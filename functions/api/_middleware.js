@@ -84,8 +84,14 @@ export async function onRequest(context) {
 
 async function signJWT(payload, secret) {
   const header = { alg: 'HS256', typ: 'JWT' };
-  const encodedHeader = btoa(JSON.stringify(header)).replace(/=/g, '');
-  const encodedPayload = btoa(JSON.stringify(payload)).replace(/=/g, '');
+  const encodedHeader = btoa(JSON.stringify(header))
+    .replace(/\+/g, '-')
+    .replace(/\//g, '_')
+    .replace(/=/g, '');
+  const encodedPayload = btoa(JSON.stringify(payload))
+    .replace(/\+/g, '-')
+    .replace(/\//g, '_')
+    .replace(/=/g, '');
   const data = `${encodedHeader}.${encodedPayload}`;
   
   const key = await crypto.subtle.importKey(
@@ -97,7 +103,10 @@ async function signJWT(payload, secret) {
   );
   
   const signature = await crypto.subtle.sign('HMAC', key, new TextEncoder().encode(data));
-  const encodedSignature = btoa(String.fromCharCode(...new Uint8Array(signature))).replace(/=/g, '');
+  const encodedSignature = btoa(String.fromCharCode(...new Uint8Array(signature)))
+    .replace(/\+/g, '-')
+    .replace(/\//g, '_')
+    .replace(/=/g, '');
   
   return `${data}.${encodedSignature}`;
 }
@@ -115,11 +124,14 @@ async function verifyJWT(token, secret) {
       ['verify']
     );
     
-    const signatureBytes = Uint8Array.from(atob(signature), c => c.charCodeAt(0));
+    const signatureBytes = Uint8Array.from(
+      atob(signature.replace(/-/g, '+').replace(/_/g, '/')), 
+      c => c.charCodeAt(0)
+    );
     const valid = await crypto.subtle.verify('HMAC', key, signatureBytes, new TextEncoder().encode(data));
     
     if (!valid) return null;
-    return JSON.parse(atob(payload));
+    return JSON.parse(atob(payload.replace(/-/g, '+').replace(/_/g, '/')));
   } catch (e) {
     return null;
   }
