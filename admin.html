@@ -1,161 +1,93 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ADMIN BMS</title>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            background: #0a0a0a;
-            color: #fff;
-            font-family: 'Arial', sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-        }
-        .container {
-            background: rgba(0, 20, 40, 0.6);
-            border: 1px solid rgba(0, 200, 255, 0.3);
-            border-radius: 20px;
-            padding: 40px;
-            width: 90%;
-            max-width: 400px;
-            box-shadow: 0 0 30px rgba(0, 200, 255, 0.2);
-        }
-        h1 {
-            color: #00d9ff;
-            text-align: center;
-            margin-bottom: 30px;
-            text-shadow: 0 0 10px #00d9ff;
-        }
-        .form-group {
-            margin-bottom: 20px;
-        }
-        label {
-            display: block;
-            color: #aaa;
-            font-size: 12px;
-            text-align: center;
-            margin-bottom: 10px;
-            letter-spacing: 2px;
-        }
-        input {
-            width: 100%;
-            padding: 15px;
-            background: rgba(0, 0, 0, 0.5);
-            border: 1px solid rgba(0, 200, 255, 0.5);
-            border-radius: 10px;
-            color: #fff;
-            text-align: center;
-            font-size: 16px;
-        }
-        input:focus {
-            outline: none;
-            box-shadow: 0 0 15px rgba(0, 200, 255, 0.5);
-        }
-        button {
-            width: 100%;
-            padding: 15px;
-            background: linear-gradient(90deg, #0099ff, #00d9ff);
-            border: none;
-            border-radius: 10px;
-            color: #fff;
-            font-size: 16px;
-            font-weight: bold;
-            cursor: pointer;
-            margin-top: 10px;
-        }
-        button:hover {
-            box-shadow: 0 0 20px rgba(0, 200, 255, 0.8);
-        }
-        .error {
-            color: #ff4444;
-            text-align: center;
-            margin-top: 15px;
-            font-size: 14px;
-        }
-        .hidden { display: none; }
-        #painel {
-            max-width: 800px;
-        }
-        .bms-item {
-            background: rgba(0, 0, 0, 0.3);
-            padding: 15px;
-            margin: 10px 0;
-            border-radius: 10px;
-            border: 1px solid rgba(0, 200, 255, 0.2);
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BMS Admin</title>
+  <style>
+    body { font-family: sans-serif; padding: 20px; background: #111; color: #eee; }
+    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+    th, td { border: 1px solid #333; padding: 8px; text-align: left; }
+    th { background: #222; }
+    input, button { padding: 8px; margin: 4px; background: #222; color: #eee; border: 1px solid #444; }
+    .online { color: #0f0; }
+    .offline { color: #f00; }
+  </style>
 </head>
 <body>
-    <div class="container" id="login">
-        <h1>ADMIN BMS</h1>
-        <div class="form-group">
-            <label>ACESSO ADMINISTRADOR</label>
-            <input type="text" id="user" placeholder="administrador" value="administrador">
-        </div>
-        <div class="form-group">
-            <input type="password" id="pass" placeholder="Senha">
-        </div>
-        <button onclick="fazerLogin()">Entrar no Painel</button>
-        <div class="error" id="erro"></div>
-    </div>
+  <h1>Painel Admin BMS</h1>
+  
+  <h3>Cadastrar BMS</h3>
+  <input id="code" placeholder="SL12345678" maxlength="10">
+  <input id="nome" placeholder="Nome/Local">
+  <button onclick="cadastrar()">Cadastrar</button>
+  
+  <h3>BMS Cadastradas</h3>
+  <button onclick="carregar()">Atualizar Lista</button>
+  <table id="tabela">
+    <thead>
+      <tr>
+        <th>Code</th><th>Nome</th><th>SOC</th><th>V</th><th>A</th><th>°C</th><th>Status</th><th>Update</th><th>Ações</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
 
-    <div class="container hidden" id="painel">
-        <h1>PAINEL ADMIN</h1>
-        <p style="text-align: center; margin-bottom: 20px;">Logado como: <span id="nomeAdmin"></span></p>
-        <button onclick="logout()">Sair</button>
-        <div id="listaBms"></div>
-    </div>
+<script>
+const API = '/api/bms';
+const AUTH = 'Bearer admin_ok';
 
-    <script>
-        const API = 'https://bms-neon.pages.dev/api';
-        
-        async function fazerLogin() {
-            const user = document.getElementById('user').value;
-            const pass = document.getElementById('pass').value;
-            const erro = document.getElementById('erro');
-            
-            try {
-                const res = await fetch(`${API}/login`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ user, pass })
-                });
-                
-                const data = await res.json();
-                
-                if (data.success) {
-                    localStorage.setItem('admin_token', data.token);
-                    localStorage.setItem('admin_user', user);
-                    mostrarPainel();
-                } else {
-                    erro.textContent = 'Usuário ou senha inválidos';
-                }
-            } catch (e) {
-                erro.textContent = 'Erro de conexão com API';
-            }
-        }
-        
-        function mostrarPainel() {
-            document.getElementById('login').classList.add('hidden');
-            document.getElementById('painel').classList.remove('hidden');
-            document.getElementById('nomeAdmin').textContent = localStorage.getItem('admin_user');
-        }
-        
-        function logout() {
-            localStorage.removeItem('admin_token');
-            localStorage.removeItem('admin_user');
-            location.reload();
-        }
-        
-        // Checa se já tá logado
-        if (localStorage.getItem('admin_token')) {
-            mostrarPainel();
-        }
-    </script>
+async function cadastrar() {
+  const code = document.getElementById('code').value;
+  const nome = document.getElementById('nome').value;
+  const r = await fetch(`${API}?action=cadastrar`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': AUTH },
+    body: JSON.stringify({ code, nome })
+  });
+  const j = await r.json();
+  alert(j.ok ? 'Cadastrado!' : j.error);
+  if (j.ok) carregar();
+}
+
+async function deletar(code) {
+  if (!confirm(`Deletar ${code}?`)) return;
+  const r = await fetch(`${API}?action=deletar&code=${code}`, {
+    method: 'DELETE',
+    headers: { 'Authorization': AUTH }
+  });
+  const j = await r.json();
+  if (j.ok) carregar();
+}
+
+async function carregar() {
+  const r = await fetch(`${API}?action=listar`, {
+    headers: { 'Authorization': AUTH }
+  });
+  const j = await r.json();
+  const tbody = document.querySelector('#tabela tbody');
+  tbody.innerHTML = '';
+  
+  j.bms.forEach(b => {
+    const tr = document.createElement('tr');
+    const lastUpdate = b.last_update ? new Date(b.last_update).toLocaleString() : '-';
+    tr.innerHTML = `
+      <td>${b.code}</td>
+      <td>${b.nome || '-'}</td>
+      <td>${b.soc}%</td>
+      <td>${b.voltage}V</td>
+      <td>${b.current}A</td>
+      <td>${b.temp}°C</td>
+      <td class="${b.online ? 'online' : 'offline'}">${b.online ? 'Online' : 'Offline'}</td>
+      <td>${lastUpdate}</td>
+      <td><button onclick="deletar('${b.code}')">Deletar</button></td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+carregar();
+setInterval(carregar, 5000); // Auto refresh 5s
+</script>
 </body>
 </html>
-
