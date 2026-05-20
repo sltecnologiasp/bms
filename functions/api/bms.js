@@ -8,44 +8,29 @@ export async function onRequest(context) {
     return Response.json({ok: false, error: 'Unauthorized'}, {status: 401});
   }
 
+  if (!env.DB) {
+    return Response.json({ok: false, error: 'D1 binding DB não encontrado'});
+  }
+
   const db = env.DB;
 
-  try {
-    if (request.method === 'POST' && action === 'cadastrar') {
-      const { code } = await request.json();
-      if (!code || !code.startsWith('SL') || code.length !== 10) {
-        return Response.json({ok: false, error: 'Código inválido'});
-      }
-      
-      const existing = await db.prepare('SELECT code FROM bms WHERE code = ?').bind(code).first();
-      if (existing !== null) {
-        return Response.json({ok: false, error: 'BMS já cadastrada'});
-      }
-      
-      await db.prepare('INSERT INTO bms (code, created_at) VALUES (?, ?)').bind(code, Date.now()).run();
-      return Response.json({ok: true});
+  if (request.method === 'POST' && action === 'cadastrar') {
+    const { code } = await request.json();
+    
+    const existing = await db.prepare('SELECT code FROM bms WHERE code = ?').bind(code).first();
+    
+    if (existing) {
+      return Response.json({ok: false, error: 'BMS já cadastrada', debug: existing});
     }
-
-    if (request.method === 'GET' && action === 'listar') {
-      const { results } = await db.prepare('SELECT * FROM bms ORDER BY created_at DESC').all();
-      return Response.json({ok: true, bms: results || []});
-    }
-
-    if (request.method === 'GET' && action === 'get') {
-      const code = url.searchParams.get('code');
-      const bms = await db.prepare('SELECT * FROM bms WHERE code = ?').bind(code).first();
-      if (!bms) return Response.json({ok: false, error: 'BMS não encontrada'});
-      return Response.json({ok: true, bms});
-    }
-
-    if (request.method === 'POST' && action === 'deletar') {
-      const { code } = await request.json();
-      await db.prepare('DELETE FROM bms WHERE code = ?').bind(code).run();
-      return Response.json({ok: true});
-    }
-
-    return Response.json({ok: false, error: 'Action inválida'});
-  } catch (e) {
-    return Response.json({ok: false, error: e.message}, {status: 500});
+    
+    const result = await db.prepare('INSERT INTO bms (code, created_at) VALUES (?, ?)').bind(code, Date.now()).run();
+    return Response.json({ok: true, result: result});
   }
+
+  if (request.method === 'GET' && action === 'listar') {
+    const { results } = await db.prepare('SELECT code FROM bms').all();
+    return Response.json({ok: true, bms: results});
+  }
+
+  return Response.json({ok: false, error: 'Action inválida'});
 }
