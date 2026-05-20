@@ -16,20 +16,24 @@ export async function onRequest(context) {
 
   if (request.method === 'POST' && action === 'cadastrar') {
     const { code } = await request.json();
+    if (!code || !code.startsWith('SL') || code.length !== 10) {
+      return Response.json({ok: false, error: 'Código inválido'});
+    }
     
     const existing = await db.prepare('SELECT code FROM bms WHERE code = ?').bind(code).first();
     
-    if (existing) {
-      return Response.json({ok: false, error: 'BMS já cadastrada', debug: existing});
+    // FIX: Checa se tem .code dentro, não só se existing existe
+    if (existing && existing.code) {
+      return Response.json({ok: false, error: 'BMS já cadastrada'});
     }
     
-    const result = await db.prepare('INSERT INTO bms (code, created_at) VALUES (?, ?)').bind(code, Date.now()).run();
-    return Response.json({ok: true, result: result});
+    await db.prepare('INSERT INTO bms (code, created_at) VALUES (?, ?)').bind(code, Date.now()).run();
+    return Response.json({ok: true});
   }
 
   if (request.method === 'GET' && action === 'listar') {
-    const { results } = await db.prepare('SELECT code FROM bms').all();
-    return Response.json({ok: true, bms: results});
+    const { results } = await db.prepare('SELECT * FROM bms ORDER BY created_at DESC').all();
+    return Response.json({ok: true, bms: results || []});
   }
 
   return Response.json({ok: false, error: 'Action inválida'});
