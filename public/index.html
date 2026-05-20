@@ -1,1 +1,210 @@
-[cola o código todo]
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SMART BMS</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0a0a0f;color:#fff;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui;padding:12px;text-align:center;overflow-x:hidden;position:relative}
+h1{text-align:center;font-size:24px;font-weight:800;padding:16px 0;background:linear-gradient(90deg,#00ffff,#0080ff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;position:relative;z-index:10}
+.container{max-width:500px;margin:0 auto;position:relative;z-index:10}
+.bg-particles{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:1;overflow:hidden}
+.particle{position:absolute;width:3px;height:3px;background:#00ffff;border-radius:50%;opacity:0;animation:float 12s infinite;box-shadow:0 0 10px #00ffff}
+.particle:nth-child(1){left:5%;animation-delay:0s;animation-duration:15s}
+.particle:nth-child(2){left:15%;animation-delay:2s;animation-duration:18s}
+.particle:nth-child(3){left:25%;animation-delay:4s;animation-duration:14s}
+.particle:nth-child(4){left:35%;animation-delay:1s;animation-duration:16s}
+.particle:nth-child(5){left:45%;animation-delay:3s;animation-duration:20s}
+.particle:nth-child(6){left:55%;animation-delay:5s;animation-duration:13s}
+.particle:nth-child(7){left:65%;animation-delay:2.5s;animation-duration:17s}
+.particle:nth-child(8){left:75%;animation-delay:6s;animation-duration:15s}
+.particle:nth-child(9){left:85%;animation-delay:3.5s;animation-duration:19s}
+.particle:nth-child(10){left:95%;animation-delay:7s;animation-duration:14s}
+.particle:nth-child(11){left:10%;animation-delay:8s;animation-duration:16s}
+.particle:nth-child(12){left:50%;animation-delay:9s;animation-duration:18s}
+@keyframes float{0%{bottom:-20px;opacity:0;transform:translateX(0) scale(1)}10%{opacity:.4}50%{opacity:.6;transform:translateX(30px) scale(1.2)}90%{opacity:.4}100%{bottom:110%;opacity:0;transform:translateX(-20px) scale(0.8)}}
+body::before{content:'';position:fixed;top:0;left:0;right:0;bottom:0;background:radial-gradient(circle at 20% 30%,rgba(0,255,255,.06) 0%,transparent 50%),radial-gradient(circle at 80% 70%,rgba(0,128,255,.06) 0%,transparent 50%);pointer-events:none;z-index:0}
+.card{background:rgba(15,15,25,.7);backdrop-filter:blur(10px);border:1px solid rgba(0,255,255,.25);border-radius:20px;padding:18px;margin-bottom:12px;position:relative;z-index:10;box-shadow:0 8px 32px rgba(0,0,0,.4)}
+input,button{width:100%;padding:16px;margin:10px 0;border-radius:14px;border:1px solid rgba(0,255,255,.3);background:rgba(0,0,0,.4);color:#fff;font-size:16px;text-align:center;position:relative;z-index:10}
+button{background:linear-gradient(90deg,#0080ff,#00ffff);cursor:pointer;font-weight:700;border:none;box-shadow:0 0 30px rgba(0,255,255,.3)}
+.hidden{display:none}
+.label{opacity:.6;font-size:11px;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:8px}
+.value{font-size:42px;font-weight:800;line-height:1;margin:8px 0;text-shadow:0 0 30px rgba(0,255,255,.4)}
+.unit{font-size:16px;opacity:.5;font-weight:400}
+.status{display:inline-block;padding:8px 20px;border-radius:100px;font-size:13px;font-weight:600;margin:8px 0}
+.on{background:rgba(0,255,136,.15);color:#00ff88;border:1px solid rgba(0,255,136,.3);box-shadow:0 0 20px rgba(0,255,136,.3)}
+.off{background:rgba(255,68,68,.15);color:#ff4444;border:1px solid rgba(255,68,68,.3)}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+.grid-2 .card{margin:0}
+.code{font-size:20px;font-weight:700;letter-spacing:1px}
+.cells{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:12px}
+.cell{background:rgba(0,0,0,.4);border:1px solid rgba(0,255,255,.15);border-radius:12px;padding:10px 6px}
+.cell-num{opacity:.4;font-size:9px;margin-bottom:4px}
+.cell-val{font-weight:700;font-size:13px}
+.logout{background:rgba(255,68,68,.1);border:1px solid rgba(255,68,68,.3);margin-top:20px}
+.sim{background:rgba(0,255,136,.08);border:1px solid rgba(0,255,136,.3)}
+.sim-btn{background:linear-gradient(90deg,#00ff88,#00cc6a);box-shadow:0 0 20px rgba(0,255,136,.3)}
+@media(max-width:380px){.value{font-size:36px}.cells{grid-template-columns:repeat(3,1fr)}}
+</style>
+</head>
+<body>
+<div class="bg-particles">
+  <div class="particle"></div><div class="particle"></div><div class="particle"></div>
+  <div class="particle"></div><div class="particle"></div><div class="particle"></div>
+  <div class="particle"></div><div class="particle"></div><div class="particle"></div>
+  <div class="particle"></div><div class="particle"></div><div class="particle"></div>
+</div>
+<div id="login">
+  <div class="container">
+    <h1>SMART BMS</h1>
+    <div class="card">
+      <div class="label">Código de Acesso</div>
+      <input id="code" placeholder="SL82576655" maxlength="10">
+      <button onclick="login()">Conectar BMS</button>
+      <p id="error" style="color:#ff4444;margin-top:12px;display:none"></p>
+    </div>
+  </div>
+</div>
+<div id="dash" class="hidden">
+  <div class="container">
+    <h1>SMART BMS</h1>
+    <div class="card">
+      <div class="label">BMS</div>
+      <div class="code" id="codeVal"></div>
+      <div class="status off" id="status">Offline</div>
+    </div>
+    <div class="grid-2">
+      <div class="card">
+        <div class="label">SOC</div>
+        <div class="value" id="soc">--<span class="unit">%</span></div>
+      </div>
+      <div class="card">
+        <div class="label">Tensão</div>
+        <div class="value" id="voltage">--<span class="unit">V</span></div>
+      </div>
+    </div>
+    <div class="grid-2">
+      <div class="card">
+        <div class="label">Corrente</div>
+        <div class="value" id="current">--<span class="unit">A</span></div>
+      </div>
+      <div class="card">
+        <div class="label">Temperatura</div>
+        <div class="value" id="temp">--<span class="unit">°C</span></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="label">Células</div>
+      <div id="cells" class="cells"></div>
+    </div>
+    
+    <div class="card sim">
+      <div class="label">SIMULADOR ESP32</div>
+      <button class="sim-btn" onclick="simulate()">Enviar Dados Teste</button>
+      <div id="simMsg" style="opacity:.6;font-size:12px;margin-top:8px"></div>
+    </div>
+    
+    <button class="logout" onclick="logout()">Sair</button>
+  </div>
+</div>
+<script>
+const API = '/api/bms';
+let token = sessionStorage.getItem('bms_token');
+let interval;
+if(token) loadDash();
+document.getElementById('code').oninput = e => {
+  if(!e.target.value.startsWith('SL')) e.target.value = 'SL';
+  e.target.value = 'SL' + e.target.value.slice(2).replace(/[^0-9]/g,'').slice(0,8);
+};
+async function login(){
+  const code = document.getElementById('code').value;
+  const errorEl = document.getElementById('error');
+  errorEl.style.display='none';
+  if(code.length !== 10) return showError('Código deve ter 10 caracteres');
+  try{
+    const r = await fetch(API+'?action=login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({code})});
+    const d = await r.json();
+    if(d.ok){
+      token = d.token;
+      sessionStorage.setItem('bms_token', token);
+      loadDash();
+    }else showError(d.error);
+  }catch(e){showError('Erro de conexão')}
+}
+function showError(msg){
+  const el = document.getElementById('error');
+  el.textContent = msg;
+  el.style.display = 'block';
+}
+function loadDash(){
+  document.getElementById('login').classList.add('hidden');
+  document.getElementById('dash').classList.remove('hidden');
+  load();
+  interval = setInterval(load, 3000);
+}
+function logout(){
+  sessionStorage.removeItem('bms_token');
+  clearInterval(interval);
+  location.reload();
+}
+async function load(){
+  try{
+    const r = await fetch(API+'?action=dados',{headers:{'Authorization':'Bearer '+token}});
+    if(r.status===401){logout();return;}
+    const d = await r.json();
+    if(d.error){logout();return;}
+    update(d);
+  }catch(e){console.error(e)}
+}
+function update(d){
+  document.getElementById('codeVal').textContent = d.code;
+  document.getElementById('soc').innerHTML = (d.soc||0).toFixed(0)+'<span class="unit">%</span>';
+  document.getElementById('voltage').innerHTML = (d.voltage||0).toFixed(2).replace('.',',')+'<span class="unit">V</span>';
+  document.getElementById('current').innerHTML = (d.current||0).toFixed(1)+'<span class="unit">A</span>';
+  document.getElementById('temp').innerHTML = (d.temp||0).toFixed(1)+'<span class="unit">°C</span>';
+  const st = document.getElementById('status');
+  st.textContent = d.online?'● Online':'● Offline';
+  st.className = 'status '+(d.online?'on':'off');
+  const cellsEl = document.getElementById('cells');
+  if(d.cells && d.cells.length){
+    cellsEl.innerHTML = d.cells.map((v,i)=>{
+      const val = parseFloat(v);
+      let style = '';
+      if(val < 3.2 || val > 4.2) style = 'border-color:#ff4444;background:rgba(255,68,68,.08)';
+      else if(val < 3.4 || val > 4.15) style = 'border-color:#ffaa00;background:rgba(255,170,0,.08)';
+      return `<div class="cell" style="${style}"><div class="cell-num">C${i+1}</div><div class="cell-val">${val.toFixed(2).replace('.',',')}V</div></div>`;
+    }).join('');
+  }else{
+    cellsEl.innerHTML = '<div style="grid-column:1/-1;opacity:.4;text-align:center;padding:20px">Sem dados</div>';
+  }
+}
+async function simulate(){
+  const btn = document.querySelector('.sim-btn');
+  const msg = document.getElementById('simMsg');
+  btn.disabled = true;
+  btn.textContent = 'Enviando...';
+  try{
+    const data = {
+      code: document.getElementById('codeVal').textContent,
+      soc: 75 + Math.random()*20,
+      voltage: 50 + Math.random()*5,
+      current: -5 + Math.random()*10,
+      temp: 25 + Math.random()*10,
+      cells: Array(16).fill(0).map(()=>3.5 + Math.random()*0.7)
+    };
+    const r = await fetch(API+'?action=update',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});
+    const d = await r.json();
+    if(d.ok){
+      msg.textContent = 'Dados enviados! Atualizando...';
+      setTimeout(()=>{load();msg.textContent='';},1000);
+    }else msg.textContent = 'Erro: '+d.error;
+  }catch(e){
+    msg.textContent = 'Erro de conexão';
+  }
+  btn.disabled = false;
+  btn.textContent = 'Enviar Dados Teste';
+}
+</script>
+</body>
+</html>
