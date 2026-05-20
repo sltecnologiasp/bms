@@ -27,7 +27,35 @@ export async function onRequest(context) {
       return json({ status: 'ok', db: true });
     }
 
-    // UPDATE TELEMETRIA - SEM AUTH PRA BMS ENVIAR DADOS
+    // LOGIN CLIENTE - VOLTA COM ESSA ROTA
+    if (path === 'bms' && action === 'login' && method === 'POST') {
+      const { code } = await request.json();
+      if (!code) return json({ ok: false, error: 'Código obrigatório' });
+      
+      const bms = await env.DB.prepare('SELECT * FROM bms WHERE code = ?').bind(code).first();
+      if (!bms) return json({ ok: false, error: 'BMS não encontrada' });
+      
+      // Token simples: code base64. Pra produção usa JWT_SECRET
+      const token = btoa(JSON.stringify({ code }));
+      return json({ ok: true, token, bms: {...bms, cells: bms.cells ? JSON.parse(bms.cells) : []} });
+    }
+
+    // DADOS CLIENTE - PUXA COM TOKEN
+    if (path === 'bms' && action === 'dados' && method === 'GET') {
+      const token = request.headers.get('Authorization')?.replace('Bearer ', '');
+      if (!token) return json({ ok: false, error: 'Token obrigatório' }, 401);
+      
+      try {
+        const { code } = JSON.parse(atob(token));
+        const bms = await env.DB.prepare('SELECT * FROM bms WHERE code = ?').bind(code).first();
+        if (!bms) return json({ ok: false, error: 'BMS não encontrada' }, 404);
+        return json({ ok: true, bms: {...bms, cells: bms.cells ? JSON.parse(bms.cells) : []} });
+      } catch {
+        return json({ ok: false, error: 'Token inválido' }, 401);
+      }
+    }
+
+    // UPDATE TELEMETRIA - SEM AUTH
     if (path === 'bms' && action === 'update' && method === 'POST') {
       const body = await request.json();
       const { code, soc, voltage, current, temp, cells, online } = body;
@@ -39,19 +67,11 @@ export async function onRequest(context) {
           cells = ?, online = ?, last_update = ?
         WHERE code = ?
       `).bind(
-        Number(soc) || 0,
-        Number(voltage) || 0,
-        Number(current) || 0,
-        Number(temp) || 0,
-        JSON.stringify(cells || []),
-        Number(online) || 0,
-        Date.now(),
-        code
+        Number(soc) || 0, Number(voltage) || 0, Number(current) || 0, Number(temp) || 0,
+        JSON.stringify(cells || []), Number(online) || 0, Date.now(), code
       ).run();
 
-      if (result.meta.changes === 0) {
-        return json({ ok: false, error: 'BMS não encontrada' }, 404);
-      }
+      if (result.meta.changes === 0) return json({ ok: false, error: 'BMS não encontrada' }, 404);
       return json({ ok: true });
     }
 
@@ -66,12 +86,8 @@ export async function onRequest(context) {
       if (!code || !code.startsWith('SL') || code.length !== 10) {
         return json({ ok: false, error: 'Código inválido' });
       }
-      
       const count = await env.DB.prepare('SELECT COUNT(*) as total FROM bms WHERE code = ?').bind(code).first();
-      if (count.total > 0) {
-        return json({ ok: false, error: 'BMS já cadastrada' });
-      }
-      
+      if (count.total > 0) return json({ ok: false, error: 'BMS já cadastrada' });
       await env.DB.prepare('INSERT INTO bms (code, nome, created_at) VALUES (?, ?, ?)').bind(code, nome || '', Date.now()).run();
       return json({ ok: true });
     }
@@ -79,13 +95,7 @@ export async function onRequest(context) {
     // LISTAR
     if (path === 'bms' && action === 'listar' && method === 'GET') {
       const { results } = await env.DB.prepare('SELECT * FROM bms ORDER BY created_at DESC').all();
-      return json({ 
-        ok: true, 
-        bms: results.map(r => ({
-          ...r, 
-          cells: r.cells ? JSON.parse(r.cells) : []
-        }))
-      });
+      return json({ ok: true, bms: results.map(r => ({...r, cells: r.cells ? JSON.parse(r.cells) : []})) });
     }
 
     // DELETAR
@@ -96,7 +106,7 @@ export async function onRequest(context) {
       return json({ ok: true });
     }
 
-    // EDITAR NOME
+    // EDITAR
     if (path === 'bms' && action === 'editar' && method === 'POST') {
       const { code, nome } = await request.json();
       await env.DB.prepare('UPDATE bms SET nome = ? WHERE code = ?').bind(nome, code).run();
