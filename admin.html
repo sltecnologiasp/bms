@@ -6,16 +6,34 @@
   <title>BMS Admin</title>
   <style>
     body { font-family: sans-serif; padding: 20px; background: #111; color: #eee; }
+    .login { max-width: 300px; margin: 100px auto; }
+    .painel { display: none; }
     table { width: 100%; border-collapse: collapse; margin-top: 20px; }
     th, td { border: 1px solid #333; padding: 8px; text-align: left; }
     th { background: #222; }
-    input, button { padding: 8px; margin: 4px; background: #222; color: #eee; border: 1px solid #444; }
+    input, button { padding: 8px; margin: 4px; background: #222; color: #eee; border: 1px solid #444; width: 100%; box-sizing: border-box; }
+    button { cursor: pointer; }
+    button:hover { background: #333; }
     .online { color: #0f0; }
     .offline { color: #f00; }
+    .header { display: flex; justify-content: space-between; align-items: center; }
   </style>
 </head>
 <body>
-  <h1>Painel Admin BMS</h1>
+
+<div class="login" id="login">
+  <h2>Login Admin</h2>
+  <input id="user" placeholder="Usuário" value="admin">
+  <input id="pass" type="password" placeholder="Senha">
+  <button onclick="login()">Entrar</button>
+  <p id="erro" style="color:#f00"></p>
+</div>
+
+<div class="painel" id="painel">
+  <div class="header">
+    <h1>Painel Admin BMS</h1>
+    <button onclick="logout()">Sair</button>
+  </div>
   
   <h3>Cadastrar BMS</h3>
   <input id="code" placeholder="SL12345678" maxlength="10">
@@ -32,29 +50,66 @@
     </thead>
     <tbody></tbody>
   </table>
+</div>
 
 <script>
 const API = '/api/bms';
-const AUTH = 'Bearer admin_ok';
+let TOKEN = localStorage.getItem('admin_token');
+
+if (TOKEN) {
+  document.getElementById('login').style.display = 'none';
+  document.getElementById('painel').style.display = 'block';
+  carregar();
+}
+
+async function login() {
+  const user = document.getElementById('user').value;
+  const password = document.getElementById('pass').value;
+  const r = await fetch(`${API}?action=admin_login`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ user, password })
+  });
+  const j = await r.json();
+  if (j.ok) {
+    TOKEN = j.token;
+    localStorage.setItem('admin_token', TOKEN);
+    document.getElementById('login').style.display = 'none';
+    document.getElementById('painel').style.display = 'block';
+    carregar();
+  } else {
+    document.getElementById('erro').innerText = j.error;
+  }
+}
+
+function logout() {
+  localStorage.removeItem('admin_token');
+  TOKEN = null;
+  location.reload();
+}
 
 async function cadastrar() {
   const code = document.getElementById('code').value;
   const nome = document.getElementById('nome').value;
   const r = await fetch(`${API}?action=cadastrar`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'Authorization': AUTH },
+    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${TOKEN}` },
     body: JSON.stringify({ code, nome })
   });
   const j = await r.json();
   alert(j.ok ? 'Cadastrado!' : j.error);
-  if (j.ok) carregar();
+  if (j.ok) {
+    document.getElementById('code').value = '';
+    document.getElementById('nome').value = '';
+    carregar();
+  }
 }
 
 async function deletar(code) {
   if (!confirm(`Deletar ${code}?`)) return;
   const r = await fetch(`${API}?action=deletar&code=${code}`, {
     method: 'DELETE',
-    headers: { 'Authorization': AUTH }
+    headers: { 'Authorization': `Bearer ${TOKEN}` }
   });
   const j = await r.json();
   if (j.ok) carregar();
@@ -62,15 +117,20 @@ async function deletar(code) {
 
 async function carregar() {
   const r = await fetch(`${API}?action=listar`, {
-    headers: { 'Authorization': AUTH }
+    headers: { 'Authorization': `Bearer ${TOKEN}` }
   });
   const j = await r.json();
+  if (!j.ok) {
+    alert(j.error);
+    logout();
+    return;
+  }
   const tbody = document.querySelector('#tabela tbody');
   tbody.innerHTML = '';
   
   j.bms.forEach(b => {
     const tr = document.createElement('tr');
-    const lastUpdate = b.last_update ? new Date(b.last_update).toLocaleString() : '-';
+    const lastUpdate = b.last_update ? new Date(b.last_update).toLocaleString('pt-BR') : '-';
     tr.innerHTML = `
       <td>${b.code}</td>
       <td>${b.nome || '-'}</td>
@@ -86,8 +146,7 @@ async function carregar() {
   });
 }
 
-carregar();
-setInterval(carregar, 5000); // Auto refresh 5s
+setInterval(() => { if (TOKEN) carregar(); }, 5000);
 </script>
 </body>
 </html>
