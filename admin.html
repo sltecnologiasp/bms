@@ -3,150 +3,151 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>BMS Admin</title>
+  <title>BMS Admin Debug</title>
   <style>
-    body { font-family: sans-serif; padding: 20px; background: #111; color: #eee; }
-    .login { max-width: 300px; margin: 100px auto; }
-    .painel { display: none; }
-    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-    th, td { border: 1px solid #333; padding: 8px; text-align: left; }
+    body { font-family: sans-serif; padding: 10px; background: #111; color: #eee; }
+    table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 12px; }
+    th, td { border: 1px solid #333; padding: 6px; text-align: left; }
     th { background: #222; }
-    input, button { padding: 8px; margin: 4px; background: #222; color: #eee; border: 1px solid #444; width: 100%; box-sizing: border-box; }
-    button { cursor: pointer; }
-    button:hover { background: #333; }
-    .online { color: #0f0; }
+    input, button { padding: 10px; margin: 4px 0; background: #222; color: #eee; border: 1px solid #444; width: 100%; box-sizing: border-box; }
+    button { background: #0a4; cursor: pointer; }
+    .online { color: #0f0; font-weight: bold; }
     .offline { color: #f00; }
-    .header { display: flex; justify-content: space-between; align-items: center; }
+    .debug { background: #222; padding: 10px; margin: 10px 0; font-size: 11px; word-break: break-all; }
+    .erro { color: #f55; }
+    .ok { color: #5f5; }
   </style>
 </head>
 <body>
 
-<div class="login" id="login">
-  <h2>Login Admin</h2>
-  <input id="user" placeholder="Usuário" value="admin">
-  <input id="pass" type="password" placeholder="Senha">
-  <button onclick="login()">Entrar</button>
-  <p id="erro" style="color:#f00"></p>
-</div>
+<h2>Painel Admin BMS</h2>
+<div id="debug" class="debug">Iniciando...</div>
 
-<div class="painel" id="painel">
-  <div class="header">
-    <h1>Painel Admin BMS</h1>
-    <button onclick="logout()">Sair</button>
-  </div>
-  
-  <h3>Cadastrar BMS</h3>
-  <input id="code" placeholder="SL12345678" maxlength="10">
-  <input id="nome" placeholder="Nome/Local">
-  <button onclick="cadastrar()">Cadastrar</button>
-  
-  <h3>BMS Cadastradas</h3>
-  <button onclick="carregar()">Atualizar Lista</button>
-  <table id="tabela">
-    <thead>
-      <tr>
-        <th>Code</th><th>Nome</th><th>SOC</th><th>V</th><th>A</th><th>°C</th><th>Status</th><th>Update</th><th>Ações</th>
-      </tr>
-    </thead>
-    <tbody></tbody>
-  </table>
-</div>
+<h3>Cadastrar BMS</h3>
+<input id="code" placeholder="SL12345678" maxlength="10">
+<input id="nome" placeholder="Nome/Local">
+<button onclick="cadastrar()">Cadastrar</button>
+
+<h3>BMS Cadastradas</h3>
+<button onclick="carregar()">🔄 Atualizar Lista</button>
+<div id="status"></div>
+<table id="tabela">
+  <thead>
+    <tr>
+      <th>Code</th><th>Nome</th><th>SOC</th><th>V</th><th>°C</th><th>Status</th><th>Ações</th>
+    </tr>
+  </thead>
+  <tbody></tbody>
+</table>
 
 <script>
 const API = '/api/bms';
-let TOKEN = localStorage.getItem('admin_token');
+const TOKEN = 'admin_ok'; // TOKEN FIXO PRA TESTAR
+const debug = document.getElementById('debug');
+const status = document.getElementById('status');
 
-if (TOKEN) {
-  document.getElementById('login').style.display = 'none';
-  document.getElementById('painel').style.display = 'block';
-  carregar();
+function log(msg, tipo = '') {
+  debug.innerHTML = `<span class="${tipo}">${new Date().toLocaleTimeString()}: ${msg}</span>`;
 }
 
-async function login() {
-  const user = document.getElementById('user').value;
-  const password = document.getElementById('pass').value;
-  const r = await fetch(`${API}?action=admin_login`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ user, password })
-  });
-  const j = await r.json();
-  if (j.ok) {
-    TOKEN = j.token;
-    localStorage.setItem('admin_token', TOKEN);
-    document.getElementById('login').style.display = 'none';
-    document.getElementById('painel').style.display = 'block';
-    carregar();
-  } else {
-    document.getElementById('erro').innerText = j.error;
-  }
-}
-
-function logout() {
-  localStorage.removeItem('admin_token');
-  TOKEN = null;
-  location.reload();
-}
+log('Token fixo: admin_ok');
 
 async function cadastrar() {
   const code = document.getElementById('code').value;
   const nome = document.getElementById('nome').value;
-  const r = await fetch(`${API}?action=cadastrar`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${TOKEN}` },
-    body: JSON.stringify({ code, nome })
-  });
-  const j = await r.json();
-  alert(j.ok ? 'Cadastrado!' : j.error);
-  if (j.ok) {
-    document.getElementById('code').value = '';
-    document.getElementById('nome').value = '';
-    carregar();
+  
+  if (!code) {
+    log('Digite o código SL', 'erro');
+    return;
+  }
+  
+  log('Cadastrando ' + code + '...');
+  try {
+    const r = await fetch(`${API}?action=cadastrar`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${TOKEN}` },
+      body: JSON.stringify({ code, nome })
+    });
+    const j = await r.json();
+    if (j.ok) {
+      log('Cadastrado com sucesso!', 'ok');
+      document.getElementById('code').value = '';
+      document.getElementById('nome').value = '';
+      carregar();
+    } else {
+      log('Erro: ' + j.error, 'erro');
+    }
+  } catch (e) {
+    log('Erro de rede: ' + e.message, 'erro');
   }
 }
 
 async function deletar(code) {
   if (!confirm(`Deletar ${code}?`)) return;
-  const r = await fetch(`${API}?action=deletar&code=${code}`, {
-    method: 'DELETE',
-    headers: { 'Authorization': `Bearer ${TOKEN}` }
-  });
-  const j = await r.json();
-  if (j.ok) carregar();
+  log('Deletando ' + code + '...');
+  try {
+    const r = await fetch(`${API}?action=deletar&code=${code}`, {
+      method: 'DELETE',
+      headers: { 'Authorization': `Bearer ${TOKEN}` }
+    });
+    const j = await r.json();
+    if (j.ok) {
+      log('Deletado!', 'ok');
+      carregar();
+    } else {
+      log('Erro: ' + j.error, 'erro');
+    }
+  } catch (e) {
+    log('Erro de rede: ' + e.message, 'erro');
+  }
 }
 
 async function carregar() {
-  const r = await fetch(`${API}?action=listar`, {
-    headers: { 'Authorization': `Bearer ${TOKEN}` }
-  });
-  const j = await r.json();
-  if (!j.ok) {
-    alert(j.error);
-    logout();
-    return;
+  log('Buscando lista...');
+  status.innerHTML = 'Carregando...';
+  try {
+    const r = await fetch(`${API}?action=listar`, {
+      headers: { 'Authorization': `Bearer ${TOKEN}` }
+    });
+    const j = await r.json();
+    log('Resposta: ' + JSON.stringify(j).substring(0, 100) + '...');
+    
+    if (!j.ok) {
+      status.innerHTML = `<span class="erro">Erro: ${j.error}</span>`;
+      return;
+    }
+    
+    const tbody = document.querySelector('#tabela tbody');
+    tbody.innerHTML = '';
+    
+    if (j.bms.length === 0) {
+      status.innerHTML = 'Nenhuma BMS cadastrada';
+      return;
+    }
+    
+    j.bms.forEach(b => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${b.code}</td>
+        <td>${b.nome || '-'}</td>
+        <td>${b.soc}%</td>
+        <td>${b.voltage}V</td>
+        <td>${b.temp}°C</td>
+        <td class="${b.online ? 'online' : 'offline'}">${b.online ? 'ON' : 'OFF'}</td>
+        <td><button onclick="deletar('${b.code}')">X</button></td>
+      `;
+      tbody.appendChild(tr);
+    });
+    status.innerHTML = `<span class="ok">${j.bms.length} BMS encontradas</span>`;
+    log(`Carregadas ${j.bms.length} BMS`, 'ok');
+  } catch (e) {
+    status.innerHTML = `<span class="erro">Erro: ${e.message}</span>`;
+    log('Erro: ' + e.message, 'erro');
   }
-  const tbody = document.querySelector('#tabela tbody');
-  tbody.innerHTML = '';
-  
-  j.bms.forEach(b => {
-    const tr = document.createElement('tr');
-    const lastUpdate = b.last_update ? new Date(b.last_update).toLocaleString('pt-BR') : '-';
-    tr.innerHTML = `
-      <td>${b.code}</td>
-      <td>${b.nome || '-'}</td>
-      <td>${b.soc}%</td>
-      <td>${b.voltage}V</td>
-      <td>${b.current}A</td>
-      <td>${b.temp}°C</td>
-      <td class="${b.online ? 'online' : 'offline'}">${b.online ? 'Online' : 'Offline'}</td>
-      <td>${lastUpdate}</td>
-      <td><button onclick="deletar('${b.code}')">Deletar</button></td>
-    `;
-    tbody.appendChild(tr);
-  });
 }
 
-setInterval(() => { if (TOKEN) carregar(); }, 5000);
+// Carrega automático ao abrir
+carregar();
 </script>
 </body>
 </html>
