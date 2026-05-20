@@ -6,75 +6,82 @@
 <title>Monitor BMS</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-body{background:#0a0a0f;color:#fff;font-family:system-ui;padding:0;text-align:center}
-h1{text-align:center;font-size:28px;font-weight:900;padding:16px;background:linear-gradient(90deg,#00ffff,#0080ff);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-.card{background:rgba(255,255,255,.03);border:1px solid rgba(0,255,255,.3);border-radius:16px;padding:16px;margin:12px}
-input,button{width:100%;max-width:600px;padding:14px;margin:8px auto;border-radius:12px;border:1px solid rgba(0,255,255,.3);background:rgba(0,0,0,.4);color:#fff;font-size:16px;text-align:center;display:block}
+body{background:#0a0a0f;color:#fff;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui;padding:12px;text-align:center}
+h1{text-align:center;font-size:24px;font-weight:800;padding:16px 0;background:linear-gradient(90deg,#00ffff,#0080ff);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.container{max-width:500px;margin:0 auto}
+.card{background:rgba(255,255,255,.04);border:1px solid rgba(0,255,255,.2);border-radius:20px;padding:18px;margin-bottom:12px}
+input,button{width:100%;padding:16px;margin:10px 0;border-radius:14px;border:1px solid rgba(0,255,255,.3);background:rgba(0,0,0,.3);color:#fff;font-size:16px;text-align:center}
 button{background:linear-gradient(90deg,#0080ff,#00ffff);cursor:pointer;font-weight:700;border:none}
 .hidden{display:none}
-.label{opacity:.7;font-size:11px;text-transform:uppercase;text-align:center;letter-spacing:2px;margin-bottom:6px}
-.val{font-size:36px;font-weight:700;margin:8px 0;text-align:center;line-height:1}
-.unit{font-size:14px;opacity:.6}
-.status{display:inline-block;padding:6px 20px;border-radius:20px;font-size:13px;font-weight:700;margin:8px 0}
-.on{background:rgba(0,255,136,.15);color:#00ff88;border:1px solid rgba(0,255,136,.4)}
-.off{background:rgba(255,68,68,.15);color:#ff4444;border:1px solid rgba(255,68,68,.4)}
-.cells{display:grid;grid-template-columns:repeat(auto-fill,minmax(75px,1fr));gap:8px;margin-top:12px}
-.cell{background:rgba(0,0,0,.4);border:1px solid rgba(0,255,255,.2);border-radius:10px;padding:10px;text-align:center}
-.cell-num{opacity:.5;font-size:9px}
-.cell-val{font-weight:700;font-size:13px;margin-top:4px}
-.logout{background:rgba(255,68,68,.1);border:1px solid rgba(255,68,68,.4);max-width:500px;margin:30px auto}
-.row{display:flex;gap:12px;max-width:632px;margin:0 auto;padding:0 12px}
-.row .card{flex:1;margin:6px 0;padding:14px}
-@media(max-width:400px){.val{font-size:28px}.row{gap:8px;padding:0 8px}.row .card{padding:12px}}
+.label{opacity:.6;font-size:11px;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:8px}
+.value{font-size:42px;font-weight:800;line-height:1;margin:8px 0}
+.unit{font-size:16px;opacity:.5;font-weight:400}
+.status{display:inline-block;padding:8px 20px;border-radius:100px;font-size:13px;font-weight:600;margin:8px 0}
+.on{background:rgba(0,255,136,.15);color:#00ff88;border:1px solid rgba(0,255,136,.3)}
+.off{background:rgba(255,68,68,.15);color:#ff4444;border:1px solid rgba(255,68,68,.3)}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+.grid-2 .card{margin:0}
+.code{font-size:20px;font-weight:700;letter-spacing:1px}
+.cells{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:12px}
+.cell{background:rgba(0,0,0,.3);border:1px solid rgba(0,255,255,.15);border-radius:12px;padding:10px 6px}
+.cell-num{opacity:.4;font-size:9px;margin-bottom:4px}
+.cell-val{font-weight:700;font-size:13px}
+.logout{background:rgba(255,68,68,.1);border:1px solid rgba(255,68,68,.3);margin-top:20px}
+@media(max-width:380px){.value{font-size:36px}.cells{grid-template-columns:repeat(3,1fr)}}
 </style>
 </head>
 <body>
 <div id="login">
-  <h1>BMS MONITOR</h1>
-  <div class="card">
-    <div class="label">Código de Acesso</div>
-    <input id="code" placeholder="SL82576655" maxlength="10">
-    <button onclick="login()">Conectar BMS</button>
-    <p id="error" style="color:#ff4444;margin-top:12px;display:none"></p>
+  <div class="container">
+    <h1>BMS MONITOR</h1>
+    <div class="card">
+      <div class="label">Código de Acesso</div>
+      <input id="code" placeholder="SL82576655" maxlength="10">
+      <button onclick="login()">Conectar BMS</button>
+      <p id="error" style="color:#ff4444;margin-top:12px;display:none"></p>
+    </div>
   </div>
 </div>
 
 <div id="dash" class="hidden">
-  <h1>BMS MONITOR</h1>
-  <div class="card">
-    <div class="label">Código</div>
-    <div class="val" style="font-size:22px" id="codeVal"></div>
-    <div class="status off" id="status">Offline</div>
-  </div>
+  <div class="container">
+    <h1>BMS MONITOR</h1>
+    
+    <div class="card">
+      <div class="label">BMS</div>
+      <div class="code" id="codeVal"></div>
+      <div class="status off" id="status">Offline</div>
+    </div>
 
-  <div class="row">
-    <div class="card">
-      <div class="label">SOC</div>
-      <div class="val" id="soc">--<span class="unit">%</span></div>
+    <div class="grid-2">
+      <div class="card">
+        <div class="label">SOC</div>
+        <div class="value" id="soc">--<span class="unit">%</span></div>
+      </div>
+      <div class="card">
+        <div class="label">Tensão</div>
+        <div class="value" id="voltage">--<span class="unit">V</span></div>
+      </div>
     </div>
-    <div class="card">
-      <div class="label">Tensão</div>
-      <div class="val" id="voltage">--<span class="unit">V</span></div>
-    </div>
-  </div>
 
-  <div class="row">
-    <div class="card">
-      <div class="label">Corrente</div>
-      <div class="val" id="current">--<span class="unit">A</span></div>
+    <div class="grid-2">
+      <div class="card">
+        <div class="label">Corrente</div>
+        <div class="value" id="current">--<span class="unit">A</span></div>
+      </div>
+      <div class="card">
+        <div class="label">Temperatura</div>
+        <div class="value" id="temp">--<span class="unit">°C</span></div>
+      </div>
     </div>
-    <div class="card">
-      <div class="label">Temperatura</div>
-      <div class="val" id="temp">--<span class="unit">°C</span></div>
-    </div>
-  </div>
 
-  <div class="card">
-    <div class="label">Células</div>
-    <div id="cells" class="cells"></div>
+    <div class="card">
+      <div class="label">Células</div>
+      <div id="cells" class="cells"></div>
+    </div>
+    
+    <button class="logout" onclick="logout()">Sair</button>
   </div>
-  
-  <button class="logout" onclick="logout()">Sair</button>
 </div>
 
 <script>
@@ -141,20 +148,20 @@ function update(d){
   document.getElementById('current').innerHTML = (d.current||0).toFixed(1)+'<span class="unit">A</span>';
   document.getElementById('temp').innerHTML = (d.temp||0).toFixed(1)+'<span class="unit">°C</span>';
   const st = document.getElementById('status');
-  st.textContent = d.online?'Online':'Offline';
+  st.textContent = d.online?'● Online':'● Offline';
   st.className = 'status '+(d.online?'on':'off');
   
   const cellsEl = document.getElementById('cells');
   if(d.cells && d.cells.length){
     cellsEl.innerHTML = d.cells.map((v,i)=>{
       const val = parseFloat(v);
-      let cls = '';
-      if(val < 3.2 || val > 4.2) cls = 'style="border-color:#ff4444;background:rgba(255,68,68,.08)"';
-      else if(val < 3.4 || val > 4.15) cls = 'style="border-color:#ffaa00;background:rgba(255,170,0,.08)"';
-      return `<div class="cell" ${cls}><div class="cell-num">Cél ${i+1}</div><div class="cell-val">${val.toFixed(3)}</div></div>`;
+      let style = '';
+      if(val < 3.2 || val > 4.2) style = 'border-color:#ff4444;background:rgba(255,68,68,.08)';
+      else if(val < 3.4 || val > 4.15) style = 'border-color:#ffaa00;background:rgba(255,170,0,.08)';
+      return `<div class="cell" style="${style}"><div class="cell-num">C${i+1}</div><div class="cell-val">${val.toFixed(3)}</div></div>`;
     }).join('');
   }else{
-    cellsEl.innerHTML = '<div style="grid-column:1/-1;opacity:.5;text-align:center">Sem dados</div>';
+    cellsEl.innerHTML = '<div style="grid-column:1/-1;opacity:.4;text-align:center;padding:20px">Sem dados</div>';
   }
 }
 </script>
