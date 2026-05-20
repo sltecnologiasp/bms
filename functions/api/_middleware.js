@@ -27,24 +27,29 @@ export async function onRequest(context) {
       return json({ status: 'ok', db: true });
     }
 
-    // LOGIN CLIENTE - VOLTA COM ESSA ROTA
+    // LOGIN ADMIN - ADICIONADO DE VOLTA
+    if (path === 'bms' && action === 'admin_login' && method === 'POST') {
+      const { user, password } = await request.json();
+      // Muda aqui pra tua senha. Por enquanto: admin / 1234
+      if (user === 'admin' && password === '1234') {
+        return json({ ok: true, token: 'admin_ok' });
+      }
+      return json({ ok: false, error: 'Usuário ou senha inválidos' });
+    }
+
+    // LOGIN CLIENTE
     if (path === 'bms' && action === 'login' && method === 'POST') {
       const { code } = await request.json();
-      if (!code) return json({ ok: false, error: 'Código obrigatório' });
-      
       const bms = await env.DB.prepare('SELECT * FROM bms WHERE code = ?').bind(code).first();
       if (!bms) return json({ ok: false, error: 'BMS não encontrada' });
-      
-      // Token simples: code base64. Pra produção usa JWT_SECRET
       const token = btoa(JSON.stringify({ code }));
       return json({ ok: true, token, bms: {...bms, cells: bms.cells ? JSON.parse(bms.cells) : []} });
     }
 
-    // DADOS CLIENTE - PUXA COM TOKEN
+    // DADOS CLIENTE
     if (path === 'bms' && action === 'dados' && method === 'GET') {
       const token = request.headers.get('Authorization')?.replace('Bearer ', '');
-      if (!token) return json({ ok: false, error: 'Token obrigatório' }, 401);
-      
+      if (!token || token === 'admin_ok') return json({ ok: false, error: 'Token de cliente obrigatório' }, 401);
       try {
         const { code } = JSON.parse(atob(token));
         const bms = await env.DB.prepare('SELECT * FROM bms WHERE code = ?').bind(code).first();
@@ -60,22 +65,18 @@ export async function onRequest(context) {
       const body = await request.json();
       const { code, soc, voltage, current, temp, cells, online } = body;
       if (!code) return json({ ok: false, error: 'Code obrigatório' }, 400);
-
       const result = await env.DB.prepare(`
-        UPDATE bms SET 
-          soc = ?, voltage = ?, current = ?, temp = ?, 
-          cells = ?, online = ?, last_update = ?
-        WHERE code = ?
+        UPDATE bms SET soc = ?, voltage = ?, current = ?, temp = ?, 
+        cells = ?, online = ?, last_update = ? WHERE code = ?
       `).bind(
         Number(soc) || 0, Number(voltage) || 0, Number(current) || 0, Number(temp) || 0,
         JSON.stringify(cells || []), Number(online) || 0, Date.now(), code
       ).run();
-
       if (result.meta.changes === 0) return json({ ok: false, error: 'BMS não encontrada' }, 404);
       return json({ ok: true });
     }
 
-    // AUTH ADMIN
+    // AUTH ADMIN - DAQUI PRA BAIXO PRECISA DO TOKEN
     if (request.headers.get('Authorization') !== 'Bearer admin_ok') {
       return json({ error: 'Unauthorized' }, 401);
     }
