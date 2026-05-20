@@ -17,7 +17,7 @@ button.stop{background:rgba(255,68,68,.1);border:1px solid rgba(255,68,68,.4);bo
 button.logout{background:rgba(255,68,68,.1);border:1px solid rgba(255,68,68,.4);max-width:500px;margin:60px auto 40px;box-shadow:0 0 20px rgba(255,68,68,.2)}
 button.view{background:rgba(0,255,255,.1);border:1px solid rgba(0,255,255,.4);padding:10px;margin-top:12px;box-shadow:0 0 15px rgba(0,255,255,.2)}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(350px,1fr));gap:16px;padding:0 16px}
-.grid .card{margin:0;border-radius:16px}
+.grid.card{margin:0;border-radius:16px}
 .status{display:inline-block;padding:6px 16px;border-radius:12px;font-size:13px;font-weight:700}
 .on{background:rgba(0,255,136,.15);color:#00ff88;border:1px solid rgba(0,255,136,.4);box-shadow:0 0 15px rgba(0,255,136,.3)}
 .off{background:rgba(255,68,68,.15);color:#ff4444;border:1px solid rgba(255,68,68,.4);box-shadow:0 0 15px rgba(255,68,68,.3)}
@@ -44,7 +44,7 @@ button.view{background:rgba(0,255,255,.1);border:1px solid rgba(0,255,255,.4);pa
 .modal-content{max-width:1200px;margin:40px auto;background:#0a0a0f;border:1px solid rgba(0,255,255,.3);border-radius:20px;padding:30px;text-align:center;box-shadow:0 0 40px rgba(0,255,255,.2)}
 .modal-close{float:right;background:rgba(255,68,68,.1);border:1px solid rgba(255,68,68,.4);color:#fff;padding:10px 20px;border-radius:8px;cursor:pointer;box-shadow:0 0 15px rgba(255,68,68,.2)}
 #login{padding:40px 20px}
-#login .card{border-radius:20px;margin:40px auto;max-width:500px}
+#login.card{border-radius:20px;margin:40px auto;max-width:500px}
 </style>
 </head>
 <body>
@@ -58,15 +58,12 @@ button.view{background:rgba(0,255,255,.1);border:1px solid rgba(0,255,255,.4);pa
     <p id="loginError" style="color:#ff4444;margin-top:12px;display:none;text-align:center"></p>
   </div>
 </div>
-
 <div id="painel" class="hidden">
   <h1>PAINEL ADMIN BMS</h1>
-
   <div class="tabs">
     <div class="tab active" onclick="switchTab('cadastro')">Cadastro</div>
     <div class="tab" onclick="switchTab('simulador')">Simulador ESP32</div>
   </div>
-
   <div id="cadastro" class="content active">
     <div class="card" style="max-width:600px">
       <input id="code" placeholder="SL82576655" maxlength="10">
@@ -76,51 +73,30 @@ button.view{background:rgba(0,255,255,.1);border:1px solid rgba(0,255,255,.4);pa
     </div>
     <div id="lista" class="grid"></div>
   </div>
-
   <div id="simulador" class="content">
     <div class="card" style="max-width:600px">
       <h3 style="margin-bottom:20px;text-align:center;font-size:24px">Simulador ESP32</h3>
-      
       <div class="label">BMS Selecionada</div>
-      <select id="simCode">
-        <option value="">Selecione uma BMS</option>
-      </select>
-      
+      <select id="simCode"><option value="">Selecione uma BMS</option></select>
       <div class="label">Quantidade de Células</div>
       <select id="cellsCount" onchange="updateCellsCount()">
-        <option value="4">4 Células</option>
-        <option value="7">7 Células</option>
-        <option value="8">8 Células</option>
-        <option value="12">12 Células</option>
-        <option value="13">13 Células</option>
-        <option value="14">14 Células</option>
-        <option value="16" selected>16 Células</option>
-        <option value="17">17 Células</option>
-        <option value="20">20 Células</option>
-        <option value="24">24 Células</option>
+        <option value="4">4 Células</option><option value="7">7 Células</option><option value="8">8 Células</option><option value="12">12 Células</option><option value="13">13 Células</option><option value="14">14 Células</option><option value="16" selected>16 Células</option><option value="17">17 Células</option><option value="20">20 Células</option><option value="24">24 Células</option>
       </select>
-      
       <div class="slider-label"><span>SOC</span><span id="socVal">85%</span></div>
       <input type="range" class="slider" id="soc" min="0" max="100" value="85" oninput="updateSlider('soc')">
-      
       <div class="slider-label"><span>Tensão</span><span id="voltageVal">58.2V</span></div>
       <input type="range" class="slider" id="voltage" min="400" max="650" value="582" oninput="updateSlider('voltage')">
-      
       <div class="slider-label"><span>Corrente</span><span id="currentVal">-1.5A</span></div>
       <input type="range" class="slider" id="current" min="-200" max="200" value="-15" oninput="updateSlider('current')">
-      
       <div class="slider-label"><span>Temperatura</span><span id="tempVal">28.3°C</span></div>
       <input type="range" class="slider" id="temp" min="0" max="600" value="283" oninput="updateSlider('temp')">
-      
       <button id="simBtn" class="sim" onclick="toggleSim()">▶ Iniciar Simulação</button>
       <button onclick="sendOnce()">📡 Enviar Dados Uma Vez</button>
       <p id="simMsg" style="text-align:center;margin-top:12px;opacity:.6"></p>
     </div>
   </div>
-  
   <button class="logout" onclick="adminLogout()">Sair do Painel Admin</button>
 </div>
-
 <div id="modal" class="modal">
   <div class="modal-content">
     <button class="modal-close" onclick="closeModal()">Fechar</button>
@@ -128,15 +104,12 @@ button.view{background:rgba(0,255,255,.1);border:1px solid rgba(0,255,255,.4);pa
     <div id="modalCells" class="cells" style="margin-top:20px"></div>
   </div>
 </div>
-
 <script>
 const API = '/api/bms';
 let adminToken = sessionStorage.getItem('admin_token');
 let simInterval = null;
 let bmsList = [];
-
 if(adminToken === 'admin_ok') showPainel();
-
 async function adminLogin(){
   const user = document.getElementById('user').value;
   const password = document.getElementById('password').value;
@@ -144,182 +117,25 @@ async function adminLogin(){
   errorEl.style.display='none';
   const r = await fetch(API+'?action=admin_login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({user,password})});
   const d = await r.json();
-  if(d.ok){
-    adminToken = d.token;
-    sessionStorage.setItem('admin_token', adminToken);
-    showPainel();
-  }else{
-    errorEl.textContent = d.error;
-    errorEl.style.display='block';
-  }
+  if(d.ok){adminToken = d.token;sessionStorage.setItem('admin_token', adminToken);showPainel();}else{errorEl.textContent = d.error;errorEl.style.display='block';}
 }
-
-function showPainel(){
-  document.getElementById('login').classList.add('hidden');
-  document.getElementById('painel').classList.remove('hidden');
-  listar();
-}
-
-function adminLogout(){
-  sessionStorage.removeItem('admin_token');
-  location.reload();
-}
-
-function authHeaders(){
-  return {'Content-Type':'application/json','Authorization':'Bearer '+adminToken};
-}
-
-function switchTab(tab){
-  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
-  document.querySelectorAll('.content').forEach(c=>c.classList.remove('active'));
-  event.target.classList.add('active');
-  document.getElementById(tab).classList.add('active');
-  if(tab==='simulador') loadSimCodes();
-}
-
-document.getElementById('code').oninput = e => {
-  if(!e.target.value.startsWith('SL')) e.target.value = 'SL';
-  e.target.value = 'SL' + e.target.value.slice(2).replace(/[^0-9]/g,'').slice(0,8);
-};
-
-async function cad(){
-  const code = document.getElementById('code').value;
-  const nome = document.getElementById('nome').value;
-  const r = await fetch(API+'?action=cadastrar',{method:'POST',headers:authHeaders(),body:JSON.stringify({code,nome})});
-  const d = await r.json();
-  document.getElementById('msg').textContent = d.ok?'Cadastrada!':d.error;
-  document.getElementById('msg').style.color = d.ok?'#00ff88':'#ff4444';
-  if(d.ok){document.getElementById('code').value='';document.getElementById('nome').value='';listar();}
-}
-
-async function del(code){
-  if(!confirm(`Deletar ${code}?`))return;
-  await fetch(API+`?action=deletar&code=${code}`,{method:'DELETE',headers:authHeaders()});
-  listar();
-}
-
-function viewCells(code){
-  const bms = bmsList.find(b => b.code === code);
-  if(!bms || !bms.cells) return;
-  document.getElementById('modalTitle').textContent = `${bms.code} - ${bms.cells.length} Células`;
-  document.getElementById('modalCells').innerHTML = bms.cells.map((v,i)=>{
-    const val = parseFloat(v);
-    let cls = 'ok';
-    if(val < 3.2 || val > 4.2) cls = 'crit';
-    else if(val < 3.4 || val > 4.15) cls = 'warn';
-    return `<div class="cell ${cls}"><div class="cell-num">Célula ${i+1}</div><div class="cell-val">${val.toFixed(3)}V</div></div>`;
-  }).join('');
-  document.getElementById('modal').classList.add('active');
-}
-
-function closeModal(){
-  document.getElementById('modal').classList.remove('active');
-}
-
-async function listar(){
-  const r = await fetch(API+'?action=listar',{headers:authHeaders()});
-  if(r.status===401){adminLogout();return;}
-  bmsList = await r.json();
-  document.getElementById('lista').innerHTML = bmsList.map(b=>`
-    <div class="card">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
-        <strong style="font-size:20px">${b.code}</strong>
-        <span class="status ${b.online?'on':'off'}">${b.online?'Online':'Offline'}</span>
-      </div>
-      <div style="opacity:.7;margin-bottom:16px;font-size:15px">${b.nome||'Sem nome'}</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:16px 0">
-        <div><div style="opacity:.6;font-size:12px">SOC</div><div class="val" style="color:#00ff88;font-size:28px">${b.soc?.toFixed(0)||0}%</div></div>
-        <div><div style="opacity:.6;font-size:12px">Tensão</div><div class="val" style="color:#00ffff;font-size:28px">${b.voltage?.toFixed(1)||0}V</div></div>
-      </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:16px 0">
-        <div><div style="opacity:.6;font-size:12px">Corrente</div><div class="val" style="color:#ffaa00;font-size:28px">${b.current?.toFixed(1)||0}A</div></div>
-        <div><div style="opacity:.6;font-size:12px">Temp</div><div class="val" style="color:#ff4444;font-size:28px">${b.temp?.toFixed(1)||0}°C</div></div>
-      </div>
-      <div style="opacity:.5;font-size:11px;margin-top:12px">Última atualização: ${b.last_update?new Date(b.last_update).toLocaleString('pt-BR'):'Nunca'}</div>
-      <button class="view" onclick="viewCells('${b.code}')">Ver Células</button>
-      <button class="del" onclick="del('${b.code}')">Deletar BMS</button>
-    </div>
-  `).join('');
-}
-
-async function loadSimCodes(){
-  const r = await fetch(API+'?action=listar',{headers:authHeaders()});
-  const d = await r.json();
-  document.getElementById('simCode').innerHTML = '<option value="">Selecione uma BMS</option>' + d.map(b=>`<option value="${b.code}">${b.code} - ${b.nome||'Sem nome'}</option>`).join('');
-}
-
-function updateSlider(type){
-  const val = document.getElementById(type).value;
-  if(type==='soc') document.getElementById('socVal').textContent = val+'%';
-  if(type==='voltage') document.getElementById('voltageVal').textContent = (val/10).toFixed(1)+'V';
-  if(type==='current') document.getElementById('currentVal').textContent = (val/10).toFixed(1)+'A';
-  if(type==='temp') document.getElementById('tempVal').textContent = (val/10).toFixed(1)+'°C';
-}
-
-function updateCellsCount(){
-  const count = parseInt(document.getElementById('cellsCount').value);
-  const voltage = parseFloat(document.getElementById('voltage').value) / 10;
-  const avg = voltage / count;
-  document.getElementById('simMsg').textContent = `${count} células - Média: ${avg.toFixed(3)}V por célula`;
-}
-
-function generateCells(count, totalVoltage){
-  const avg = totalVoltage / count;
-  const cells = [];
-  for(let i=0; i<count; i++){
-    const variation = (Math.random() - 0.5) * 0.1;
-    cells.push(parseFloat((avg + variation).toFixed(3)));
-  }
-  return cells;
-}
-
-async function sendSimData(){
-  const code = document.getElementById('simCode').value;
-  if(!code){
-    document.getElementById('simMsg').textContent = 'Selecione uma BMS';
-    return;
-  }
-  const count = parseInt(document.getElementById('cellsCount').value);
-  const voltage = parseFloat(document.getElementById('voltage').value) / 10;
-  const cells = generateCells(count, voltage);
-  
-  const data = {
-    code,
-    soc: parseInt(document.getElementById('soc').value),
-    voltage: voltage,
-    current: parseFloat(document.getElementById('current').value) / 10,
-    temp: parseFloat(document.getElementById('temp').value) / 10,
-    cells
-  };
-  await fetch(API+'?action=update',{method:'POST',headers:authHeaders(),body:JSON.stringify(data)});
-  document.getElementById('simMsg').textContent = `Dados enviados: ${code} - ${count} células - ${new Date().toLocaleTimeString('pt-BR')}`;
-  if(document.getElementById('cadastro').classList.contains('active')) listar();
-}
-
-function sendOnce(){
-  sendSimData();
-}
-
-function toggleSim(){
-  const btn = document.getElementById('simBtn');
-  if(simInterval){
-    clearInterval(simInterval);
-    simInterval = null;
-    btn.textContent = '▶ Iniciar Simulação';
-    btn.classList.remove('stop');
-    document.getElementById('simMsg').textContent = 'Simulação parada';
-  }else{
-    if(!document.getElementById('simCode').value){
-      document.getElementById('simMsg').textContent = 'Selecione uma BMS primeiro';
-      return;
-    }
-    sendSimData();
-    simInterval = setInterval(sendSimData, 3000);
-    btn.textContent = '⏸ Parar Simulação';
-    btn.classList.add('stop');
-  }
-}
-
+function showPainel(){document.getElementById('login').classList.add('hidden');document.getElementById('painel').classList.remove('hidden');listar();}
+function adminLogout(){sessionStorage.removeItem('admin_token');location.reload();}
+function authHeaders(){return {'Content-Type':'application/json','Authorization':'Bearer '+adminToken};}
+function switchTab(tab){document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));document.querySelectorAll('.content').forEach(c=>c.classList.remove('active'));event.target.classList.add('active');document.getElementById(tab).classList.add('active');if(tab==='simulador') loadSimCodes();}
+document.getElementById('code').oninput = e => {if(!e.target.value.startsWith('SL')) e.target.value = 'SL';e.target.value = 'SL' + e.target.value.slice(2).replace(/[^0-9]/g,'').slice(0,8);};
+async function cad(){const code = document.getElementById('code').value;const nome = document.getElementById('nome').value;const r = await fetch(API+'?action=cadastrar',{method:'POST',headers:authHeaders(),body:JSON.stringify({code,nome})});const d = await r.json();document.getElementById('msg').textContent = d.ok?'Cadastrada!':d.error;document.getElementById('msg').style.color = d.ok?'#00ff88':'#ff4444';if(d.ok){document.getElementById('code').value='';document.getElementById('nome').value='';listar();}}
+async function del(code){if(!confirm(`Deletar ${code}?`))return;await fetch(API+`?action=deletar&code=${code}`,{method:'DELETE',headers:authHeaders()});listar();}
+function viewCells(code){const bms = bmsList.find(b => b.code === code);if(!bms ||!bms.cells) return;document.getElementById('modalTitle').textContent = `${bms.code} - ${bms.cells.length} Células`;document.getElementById('modalCells').innerHTML = bms.cells.map((v,i)=>{const val = parseFloat(v);let cls = 'ok';if(val < 3.2 || val > 4.2) cls = 'crit';else if(val < 3.4 || val > 4.15) cls = 'warn';return `<div class="cell ${cls}"><div class="cell-num">Célula ${i+1}</div><div class="cell-val">${val.toFixed(3)}V</div></div>`;}).join('');document.getElementById('modal').classList.add('active');}
+function closeModal(){document.getElementById('modal').classList.remove('active');}
+async function listar(){const r = await fetch(API+'?action=listar',{headers:authHeaders()});if(r.status===401){adminLogout();return;}bmsList = await r.json();document.getElementById('lista').innerHTML = bmsList.map(b=>`<div class="card"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px"><strong style="font-size:20px">${b.code}</strong><span class="status ${b.online?'on':'off'}">${b.online?'Online':'Offline'}</span></div><div style="opacity:.7;margin-bottom:16px;font-size:15px">${b.nome||'Sem nome'}</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:16px 0"><div><div style="opacity:.6;font-size:12px">SOC</div><div class="val" style="color:#00ff88;font-size:28px">${b.soc?.toFixed(0)||0}%</div></div><div><div style="opacity:.6;font-size:12px">Tensão</div><div class="val" style="color:#00ffff;font-size:28px">${b.voltage?.toFixed(1)||0}V</div></div></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:16px 0"><div><div style="opacity:.6;font-size:12px">Corrente</div><div class="val" style="color:#ffaa00;font-size:28px">${b.current?.toFixed(1)||0}A</div></div><div><div style="opacity:.6;font-size:12px">Temp</div><div class="val" style="color:#ff4444;font-size:28px">${b.temp?.toFixed(1)||0}°C</div></div></div><div style="opacity:.5;font-size:11px;margin-top:12px">Última atualização: ${b.last_update?new Date(b.last_update).toLocaleString('pt-BR'):'Nunca'}</div><button class="view" onclick="viewCells('${b.code}')">Ver Células</button><button class="del" onclick="del('${b.code}')">Deletar BMS</button></div>`).join('');}
+async function loadSimCodes(){const r = await fetch(API+'?action=listar',{headers:authHeaders()});const d = await r.json();document.getElementById('simCode').innerHTML = '<option value="">Selecione uma BMS</option>' + d.map(b=>`<option value="${b.code}">${b.code} - ${b.nome||'Sem nome'}</option>`).join('');}
+function updateSlider(type){const val = document.getElementById(type).value;if(type==='soc') document.getElementById('socVal').textContent = val+'%';if(type==='voltage') document.getElementById('voltageVal').textContent = (val/10).toFixed(1)+'V';if(type==='current') document.getElementById('currentVal').textContent = (val/10).toFixed(1)+'A';if(type==='temp') document.getElementById('tempVal').textContent = (val/10).toFixed(1)+'°C';}
+function updateCellsCount(){const count = parseInt(document.getElementById('cellsCount').value);const voltage = parseFloat(document.getElementById('voltage').value) / 10;const avg = voltage / count;document.getElementById('simMsg').textContent = `${count} células - Média: ${avg.toFixed(3)}V por célula`;}
+function generateCells(count, totalVoltage){const avg = totalVoltage / count;const cells = [];for(let i=0; i<count; i++){const variation = (Math.random() - 0.5) * 0.1;cells.push(parseFloat((avg + variation).toFixed(3)));}return cells;}
+async function sendSimData(){const code = document.getElementById('simCode').value;if(!code){document.getElementById('simMsg').textContent = 'Selecione uma BMS';return;}const count = parseInt(document.getElementById('cellsCount').value);const voltage = parseFloat(document.getElementById('voltage').value) / 10;const cells = generateCells(count, voltage);const data = {code,soc: parseInt(document.getElementById('soc').value),voltage: voltage,current: parseFloat(document.getElementById('current').value) / 10,temp: parseFloat(document.getElementById('temp').value) / 10,cells};await fetch(API+'?action=update',{method:'POST',headers:authHeaders(),body:JSON.stringify(data)});document.getElementById('simMsg').textContent = `Dados enviados: ${code} - ${count} células - ${new Date().toLocaleTimeString('pt-BR')}`;if(document.getElementById('cadastro').classList.contains('active')) listar();}
+function sendOnce(){sendSimData();}
+function toggleSim(){const btn = document.getElementById('simBtn');if(simInterval){clearInterval(simInterval);simInterval = null;btn.textContent = '▶ Iniciar Simulação';btn.classList.remove('stop');document.getElementById('simMsg').textContent = 'Simulação parada';}else{if(!document.getElementById('simCode').value){document.getElementById('simMsg').textContent = 'Selecione uma BMS primeiro';return;}sendSimData();simInterval = setInterval(sendSimData, 3000);btn.textContent = '⏸ Parar Simulação';btn.classList.add('stop');}}
 updateCellsCount();
 </script>
 </body>

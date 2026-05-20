@@ -2,12 +2,6 @@ export async function onRequest(context) {
   const { request, env } = context;
   const url = new URL(request.url);
   const action = url.searchParams.get('action');
-  const cors = {'Access-Control-Allow-Origin':'*','Access-Control-Allow-Methods':'GET,POST,DELETE,OPTIONS','Access-Control-Allow-Headers':'Content-Type,Authorization','Content
-cat >> functions/api/bms.js << 'EOF'
-export async function onRequest(context) {
-  const { request, env } = context;
-  const url = new URL(request.url);
-  const action = url.searchParams.get('action');
   const cors = {'Access-Control-Allow-Origin':'*','Access-Control-Allow-Methods':'GET,POST,DELETE,OPTIONS','Access-Control-Allow-Headers':'Content-Type,Authorization','Content-Type':'application/json'};
   if (request.method === 'OPTIONS') return new Response(null, { headers: cors });
   
@@ -29,6 +23,8 @@ export async function onRequest(context) {
       if (!r) return Response.json({error:'Não encontrada'}, {status:401,headers:cors});
       return Response.json({...r,cells:JSON.parse(r.cells||'[]'),online:new Date()-new Date(r.last_update)<30000}, {headers:cors});
     }
+    if (action === 'cadastrar' &&
+cat >> functions/api/bms.js << 'EOF'
     if (action === 'cadastrar' && request.method === 'POST') {
       const auth = request.headers.get('authorization');
       if (auth!== 'Bearer admin_ok') return Response.json({error:'Não autorizado'}, {status:401,headers:cors});
