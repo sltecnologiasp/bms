@@ -6,23 +6,40 @@
 <title>Monitor BMS</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-body{background:#0a0a0f;color:#fff;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui;padding:12px;text-align:center}
+body{background:#0a0a0f;color:#fff;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui;padding:12px;text-align:center;overflow-x:hidden}
 h1{text-align:center;font-size:24px;font-weight:800;padding:16px 0;background:linear-gradient(90deg,#00ffff,#0080ff);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
 .container{max-width:500px;margin:0 auto}
-.card{background:rgba(255,255,255,.04);border:1px solid rgba(0,255,255,.2);border-radius:20px;padding:18px;margin-bottom:12px}
-input,button{width:100%;padding:16px;margin:10px 0;border-radius:14px;border:1px solid rgba(0,255,255,.3);background:rgba(0,0,0,.3);color:#fff;font-size:16px;text-align:center}
-button{background:linear-gradient(90deg,#0080ff,#00ffff);cursor:pointer;font-weight:700;border:none}
+.card{background:rgba(255,255,255,.04);border:1px solid rgba(0,255,255,.2);border-radius:20px;padding:18px;margin-bottom:12px;position:relative;overflow:hidden}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;bottom:0;background:radial-gradient(circle at 20% 50%,rgba(0,255,255,.03) 0%,transparent 50%),radial-gradient(circle at 80% 80%,rgba(0,128,255,.03) 0%,transparent 50%);pointer-events:none}
+.particles{position:absolute;top:0;left:0;right:0;bottom:0;pointer-events:none;overflow:hidden}
+.particle{position:absolute;width:2px;height:2px;background:#00ffff;border-radius:50%;opacity:0;animation:float 8s infinite}
+.particle:nth-child(1){left:10%;animation-delay:0s}
+.particle:nth-child(2){left:30%;animation-delay:1.5s}
+.particle:nth-child(3){left:50%;animation-delay:3s}
+.particle:nth-child(4){left:70%;animation-delay:4.5s}
+.particle:nth-child(5){left:90%;animation-delay:6s}
+.particle:nth-child(6){left:20%;animation-delay:2s}
+.particle:nth-child(7){left:60%;animation-delay:5s}
+.particle:nth-child(8){left:80%;animation-delay:7s}
+@keyframes float{
+  0%{bottom:-10px;opacity:0;transform:translateX(0)}
+  10%{opacity:.6}
+  90%{opacity:.6}
+  100%{bottom:110%;opacity:0;transform:translateX(20px)}
+}
+input,button{width:100%;padding:16px;margin:10px 0;border-radius:14px;border:1px solid rgba(0,255,255,.3);background:rgba(0,0,0,.3);color:#fff;font-size:16px;text-align:center;position:relative;z-index:1}
+button{background:linear-gradient(90deg,#0080ff,#00ffff);cursor:pointer;font-weight:700;border:none;box-shadow:0 0 20px rgba(0,255,255,.2)}
 .hidden{display:none}
-.label{opacity:.6;font-size:11px;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:8px}
-.value{font-size:42px;font-weight:800;line-height:1;margin:8px 0}
+.label{opacity:.6;font-size:11px;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:8px;position:relative;z-index:1}
+.value{font-size:42px;font-weight:800;line-height:1;margin:8px 0;position:relative;z-index:1;text-shadow:0 0 20px rgba(0,255,255,.3)}
 .unit{font-size:16px;opacity:.5;font-weight:400}
-.status{display:inline-block;padding:8px 20px;border-radius:100px;font-size:13px;font-weight:600;margin:8px 0}
-.on{background:rgba(0,255,136,.15);color:#00ff88;border:1px solid rgba(0,255,136,.3)}
+.status{display:inline-block;padding:8px 20px;border-radius:100px;font-size:13px;font-weight:600;margin:8px 0;position:relative;z-index:1}
+.on{background:rgba(0,255,136,.15);color:#00ff88;border:1px solid rgba(0,255,136,.3);box-shadow:0 0 15px rgba(0,255,136,.2)}
 .off{background:rgba(255,68,68,.15);color:#ff4444;border:1px solid rgba(255,68,68,.3)}
 .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
 .grid-2 .card{margin:0}
-.code{font-size:20px;font-weight:700;letter-spacing:1px}
-.cells{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:12px}
+.code{font-size:20px;font-weight:700;letter-spacing:1px;position:relative;z-index:1}
+.cells{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:12px;position:relative;z-index:1}
 .cell{background:rgba(0,0,0,.3);border:1px solid rgba(0,255,255,.15);border-radius:12px;padding:10px 6px}
 .cell-num{opacity:.4;font-size:9px;margin-bottom:4px}
 .cell-val{font-weight:700;font-size:13px}
@@ -35,10 +52,14 @@ button{background:linear-gradient(90deg,#0080ff,#00ffff);cursor:pointer;font-wei
   <div class="container">
     <h1>BMS MONITOR</h1>
     <div class="card">
+      <div class="particles">
+        <div class="particle"></div><div class="particle"></div><div class="particle"></div><div class="particle"></div>
+        <div class="particle"></div><div class="particle"></div><div class="particle"></div><div class="particle"></div>
+      </div>
       <div class="label">Código de Acesso</div>
       <input id="code" placeholder="SL82576655" maxlength="10">
       <button onclick="login()">Conectar BMS</button>
-      <p id="error" style="color:#ff4444;margin-top:12px;display:none"></p>
+      <p id="error" style="color:#ff4444;margin-top:12px;display:none;position:relative;z-index:1"></p>
     </div>
   </div>
 </div>
@@ -48,6 +69,10 @@ button{background:linear-gradient(90deg,#0080ff,#00ffff);cursor:pointer;font-wei
     <h1>BMS MONITOR</h1>
     
     <div class="card">
+      <div class="particles">
+        <div class="particle"></div><div class="particle"></div><div class="particle"></div><div class="particle"></div>
+        <div class="particle"></div><div class="particle"></div><div class="particle"></div><div class="particle"></div>
+      </div>
       <div class="label">BMS</div>
       <div class="code" id="codeVal"></div>
       <div class="status off" id="status">Offline</div>
@@ -55,10 +80,18 @@ button{background:linear-gradient(90deg,#0080ff,#00ffff);cursor:pointer;font-wei
 
     <div class="grid-2">
       <div class="card">
+        <div class="particles">
+          <div class="particle"></div><div class="particle"></div><div class="particle"></div><div class="particle"></div>
+          <div class="particle"></div><div class="particle"></div><div class="particle"></div><div class="particle"></div>
+        </div>
         <div class="label">SOC</div>
         <div class="value" id="soc">--<span class="unit">%</span></div>
       </div>
       <div class="card">
+        <div class="particles">
+          <div class="particle"></div><div class="particle"></div><div class="particle"></div><div class="particle"></div>
+          <div class="particle"></div><div class="particle"></div><div class="particle"></div><div class="particle"></div>
+        </div>
         <div class="label">Tensão</div>
         <div class="value" id="voltage">--<span class="unit">V</span></div>
       </div>
@@ -66,16 +99,28 @@ button{background:linear-gradient(90deg,#0080ff,#00ffff);cursor:pointer;font-wei
 
     <div class="grid-2">
       <div class="card">
+        <div class="particles">
+          <div class="particle"></div><div class="particle"></div><div class="particle"></div><div class="particle"></div>
+          <div class="particle"></div><div class="particle"></div><div class="particle"></div><div class="particle"></div>
+        </div>
         <div class="label">Corrente</div>
         <div class="value" id="current">--<span class="unit">A</span></div>
       </div>
       <div class="card">
+        <div class="particles">
+          <div class="particle"></div><div class="particle"></div><div class="particle"></div><div class="particle"></div>
+          <div class="particle"></div><div class="particle"></div><div class="particle"></div><div class="particle"></div>
+        </div>
         <div class="label">Temperatura</div>
         <div class="value" id="temp">--<span class="unit">°C</span></div>
       </div>
     </div>
 
     <div class="card">
+      <div class="particles">
+        <div class="particle"></div><div class="particle"></div><div class="particle"></div><div class="particle"></div>
+        <div class="particle"></div><div class="particle"></div><div class="particle"></div><div class="particle"></div>
+      </div>
       <div class="label">Células</div>
       <div id="cells" class="cells"></div>
     </div>
