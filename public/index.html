@@ -7,27 +7,25 @@
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 body{background:#0a0a0f;color:#fff;font-family:system-ui;padding:0;text-align:center}
-h1{text-align:center;font-size:32px;font-weight:900;padding:20px;background:linear-gradient(90deg,#00ffff,#0080ff);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-.card{background:rgba(255,255,255,.03);border:1px solid rgba(0,255,255,.3);border-radius:16px;padding:20px;margin:16px}
-input,button{width:100%;max-width:600px;padding:16px;margin:8px auto;border-radius:12px;border:1px solid rgba(0,255,255,.3);background:rgba(0,0,0,.4);color:#fff;font-size:16px;text-align:center;display:block}
+h1{text-align:center;font-size:28px;font-weight:900;padding:16px;background:linear-gradient(90deg,#00ffff,#0080ff);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.card{background:rgba(255,255,255,.03);border:1px solid rgba(0,255,255,.3);border-radius:16px;padding:16px;margin:12px}
+input,button{width:100%;max-width:600px;padding:14px;margin:8px auto;border-radius:12px;border:1px solid rgba(0,255,255,.3);background:rgba(0,0,0,.4);color:#fff;font-size:16px;text-align:center;display:block}
 button{background:linear-gradient(90deg,#0080ff,#00ffff);cursor:pointer;font-weight:700;border:none}
 .hidden{display:none}
-.label{opacity:.7;font-size:12px;text-transform:uppercase;text-align:center;letter-spacing:2px;margin-bottom:8px}
-.val{font-size:48px;font-weight:700;margin:12px 0;text-align:center}
-.unit{font-size:16px;opacity:.6}
-.status{display:inline-block;padding:8px 24px;border-radius:20px;font-size:14px;font-weight:700;margin:12px 0}
+.label{opacity:.7;font-size:11px;text-transform:uppercase;text-align:center;letter-spacing:2px;margin-bottom:6px}
+.val{font-size:36px;font-weight:700;margin:8px 0;text-align:center;line-height:1}
+.unit{font-size:14px;opacity:.6}
+.status{display:inline-block;padding:6px 20px;border-radius:20px;font-size:13px;font-weight:700;margin:8px 0}
 .on{background:rgba(0,255,136,.15);color:#00ff88;border:1px solid rgba(0,255,136,.4)}
 .off{background:rgba(255,68,68,.15);color:#ff4444;border:1px solid rgba(255,68,68,.4)}
-.cells{display:grid;grid-template-columns:repeat(auto-fill,minmax(85px,1fr));gap:10px;margin-top:16px}
-.cell{background:rgba(0,0,0,.4);border:1px solid rgba(0,255,255,.2);border-radius:12px;padding:12px;text-align:center}
-.cell-num{opacity:.5;font-size:10px}
-.cell-val{font-weight:700;font-size:14px;margin-top:4px}
-.loading{width:20px;height:20px;border:3px solid rgba(0,255,255,.2);border-top-color:#00ffff;border-radius:50%;animation:spin 1s linear infinite;margin:0 auto}
-@keyframes spin{to{transform:rotate(360deg)}}
-.logout{background:rgba(255,68,68,.1);border:1px solid rgba(255,68,68,.4);max-width:500px;margin:40px auto}
-.row{display:grid;grid-template-columns:1fr 1fr;gap:16px;max-width:632px;margin:0 auto}
-.row .card{margin:8px}
-@media(max-width:600px){.row{grid-template-columns:1fr}.row .card{margin:16px}}
+.cells{display:grid;grid-template-columns:repeat(auto-fill,minmax(75px,1fr));gap:8px;margin-top:12px}
+.cell{background:rgba(0,0,0,.4);border:1px solid rgba(0,255,255,.2);border-radius:10px;padding:10px;text-align:center}
+.cell-num{opacity:.5;font-size:9px}
+.cell-val{font-weight:700;font-size:13px;margin-top:4px}
+.logout{background:rgba(255,68,68,.1);border:1px solid rgba(255,68,68,.4);max-width:500px;margin:30px auto}
+.row{display:flex;gap:12px;max-width:632px;margin:0 auto;padding:0 12px}
+.row .card{flex:1;margin:6px 0;padding:14px}
+@media(max-width:400px){.val{font-size:28px}.row{gap:8px;padding:0 8px}.row .card{padding:12px}}
 </style>
 </head>
 <body>
@@ -45,7 +43,7 @@ button{background:linear-gradient(90deg,#0080ff,#00ffff);cursor:pointer;font-wei
   <h1>BMS MONITOR</h1>
   <div class="card">
     <div class="label">Código</div>
-    <div class="val" style="font-size:24px" id="codeVal"></div>
+    <div class="val" style="font-size:22px" id="codeVal"></div>
     <div class="status off" id="status">Offline</div>
   </div>
 
@@ -153,7 +151,7 @@ function update(d){
       let cls = '';
       if(val < 3.2 || val > 4.2) cls = 'style="border-color:#ff4444;background:rgba(255,68,68,.08)"';
       else if(val < 3.4 || val > 4.15) cls = 'style="border-color:#ffaa00;background:rgba(255,170,0,.08)"';
-      return `<div class="cell" ${cls}><div class="cell-num">Célula ${i+1}</div><div class="cell-val">${val.toFixed(3)}V</div></div>`;
+      return `<div class="cell" ${cls}><div class="cell-num">Cél ${i+1}</div><div class="cell-val">${val.toFixed(3)}</div></div>`;
     }).join('');
   }else{
     cellsEl.innerHTML = '<div style="grid-column:1/-1;opacity:.5;text-align:center">Sem dados</div>';
