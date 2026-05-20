@@ -3,303 +3,211 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Admin BMS</title>
+<title>Admin - SMART BMS</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-body{background:#0a0a0f;color:#fff;font-family:system-ui;padding:0;text-align:center}
-h1{text-align:center;font-size:32px;font-weight:900;padding:20px;background:linear-gradient(90deg,#00ffff,#0080ff);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-.card{background:rgba(255,255,255,.03);border:1px solid rgba(0,255,255,.3);border-radius:16px;padding:20px;margin:16px}
-input,button,select{width:100%;max-width:600px;padding:16px;margin:8px auto;border-radius:12px;border:1px solid rgba(0,255,255,.3);background:rgba(0,0,0,.4);color:#fff;font-size:16px;text-align:center;display:block}
-button{background:linear-gradient(90deg,#0080ff,#00ffff);cursor:pointer;font-weight:700;border:none}
-button.del{background:rgba(255,68,68,.1);border:1px solid rgba(255,68,68,.4);padding:10px;margin-top:12px}
-button.sim{background:rgba(0,255,136,.1);border:1px solid rgba(0,255,136,.4)}
-button.stop{background:rgba(255,68,68,.1);border:1px solid rgba(255,68,68,.4)}
-button.logout{background:rgba(255,68,68,.1);border:1px solid rgba(255,68,68,.4);max-width:500px;margin:40px auto}
-button.view{background:rgba(0,255,255,.1);border:1px solid rgba(0,255,255,.4);padding:10px;margin-top:12px}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px;padding:0 16px}
-.grid.card{margin:0}
-.status{display:inline-block;padding:6px 16px;border-radius:12px;font-size:13px;font-weight:700}
-.on{background:rgba(0,255,136,.15);color:#00ff88;border:1px solid rgba(0,255,136,.4)}
-.off{background:rgba(255,68,.15);color:#ff4444;border:1px solid rgba(255,68,68,.4)}
-.val{font-size:32px;font-weight:700;margin:12px 0;text-align:center}
-.tabs{display:flex;border-bottom:1px solid rgba(0,255,255,.2)}
-.tab{flex:1;padding:16px;background:rgba(255,255,255,.02);border:none;border-right:1px solid rgba(0,255,255,.2);cursor:pointer}
-.tab.active{background:linear-gradient(90deg,#0080ff,#00ffff);font-weight:700}
-.content{display:none}
-.content.active{display:block}
-.slider{width:100%;max-width:600px;margin:8px auto}
-.slider-label{display:flex;justify-content:space-between;font-size:14px;opacity:.8;max-width:600px;margin:0 auto}
+body{background:#0a0a0f;color:#fff;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui;padding:12px;overflow-x:hidden}
+h1{text-align:center;font-size:24px;font-weight:800;padding:16px 0;background:linear-gradient(90deg,#ff4444,#ff8800);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.container{max-width:600px;margin:0 auto}
+.card{background:rgba(15,15,25,.7);backdrop-filter:blur(10px);border:1px solid rgba(255,68,68,.25);border-radius:20px;padding:18px;margin-bottom:12px;box-shadow:0 8px 32px rgba(0,0,0,.4)}
+input,button,select{width:100%;padding:14px;margin:8px 0;border-radius:14px;border:1px solid rgba(255,68,68,.3);background:rgba(0,0,0,.4);color:#fff;font-size:15px}
+button{background:linear-gradient(90deg,#ff4444,#ff8800);cursor:pointer;font-weight:700;border:none;box-shadow:0 0 30px rgba(255,68,68,.3)}
+.label{opacity:.6;font-size:11px;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:8px}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.bms-item{background:rgba(0,0,0,.4);border:1px solid rgba(255,68,68,.15);border-radius:12px;padding:12px;margin:8px 0;display:flex;justify-content:space-between;align-items:center}
+.bms-code{font-weight:700;font-size:14px}
+.bms-status{font-size:11px;padding:4px 10px;border-radius:100px}
+.online{background:rgba(0,255,136,.15);color:#00ff88}
+.offline{background:rgba(255,68,68,.15);color:#ff4444}
+.del{background:rgba(255,68,68,.2);border:1px solid rgba(255,68,68,.4);padding:6px 12px;font-size:12px;width:auto;margin:0}
+.sim{background:rgba(0,255,136,.08);border:1px solid rgba(0,255,136,.3)}
+.sim-btn{background:linear-gradient(90deg,#00ff88,#00cc6a);box-shadow:0 0 20px rgba(0,255,136,.3)}
+.logout{background:rgba(255,68,68,.1);border:1px solid rgba(255,68,68,.3);margin-top:20px}
 .hidden{display:none}
-.label{opacity:.7;font-size:12px;text-transform:uppercase;text-align:center;letter-spacing:2px;margin-bottom:8px}
-.debug{background:rgba(255,255,0,.1);border:1px solid rgba(255,255,0,.4);padding:12px;margin:12px;border-radius:8px;font-size:12px;text-align:left;word-break:break-all}
-.cells{display:grid;grid-template-columns:repeat(auto-fill,minmax(85px,1fr));gap:10px;margin-top:16px}
-.cell{background:rgba(0,0,0,.4);border:1px solid rgba(0,255,255,.2);border-radius:12px;padding:12px;text-align:center}
-.cell-num{opacity:.5;font-size:10px}
-.cell-val{font-weight:700;font-size:14px;margin-top:4px}
-.modal{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.95);z-index:999;overflow-y:auto;padding:20px}
-.modal.active{display:block}
-.modal-content{max-width:1200px;margin:40px auto;background:#0a0a0f;border:1px solid rgba(0,255,255,.3);border-radius:20px;padding:30px}
-.modal-close{float:right;background:rgba(255,68,68,.1);border:1px solid rgba(255,68,68,.4);color:#fff;padding:10px 20px;border-radius:8px;cursor:pointer}
 </style>
 </head>
 <body>
 <div id="login">
-  <h1>ADMIN BMS</h1>
-  <div class="card">
-    <div class="label">Acesso Administrador</div>
-    <input id="user" placeholder="Usuário" value="administrador">
-    <input id="password" type="password" placeholder="Senha">
-    <button onclick="adminLogin()">Entrar no Painel</button>
-    <p id="loginError" style="color:#ff4444;margin-top:12px;display:none"></p>
-  </div>
-</div>
-
-<div id="painel" class="hidden">
-  <h1>PAINEL ADMIN BMS</h1>
-  <div class="tabs">
-    <div class="tab active" onclick="switchTab('cadastro')">Cadastro</div>
-    <div class="tab" onclick="switchTab('simulador')">Simulador ESP32</div>
-  </div>
-
-  <div id="cadastro" class="content active">
+  <div class="container">
+    <h1>ADMIN BMS</h1>
     <div class="card">
-      <input id="code" placeholder="SL82576655" maxlength="10">
-      <input id="nome" placeholder="Nome do Cliente">
-      <button onclick="cad()">Cadastrar BMS</button>
-      <p id="msg"></p>
-    </div>
-    <div id="lista" class="grid"></div>
-  </div>
-
-  <div id="simulador" class="content">
-    <div class="card">
-      <h3>Simulador ESP32</h3>
-      <div class="label">BMS Selecionada</div>
-      <select id="simCode"><option value="">Carregando...</option></select>
-      <div class="label">Células</div>
-      <select id="cellsCount">
-        <option value="4">4</option><option value="8">8</option><option value="16" selected>16</option><option value="24">24</option>
-      </select>
-      <div class="slider-label"><span>SOC</span><span id="socVal">85%</span></div>
-      <input type="range" class="slider" id="soc" min="0" max="100" value="85" oninput="updateSlider('soc')">
-      <div class="slider-label"><span>Tensão</span><span id="voltageVal">58.2V</span></div>
-      <input type="range" class="slider" id="voltage" min="400" max="650" value="582" oninput="updateSlider('voltage')">
-      <div class="slider-label"><span>Corrente</span><span id="currentVal">-1.5A</span></div>
-      <input type="range" class="slider" id="current" min="-200" max="200" value="-15" oninput="updateSlider('current')">
-      <div class="slider-label"><span>Temp</span><span id="tempVal">28.3°C</span></div>
-      <input type="range" class="slider" id="temp" min="0" max="600" value="283" oninput="updateSlider('temp')">
-      <button id="simBtn" class="sim" onclick="toggleSim()">▶ Iniciar Simulação</button>
-      <button onclick="sendOnce()">📡 Enviar Uma Vez</button>
-      <div class="debug" id="debug">Aguardando...</div>
+      <div class="label">Senha Admin</div>
+      <input id="pass" type="password" placeholder="Senha">
+      <button onclick="login()">Entrar</button>
+      <p id="error" style="color:#ff4444;margin-top:12px;display:none"></p>
     </div>
   </div>
-  <button class="logout" onclick="adminLogout()">Sair</button>
 </div>
+<div id="dash" class="hidden">
+  <div class="container">
+    <h1>ADMIN BMS</h1>
+    
+    <div class="card">
+      <div class="label">Cadastrar Novo BMS</div>
+      <input id="newCode" placeholder="SL82576655" maxlength="10">
+      <button onclick="addBms()">Cadastrar BMS</button>
+      <div id="addMsg" style="opacity:.6;font-size:12px;margin-top:8px"></div>
+    </div>
 
-<div id="modal" class="modal">
-  <div class="modal-content">
-    <button class="modal-close" onclick="closeModal()">Fechar</button>
-    <h2 id="modalTitle"></h2>
-    <div id="modalCells" class="cells"></div>
+    <div class="card">
+      <div class="label">BMS Cadastrados</div>
+      <div id="bmsList"></div>
+    </div>
+
+    <div class="card sim">
+      <div class="label">SIMULADOR ESP32</div>
+      <select id="simSelect"></select>
+      <div class="grid-2">
+        <input id="simSoc" type="number" placeholder="SOC %" value="85">
+        <input id="simVolt" type="number" placeholder="Tensão V" value="53.2" step="0.1">
+        <input id="simCurr" type="number" placeholder="Corrente A" value="-2.5" step="0.1">
+        <input id="simTemp" type="number" placeholder="Temp °C" value="28.5" step="0.1">
+      </div>
+      <button class="sim-btn" onclick="simulate()">Enviar Dados Teste</button>
+      <div id="simMsg" style="opacity:.6;font-size:12px;margin-top:8px"></div>
+    </div>
+
+    <button class="logout" onclick="logout()">Sair</button>
   </div>
 </div>
-
 <script>
-const API = '/api/bms';
-let adminToken = sessionStorage.getItem('admin_token');
-let simInterval = null;
+const API = '/api/admin';
+let token = sessionStorage.getItem('admin_token');
 let bmsList = [];
+if(token) loadDash();
 
-if(adminToken === 'admin_ok') showPainel();
-
-function debug(msg){
-  document.getElementById('debug').textContent = new Date().toLocaleTimeString() + ': ' + msg;
-}
-
-async function adminLogin(){
-  const user = document.getElementById('user').value;
-  const password = document.getElementById('password').value;
-  const errorEl = document.getElementById('loginError');
-  errorEl.style.display='none';
-  debug('Tentando login...');
-  try{
-    const r = await fetch(API+'?action=admin_login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({user,password})});
-    const d = await r.json();
-    debug('Resposta login: '+JSON.stringify(d));
-    if(d.ok){
-      adminToken = d.token;
-      sessionStorage.setItem('admin_token', adminToken);
-      showPainel();
-    }else{
-      errorEl.textContent = d.error;
-      errorEl.style.display='block';
-    }
-  }catch(e){
-    errorEl.textContent = 'Erro: '+e.message;
-    errorEl.style.display='block';
-    debug('Erro login: '+e.message);
-  }
-}
-
-function showPainel(){
-  document.getElementById('login').classList.add('hidden');
-  document.getElementById('painel').classList.remove('hidden');
-  listar();
-}
-
-function adminLogout(){
-  sessionStorage.removeItem('admin_token');
-  location.reload();
-}
-
-function authHeaders(){
-  return {'Content-Type':'application/json','Authorization':'Bearer '+adminToken};
-}
-
-function switchTab(tab){
-  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
-  document.querySelectorAll('.content').forEach(c=>c.classList.remove('active'));
-  event.target.classList.add('active');
-  document.getElementById(tab).classList.add('active');
-  if(tab==='simulador') loadSimCodes();
-}
-
-document.getElementById('code').oninput = e => {
+document.getElementById('newCode').oninput = e => {
   if(!e.target.value.startsWith('SL')) e.target.value = 'SL';
   e.target.value = 'SL' + e.target.value.slice(2).replace(/[^0-9]/g,'').slice(0,8);
 };
 
-async function cad(){
-  const code = document.getElementById('code').value;
-  const nome = document.getElementById('nome').value;
-  debug('Cadastrando '+code+'...');
-  const r = await fetch(API+'?action=cadastrar',{method:'POST',headers:authHeaders(),body:JSON.stringify({code,nome})});
-  const d = await r.json();
-  debug('Resposta cadastro: '+JSON.stringify(d));
-  document.getElementById('msg').textContent = d.ok?'Cadastrada!':d.error;
-  document.getElementById('msg').style.color = d.ok?'#00ff88':'#ff4444';
-  if(d.ok){document.getElementById('code').value='';document.getElementById('nome').value='';listar();}
-}
-
-async function del(code){
-  if(!confirm(`Deletar ${code}?`))return;
-  await fetch(API+`?action=deletar&code=${code}`,{method:'DELETE',headers:authHeaders()});
-  listar();
-}
-
-function viewCells(code){
-  const bms = bmsList.find(b => b.code === code);
-  if(!bms ||!bms.cells) return;
-  document.getElementById('modalTitle').textContent = `${bms.code} - ${bms.cells.length} Células`;
-  document.getElementById('modalCells').innerHTML = bms.cells.map((v,i)=>{
-    const val = parseFloat(v);
-    let cls = '';
-    if(val < 3.2 || val > 4.2) cls = 'style="border-color:#ff4444;background:rgba(255,68,68,.08)"';
-    else if(val < 3.4 || val > 4.15) cls = 'style="border-color:#ffaa00;background:rgba(255,170,0,.08)"';
-    return `<div class="cell" ${cls}><div class="cell-num">Célula ${i+1}</div><div class="cell-val">${val.toFixed(3)}V</div></div>`;
-  }).join('');
-  document.getElementById('modal').classList.add('active');
-}
-
-function closeModal(){
-  document.getElementById('modal').classList.remove('active');
-}
-
-async function listar(){
-  debug('Buscando BMS...');
+async function login(){
+  const pass = document.getElementById('pass').value;
+  const errorEl = document.getElementById('error');
+  errorEl.style.display='none';
   try{
-    const r = await fetch(API+'?action=listar',{headers:authHeaders()});
-    if(r.status===401){debug('Erro 401 - Token inválido');adminLogout();return;}
-    bmsList = await r.json();
-    debug('BMS encontradas: '+bmsList.length);
-    document.getElementById('lista').innerHTML = bmsList.map(b=>`
-      <div class="card">
-        <div style="font-size:20px;font-weight:700;margin-bottom:8px">${b.code}</div>
-        <div style="opacity:.7;margin-bottom:12px">${b.nome||'Sem nome'}</div>
-        <div class="status ${b.online?'on':'off'}">${b.online?'Online':'Offline'}</div>
-        <div class="val" style="color:#00ff88">${b.soc?.toFixed(0)||0}%</div>
-        <div style="font-size:14px;opacity:.8">${b.voltage?.toFixed(2)||0}V | ${b.current?.toFixed(1)||0}A | ${b.temp?.toFixed(1)||0}°C</div>
-        <div style="font-size:11px;opacity:.5;margin-top:8px">${b.last_update?new Date(b.last_update).toLocaleString():'Nunca'}</div>
-        <button class="view" onclick="viewCells('${b.code}')">Ver Células</button>
-        <button class="del" onclick="del('${b.code}')">Deletar</button>
-      </div>
-    `).join('');
+    const r = await fetch(API+'?action=login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({pass})});
+    const d = await r.json();
+    if(d.ok){
+      token = d.token;
+      sessionStorage.setItem('admin_token', token);
+      loadDash();
+    }else{
+      errorEl.textContent = d.error;
+      errorEl.style.display = 'block';
+    }
   }catch(e){
-    debug('Erro listar: '+e.message);
+    errorEl.textContent = 'Erro de conexão';
+    errorEl.style.display = 'block';
   }
 }
 
-function updateSlider(type){
-  const val = document.getElementById(type).value;
-  if(type==='soc') document.getElementById('socVal').textContent = val+'%';
-  if(type==='voltage') document.getElementById('voltageVal').textContent = (val/10).toFixed(1)+'V';
-  if(type==='current') document.getElementById('currentVal').textContent = (val/10).toFixed(1)+'A';
-  if(type==='temp') document.getElementById('tempVal').textContent = (val/10).toFixed(1)+'°C';
+function loadDash(){
+  document.getElementById('login').classList.add('hidden');
+  document.getElementById('dash').classList.remove('hidden');
+  loadBms();
 }
 
-function loadSimCodes(){
-  const sel = document.getElementById('simCode');
-  if(bmsList.length===0){
-    sel.innerHTML = '<option value="">Cadastre uma BMS primeiro</option>';
-    debug('Nenhuma BMS cadastrada');
-  }else{
-    sel.innerHTML = '<option value="">Selecione</option>' + bmsList.map(b=>`<option value="${b.code}">${b.code} - ${b.nome||'Sem nome'}</option>`).join('');
-    debug('BMS carregadas no select: '+bmsList.length);
-  }
+function logout(){
+  sessionStorage.removeItem('admin_token');
+  location.reload();
 }
 
-function generateCells(count, voltage){
-  const baseVolt = voltage / count;
-  return Array.from({length: count}, () => (baseVolt + (Math.random() - 0.5) * 0.05).toFixed(3));
+async function loadBms(){
+  try{
+    const r = await fetch(API+'?action=list',{headers:{'Authorization':'Bearer '+token}});
+    if(r.status===401){logout();return;}
+    const d = await r.json();
+    bmsList = d.bms || [];
+    renderBms();
+    updateSimSelect();
+  }catch(e){console.error(e)}
 }
 
-async function sendSimData(){
-  const code = document.getElementById('simCode').value;
-  if(!code){
-    debug('ERRO: Selecione uma BMS');
+function renderBms(){
+  const el = document.getElementById('bmsList');
+  if(!bmsList.length){
+    el.innerHTML = '<div style="opacity:.4;text-align:center;padding:20px">Nenhum BMS cadastrado</div>';
     return;
   }
-  const cellsCount = parseInt(document.getElementById('cellsCount').value);
-  const soc = parseInt(document.getElementById('soc').value);
-  const voltage = parseInt(document.getElementById('voltage').value) / 10;
-  const current = parseInt(document.getElementById('current').value) / 10;
-  const temp = parseInt(document.getElementById('temp').value) / 10;
-  const cells = generateCells(cellsCount, voltage);
+  el.innerHTML = bmsList.map(b=>`
+    <div class="bms-item">
+      <div>
+        <div class="bms-code">${b.code}</div>
+        <div class="bms-status ${b.online?'online':'offline'}">${b.online?'● Online':'● Offline'}</div>
+      </div>
+      <button class="del" onclick="delBms('${b.code}')">Excluir</button>
+    </div>
+  `).join('');
+}
 
-  debug('Enviando dados para '+code+'...');
+async function addBms(){
+  const code = document.getElementById('newCode').value;
+  const msg = document.getElementById('addMsg');
+  if(code.length !== 10){
+    msg.textContent = 'Código deve ter 10 caracteres';
+    return;
+  }
   try{
-    const r = await fetch(API+'?action=update',{method:'POST',headers:authHeaders(),body:JSON.stringify({code,soc,voltage,current,temp,cells,online:1})});
+    const r = await fetch(API+'?action=add',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},body:JSON.stringify({code})});
     const d = await r.json();
-    debug('Resposta API: '+JSON.stringify(d));
-    if(d.ok) listar();
-  }catch(e){
-    debug('ERRO envio: '+e.message);
-  }
-}
-
-function toggleSim(){
-  const btn = document.getElementById('simBtn');
-  if(simInterval){
-    clearInterval(simInterval);
-    simInterval = null;
-    btn.textContent = '▶ Iniciar Simulação';
-    btn.classList.remove('stop');
-    debug('Simulação parada');
-  }else{
-    if(!document.getElementById('simCode').value){
-      debug('ERRO: Selecione uma BMS primeiro');
-      return;
+    if(d.ok){
+      msg.textContent = 'BMS cadastrado!';
+      document.getElementById('newCode').value = '';
+      loadBms();
+      setTimeout(()=>msg.textContent='',2000);
+    }else{
+      msg.textContent = 'Erro: '+d.error;
     }
-    simInterval = setInterval(sendSimData, 3000);
-    btn.textContent = '■ Parar Simulação';
-    btn.classList.add('stop');
-    debug('Simulação iniciada');
-    sendSimData();
+  }catch(e){
+    msg.textContent = 'Erro de conexão';
   }
 }
 
-function sendOnce(){
-  sendSimData();
+async function delBms(code){
+  if(!confirm('Excluir '+code+'?')) return;
+  try{
+    const r = await fetch(API+'?action=del',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},body:JSON.stringify({code})});
+    const d = await r.json();
+    if(d.ok) loadBms();
+  }catch(e){alert('Erro ao excluir')}
+}
+
+function updateSimSelect(){
+  const sel = document.getElementById('simSelect');
+  sel.innerHTML = bmsList.map(b=>`<option value="${b.code}">${b.code}</option>`).join('');
+}
+
+async function simulate(){
+  const btn = document.querySelector('.sim-btn');
+  const msg = document.getElementById('simMsg');
+  const code = document.getElementById('simSelect').value;
+  if(!code){
+    msg.textContent = 'Selecione um BMS';
+    return;
+  }
+  btn.disabled = true;
+  btn.textContent = 'Enviando...';
+  try{
+    const data = {
+      code: code,
+      soc: parseFloat(document.getElementById('simSoc').value),
+      voltage: parseFloat(document.getElementById('simVolt').value),
+      current: parseFloat(document.getElementById('simCurr').value),
+      temp: parseFloat(document.getElementById('simTemp').value),
+      cells: Array(16).fill(0).map(()=>3.5 + Math.random()*0.7)
+    };
+    const r = await fetch('/api/bms?action=update',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});
+    const d = await r.json();
+    if(d.ok){
+      msg.textContent = 'Dados enviados para '+code;
+      setTimeout(()=>msg.textContent='',2000);
+    }else msg.textContent = 'Erro: '+d.error;
+  }catch(e){
+    msg.textContent = 'Erro de conexão';
+  }
+  btn.disabled = false;
+  btn.textContent = 'Enviar Dados Teste';
 }
 </script>
 </body>
