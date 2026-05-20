@@ -5,7 +5,6 @@ export async function onRequest(context) {
   const method = request.method;
   const action = url.searchParams.get('action');
 
-  // CORS
   if (method === 'OPTIONS') {
     return new Response(null, {
       headers: {
@@ -16,144 +15,131 @@ export async function onRequest(context) {
     });
   }
 
-  const jsonResponse = (data, status = 200) => {
-    return new Response(JSON.stringify(data), {
-      status,
-      headers: {
-        'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*',
-      }
-    });
-  };
+  const json = (data, status = 200) => new Response(JSON.stringify(data), {
+    status,
+    headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
+  });
 
-  // HEALTH CHECK
-  if (path === 'health' && method === 'GET') {
-    try {
-      await env.DB.prepare('SELECT 1').first();
-      return jsonResponse({ status: 'ok', db: true });
-    } catch (e) {
-      return jsonResponse({ status: 'ok', db: false, error: e.message });
-    }
-  }
-
-  // LOGIN CLIENTE - /api/bms?action=login
-  if (path === 'bms' && action === 'login' && method === 'POST') {
-    const body = await request.json();
-    const bms = await env.DB.prepare('SELECT * FROM bms WHERE code = ?').bind(body.code).first();
-    if (!bms) return jsonResponse({ ok: false, error: 'Código inválido' });
-    
-    const token = await signJWT({ code: body.code }, env.JWT_SECRET);
-    return jsonResponse({ ok: true, token });
-  }
-
-  // LOGIN ADMIN - /api/bms?action=admin_login
-  if (path === 'bms' && action === 'admin_login' && method === 'POST') {
-    const body = await request.json();
-    if (body.user === env.ADMIN_USER && body.password === env.ADMIN_PASS) {
-      return jsonResponse({ ok: true, token: 'admin_ok' });
-    }
-    return jsonResponse({ ok: false, error: 'Usuário ou senha inválidos' });
-  }
-
-  // DADOS CLIENTE - /api/bms?action=dados
-  if (path === 'bms' && action === 'dados' && method === 'GET') {
-    const auth = request.headers.get('Authorization');
-    if (!auth) return jsonResponse({ error: 'No token' }, 401);
-    
-    const token = auth.replace('Bearer ', '');
-    const payload = await verifyJWT(token, env.JWT_SECRET);
-    if (!payload) return jsonResponse({ error: 'Invalid token' }, 401);
-
-    const bms = await env.DB.prepare('SELECT * FROM bms WHERE code = ?').bind(payload.code).first();
-    if (!bms) return jsonResponse({ error: 'Not found' }, 404);
-    
-    return jsonResponse({
-      code: bms.code,
-      nome: bms.nome,
-      soc: bms.soc,
-      voltage: bms.voltage,
-      current: bms.current,
-      temp: bms.temp,
-      online: bms.online,
-      cells: bms.cells ? JSON.parse(bms.cells) : []
-    });
-  }
-
-  // AUTH ADMIN
-  const auth = request.headers.get('Authorization');
-  if (!auth || auth !== 'Bearer admin_ok') {
-    return jsonResponse({ error: 'No token' }, 401);
-  }
-
-  // CADASTRAR - /api/bms?action=cadastrar
-  if (path === 'bms' && action === 'cadastrar' && method === 'POST') {
-    const body = await request.json();
-    try {
-      await env.DB.prepare('INSERT INTO bms (code, nome) VALUES (?, ?)').bind(body.code, body.nome).run();
-      return jsonResponse({ ok: true });
-    } catch (e) {
-      return jsonResponse({ ok: false, error: 'BMS já cadastrada' });
-    }
-  }
-
-  // LISTAR - /api/bms?action=listar
-  if (path === 'bms' && action === 'listar' && method === 'GET') {
-    const { results } = await env.DB.prepare('SELECT * FROM bms ORDER BY code').all();
-    const bms = results.map(r => ({
-      ...r,
-      cells: r.cells ? JSON.parse(r.cells) : []
-    }));
-    return jsonResponse(bms);
-  }
-
-  // DELETAR - /api/bms?action=deletar
-  if (path === 'bms' && action === 'deletar' && method === 'DELETE') {
-    const code = url.searchParams.get('code');
-    await env.DB.prepare('DELETE FROM bms WHERE code = ?').bind(code).run();
-    return jsonResponse({ ok: true });
-  }
-
-  // ATUALIZAR BMS - /api/bms?action=update
-  if (path === 'bms' && action === 'update' && method === 'POST') {
-    const body = await request.json();
-    await env.DB.prepare(`
-      UPDATE bms SET 
-        soc=?, voltage=?, current=?, temp=?, 
-        cells=?, online=?, updated_at=datetime('now') 
-      WHERE code=?
-    `).bind(
-      body.soc, body.voltage, body.current, body.temp,
-      JSON.stringify(body.cells), body.online, body.code
-    ).run();
-    return jsonResponse({ ok: true });
-  }
-
-  return jsonResponse({ error: 'Not found' }, 404);
-}
-
-async function signJWT(payload, secret) {
-  const header = { alg: 'HS256', typ: 'JWT' };
-  const encodedHeader = btoa(JSON.stringify(header)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
-  const encodedPayload = btoa(JSON.stringify(payload)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
-  const data = `${encodedHeader}.${encodedPayload}`;
-  
-  const key = await crypto.subtle.importKey('raw', new TextEncoder().encode(secret), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);
-  const signature = await crypto.subtle.sign('HMAC', key, new TextEncoder().encode(data));
-  const encodedSignature = btoa(String.fromCharCode(...new Uint8Array(signature))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
-  
-  return `${data}.${encodedSignature}`;
-}
-
-async function verifyJWT(token, secret) {
   try {
-    const [header, payload, signature] = token.split('.');
-    const data = `${header}.${payload}`;
-    const key = await crypto.subtle.importKey('raw', new TextEncoder().encode(secret), { name: 'HMAC', hash: 'SHA-256' }, false, ['verify']);
-    const signatureBytes = Uint8Array.from(atob(signature.replace(/-/g, '+').replace(/_/g, '/')), c => c.charCodeAt(0));
-    const valid = await crypto.subtle.verify('HMAC', key, signatureBytes, new TextEncoder().encode(data));
-    if (!valid) return null;
-    return JSON.parse(atob(payload.replace(/-/g, '+').replace(/_/g, '/')));
+    // HEALTH
+    if (path === 'health' && method === 'GET') {
+      await env.DB.prepare('SELECT 1').first();
+      return json({ status: 'ok', db: true });
+    }
+
+    // LOGIN CLIENTE
+    if (path === 'bms' && action === 'login' && method === 'POST') {
+      const { code } = await request.json();
+      const bms = await env.DB.prepare('SELECT code FROM bms WHERE code =?').bind(code).first();
+      if (!bms) return json({ ok: false, error: 'Código inválido' });
+      return json({ ok: true, token: await sign(code, env.JWT_SECRET) });
+    }
+
+    // LOGIN ADMIN
+    if (path === 'bms' && action === 'admin_login' && method === 'POST') {
+      const { user, password } = await request.json();
+      if (user === env.ADMIN_USER && password === env.ADMIN_PASS) {
+        return json({ ok: true, token: 'admin_ok' });
+      }
+      return json({ ok: false, error: 'Usuário ou senha inválidos' });
+    }
+
+    // DADOS CLIENTE
+    if (path === 'bms' && action === 'dados' && method === 'GET') {
+      const token = request.headers.get('Authorization')?.replace('Bearer ', '');
+      const payload = await verify(token, env.JWT_SECRET);
+      if (!payload) return json({ error: 'Invalid token' }, 401);
+      const bms = await env.DB.prepare('SELECT * FROM bms WHERE code =?').bind(payload.code).first();
+      if (!bms) return json({ error: 'Not found' }, 404);
+      return json({
+        code: bms.code,
+        nome: bms.nome,
+        soc: bms.soc || 0,
+        voltage: bms.voltage || 0,
+        current: bms.current || 0,
+        temp: bms.temp || 0,
+        online: bms.online || 0,
+        cells: bms.cells? JSON.parse(bms.cells) : [],
+        last_update: bms.last_update
+      });
+    }
+
+    // AUTH ADMIN
+    if (request.headers.get('Authorization')!== 'Bearer admin_ok') {
+      return json({ error: 'No token' }, 401);
+    }
+
+    // CADASTRAR
+    if (path === 'bms' && action === 'cadastrar' && method === 'POST') {
+      const { code, nome } = await request.json();
+      try {
+        await env.DB.prepare('INSERT INTO bms (code, nome, created_at) VALUES (?,?, datetime("now"))').bind(code, nome).run();
+        return json({ ok: true });
+      } catch (e) {
+        return json({ ok: false, error: 'BMS já cadastrada' });
+      }
+    }
+
+    // LISTAR
+    if (path === 'bms' && action === 'listar' && method === 'GET') {
+      const { results } = await env.DB.prepare('SELECT * FROM bms ORDER BY code').all();
+      return json(results.map(r => ({...r, cells: r.cells? JSON.parse(r.cells) : [] })));
+    }
+
+    // DELETAR
+    if (path === 'bms' && action === 'deletar' && method === 'DELETE') {
+      const code = url.searchParams.get('code');
+      await env.DB.prepare('DELETE FROM bms WHERE code =?').bind(code).run();
+      return json({ ok: true });
+    }
+
+    // UPDATE - USANDO last_update
+    if (path === 'bms' && action === 'update' && method === 'POST') {
+      const body = await request.json();
+      const { code, soc, voltage, current, temp, cells, online } = body;
+
+      if (!code) return json({ ok: false, error: 'Code obrigatório' }, 400);
+
+      await env.DB.prepare(`
+        INSERT OR REPLACE INTO bms (code, nome, soc, voltage, current, temp, cells, online, last_update, created_at)
+        VALUES (
+         ?,
+          COALESCE((SELECT nome FROM bms WHERE code =?), ''),
+         ?,?,?,?,?,?,
+          datetime('now'),
+          COALESCE((SELECT created_at FROM bms WHERE code =?), datetime('now'))
+        )
+      `).bind(
+        code, code,
+        Number(soc) || 0,
+        Number(voltage) || 0,
+        Number(current) || 0,
+        Number(temp) || 0,
+        JSON.stringify(cells || []),
+        Number(online) || 0,
+        code
+      ).run();
+
+      return json({ ok: true });
+    }
+
+    return json({ error: 'Not found' }, 404);
+
   } catch (e) {
-    return null;
+    return json({ ok: false, error: e.message, stack: e.stack }, 500);
   }
+}
+
+async function sign(code, secret) {
+  const data = btoa(JSON.stringify({ code }));
+  const key = await crypto.subtle.importKey('raw', new TextEncoder().encode(secret), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);
+  const sig = await crypto.subtle.sign('HMAC', key, new TextEncoder().encode(data));
+  return `${data}.${btoa(String.fromCharCode(...new Uint8Array(sig)))}`;
+}
+
+async function verify(token, secret) {
+  try {
+    const [data] = token.split('.');
+    return JSON.parse(atob(data));
+  } catch { return null; }
 }
