@@ -2,7 +2,16 @@ export async function onRequest({ request, env }) {
   const db = env.DB;
   const url = new URL(request.url);
   const action = url.searchParams.get('action');
-  const headers = { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' };
+  const headers = { 
+    'Content-Type': 'application/json', 
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Methods': 'GET, POST, DELETE, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type, Authorization'
+  };
+
+  if (request.method === 'OPTIONS') {
+    return new Response(null, { headers });
+  }
 
   if (action === 'admin_login' && request.method === 'POST') {
     const { user, password } = await request.json();
@@ -61,9 +70,9 @@ export async function onRequest({ request, env }) {
     const data = await request.json();
     const { code, soc, voltage, current, temp, online, cells } = data;
     await db.prepare(`UPDATE bms SET soc=?, voltage=?, current=?, temp=?, online=?, cells=?, updated_at=CURRENT_TIMESTAMP WHERE code=?`)
-    .bind(soc, voltage, current, temp, online? 1 : 0, JSON.stringify(cells || []), code).run();
+   .bind(soc, voltage, current, temp, online? 1 : 0, JSON.stringify(cells || []), code).run();
     return new Response(JSON.stringify({ ok: true }), { headers });
   }
 
-  return new Response('Not found', { status: 404 });
+  return new Response(JSON.stringify({ error: 'Not found' }), { status: 404, headers });
 }
