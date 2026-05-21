@@ -95,9 +95,9 @@ function createParticles(){
 }
 createParticles();
 
-// GET IGUAL O ADMIN DO fe7d93f
+// API REAL: POST /api/bms?action=login + GET /api/bms?action=data + Authorization Bearer
 const API = '/api/bms';
-let token = localStorage.getItem('bms_code');
+let token = localStorage.getItem('bms_token');
 let interval;
 if(token) showDash();
 document.getElementById('code').oninput = e => {
@@ -109,13 +109,18 @@ async function login(){
   const errorEl = document.getElementById('error');
   errorEl.style.display='none';
   try{
-    const r = await fetch(API+'?action=check&code='+code);
+    const r = await fetch(API+'?action=login',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({code})
+    });
     const d = await r.json();
-    if(d.ok){
+    if(d.ok && d.token){
+      localStorage.setItem('bms_token',d.token);
       localStorage.setItem('bms_code',code);
       showDash();
     }else{
-      errorEl.textContent = d.error || 'Código inválido';
+      errorEl.textContent = d.error || 'BMS não encontrada';
       errorEl.style.display='block';
     }
   }catch(e){
@@ -155,10 +160,12 @@ function renderCells(cells){
   }).join('');
 }
 async function update(){
-  const code = localStorage.getItem('bms_code');
+  const token = localStorage.getItem('bms_token');
   try{
-    const r = await fetch(API+'?action=data&code='+code);
-    if(r.status===401){logout();return;}
+    const r = await fetch(API+'?action=data',{
+      headers:{'Authorization':'Bearer '+token}
+    });
+    if(r.status===401||r.status===404){logout();return;}
     const d = await r.json();
     document.getElementById('bmsName').textContent = d.nome || d.code;
     document.getElementById('soc').textContent = (d.soc?.toFixed(0)||'0')+'%';
@@ -175,6 +182,7 @@ async function update(){
 }
 function logout(){
   clearInterval(interval);
+  localStorage.removeItem('bms_token');
   localStorage.removeItem('bms_code');
   document.getElementById('dash').classList.add('hidden');
   document.getElementById('login').classList.remove('hidden');
