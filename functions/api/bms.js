@@ -70,9 +70,9 @@ export async function onRequest({ request, env }) {
     const data = await request.json();
     const { code, soc, voltage, current, temp, online, cells } = data;
     await db.prepare(`UPDATE bms SET soc=?, voltage=?, current=?, temp=?, online=?, cells=?, updated_at=CURRENT_TIMESTAMP WHERE code=?`)
-   .bind(soc, voltage, current, temp, online? 1 : 0, JSON.stringify(cells || []), code).run();
+  .bind(soc, voltage, current, temp, online? 1 : 0, JSON.stringify(cells || []), code).run();
     return new Response(JSON.stringify({ ok: true }), { headers });
   }
 
-  return new Response(JSON.stringify({ error: 'Not found' }), { status: 404, headers });
+  return new Response(JSON.stringify({ ok: false, error: 'Ação inválida' }), { status: 404, headers });
 }
