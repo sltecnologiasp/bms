@@ -71,7 +71,7 @@ button.logout{background:rgba(255,68,68,.1);border:1px solid rgba(255,68,68,.4);
 </div>
 <script>
 const API = '/api/bms';
-let token = localStorage.getItem('bms_token');
+let token = localStorage.getItem('bms_code');
 let interval;
 if(token) showDash();
 document.getElementById('code').oninput = e => {
@@ -83,7 +83,7 @@ async function login(){
   const errorEl = document.getElementById('error');
   errorEl.style.display='none';
   try{
-    const r = await fetch(API+'?action=login',{
+    const r = await fetch(API+'?action=check',{
       method:'POST',
       headers:{'Content-Type':'application/json'},
       body:JSON.stringify({code}),
@@ -92,7 +92,7 @@ async function login(){
     const d = await r.json();
     if(d.ok){
       token = d.token;
-      localStorage.setItem('bms_token',token);
+      localStorage.setItem('bms_code',token);
       showDash();
     }else{
       errorEl.textContent = d.error;
@@ -136,8 +136,8 @@ function renderCells(cells){
 }
 async function update(){
   try{
-    const r = await fetch(API+'?action=dados',{
-      headers:{'Authorization':'Bearer '+token},
+    const r = await fetch(API+'?action=data',{
+      headers:{},
       cache:'no-store'
     });
     if(r.status===401){logout();return;}
@@ -157,7 +157,7 @@ async function update(){
 }
 function logout(){
   clearInterval(interval);
-  localStorage.removeItem('bms_token');
+  localStorage.removeItem('bms_code');
   token=null;
   document.getElementById('dash').classList.add('hidden');
   document.getElementById('login').classList.remove('hidden');
