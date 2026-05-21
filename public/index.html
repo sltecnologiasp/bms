@@ -95,7 +95,7 @@ function createParticles(){
 }
 createParticles();
 
-// SEU JS ORIGINAL DO COMMIT fe7d93f - NÃO MEXI EM NADA DA API
+// VOLTEI PRO LOGIN ORIGINAL DO fe7d93f
 const API = '/api/bms';
 let token = localStorage.getItem('bms_code');
 let interval;
@@ -108,13 +108,22 @@ async function login(){
   const code = document.getElementById('code').value.trim();
   const errorEl = document.getElementById('error');
   errorEl.style.display='none';
-  const r = await fetch(API+'?action=check&code='+code);
-  const d = await r.json();
-  if(d.ok){
-    localStorage.setItem('bms_code',code);
-    showDash();
-  }else{
-    errorEl.textContent = d.error;
+  try{
+    const r = await fetch(API,{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({action:'check',code})
+    });
+    const d = await r.json();
+    if(d.ok){
+      localStorage.setItem('bms_code',code);
+      showDash();
+    }else{
+      errorEl.textContent = d.error || 'Código inválido';
+      errorEl.style.display='block';
+    }
+  }catch(e){
+    errorEl.textContent = 'Erro de conexão';
     errorEl.style.display='block';
   }
 }
@@ -151,17 +160,26 @@ function renderCells(cells){
 }
 async function update(){
   const code = localStorage.getItem('bms_code');
-  const r = await fetch(API+'?action=data&code='+code);
-  if(r.status===401){logout();return;}
-  const d = await r.json();
-  document.getElementById('bmsName').textContent = d.nome || d.code;
-  document.getElementById('soc').textContent = (d.soc?.toFixed(0)||'0')+'%';
-  document.getElementById('voltage').textContent = (d.voltage?.toFixed(2)||'0')+'V';
-  document.getElementById('current').textContent = (d.current?.toFixed(1)||'0')+'A';
-  document.getElementById('temp').textContent = (d.temp?.toFixed(1)||'0')+'°C';
-  document.getElementById('connStatus').textContent = d.online?'Online':'Offline';
-  document.getElementById('connStatus').className = 'status ' + (d.online?'on':'off');
-  renderCells(d.cells);
+  try{
+    const r = await fetch(API,{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({action:'data',code})
+    });
+    if(r.status===401){logout();return;}
+    const d = await r.json();
+    document.getElementById('bmsName').textContent = d.nome || d.code;
+    document.getElementById('soc').textContent = (d.soc?.toFixed(0)||'0')+'%';
+    document.getElementById('voltage').textContent = (d.voltage?.toFixed(2)||'0')+'V';
+    document.getElementById('current').textContent = (d.current?.toFixed(1)||'0')+'A';
+    document.getElementById('temp').textContent = (d.temp?.toFixed(1)||'0')+'°C';
+    document.getElementById('connStatus').textContent = d.online?'Online':'Offline';
+    document.getElementById('connStatus').className = 'status ' + (d.online?'on':'off');
+    renderCells(d.cells);
+  }catch(e){
+    document.getElementById('connStatus').textContent = 'Erro';
+    document.getElementById('connStatus').className = 'status off';
+  }
 }
 function logout(){
   clearInterval(interval);
