@@ -8,11 +8,11 @@
 *{margin:0;padding:0;box-sizing:border-box}
 body{background:#0a0a0f;color:#fff;font-family:system-ui;padding:20px;text-align:center}
 h1{text-align:center;font-size:36px;font-weight:900;padding:20px;background:linear-gradient(90deg,#00ffff,#0080ff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-shadow:0 0 30px rgba(0,255,255,.3)}
-.card{background:rgba(255,255,255,.03);border:1px solid rgba(0,255,255,.3);border-radius:16px;padding:24px;margin:16px 0;text-align:center;box-shadow:0 0 20px rgba(0,255,255,.1),inset 0 0 20px rgba(0,255,255,.05)}
+.card{background:rgba(255,255,255,.03);border:1px solid rgba(0,255,255,.3);border-radius:16px;padding:24px;margin:16px auto;text-align:center;box-shadow:0 0 20px rgba(0,255,255,.1),inset 0 0 20px rgba(0,255,255,.05);max-width:600px}
 input,button{width:100%;max-width:500px;padding:16px;margin:12px auto;border-radius:12px;border:1px solid rgba(0,255,255,.3);background:rgba(0,0,0,.4);color:#fff;font-size:16px;text-align:center;display:block;box-shadow:0 0 15px rgba(0,255,255,.1)}
 button{background:linear-gradient(90deg,#0080ff,#00ffff);cursor:pointer;font-weight:700;border:none;font-family:system-ui;box-shadow:0 0 25px rgba(0,255,255,.4)}
-.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-bottom:16px}
-.grid.card{margin:0;border-radius:16px;padding:24px}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin:16px auto;max-width:600px}
+.grid.card{margin:0;padding:24px}
 .label{opacity:.7;font-size:12px;text-transform:uppercase;text-align:center;letter-spacing:2px;margin-bottom:8px}
 .value{font-size:40px;font-weight:900;text-align:center;text-shadow:0 0 20px currentColor}
 .status{display:inline-block;padding:8px 20px;border-radius:12px;font-size:14px;font-weight:700;margin:12px 0}
@@ -32,7 +32,7 @@ button{background:linear-gradient(90deg,#0080ff,#00ffff);cursor:pointer;font-wei
 <body>
 <div id="login">
   <h1>BMS MONITOR</h1>
-  <div class="card" style="max-width:500px;margin:40px auto">
+  <div class="card" style="max-width:500px">
     <div class="label">Código da BMS</div>
     <input id="code" placeholder="SL82576655" maxlength="10">
     <button onclick="login()">Acessar Monitor</button>
@@ -41,7 +41,7 @@ button{background:linear-gradient(90deg,#0080ff,#00ffff);cursor:pointer;font-wei
 </div>
 <div id="dash" class="hidden">
   <h1 id="title">BMS MONITOR</h1>
-  <div class="card" style="max-width:600px">
+  <div class="card">
     <div id="status" class="status off">Offline</div>
     <div id="update" style="opacity:.6;font-size:13px;text-align:center;margin-top:8px">Aguardando dados...</div>
   </div>
@@ -62,7 +62,6 @@ button{background:linear-gradient(90deg,#0080ff,#00ffff);cursor:pointer;font-wei
       <div class="label">Temperatura</div>
       <div id="temp" class="value" style="color:#ff4444">--°C</div>
     </div>
-  </div>
   <div class="card">
     <div class="label">Tensão das Células</div>
     <div id="cells" class="cells"></div>
@@ -70,54 +69,51 @@ button{background:linear-gradient(90deg,#0080ff,#00ffff);cursor:pointer;font-wei
   <button onclick="logout()" style="max-width:500px;margin:40px auto;background:rgba(255,68,68,.1);border:1px solid rgba(255,68,68,.4);box-shadow:0 0 20px rgba(255,68,68,.2)">Sair</button>
 </div>
 <script>
-const API = '/api/bms';
-let code = localStorage.getItem('bms_code');
-if(code) showDash();
-document.getElementById('code').oninput = e => {
-  if(!e.target.value.startsWith('SL')) e.target.value = 'SL';
-  e.target.value = 'SL' + e.target.value.slice(2).replace(/[^0-9]/g,'').slice(0,8);
-};
+const API='/api/bms';
+let code=localStorage.getItem('bms_code');
+if(code)showDash();
+document.getElementById('code').oninput=e=>{if(!e.target.value.startsWith('SL'))e.target.value='SL';e.target.value='SL'+e.target.value.slice(2).replace(/[^0-9]/g,'').slice(0,8)};
 async function login(){
-  const c = document.getElementById('code').value;
-  const r = await fetch(API+`?action=check&code=${c}`);
-  const d = await r.json();
+  const c=document.getElementById('code').value;
+  const r=await fetch(API+`?action=check&code=${c}`);
+  const d=await r.json();
   if(d.ok){
-    code = c;
-    localStorage.setItem('bms_code', code);
+    code=c;
+    localStorage.setItem('bms_code',code);
     showDash();
   }else{
-    document.getElementById('error').textContent = d.error;
+    document.getElementById('error').textContent=d.error;
     document.getElementById('error').style.display='block';
   }
 }
 function showDash(){
   document.getElementById('login').classList.add('hidden');
   document.getElementById('dash').classList.remove('hidden');
-  document.getElementById('title').textContent = code;
+  document.getElementById('title').textContent=code;
   update();
-  setInterval(update, 3000);
+  setInterval(update,3000);
 }
 function logout(){
   localStorage.removeItem('bms_code');
   location.reload();
 }
 async function update(){
-  const r = await fetch(API+`?action=data&code=${code}`);
-  const d = await r.json();
-  if(!d.ok) return;
-  document.getElementById('status').className = 'status ' + (d.online?'on':'off');
-  document.getElementById('status').textContent = d.online?'Online':'Offline';
-  document.getElementById('update').textContent = 'Atualizado: ' + new Date(d.timestamp).toLocaleTimeString();
-  document.getElementById('soc').textContent = d.soc?.toFixed(0)||0 + '%';
-  document.getElementById('voltage').textContent = d.voltage?.toFixed(2)||0 + 'V';
-  document.getElementById('current').textContent = d.current?.toFixed(1)||0 + 'A';
-  document.getElementById('temp').textContent = d.temp?.toFixed(1)||0 + '°C';
+  const r=await fetch(API+`?action=data&code=${code}`);
+  const d=await r.json();
+  if(!d.ok)return;
+  document.getElementById('status').className='status '+(d.online?'on':'off');
+  document.getElementById('status').textContent=d.online?'Online':'Offline';
+  document.getElementById('update').textContent='Atualizado: '+new Date(d.timestamp).toLocaleTimeString();
+  document.getElementById('soc').textContent=(d.soc?.toFixed(0)||0)+'%';
+  document.getElementById('voltage').textContent=(d.voltage?.toFixed(2)||0)+'V';
+  document.getElementById('current').textContent=(d.current?.toFixed(1)||0)+'A';
+  document.getElementById('temp').textContent=(d.temp?.toFixed(1)||0)+'°C';
   if(d.cells){
-    document.getElementById('cells').innerHTML = d.cells.map((v,i)=>{
-      const val = parseFloat(v);
-      let cls = 'ok';
-      if(val < 3.2 || val > 4.2) cls = 'crit';
-      else if(val < 3.4 || val > 4.15) cls = 'warn';
+    document.getElementById('cells').innerHTML=d.cells.map((v,i)=>{
+      const val=parseFloat(v);
+      let cls='ok';
+      if(val<3.2||val>4.2)cls='crit';
+      else if(val<3.4||val>4.15)cls='warn';
       return `<div class="cell ${cls}"><div class="cell-num">Célula ${i+1}</div><div class="cell-val">${val.toFixed(3)}V</div></div>`;
     }).join('');
   }
