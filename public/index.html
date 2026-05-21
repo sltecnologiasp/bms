@@ -32,7 +32,7 @@ button.logout{background:rgba(255,68,68,.1);border:1px solid rgba(255,68,68,.4);
 .diff-item span{display:block;font-size:24px;font-weight:700;margin-top:6px;text-shadow:0 0 15px currentColor}
 #login{padding:40px 20px}
 #login.card{border-radius:20px;margin:40px auto;max-width:500px}
-@media(max-width:360px){.value{font-size:28px}}
+@media(max-width:480px){.grid{grid-template-columns:1fr}.value{font-size:32px}}
 </style>
 </head>
 <body>
@@ -71,7 +71,7 @@ button.logout{background:rgba(255,68,68,.1);border:1px solid rgba(255,68,68,.4);
 </div>
 <script>
 const API = '/api/bms';
-let token = localStorage.getItem('bms_code');
+let token = localStorage.getItem('bms_token');
 let interval;
 if(token) showDash();
 document.getElementById('code').oninput = e => {
@@ -82,24 +82,14 @@ async function login(){
   const code = document.getElementById('code').value.trim();
   const errorEl = document.getElementById('error');
   errorEl.style.display='none';
-  try{
-    const r = await fetch(API+'?action=check',{
-      method:'GET',
-      headers:{'Content-Type':'application/json'},
-      body:null,
-      cache:'no-store'
-    });
-    const d = await r.json();
-    if(d.ok){
-      token = d.token;
-      localStorage.setItem('bms_code',token);
-      showDash();
-    }else{
-      errorEl.textContent = d.error;
-      errorEl.style.display='block';
-    }
-  }catch(e){
-    errorEl.textContent = 'Erro de conexão';
+  const r = await fetch(API+'?action=login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({code})});
+  const d = await r.json();
+  if(d.ok){
+    token = d.token;
+    localStorage.setItem('bms_token',token);
+    showDash();
+  }else{
+    errorEl.textContent = d.error;
     errorEl.style.display='block';
   }
 }
@@ -135,29 +125,21 @@ function renderCells(cells){
   }).join('');
 }
 async function update(){
-  try{
-    const r = await fetch(API+'?action=data',{
-      headers:{},
-      cache:'no-store'
-    });
-    if(r.status===401){logout();return;}
-    const d = await r.json();
-    document.getElementById('bmsName').textContent = d.nome || d.code;
-    document.getElementById('soc').textContent = (d.soc?.toFixed(0)||'0')+'%';
-    document.getElementById('voltage').textContent = (d.voltage?.toFixed(2)||'0')+'V';
-    document.getElementById('current').textContent = (d.current?.toFixed(1)||'0')+'A';
-    document.getElementById('temp').textContent = (d.temp?.toFixed(1)||'0')+'°C';
-    document.getElementById('connStatus').textContent = d.online?'Online':'Offline';
-    document.getElementById('connStatus').className = 'status ' + (d.online?'on':'off');
-    renderCells(d.cells);
-  }catch(e){
-    document.getElementById('connStatus').textContent = 'Erro';
-    document.getElementById('connStatus').className = 'status off';
-  }
+  const r = await fetch(API+'?action=dados',{headers:{'Authorization':'Bearer '+token}});
+  if(r.status===401){logout();return;}
+  const d = await r.json();
+  document.getElementById('bmsName').textContent = d.nome || d.code;
+  document.getElementById('soc').textContent = (d.soc?.toFixed(0)||'0')+'%';
+  document.getElementById('voltage').textContent = (d.voltage?.toFixed(2)||'0')+'V';
+  document.getElementById('current').textContent = (d.current?.toFixed(1)||'0')+'A';
+  document.getElementById('temp').textContent = (d.temp?.toFixed(1)||'0')+'°C';
+  document.getElementById('connStatus').textContent = d.online?'Online':'Offline';
+  document.getElementById('connStatus').className = 'status ' + (d.online?'on':'off');
+  renderCells(d.cells);
 }
 function logout(){
   clearInterval(interval);
-  localStorage.removeItem('bms_code');
+  localStorage.removeItem('bms_token');
   token=null;
   document.getElementById('dash').classList.add('hidden');
   document.getElementById('login').classList.remove('hidden');
