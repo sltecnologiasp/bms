@@ -35,6 +35,10 @@ button.view{background:rgba(0,255,255,.1);border:1px solid rgba(0,255,255,.4);pa
 .modal-close{float:right;background:rgba(255,68,68,.1);border:1px solid rgba(255,68,68,.4);color:#fff;padding:10px 20px;border-radius:8px;cursor:pointer;box-shadow:0 0 15px rgba(255,68,68,.2)}
 #login{padding:40px 20px}
 #login .card{border-radius:20px;margin:40px auto;max-width:500px}
+.data-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:12px 0}
+.data-item{text-align:center}
+.data-item .label{margin-bottom:4px;font-size:11px}
+.data-item .value{font-size:24px;font-weight:700;text-shadow:0 0 15px currentColor}
 </style>
 </head>
 <body>
@@ -146,16 +150,33 @@ async function listar(){
       '<div style="opacity:.4;font-size:13px;margin-top:12px;text-align:center">Sem dados de células</div>';
     return `
     <div class="card">
-      <div style="display:flex;justify-content:space-between;align-items:center">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
         <div style="text-align:left"><b style="font-size:18px">${b.code}</b><div style="opacity:.6;font-size:13px;margin-top:4px">${b.nome||''}</div></div>
         <span class="status ${b.online?'on':'off'}">${b.online?'Online':'Offline'}</span>
       </div>
-      <div class="val" style="color:#00ff88">${b.soc?.toFixed(0)||0}%</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;font-size:15px;opacity:.8;text-align:center">
-        <div>${b.voltage?.toFixed(2)||0}V</div>
-        <div>${b.current?.toFixed(1)||0}A</div>
-        <div>${b.temp?.toFixed(1)||0}°C</div>
+      
+      <div class="data-row">
+        <div class="data-item">
+          <div class="label">SOC</div>
+          <div class="value" style="color:#00ff88">${b.soc?.toFixed(0)||0}%</div>
+        </div>
+        <div class="data-item">
+          <div class="label">Tensão</div>
+          <div class="value" style="color:#00ffff">${b.voltage?.toFixed(2)||0}V</div>
+        </div>
       </div>
+      
+      <div class="data-row">
+        <div class="data-item">
+          <div class="label">Corrente</div>
+          <div class="value" style="color:#ffaa00">${b.current?.toFixed(1)||0}A</div>
+        </div>
+        <div class="data-item">
+          <div class="label">Temperatura</div>
+          <div class="value" style="color:#ff4444">${b.temp?.toFixed(1)||0}°C</div>
+        </div>
+      </div>
+      
       ${cellsHtml}
       <button class="del" onclick="del('${b.code}')">Excluir</button>
     </div>
