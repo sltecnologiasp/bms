@@ -2,7 +2,7 @@ export async function onRequest(context) {
   const { request, env } = context;
   const db = env.DB;
   const url = new URL(request.url);
-  const action = url.searchParams.get('action');
+  const action = url.searchParams.get('action') || '';
   
   const json = (data, status = 200) => new Response(JSON.stringify(data), {
     status, headers: { 
@@ -12,8 +12,8 @@ export async function onRequest(context) {
   });
 
   try {
-    // 1. UPDATE - Simulador salva dados
-    if (action === 'update' && request.method === 'POST') {
+    // UPDATE - pro simulador ESP32
+    if (action.toLowerCase() === 'update' && request.method === 'POST') {
       const data = await request.json();
       const { code, soc, voltage, current, temp, online, cells } = data;
       
@@ -24,10 +24,10 @@ export async function onRequest(context) {
         WHERE code = ?
       `).bind(soc, voltage, current, temp, online, JSON.stringify(cells), code).run();
       
-      return json({ ok: true });
+      return json({ ok: true, updated: code });
     }
 
-    // 2. LIST - Painel admin busca baterias
+    // LIST - pro painel admin
     if (action === 'list') {
       const { results } = await db.prepare(`
         SELECT code, client, soc, voltage, current, temp, online, cells, updated_at 
