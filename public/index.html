@@ -95,7 +95,7 @@ function createParticles(){
 }
 createParticles();
 
-// VOLTEI PRO LOGIN ORIGINAL DO fe7d93f
+// GET IGUAL O ADMIN DO fe7d93f
 const API = '/api/bms';
 let token = localStorage.getItem('bms_code');
 let interval;
@@ -109,11 +109,7 @@ async function login(){
   const errorEl = document.getElementById('error');
   errorEl.style.display='none';
   try{
-    const r = await fetch(API,{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({action:'check',code})
-    });
+    const r = await fetch(API+'?action=check&code='+code);
     const d = await r.json();
     if(d.ok){
       localStorage.setItem('bms_code',code);
@@ -161,11 +157,7 @@ function renderCells(cells){
 async function update(){
   const code = localStorage.getItem('bms_code');
   try{
-    const r = await fetch(API,{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({action:'data',code})
-    });
+    const r = await fetch(API+'?action=data&code='+code);
     if(r.status===401){logout();return;}
     const d = await r.json();
     document.getElementById('bmsName').textContent = d.nome || d.code;
