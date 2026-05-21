@@ -82,14 +82,24 @@ async function login(){
   const code = document.getElementById('code').value.trim();
   const errorEl = document.getElementById('error');
   errorEl.style.display='none';
-  const r = await fetch(API+'?action=login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({code})});
-  const d = await r.json();
-  if(d.ok){
-    token = d.token;
-    localStorage.setItem('bms_token',token);
-    showDash();
-  }else{
-    errorEl.textContent = d.error;
+  try{
+    const r = await fetch(API+'?action=login',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({code}),
+      cache:'no-store'
+    });
+    const d = await r.json();
+    if(d.ok){
+      token = d.token;
+      localStorage.setItem('bms_token',token);
+      showDash();
+    }else{
+      errorEl.textContent = d.error;
+      errorEl.style.display='block';
+    }
+  }catch(e){
+    errorEl.textContent = 'Erro de conexão';
     errorEl.style.display='block';
   }
 }
@@ -125,17 +135,25 @@ function renderCells(cells){
   }).join('');
 }
 async function update(){
-  const r = await fetch(API+'?action=dados',{headers:{'Authorization':'Bearer '+token}});
-  if(r.status===401){logout();return;}
-  const d = await r.json();
-  document.getElementById('bmsName').textContent = d.nome || d.code;
-  document.getElementById('soc').textContent = (d.soc?.toFixed(0)||'0')+'%';
-  document.getElementById('voltage').textContent = (d.voltage?.toFixed(2)||'0')+'V';
-  document.getElementById('current').textContent = (d.current?.toFixed(1)||'0')+'A';
-  document.getElementById('temp').textContent = (d.temp?.toFixed(1)||'0')+'°C';
-  document.getElementById('connStatus').textContent = d.online?'Online':'Offline';
-  document.getElementById('connStatus').className = 'status ' + (d.online?'on':'off');
-  renderCells(d.cells);
+  try{
+    const r = await fetch(API+'?action=dados',{
+      headers:{'Authorization':'Bearer '+token},
+      cache:'no-store'
+    });
+    if(r.status===401){logout();return;}
+    const d = await r.json();
+    document.getElementById('bmsName').textContent = d.nome || d.code;
+    document.getElementById('soc').textContent = (d.soc?.toFixed(0)||'0')+'%';
+    document.getElementById('voltage').textContent = (d.voltage?.toFixed(2)||'0')+'V';
+    document.getElementById('current').textContent = (d.current?.toFixed(1)||'0')+'A';
+    document.getElementById('temp').textContent = (d.temp?.toFixed(1)||'0')+'°C';
+    document.getElementById('connStatus').textContent = d.online?'Online':'Offline';
+    document.getElementById('connStatus').className = 'status ' + (d.online?'on':'off');
+    renderCells(d.cells);
+  }catch(e){
+    document.getElementById('connStatus').textContent = 'Erro';
+    document.getElementById('connStatus').className = 'status off';
+  }
 }
 function logout(){
   clearInterval(interval);
