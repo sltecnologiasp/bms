@@ -21,7 +21,6 @@ export async function onRequest(context) {
     'Access-Control-Allow-Origin': '*'
   };
 
-  // LOGIN CLIENTE
   if (action === 'login' && request.method === 'POST') {
     const { code } = await request.json();
     const bms = BMS_DB.find(b => b.code === code);
@@ -29,7 +28,6 @@ export async function onRequest(context) {
     return new Response(JSON.stringify({ ok: true, token: btoa(JSON.stringify({ code })) }), { headers });
   }
 
-  // DADOS CLIENTE
   if (action === 'dados' && request.method === 'GET') {
     const auth = request.headers.get('Authorization');
     if (!auth) return new Response(JSON.stringify({ ok: false }), { status: 401, headers });
@@ -39,7 +37,6 @@ export async function onRequest(context) {
     return new Response(JSON.stringify(bms || {}), { headers });
   }
 
-  // LOGIN ADMIN
   if (action === 'admin_login' && request.method === 'POST') {
     const { user, password } = await request.json();
     if (user === 'admin' && password === 'admin123') {
@@ -48,14 +45,12 @@ export async function onRequest(context) {
     return new Response(JSON.stringify({ ok: false, error: 'Usuário ou senha inválidos' }), { status: 401, headers });
   }
 
-  // LISTAR BMS - ADMIN
   if (action === 'listar' && request.method === 'GET') {
     const auth = request.headers.get('Authorization');
     if (auth !== 'Bearer admin_ok') return new Response(JSON.stringify({ ok: false }), { status: 401, headers });
     return new Response(JSON.stringify(BMS_DB), { headers });
   }
 
-  // CADASTRAR BMS - ADMIN
   if (action === 'cadastrar' && request.method === 'POST') {
     const auth = request.headers.get('Authorization');
     if (auth !== 'Bearer admin_ok') return new Response(JSON.stringify({ ok: false }), { status: 401, headers });
@@ -67,7 +62,6 @@ export async function onRequest(context) {
     return new Response(JSON.stringify({ ok: true }), { headers });
   }
 
-  // DELETAR BMS - ADMIN
   if (action === 'deletar' && request.method === 'DELETE') {
     const auth = request.headers.get('Authorization');
     if (auth !== 'Bearer admin_ok') return new Response(JSON.stringify({ ok: false }), { status: 401, headers });

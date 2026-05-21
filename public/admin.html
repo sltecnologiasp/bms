@@ -48,10 +48,8 @@ button.view{background:rgba(0,255,255,.1);border:1px solid rgba(0,255,255,.4);pa
     <p id="loginError" style="color:#ff4444;margin-top:12px;display:none;text-align:center"></p>
   </div>
 </div>
-
 <div id="painel" class="hidden">
   <h1>PAINEL ADMIN BMS</h1>
-
   <div class="card" style="max-width:600px">
     <div class="label">Cadastrar Nova BMS</div>
     <input id="code" placeholder="SL82576655" maxlength="10">
@@ -59,12 +57,9 @@ button.view{background:rgba(0,255,255,.1);border:1px solid rgba(0,255,255,.4);pa
     <button onclick="cad()">Cadastrar BMS</button>
     <p id="msg" style="text-align:center;margin-top:8px"></p>
   </div>
-  
   <div id="lista" class="grid"></div>
-  
   <button class="logout" onclick="adminLogout()">Sair do Painel Admin</button>
 </div>
-
 <div id="modal" class="modal">
   <div class="modal-content">
     <button class="modal-close" onclick="closeModal()">Fechar</button>
@@ -72,14 +67,11 @@ button.view{background:rgba(0,255,255,.1);border:1px solid rgba(0,255,255,.4);pa
     <div id="modalCells" class="cells" style="margin-top:20px"></div>
   </div>
 </div>
-
 <script>
 const API = '/api/bms';
 let adminToken = sessionStorage.getItem('admin_token');
 let bmsList = [];
-
 if(adminToken === 'admin_ok') showPainel();
-
 async function adminLogin(){
   const user = document.getElementById('user').value;
   const password = document.getElementById('password').value;
@@ -96,27 +88,22 @@ async function adminLogin(){
     errorEl.style.display='block';
   }
 }
-
 function showPainel(){
   document.getElementById('login').classList.add('hidden');
   document.getElementById('painel').classList.remove('hidden');
   listar();
 }
-
 function adminLogout(){
   sessionStorage.removeItem('admin_token');
   location.reload();
 }
-
 function authHeaders(){
   return {'Content-Type':'application/json','Authorization':'Bearer '+adminToken};
 }
-
 document.getElementById('code').oninput = e => {
   if(!e.target.value.startsWith('SL')) e.target.value = 'SL';
   e.target.value = 'SL' + e.target.value.slice(2).replace(/[^0-9]/g,'').slice(0,8);
 };
-
 async function cad(){
   const code = document.getElementById('code').value;
   const nome = document.getElementById('nome').value;
@@ -126,13 +113,11 @@ async function cad(){
   document.getElementById('msg').style.color = d.ok?'#00ff88':'#ff4444';
   if(d.ok){document.getElementById('code').value='';document.getElementById('nome').value='';listar();}
 }
-
 async function del(code){
   if(!confirm(`Deletar ${code}?`))return;
   await fetch(API+`?action=deletar&code=${code}`,{method:'DELETE',headers:authHeaders()});
   listar();
 }
-
 function viewCells(code){
   const bms = bmsList.find(b => b.code === code);
   if(!bms || !bms.cells) return;
@@ -146,11 +131,9 @@ function viewCells(code){
   }).join('');
   document.getElementById('modal').classList.add('active');
 }
-
 function closeModal(){
   document.getElementById('modal').classList.remove('active');
 }
-
 async function listar(){
   const r = await fetch(API+'?action=listar',{headers:authHeaders()});
   if(r.status===401){adminLogout();return;}
@@ -178,7 +161,6 @@ async function listar(){
     </div>
   `}).join('') || '<div class="card" style="text-align:center;opacity:.4;padding:60px 20px">Nenhuma BMS cadastrada</div>';
 }
-
 setInterval(()=>{if(adminToken)listar()},5000);
 </script>
 </body>

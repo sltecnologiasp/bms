@@ -58,7 +58,6 @@ button.logout{background:rgba(255,68,68,.1);border:1px solid rgba(255,68,68,.4);
     <div class="card"><div class="label">Corrente</div><div class="value" id="current" style="color:#ffaa00">0A</div></div>
     <div class="card"><div class="label">Temperatura</div><div class="value" id="temp" style="color:#ff4444">0°C</div></div>
   </div>
-  
   <div class="card">
     <div class="label">Células - Tensão Individual</div>
     <div class="diff">
@@ -69,7 +68,6 @@ button.logout{background:rgba(255,68,68,.1);border:1px solid rgba(255,68,68,.4);
     </div>
     <div id="cells" class="cells"></div>
   </div>
-  
   <button class="logout" onclick="logout()">Sair do Painel</button>
 </div>
 <script>
@@ -77,12 +75,10 @@ const API = '/api/bms';
 let token = localStorage.getItem('bms_token');
 let interval;
 if(token) showDash();
-
 document.getElementById('code').oninput = e => {
   if(!e.target.value.startsWith('SL')) e.target.value = 'SL';
   e.target.value = 'SL' + e.target.value.slice(2).replace(/[^0-9]/g,'').slice(0,8);
 };
-
 async function login(){
   const code = document.getElementById('code').value.trim();
   const errorEl = document.getElementById('error');
@@ -98,14 +94,12 @@ async function login(){
     errorEl.style.display='block';
   }
 }
-
 function showDash(){
   document.getElementById('login').classList.add('hidden');
   document.getElementById('dash').classList.remove('hidden');
   update();
   interval = setInterval(update,3000);
 }
-
 function renderCells(cells){
   if(!cells || cells.length === 0){
     document.getElementById('cells').innerHTML = '<div style="grid-column:1/-1;opacity:.4;text-align:center;padding:20px">Sem dados das células</div>';
@@ -115,17 +109,14 @@ function renderCells(cells){
     document.getElementById('cellCount').textContent = '0';
     return;
   }
-  
   const vals = cells.map(c => parseFloat(c)).filter(v => v > 0);
   const min = Math.min(...vals);
   const max = Math.max(...vals);
   const diff = max - min;
-  
   document.getElementById('cellMin').textContent = min.toFixed(3)+'V';
   document.getElementById('cellMax').textContent = max.toFixed(3)+'V';
   document.getElementById('cellDiff').textContent = diff.toFixed(3)+'V';
   document.getElementById('cellCount').textContent = cells.length;
-  
   document.getElementById('cells').innerHTML = cells.map((v,i)=>{
     const val = parseFloat(v);
     let cls = 'ok';
@@ -134,7 +125,6 @@ function renderCells(cells){
     return `<div class="cell ${cls}"><div class="cell-num">C${i+1}</div><div class="cell-val">${val.toFixed(3)}</div></div>`;
   }).join('');
 }
-
 async function update(){
   const r = await fetch(API+'?action=dados',{headers:{'Authorization':'Bearer '+token}});
   if(r.status===401){logout();return;}
@@ -148,7 +138,6 @@ async function update(){
   document.getElementById('connStatus').className = 'status ' + (d.online?'on':'off');
   renderCells(d.cells);
 }
-
 function logout(){
   clearInterval(interval);
   localStorage.removeItem('bms_token');
