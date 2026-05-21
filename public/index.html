@@ -84,9 +84,9 @@ async function login(){
   errorEl.style.display='none';
   try{
     const r = await fetch(API+'?action=check',{
-      method:'POST',
+      method:'GET',
       headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({code}),
+      body:null,
       cache:'no-store'
     });
     const d = await r.json();
