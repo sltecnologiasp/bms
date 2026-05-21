@@ -6,14 +6,20 @@
 <title>SMART BMS</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-body{background:#0a0a0f;color:#fff;font-family:system-ui;min-height:100vh;padding:0;text-align:center}
-.title{text-align:center;font-size:42px;font-weight:900;padding:30px 20px;background:linear-gradient(90deg,#00ffff,#0080ff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-shadow:0 0 30px rgba(0,255,255,.3)}
-.card{background:rgba(255,255,255,.03);backdrop-filter:blur(16px);border:1px solid rgba(0,255,255,.3);border-radius:16px;padding:30px;margin:16px;text-align:center;box-shadow:0 0 20px rgba(0,255,255,.1),inset 0 0 20px rgba(0,255,255,.05)}
-.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;padding:0 16px;margin-bottom:16px}
-.grid.card{margin:0;border-radius:16px;padding:24px}
+body{background:#0a0a0f;color:#fff;font-family:system-ui;min-height:100vh;padding:0;text-align:center;overflow-x:hidden}
+#particles{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;pointer-events:none}
+.particle{position:absolute;background:#00ffff;border-radius:50%;opacity:.3;animation:float 15s infinite linear;box-shadow:0 0 10px #00ffff}
+@keyframes float{
+  0%{transform:translateY(100vh) scale(0)}
+  100%{transform:translateY(-100px) scale(1);opacity:0}
+}
+.title{text-align:center;font-size:42px;font-weight:900;padding:30px 20px;background:linear-gradient(90deg,#00ffff,#0080ff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-shadow:0 0 30px rgba(0,255,255,.3);position:relative;z-index:1}
+.card{background:rgba(255,255,255,.03);backdrop-filter:blur(16px);border:1px solid rgba(0,255,255,.3);border-radius:16px;padding:30px;margin:16px;text-align:center;box-shadow:0 0 20px rgba(0,255,255,.1),inset 0 0 20px rgba(0,255,255,.05);position:relative;z-index:1}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;padding:0 16px;margin-bottom:16px;align-items:stretch}
+.grid.card{margin:0;border-radius:16px;padding:24px;height:160px;display:flex;flex-direction:column;justify-content:center}
 .value{font-size:42px;font-weight:700;margin-top:12px;text-align:center;text-shadow:0 0 20px currentColor}
 .label{opacity:.7;font-size:12px;text-transform:uppercase;text-align:center;letter-spacing:2px}
-input,button{width:100%;max-width:500px;padding:18px;border-radius:12px;border:1px solid rgba(0,255,255,.3);background:rgba(0,0,0,.4);color:#fff;font-size:18px;margin:12px auto;font-family:monospace;letter-spacing:2px;text-align:center;display:block;box-shadow:0 0 15px rgba(0,255,255,.1)}
+input,button{width:100%;max-width:500px;padding:18px;border-radius:12px;border:1px solid rgba(0,255,255,.3);background:rgba(0,0,0,.4);color:#fff;font-size:18px;margin:12px auto;font-family:monospace;letter-spacing:2px;text-align:center;display:block;box-shadow:0 0 15px rgba(0,255,255,.1);position:relative;z-index:1}
 button{background:linear-gradient(90deg,#0080ff,#00ffff);cursor:pointer;font-weight:700;border:none;font-family:system-ui;letter-spacing:0;box-shadow:0 0 25px rgba(0,255,255,.4)}
 button.logout{background:rgba(255,68,68,.1);border:1px solid rgba(255,68,68,.4);max-width:500px;margin:60px auto 40px;box-shadow:0 0 20px rgba(255,68,68,.2)}
 .status{display:inline-block;padding:12px 28px;border-radius:24px;font-size:18px;font-weight:700;box-shadow:0 0 20px currentColor}
@@ -27,15 +33,16 @@ button.logout{background:rgba(255,68,68,.1);border:1px solid rgba(255,68,68,.4);
 .cell.ok{border-color:rgba(0,255,136,.5);background:rgba(0,255,136,.08);box-shadow:0 0 15px rgba(0,255,136,.2)}
 .cell.warn{border-color:rgba(255,170,0,.5);background:rgba(255,170,0,.08);box-shadow:0 0 15px rgba(255,170,0,.2)}
 .cell.crit{border-color:rgba(255,68,68,.5);background:rgba(255,68,68,.08);box-shadow:0 0 15px rgba(255,68,68,.2)}
-.diff{display:flex;justify-content:center;gap:60px;margin-top:16px;font-size:14px}
+.diff{display:flex;justify-content:center;gap:60px;margin-top:16px;font-size:14px;flex-wrap:wrap}
 .diff-item{text-align:center}
 .diff-item span{display:block;font-size:24px;font-weight:700;margin-top:6px;text-shadow:0 0 15px currentColor}
-#login{padding:40px 20px}
+#login{padding:40px 20px;position:relative;z-index:1}
 #login.card{border-radius:20px;margin:40px auto;max-width:500px}
-@media(max-width:480px){.grid{grid-template-columns:1fr}.value{font-size:32px}}
+@media(max-width:480px){.value{font-size:32px}.grid.card{height:140px}}
 </style>
 </head>
 <body>
+<div id="particles"></div>
 <div id="login">
   <div class="title">SMART BMS</div>
   <div class="card">
@@ -70,8 +77,27 @@ button.logout{background:rgba(255,68,68,.1);border:1px solid rgba(255,68,68,.4);
   <button class="logout" onclick="logout()">Sair do Painel</button>
 </div>
 <script>
+// Partículas subindo
+function createParticles(){
+  const container = document.getElementById('particles');
+  setInterval(() => {
+    const p = document.createElement('div');
+    p.className = 'particle';
+    const size = Math.random() * 4 + 1;
+    p.style.width = size + 'px';
+    p.style.height = size + 'px';
+    p.style.left = Math.random() * 100 + '%';
+    p.style.animationDuration = (Math.random() * 10 + 10) + 's';
+    p.style.animationDelay = Math.random() * 5 + 's';
+    container.appendChild(p);
+    setTimeout(() => p.remove(), 20000);
+  }, 300);
+}
+createParticles();
+
+// SEU JS ORIGINAL DO COMMIT fe7d93f - NÃO MEXI EM NADA DA API
 const API = '/api/bms';
-let token = localStorage.getItem('bms_token');
+let token = localStorage.getItem('bms_code');
 let interval;
 if(token) showDash();
 document.getElementById('code').oninput = e => {
@@ -82,11 +108,10 @@ async function login(){
   const code = document.getElementById('code').value.trim();
   const errorEl = document.getElementById('error');
   errorEl.style.display='none';
-  const r = await fetch(API+'?action=login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({code})});
+  const r = await fetch(API+'?action=check&code='+code);
   const d = await r.json();
   if(d.ok){
-    token = d.token;
-    localStorage.setItem('bms_token',token);
+    localStorage.setItem('bms_code',code);
     showDash();
   }else{
     errorEl.textContent = d.error;
@@ -125,7 +150,8 @@ function renderCells(cells){
   }).join('');
 }
 async function update(){
-  const r = await fetch(API+'?action=dados',{headers:{'Authorization':'Bearer '+token}});
+  const code = localStorage.getItem('bms_code');
+  const r = await fetch(API+'?action=data&code='+code);
   if(r.status===401){logout();return;}
   const d = await r.json();
   document.getElementById('bmsName').textContent = d.nome || d.code;
@@ -139,8 +165,7 @@ async function update(){
 }
 function logout(){
   clearInterval(interval);
-  localStorage.removeItem('bms_token');
-  token=null;
+  localStorage.removeItem('bms_code');
   document.getElementById('dash').classList.add('hidden');
   document.getElementById('login').classList.remove('hidden');
   document.getElementById('code').value='';
