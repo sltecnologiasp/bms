@@ -9,7 +9,7 @@
 body{background:#0a0a0f;color:#fff;font-family:system-ui;min-height:100vh;padding:0;text-align:center}
 .title{text-align:center;font-size:42px;font-weight:900;padding:30px 20px;background:linear-gradient(90deg,#00ffff,#0080ff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-shadow:0 0 30px rgba(0,255,255,.3)}
 .card{background:rgba(255,255,255,.03);backdrop-filter:blur(16px);border:1px solid rgba(0,255,255,.3);border-radius:16px;padding:30px;margin:16px;text-align:center;box-shadow:0 0 20px rgba(0,255,255,.1),inset 0 0 20px rgba(0,255,255,.05)}
-.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;padding:0 16px;margin-bottom:16px}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;padding:0 16px;margin-bottom:16px}
 .grid .card{margin:0;border-radius:16px;padding:24px}
 .value{font-size:42px;font-weight:700;margin-top:12px;text-align:center;text-shadow:0 0 20px currentColor}
 .label{opacity:.7;font-size:12px;text-transform:uppercase;text-align:center;letter-spacing:2px}
@@ -32,7 +32,6 @@ button.logout{background:rgba(255,68,68,.1);border:1px solid rgba(255,68,68,.4);
 .diff-item span{display:block;font-size:24px;font-weight:700;margin-top:6px;text-shadow:0 0 15px currentColor}
 #login{padding:40px 20px}
 #login .card{border-radius:20px;margin:40px auto;max-width:500px}
-@media(max-width:768px){.grid{grid-template-columns:repeat(2,1fr)}.value{font-size:36px}}
 @media(max-width:480px){.grid{grid-template-columns:1fr}.value{font-size:32px}}
 </style>
 </head>
