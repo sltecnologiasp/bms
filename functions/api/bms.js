@@ -6,7 +6,7 @@ export async function onRequest({ request, env }) {
 
   if (action === 'admin_login' && request.method === 'POST') {
     const { user, password } = await request.json();
-    if (user === 'admin' && password === 'admin123') {
+    if (user === 'administrador' && password === '426240637') {
       return new Response(JSON.stringify({ ok: true, token: 'admin_ok' }), { headers });
     }
     return new Response(JSON.stringify({ ok: false, error: 'Credenciais inválidas' }), { status: 401, headers });
