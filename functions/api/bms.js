@@ -1,36 +1,80 @@
+let BMS_DB = [
+  {
+    code: 'SL77777777',
+    nome: 'Bateria Oficina',
+    soc: 92.1,
+    voltage: 54.1,
+    current: 5.2,
+    temp: 28.5,
+    online: 1,
+    cells: [3.38, 3.37, 3.38, 3.36, 3.37, 3.38, 3.36, 3.37, 3.38, 3.36, 3.37, 3.38, 3.36, 3.37, 3.38, 3.36]
+  }
+];
+
 export async function onRequest(context) {
-  const { request, env } = context;
+  const { request } = context;
   const url = new URL(request.url);
   const action = url.searchParams.get('action');
-  const auth = request.headers.get('Authorization');
   
-  if (auth !== 'Bearer admin_ok') {
-    return Response.json({ok: false, error: 'Unauthorized'}, {status: 401});
-  }
+  const headers = {
+    'Content-Type': 'application/json',
+    'Access-Control-Allow-Origin': '*'
+  };
 
-  const db = env.DB;
-
-  if (request.method === 'POST' && action === 'cadastrar') {
+  // LOGIN CLIENTE
+  if (action === 'login' && request.method === 'POST') {
     const { code } = await request.json();
-    if (!code || !code.startsWith('SL') || code.length !== 10) {
-      return Response.json({ok: false, error: 'Código inválido'});
-    }
-    
-    // Usa COUNT que é infalível
-    const count = await db.prepare('SELECT COUNT(*) as total FROM bms WHERE code = ?').bind(code).first();
-    
-    if (count.total > 0) {
-      return Response.json({ok: false, error: 'BMS já cadastrada', debug_count: count.total});
-    }
-    
-    await db.prepare('INSERT INTO bms (code, created_at) VALUES (?, ?)').bind(code, Date.now()).run();
-    return Response.json({ok: true});
+    const bms = BMS_DB.find(b => b.code === code);
+    if (!bms) return new Response(JSON.stringify({ ok: false, error: 'BMS não encontrada' }), { status: 404, headers });
+    return new Response(JSON.stringify({ ok: true, token: btoa(JSON.stringify({ code })) }), { headers });
   }
 
-  if (request.method === 'GET' && action === 'listar') {
-    const { results } = await db.prepare('SELECT * FROM bms').all();
-    return Response.json({ok: true, bms: results || []});
+  // DADOS CLIENTE
+  if (action === 'dados' && request.method === 'GET') {
+    const auth = request.headers.get('Authorization');
+    if (!auth) return new Response(JSON.stringify({ ok: false }), { status: 401, headers });
+    const token = auth.replace('Bearer ', '');
+    const { code } = JSON.parse(atob(token));
+    const bms = BMS_DB.find(b => b.code === code);
+    return new Response(JSON.stringify(bms || {}), { headers });
   }
 
-  return Response.json({ok: false, error: 'Action inválida'});
+  // LOGIN ADMIN
+  if (action === 'admin_login' && request.method === 'POST') {
+    const { user, password } = await request.json();
+    if (user === 'admin' && password === 'admin123') {
+      return new Response(JSON.stringify({ ok: true, token: 'admin_ok' }), { headers });
+    }
+    return new Response(JSON.stringify({ ok: false, error: 'Usuário ou senha inválidos' }), { status: 401, headers });
+  }
+
+  // LISTAR BMS - ADMIN
+  if (action === 'listar' && request.method === 'GET') {
+    const auth = request.headers.get('Authorization');
+    if (auth !== 'Bearer admin_ok') return new Response(JSON.stringify({ ok: false }), { status: 401, headers });
+    return new Response(JSON.stringify(BMS_DB), { headers });
+  }
+
+  // CADASTRAR BMS - ADMIN
+  if (action === 'cadastrar' && request.method === 'POST') {
+    const auth = request.headers.get('Authorization');
+    if (auth !== 'Bearer admin_ok') return new Response(JSON.stringify({ ok: false }), { status: 401, headers });
+    const { code, nome } = await request.json();
+    if (BMS_DB.find(b => b.code === code)) {
+      return new Response(JSON.stringify({ ok: false, error: 'BMS já existe' }), { status: 400, headers });
+    }
+    BMS_DB.push({ code, nome, soc: 0, voltage: 0, current: 0, temp: 0, online: 0, cells: [] });
+    return new Response(JSON.stringify({ ok: true }), { headers });
+  }
+
+  // DELETAR BMS - ADMIN
+  if (action === 'deletar' && request.method === 'DELETE') {
+    const auth = request.headers.get('Authorization');
+    if (auth !== 'Bearer admin_ok') return new Response(JSON.stringify({ ok: false }), { status: 401, headers });
+    const code = url.searchParams.get('code');
+    BMS_DB = BMS_DB.filter(b => b.code !== code);
+    return new Response(JSON.stringify({ ok: true }), { headers });
+  }
+
+  return new Response(JSON.stringify({ ok: false, error: 'Ação inválida' }), { status: 400, headers });
 }
