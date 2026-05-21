@@ -3,160 +3,53 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>SMART BMS</title>
-<style>
-*{margin:0;padding:0;box-sizing:border-box}
-body{background:#0a0a0f;color:#fff;font-family:system-ui;min-height:100vh;padding:0;text-align:center}
-.title{text-align:center;font-size:42px;font-weight:900;padding:30px 20px;background:linear-gradient(90deg,#00ffff,#0080ff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-shadow:0 0 30px rgba(0,255,255,.3)}
-.card{background:rgba(255,255,255,.03);backdrop-filter:blur(16px);border:1px solid rgba(0,255,255,.3);border-radius:16px;padding:30px;margin:16px;text-align:center;box-shadow:0 0 20px rgba(0,255,255,.1),inset 0 0 20px rgba(0,255,255,.05)}
-.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;padding:0 16px;margin-bottom:16px}
-.grid .card{margin:0;border-radius:16px;padding:24px}
-.value{font-size:42px;font-weight:700;margin-top:12px;text-align:center;text-shadow:0 0 20px currentColor}
-.label{opacity:.7;font-size:12px;text-transform:uppercase;text-align:center;letter-spacing:2px}
-input,button{width:100%;max-width:500px;padding:18px;border-radius:12px;border:1px solid rgba(0,255,255,.3);background:rgba(0,0,0,.4);color:#fff;font-size:18px;margin:12px auto;font-family:monospace;letter-spacing:2px;text-align:center;display:block;box-shadow:0 0 15px rgba(0,255,255,.1)}
-button{background:linear-gradient(90deg,#0080ff,#00ffff);cursor:pointer;font-weight:700;border:none;font-family:system-ui;letter-spacing:0;box-shadow:0 0 25px rgba(0,255,255,.4)}
-button.logout{background:rgba(255,68,68,.1);border:1px solid rgba(255,68,68,.4);max-width:500px;margin:60px auto 40px;box-shadow:0 0 20px rgba(255,68,68,.2)}
-.status{display:inline-block;padding:12px 28px;border-radius:24px;font-size:18px;font-weight:700;box-shadow:0 0 20px currentColor}
-.on{background:rgba(0,255,136,.15);color:#00ff88;border:1px solid rgba(0,255,136,.4)}
-.off{background:rgba(255,68,68,.15);color:#ff4444;border:1px solid rgba(255,68,68,.4)}
-.hidden{display:none}
-.cells{display:grid;grid-template-columns:repeat(auto-fill,minmax(85px,1fr));gap:10px;margin-top:20px;justify-content:center}
-.cell{background:rgba(0,0,0,.4);border:1px solid rgba(0,255,255,.2);border-radius:12px;padding:14px;text-align:center;box-shadow:0 0 10px rgba(0,255,255,.1)}
-.cell-num{font-size:11px;opacity:.5;margin-bottom:6px;text-align:center}
-.cell-val{font-size:18px;font-weight:700;text-align:center}
-.cell.ok{border-color:rgba(0,255,136,.5);background:rgba(0,255,136,.08);box-shadow:0 0 15px rgba(0,255,136,.2)}
-.cell.warn{border-color:rgba(255,170,0,.5);background:rgba(255,170,0,.08);box-shadow:0 0 15px rgba(255,170,0,.2)}
-.cell.crit{border-color:rgba(255,68,68,.5);background:rgba(255,68,68,.08);box-shadow:0 0 15px rgba(255,68,68,.2)}
-.diff{display:flex;justify-content:center;gap:60px;margin-top:16px;font-size:14px}
-.diff-item{text-align:center}
-.diff-item span{display:block;font-size:24px;font-weight:700;margin-top:6px;text-shadow:0 0 15px currentColor}
-#login{padding:40px 20px}
-#login .card{border-radius:20px;margin:40px auto;max-width:500px}
-@media(max-width:768px){.grid{grid-template-columns:repeat(2,1fr)}.value{font-size:36px}}
-@media(max-width:480px){.grid{grid-template-columns:1fr}.value{font-size:32px}}
-</style>
+<title>DEBUG BMS</title>
 </head>
-<body>
-<div id="login">
-  <div class="title">SMART BMS</div>
-  <div class="card">
-    <div class="label">Código da BMS</div>
-    <input id="code" placeholder="SL00000000" maxlength="10">
-    <button onclick="login()">Entrar</button>
-    <p id="error" style="color:#ff4444;margin-top:12px;display:none;text-align:center"></p>
-  </div>
-</div>
-<div id="dash" class="hidden">
-  <div class="title">SMART BMS</div>
-  <div class="card">
-    <div class="label" id="bmsName">BMS</div>
-    <div style="margin-top:16px"><span id="connStatus" class="status off">Offline</span></div>
-  </div>
-  <div class="grid">
-    <div class="card"><div class="label">SOC</div><div class="value" id="soc" style="color:#00ff88">0%</div></div>
-    <div class="card"><div class="label">Tensão</div><div class="value" id="voltage" style="color:#00ffff">0V</div></div>
-    <div class="card"><div class="label">Corrente</div><div class="value" id="current" style="color:#ffaa00">0A</div></div>
-    <div class="card"><div class="label">Temperatura</div><div class="value" id="temp" style="color:#ff4444">0°C</div></div>
-  </div>
-  
-  <div class="card">
-    <div class="label">Células - Tensão Individual</div>
-    <div class="diff">
-      <div class="diff-item">Min<div><span id="cellMin" style="color:#00ff88">0.00V</span></div></div>
-      <div class="diff-item">Max<div><span id="cellMax" style="color:#ffaa00">0.00V</span></div></div>
-      <div class="diff-item">Diferença<div><span id="cellDiff" style="color:#ff4444">0.00V</span></div></div>
-      <div class="diff-item">Total<div><span id="cellCount" style="color:#00ffff">0</span></div></div>
-    </div>
-    <div id="cells" class="cells"></div>
-  </div>
-  
-  <button class="logout" onclick="logout()">Sair do Painel</button>
-</div>
-<script>
-const API = '/api/bms';
-let token = localStorage.getItem('bms_token');
-let interval;
-if(token) showDash();
+<body style="background:#000;color:#0f0;font-family:monospace;padding:10px;font-size:14px">
+<h3>DEBUG SMART BMS</h3>
+<div id="log">1. Página carregou<br></div>
+<input id="code" placeholder="SL77777777" maxlength="10" style="width:100%;padding:10px;background:#000;color:#0f0;border:1px solid #0f0;margin:10px 0">
+<button onclick="testar()" style="width:100%;padding:15px;background:#0f0;color:#000;border:none;font-weight:bold">TESTAR LOGIN</button>
 
-document.getElementById('code').oninput = e => {
-  if(!e.target.value.startsWith('SL')) e.target.value = 'SL';
-  e.target.value = 'SL' + e.target.value.slice(2).replace(/[^0-9]/g,'').slice(0,8);
+<script>
+const log = (msg) => { document.getElementById('log').innerHTML += msg + '<br>'; };
+
+window.onerror = function(msg, url, line) {
+  log('ERRO JS: ' + msg);
+  return true;
 };
 
-async function login(){
-  const code = document.getElementById('code').value.trim();
-  const errorEl = document.getElementById('error');
-  errorEl.style.display='none';
-  const r = await fetch(API+'?action=login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({code})});
-  const d = await r.json();
-  if(d.ok){
-    token = d.token;
-    localStorage.setItem('bms_token',token);
-    showDash();
-  }else{
-    errorEl.textContent = d.error;
-    errorEl.style.display='block';
+log('2. JS rodando');
+
+async function testar() {
+  const code = document.getElementById('code').value || 'SL77777777';
+  log('3. Testando login com: ' + code);
+  
+  try {
+    const r = await fetch('/api/bms?action=login', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({code: code})
+    });
+    
+    log('4. Status HTTP: ' + r.status);
+    const text = await r.text();
+    log('5. Resposta bruta: ' + text.substring(0, 200));
+    
+    const d = JSON.parse(text);
+    if (d.ok) {
+      log('6. LOGIN OK! Token: ' + d.token.substring(0, 20) + '...');
+      log('7. Dados BMS: ' + d.bms.code + ' SOC:' + d.bms.soc);
+    } else {
+      log('6. ERRO API: ' + d.error);
+    }
+  } catch (e) {
+    log('ERRO FETCH: ' + e.message);
   }
 }
 
-function showDash(){
-  document.getElementById('login').classList.add('hidden');
-  document.getElementById('dash').classList.remove('hidden');
-  update();
-  interval = setInterval(update,3000);
-}
-
-function renderCells(cells){
-  if(!cells || cells.length === 0){
-    document.getElementById('cells').innerHTML = '<div style="grid-column:1/-1;opacity:.4;text-align:center;padding:20px">Sem dados das células</div>';
-    document.getElementById('cellMin').textContent = '0.00V';
-    document.getElementById('cellMax').textContent = '0.00V';
-    document.getElementById('cellDiff').textContent = '0.00V';
-    document.getElementById('cellCount').textContent = '0';
-    return;
-  }
-  
-  const vals = cells.map(c => parseFloat(c)).filter(v => v > 0);
-  const min = Math.min(...vals);
-  const max = Math.max(...vals);
-  const diff = max - min;
-  
-  document.getElementById('cellMin').textContent = min.toFixed(3)+'V';
-  document.getElementById('cellMax').textContent = max.toFixed(3)+'V';
-  document.getElementById('cellDiff').textContent = diff.toFixed(3)+'V';
-  document.getElementById('cellCount').textContent = cells.length;
-  
-  document.getElementById('cells').innerHTML = cells.map((v,i)=>{
-    const val = parseFloat(v);
-    let cls = 'ok';
-    if(val < 3.2 || val > 4.2) cls = 'crit';
-    else if(val < 3.4 || val > 4.15) cls = 'warn';
-    return `<div class="cell ${cls}"><div class="cell-num">C${i+1}</div><div class="cell-val">${val.toFixed(3)}</div></div>`;
-  }).join('');
-}
-
-async function update(){
-  const r = await fetch(API+'?action=dados',{headers:{'Authorization':'Bearer '+token}});
-  if(r.status===401){logout();return;}
-  const d = await r.json();
-  document.getElementById('bmsName').textContent = d.nome || d.code;
-  document.getElementById('soc').textContent = d.soc?.toFixed(0)+'%'||'0%';
-  document.getElementById('voltage').textContent = d.voltage?.toFixed(2)+'V'||'0V';
-  document.getElementById('current').textContent = d.current?.toFixed(1)+'A'||'0A';
-  document.getElementById('temp').textContent = d.temp?.toFixed(1)+'°C'||'0°C';
-  document.getElementById('connStatus').textContent = d.online?'Online':'Offline';
-  document.getElementById('connStatus').className = 'status ' + (d.online?'on':'off');
-  renderCells(d.cells);
-}
-
-function logout(){
-  clearInterval(interval);
-  localStorage.removeItem('bms_token');
-  token=null;
-  document.getElementById('dash').classList.add('hidden');
-  document.getElementById('login').classList.remove('hidden');
-  document.getElementById('code').value='';
-}
+// Testa automático ao abrir
+testar();
 </script>
 </body>
 </html>
