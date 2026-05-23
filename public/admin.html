@@ -38,6 +38,7 @@ button.view{background:rgba(0,255,255,.1);border:1px solid rgba(0,255,255,.4);pa
 .data-item{text-align:center}
 .data-item.label{margin-bottom:4px;font-size:11px}
 .data-item.value{font-size:24px;font-weight:700;text-shadow:0 0 15px currentColor}
+footer{text-align:center;padding:30px 20px;opacity:.5;font-size:13px;letter-spacing:1px}
 </style>
 </head>
 <body>
@@ -70,6 +71,9 @@ button.view{background:rgba(0,255,255,.1);border:1px solid rgba(0,255,255,.4);pa
     <div id="modalCells" class="cells" style="margin-top:20px"></div>
   </div>
 </div>
+
+<footer>© Todos os direitos reservados</footer>
+
 <script>
 const API = '/api/bms';
 let adminToken = sessionStorage.getItem('admin_token');
