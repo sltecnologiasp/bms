@@ -6,30 +6,20 @@
 <title>Admin BMS</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-body{
-  background:#0a0a0f;
-  color:#fff;
-  font-family:system-ui;
-  padding:0;
-  text-align:center;
-  min-height:100vh;
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-}
-#login,#painel{width:100%;max-width:1200px;margin:0 auto;flex:1;display:flex;flex-direction:column;align-items:center}
-#login.hidden,#painel.hidden{display:none}
+body{background:#0a0a0f;color:#fff;font-family:system-ui;padding:0;text-align:center;min-height:100vh}
 h1{text-align:center;font-size:42px;font-weight:900;padding:30px 20px;background:linear-gradient(90deg,#00ffff,#0080ff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-shadow:0 0 30px rgba(0,255,255,.3)}
-.card{background:rgba(255,255,255,.03);border:1px solid rgba(0,255,255,.3);border-radius:16px;padding:30px;margin:16px auto;text-align:center;box-shadow:0 0 20px rgba(0,255,255,.1),inset 0 0 20px rgba(0,255,255,.05);width:100%}
+.card{background:rgba(255,255,255,.03);border:1px solid rgba(0,255,255,.3);border-radius:16px;padding:30px;margin:16px;text-align:center;box-shadow:0 0 20px rgba(0,255,255,.1),inset 0 0 20px rgba(0,255,255,.05)}
 input,button{width:100%;max-width:600px;padding:18px;margin:12px auto;border-radius:12px;border:1px solid rgba(0,255,255,.3);background:rgba(0,0,0,.4);color:#fff;font-size:18px;text-align:center;display:block;box-shadow:0 0 15px rgba(0,255,255,.1)}
 button{background:linear-gradient(90deg,#0080ff,#00ffff);cursor:pointer;font-weight:700;border:none;font-family:system-ui;letter-spacing:0;box-shadow:0 0 25px rgba(0,255,255,.4)}
 button.del{background:rgba(255,68,68,.1);border:1px solid rgba(255,68,68,.4);padding:10px;margin-top:12px;box-shadow:0 0 15px rgba(255,68,68,.2)}
 button.logout{background:rgba(255,68,68,.1);border:1px solid rgba(255,68,68,.4);max-width:500px;margin:60px auto 40px;box-shadow:0 0 20px rgba(255,68,68,.2)}
 button.view{background:rgba(0,255,255,.1);border:1px solid rgba(0,255,255,.4);padding:10px;margin-top:12px;box-shadow:0 0 15px rgba(0,255,255,.2)}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(350px,1fr));gap:16px;padding:0 16px;width:100%;justify-content:center}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(350px,1fr));gap:16px;padding:0 16px}
+.grid.card{margin:0;border-radius:16px}
 .status{display:inline-block;padding:6px 16px;border-radius:12px;font-size:13px;font-weight:700}
 .on{background:rgba(0,255,136,.15);color:#00ff88;border:1px solid rgba(0,255,136,.4);box-shadow:0 0 15px rgba(0,255,136,.3)}
 .off{background:rgba(255,68,68,.15);color:#ff4444;border:1px solid rgba(255,68,68,.4);box-shadow:0 0 15px rgba(255,68,68,.3)}
+.hidden{display:none}
 .label{opacity:.7;font-size:13px;text-transform:uppercase;text-align:center;letter-spacing:2px;margin-bottom:8px}
 .cells{display:grid;grid-template-columns:repeat(auto-fill,minmax(85px,1fr));gap:10px;margin-top:16px;justify-content:center}
 .cell{background:rgba(0,0,0,.4);border:1px solid rgba(0,255,255,.2);border-radius:12px;padding:12px;text-align:center;box-shadow:0 0 10px rgba(0,255,255,.1)}
@@ -42,13 +32,20 @@ button.view{background:rgba(0,255,255,.1);border:1px solid rgba(0,255,255,.4);pa
 .modal.active{display:block}
 .modal-content{max-width:1200px;margin:40px auto;background:#0a0a0f;border:1px solid rgba(0,255,255,.3);border-radius:20px;padding:30px;text-align:center;box-shadow:0 0 40px rgba(0,255,255,.2)}
 .modal-close{float:right;background:rgba(255,68,68,.1);border:1px solid rgba(255,68,68,.4);color:#fff;padding:10px 20px;border-radius:8px;cursor:pointer;box-shadow:0 0 15px rgba(255,68,68,.2)}
-#login{padding:40px 20px;justify-content:center}
+#login{
+  min-height:100vh;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
+  padding:20px;
+}
 #login.card{border-radius:20px;margin:40px auto;max-width:500px}
 .data-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:12px 0}
 .data-item{text-align:center}
 .data-item.label{margin-bottom:4px;font-size:11px}
 .data-item.value{font-size:24px;font-weight:700;text-shadow:0 0 15px currentColor}
-footer{text-align:center;padding:30px 20px;opacity:.5;font-size:13px;letter-spacing:1px;width:100%;margin-top:auto}
+footer{text-align:center;padding:30px 20px;opacity:.5;font-size:13px;letter-spacing:1px}
 </style>
 </head>
 <body>
@@ -176,6 +173,7 @@ async function listar(){
           <div class="label">Tensão</div>
           <div class="value" style="color:#00ffff">${b.voltage?.toFixed(2)||0}V</div>
         </div>
+      </div>
       <div class="data-row">
         <div class="data-item">
           <div class="label">Corrente</div>
