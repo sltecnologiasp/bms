@@ -10,7 +10,6 @@ body{background:#0a0a0f;color:#fff;font-family:system-ui;padding:0;text-align:ce
 h1{text-align:center;font-size:42px;font-weight:900;padding:30px 20px;background:linear-gradient(90deg,#00ffff,#0080ff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-shadow:0 0 30px rgba(0,255,255,.3)}
 .card{background:rgba(255,255,255,.03);border:1px solid rgba(0,255,255,.3);border-radius:16px;padding:30px;margin:16px;text-align:center;box-shadow:0 0 20px rgba(0,255,255,.1),inset 0 0 20px rgba(0,255,255,.05)}
 
-/* CARD DE CADASTRO CENTRALIZADO */
 .card-cadastro{
   max-width:600px;
   margin:16px auto 32px auto;
@@ -26,7 +25,6 @@ button.view{background:rgba(0,255,255,.1);border:1px solid rgba(0,255,255,.4);pa
 .status{display:inline-block;padding:6px 16px;border-radius:12px;font-size:13px;font-weight:700}
 .on{background:rgba(0,255,136,.15);color:#00ff88;border:1px solid rgba(0,255,136,.4);box-shadow:0 0 15px rgba(0,255,136,.3)}
 .off{background:rgba(255,68,68,.15);color:#ff4444;border:1px solid rgba(255,68,68,.4);box-shadow:0 0 15px rgba(255,68,68,.3)}
-.hidden{display:none}
 .label{opacity:.7;font-size:13px;text-transform:uppercase;text-align:center;letter-spacing:2px;margin-bottom:8px}
 .cells{display:grid;grid-template-columns:repeat(auto-fill,minmax(85px,1fr));gap:10px;margin-top:16px;justify-content:center}
 .cell{background:rgba(0,0,0,.4);border:1px solid rgba(0,255,255,.2);border-radius:12px;padding:12px;text-align:center;box-shadow:0 0 10px rgba(0,255,255,.1)}
@@ -41,22 +39,21 @@ button.view{background:rgba(0,255,255,.1);border:1px solid rgba(0,255,255,.4);pa
 .modal-close{float:right;background:rgba(255,68,68,.1);border:1px solid rgba(255,68,68,.4);color:#fff;padding:10px 20px;border-radius:8px;cursor:pointer;box-shadow:0 0 15px rgba(255,68,68,.2)}
 
 /* =========================
-   MAIN + LOGIN CENTRALIZADO
+   TELAS - CORRIGIDO
 ========================= */
-#login,#dash{
+#login,#painel{
 position:relative;
 z-index:1;
 width:100%;
-min-height:100vh;
-display:flex;
-flex-direction:column;
-justify-content:center;
-align-items:center;
+min-height:100dvh;
 padding:20px;
 }
 
-#login{
-min-height:100dvh;
+.tela-ativa{
+display:flex!important;
+flex-direction:column;
+justify-content:center;
+align-items:center;
 }
 
 #login .card{
@@ -70,10 +67,13 @@ width:100%;
 .data-item{text-align:center}
 .data-item .label{margin-bottom:4px;font-size:11px}
 .data-item .value{font-size:24px;font-weight:700;text-shadow:0 0 15px currentColor}
+
+/* HIDDEN TEM QUE FICAR NO FINAL */
+.hidden{display:none!important}
 </style>
 </head>
 <body>
-<div id="login">
+<div id="login" class="tela-ativa">
   <h1>BMS SMART</h1>
   <div class="card">
     <div class="label">Acesso Administrativo</div>
@@ -124,8 +124,10 @@ async function adminLogin(){
   }
 }
 function showPainel(){
+  document.getElementById('login').classList.remove('tela-ativa');
   document.getElementById('login').classList.add('hidden');
   document.getElementById('painel').classList.remove('hidden');
+  document.getElementById('painel').classList.add('tela-ativa');
   listar();
 }
 function adminLogout(){
