@@ -545,6 +545,7 @@ let interval;
 let chart;
 let lastDataHash = '';
 let offlineTimer;
+let isOffline = false;
 
 if(localStorage.getItem('bms_token')){
   showDash();
@@ -698,6 +699,7 @@ function updateGauge(soc){
 }
 
 function setOffline(){
+  isOffline = true;
   clearTimeout(offlineTimer);
   document.getElementById('connStatus').textContent = 'Offline';
   document.getElementById('connStatus').className = 'status off';
@@ -720,12 +722,13 @@ async function update(){
     if(r.status===401){ logout(); return; }
     const d = await r.json();
     
-    // Cria hash dos dados principais com 1 casa decimal pra evitar ruído
-    const dataHash = `${d.soc?.toFixed(0)}-${d.voltage?.toFixed(1)}-${d.current?.toFixed(1)}-${d.temp?.toFixed(1)}-${d.cells?.join(',')}`;
+    // Arredonda pra 1 casa pra evitar ruído do ADC
+    const dataHash = `${d.soc?.toFixed(0)}-${d.voltage?.toFixed(1)}-${d.current?.toFixed(1)}-${d.temp?.toFixed(1)}`;
     
-    // Se o dado mudou, reseta o timer de offline
+    // Se o dado mudou, reseta o timer e destrava offline
     if(dataHash !== lastDataHash){
       lastDataHash = dataHash;
+      isOffline = false;
       clearTimeout(offlineTimer);
       
       // Se ficar 10s sem mudar = offline
@@ -734,6 +737,9 @@ async function update(){
       }, 10000);
     }
     
+    // Se tá offline, não atualiza mais
+    if(isOffline) return;
+    
     document.getElementById('bmsName').textContent = d.nome || d.code;
     document.getElementById('soc').textContent = (d.soc?.toFixed(0)||0)+'%';
     document.getElementById('voltage').textContent = (d.voltage?.toFixed(2)||0)+'V';
@@ -741,8 +747,8 @@ async function update(){
     document.getElementById('temp').textContent = (d.temp?.toFixed(1)||0)+'°C';
     
     const connEl = document.getElementById('connStatus');
-    connEl.textContent = d.online ? 'Online' : 'Offline';
-    connEl.className = 'status ' + (d.online ? 'on' : 'off');
+    connEl.textContent = 'Online';
+    connEl.className = 'status on';
     
     renderCells(d.cells);
     updateGauge(parseInt(d.soc || 0));
@@ -771,6 +777,8 @@ window.logout = function(){
   document.getElementById('dash').classList.add('hidden');
   document.getElementById('login').classList.remove('hidden');
   document.getElementById('code').value='';
+  isOffline = false;
+  lastDataHash = '';
 }
 
 if ('serviceWorker' in navigator) {
