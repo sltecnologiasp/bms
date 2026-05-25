@@ -68,6 +68,9 @@ width:100%;
 .data-item .label{margin-bottom:4px;font-size:11px}
 .data-item .value{font-size:24px;font-weight:700;text-shadow:0 0 15px currentColor}
 
+.bms-card.offline{opacity:.4;border-color:rgba(255,68,68,.2)}
+.bms-card{transition:.2s}
+
 /* HIDDEN TEM QUE FICAR NO FINAL */
 .hidden{display:none!important}
 </style>
@@ -106,7 +109,10 @@ width:100%;
 const API = '/api/bms';
 let adminToken = sessionStorage.getItem('admin_token');
 let bmsList = [];
+let updateInterval;
+
 if(adminToken === 'admin_ok') showPainel();
+
 async function adminLogin(){
   const user = document.getElementById('user').value;
   const password = document.getElementById('password').value;
@@ -123,24 +129,31 @@ async function adminLogin(){
     errorEl.style.display='block';
   }
 }
+
 function showPainel(){
   document.getElementById('login').classList.remove('tela-ativa');
   document.getElementById('login').classList.add('hidden');
   document.getElementById('painel').classList.remove('hidden');
   document.getElementById('painel').classList.add('tela-ativa');
   listar();
+  updateInterval = setInterval(listar, 5000);
 }
+
 function adminLogout(){
+  clearInterval(updateInterval);
   sessionStorage.removeItem('admin_token');
   location.reload();
 }
+
 function authHeaders(){
   return {'Content-Type':'application/json','Authorization':'Bearer '+adminToken};
 }
+
 document.getElementById('code').oninput = e => {
   if(!e.target.value.startsWith('SL')) e.target.value = 'SL';
   e.target.value = 'SL' + e.target.value.slice(2).replace(/[^0-9]/g,'').slice(0,8);
 };
+
 async function cad(){
   const code = document.getElementById('code').value;
   const nome = document.getElementById('nome').value;
@@ -150,11 +163,15 @@ async function cad(){
   document.getElementById('msg').style.color = d.ok?'#00ff88':'#ff4444';
   if(d.ok){document.getElementById('code').value='';document.getElementById('nome').value='';listar();}
 }
+
 async function del(code){
   if(!confirm(`Deletar ${code}?`))return;
   await fetch(API+`?action=deletar&code=${code}`,{method:'DELETE',headers:authHeaders()});
+  localStorage.removeItem('bms_hash_' + code);
+  localStorage.removeItem('bms_time_' + code);
   listar();
 }
+
 function viewCells(code){
   const bms = bmsList.find(b => b.code === code);
   if(!bms ||!bms.cells) return;
@@ -168,51 +185,75 @@ function viewCells(code){
   }).join('');
   document.getElementById('modal').classList.add('active');
 }
+
 function closeModal(){
   document.getElementById('modal').classList.remove('active');
 }
+
 async function listar(){
-  const r = await fetch(API+'?action=listar',{headers:authHeaders()});
-  if(r.status===401){adminLogout();return;}
-  const d = await r.json();
-  bmsList = d;
-  document.getElementById('lista').innerHTML = d.map(b=>{
-    const cellsCount = b.cells? b.cells.length : 0;
-    const cellsHtml = cellsCount > 0? 
-      `<button class="view" onclick="viewCells('${b.code}')">Ver ${cellsCount} Células</button>` : 
-      '<div style="opacity:.4;font-size:13px;margin-top:12px;text-align:center">Sem dados de células</div>';
-    return `
-    <div class="card">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
-        <div style="text-align:left"><b style="font-size:18px">${b.code}</b><div style="opacity:.6;font-size:13px;margin-top:4px">${b.nome||''}</div></div>
-        <span class="status ${b.online?'on':'off'}">${b.online?'Online':'Offline'}</span>
+  try{
+    const r = await fetch(API+'?action=listar',{headers:authHeaders()});
+    if(r.status===401){adminLogout();return;}
+    const d = await r.json();
+    bmsList = d;
+    
+    document.getElementById('lista').innerHTML = d.map(b=>{
+      const lastHash = localStorage.getItem('bms_hash_' + b.code) || '';
+      const currentHash = `${b.soc?.toFixed(0)}-${b.voltage?.toFixed(1)}-${b.current?.toFixed(1)}-${b.temp?.toFixed(1)}`;
+      const lastTime = parseInt(localStorage.getItem('bms_time_' + b.code) || '0');
+      const isStale = Date.now() - lastTime > 10000;
+      
+      // Se o dado mudou e não é zerado, atualiza timestamp
+      if(currentHash !== lastHash && currentHash !== '0-0.0-0.0'){
+        localStorage.setItem('bms_hash_' + b.code, currentHash);
+        localStorage.setItem('bms_time_' + b.code, Date.now().toString());
+      }
+      
+      // Online = tem hash salvo E não tá stale
+      const savedHash = localStorage.getItem('bms_hash_' + b.code);
+      const savedTime = parseInt(localStorage.getItem('bms_time_' + b.code) || '0');
+      const isOnline = savedHash && (Date.now() - savedTime < 10000);
+      const cardClass = isOnline ? '' : 'offline bms-card';
+      
+      const cellsCount = b.cells? b.cells.length : 0;
+      const cellsHtml = cellsCount > 0? 
+        `<button class="view" onclick="viewCells('${b.code}')">Ver ${cellsCount} Células</button>` : 
+        '<div style="opacity:.4;font-size:13px;margin-top:12px;text-align:center">Sem dados de células</div>';
+      
+      return `
+      <div class="card ${cardClass}">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+          <div style="text-align:left"><b style="font-size:18px">${b.code}</b><div style="opacity:.6;font-size:13px;margin-top:4px">${b.nome||''}</div></div>
+          <span class="status ${isOnline?'on':'off'}">${isOnline?'Online':'Offline'}</span>
+        </div>
+        <div class="data-row">
+          <div class="data-item">
+            <div class="label">SOC</div>
+            <div class="value" style="color:#00ff88">${isOnline ? (b.soc?.toFixed(0)||0)+'%' : '--'}</div>
+          </div>
+          <div class="data-item">
+            <div class="label">Tensão</div>
+            <div class="value" style="color:#00ffff">${isOnline ? (b.voltage?.toFixed(2)||0)+'V' : '--'}</div>
+          </div>
+        </div>
+        <div class="data-row">
+          <div class="data-item">
+            <div class="label">Corrente</div>
+            <div class="value" style="color:#ffaa00">${isOnline ? (b.current?.toFixed(1)||0)+'A' : '--'}</div>
+          </div>
+          <div class="data-item">
+            <div class="label">Temperatura</div>
+            <div class="value" style="color:#ff4444">${isOnline ? (b.temp?.toFixed(1)||0)+'°C' : '--'}</div>
+          </div>
+        </div>
+        ${cellsHtml}
+        <button class="del" onclick="del('${b.code}')">Excluir</button>
       </div>
-      <div class="data-row">
-        <div class="data-item">
-          <div class="label">SOC</div>
-          <div class="value" style="color:#00ff88">${b.soc?.toFixed(0)||0}%</div>
-        </div>
-        <div class="data-item">
-          <div class="label">Tensão</div>
-          <div class="value" style="color:#00ffff">${b.voltage?.toFixed(2)||0}V</div>
-        </div>
-      </div>
-      <div class="data-row">
-        <div class="data-item">
-          <div class="label">Corrente</div>
-          <div class="value" style="color:#ffaa00">${b.current?.toFixed(1)||0}A</div>
-        </div>
-        <div class="data-item">
-          <div class="label">Temperatura</div>
-          <div class="value" style="color:#ff4444">${b.temp?.toFixed(1)||0}°C</div>
-        </div>
-      </div>
-      ${cellsHtml}
-      <button class="del" onclick="del('${b.code}')">Excluir</button>
-    </div>
-  `}).join('') || '<div class="card" style="text-align:center;opacity:.4;padding:60px 20px">Nenhuma BMS cadastrada</div>';
+    `}).join('') || '<div class="card" style="text-align:center;opacity:.4;padding:60px 20px">Nenhuma BMS cadastrada</div>';
+  }catch(e){
+    console.error(e);
+  }
 }
-setInterval(()=>{if(adminToken)listar()},5000);
 </script>
 </body>
 </html>
