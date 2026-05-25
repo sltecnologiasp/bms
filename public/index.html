@@ -118,10 +118,9 @@ border-radius:16px;
 padding:16px;
 width:100%;
 position:relative;
-overflow:hidden;
 box-shadow:0 4px 20px rgba(0,0,0,.4);
 transition:none;
-contain:strict;
+contain:layout;
 }
 
 #login .card{
@@ -142,6 +141,7 @@ margin:12px auto;
 
 .gauge-card{
 padding:30px;
+overflow:visible;
 }
 
 .gauge{
@@ -221,13 +221,14 @@ margin:12px auto;
 }
 
 .grid .card{
-height:120px;
+min-height:120px;
+height:auto;
 min-width:0;
 display:flex;
 flex-direction:column;
 justify-content:center;
 align-items:center;
-padding:12px;
+padding:14px;
 overflow:hidden;
 }
 
@@ -306,7 +307,7 @@ border:1px solid rgba(0,255,136,.3);
 }
 
 .off{
-background:rgba(255,68,68,.12);
+background:rgba(255,68,.12);
 color:var(--red);
 border:1px solid rgba(255,68,68,.3);
 }
@@ -416,7 +417,7 @@ display:none!important;
 .value{font-size:24px}
 .gauge{width:200px;height:200px}
 .gauge-value{font-size:48px}
-.grid .card{padding:10px;height:110px}
+.grid .card{padding:10px;min-height:110px}
 .label{font-size:9px}
 }
 </style>
@@ -432,7 +433,6 @@ display:none!important;
 <input id="code" placeholder="SL00000000" maxlength="10">
 <button onclick="login()">Entrar</button>
 <p id="error" style="color:#ff4444;margin-top:12px;display:none;"></p>
-</div>
 </div>
 
 <div id="dash" class="hidden">
