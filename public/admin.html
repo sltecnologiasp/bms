@@ -39,8 +39,33 @@ button.view{background:rgba(0,255,255,.1);border:1px solid rgba(0,255,255,.4);pa
 .modal.active{display:block}
 .modal-content{max-width:1200px;margin:40px auto;background:#0a0a0f;border:1px solid rgba(0,255,255,.3);border-radius:20px;padding:30px;text-align:center;box-shadow:0 0 40px rgba(0,255,255,.2)}
 .modal-close{float:right;background:rgba(255,68,68,.1);border:1px solid rgba(255,68,68,.4);color:#fff;padding:10px 20px;border-radius:8px;cursor:pointer;box-shadow:0 0 15px rgba(255,68,68,.2)}
-#login{padding:40px 20px}
-#login .card{border-radius:20px;margin:40px auto;max-width:500px}
+
+/* =========================
+   MAIN + LOGIN CENTRALIZADO
+========================= */
+#login,#dash{
+position:relative;
+z-index:1;
+width:100%;
+min-height:100vh;
+display:flex;
+flex-direction:column;
+justify-content:center;
+align-items:center;
+padding:20px;
+}
+
+#login{
+min-height:100dvh;
+}
+
+#login .card{
+border-radius:20px;
+margin:0 auto;
+max-width:500px;
+width:100%;
+}
+
 .data-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:12px 0}
 .data-item{text-align:center}
 .data-item .label{margin-bottom:4px;font-size:11px}
