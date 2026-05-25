@@ -543,9 +543,9 @@ createParticles();
 const API = '/api/bms';
 let interval;
 let chart;
-let lastDataHash = '';
+let lastDataHash = localStorage.getItem('bms_lastHash') || '';
 let offlineTimer;
-let isOffline = false;
+let isOffline = localStorage.getItem('bms_offline') === 'true';
 
 if(localStorage.getItem('bms_token')){
   showDash();
@@ -574,6 +574,10 @@ window.login = async function(){
     const d = await r.json();
     if(d.ok && d.token){
       localStorage.setItem('bms_token', d.token);
+      localStorage.removeItem('bms_offline');
+      localStorage.removeItem('bms_lastHash');
+      isOffline = false;
+      lastDataHash = '';
       showDash();
     }else{
       errorEl.textContent = d.error || 'BMS não encontrada';
@@ -588,6 +592,8 @@ window.login = async function(){
 async function showDash(){
   document.getElementById('login').classList.add('hidden');
   document.getElementById('dash').classList.remove('hidden');
+  
+  if(isOffline) setOffline();
   
   if(!window.Chart){
     const { Chart, registerables } = await import('https://cdn.jsdelivr.net/npm/chart.js@4.4.1/+esm');
@@ -700,6 +706,7 @@ function updateGauge(soc){
 
 function setOffline(){
   isOffline = true;
+  localStorage.setItem('bms_offline', 'true');
   clearTimeout(offlineTimer);
   document.getElementById('connStatus').textContent = 'Offline';
   document.getElementById('connStatus').className = 'status off';
@@ -722,22 +729,20 @@ async function update(){
     if(r.status===401){ logout(); return; }
     const d = await r.json();
     
-    // Arredonda pra 1 casa pra evitar ruído do ADC
     const dataHash = `${d.soc?.toFixed(0)}-${d.voltage?.toFixed(1)}-${d.current?.toFixed(1)}-${d.temp?.toFixed(1)}`;
     
-    // Se o dado mudou, reseta o timer e destrava offline
     if(dataHash !== lastDataHash){
       lastDataHash = dataHash;
+      localStorage.setItem('bms_lastHash', dataHash);
       isOffline = false;
+      localStorage.removeItem('bms_offline');
       clearTimeout(offlineTimer);
       
-      // Se ficar 10s sem mudar = offline
       offlineTimer = setTimeout(() => {
         setOffline();
       }, 10000);
     }
     
-    // Se tá offline, não atualiza mais
     if(isOffline) return;
     
     document.getElementById('bmsName').textContent = d.nome || d.code;
@@ -774,6 +779,8 @@ window.logout = function(){
   clearInterval(interval);
   clearTimeout(offlineTimer);
   localStorage.removeItem('bms_token');
+  localStorage.removeItem('bms_offline');
+  localStorage.removeItem('bms_lastHash');
   document.getElementById('dash').classList.add('hidden');
   document.getElementById('login').classList.remove('hidden');
   document.getElementById('code').value='';
