@@ -5,29 +5,15 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 
-<title>SMART BMS</title>
+<title>SMART BMS 3D</title>
 
-<link rel="manifest" href="/manifest.json">
+<link rel="manifest" href="manifest.json">
 
 <meta name="theme-color" content="#00ffff">
-
-<link rel="icon" href="/icon-192.png">
-
-<link rel="apple-touch-icon" href="/icon-192.png">
-
-<meta name="apple-mobile-web-app-capable" content="yes">
-
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
-
-/* =========================
-   RESET
-========================= */
 
 *{
 margin:0;
@@ -35,14 +21,9 @@ padding:0;
 box-sizing:border-box;
 }
 
-/* =========================
-   ROOT
-========================= */
-
 :root{
 
 --bg:#05070d;
-
 --cyan:#00ffff;
 --blue:#0080ff;
 --green:#00ff88;
@@ -51,65 +32,58 @@ box-sizing:border-box;
 
 }
 
-/* =========================
-   BODY
-========================= */
-
 body{
 
-font-family:'Inter',sans-serif;
-
 background:
-
-radial-gradient(circle at top,
-rgba(0,255,255,.12),
-transparent 40%),
-
-radial-gradient(circle at bottom,
-rgba(0,128,255,.08),
-transparent 40%),
-
-var(--bg);
+radial-gradient(circle at top,#0b1220,#05070d);
 
 color:#fff;
 
-overflow-x:hidden;
+font-family:system-ui;
 
 min-height:100vh;
+
+overflow-x:hidden;
+
+perspective:1600px;
 
 position:relative;
 
 }
 
-/* =========================
-   GRID BACKGROUND
-========================= */
+/* =========================================
+CYBER GRID
+========================================= */
 
-body::before{
-
-content:'';
+.cyber-grid{
 
 position:fixed;
-
 inset:0;
 
 background-image:
 
 linear-gradient(
-rgba(255,255,255,.03) 1px,
-transparent 1px),
+rgba(0,255,255,.04) 1px,
+transparent 1px
+),
 
 linear-gradient(
 90deg,
-rgba(255,255,255,.03) 1px,
-transparent 1px);
+rgba(0,255,255,.04) 1px,
+transparent 1px
+);
 
 background-size:40px 40px;
 
-mask-image:
-radial-gradient(circle at center,
-black,
-transparent 90%);
+transform:
+perspective(1200px)
+rotateX(75deg);
+
+transform-origin:center top;
+
+animation:gridMove 8s linear infinite;
+
+opacity:.35;
 
 pointer-events:none;
 
@@ -117,76 +91,103 @@ z-index:0;
 
 }
 
-/* =========================
-   PARTICLES
-========================= */
+@keyframes gridMove{
 
-#particles{
+0%{
 
-position:fixed;
-
-inset:0;
-
-overflow:hidden;
-
-z-index:0;
-
-pointer-events:none;
+transform:
+perspective(1200px)
+rotateX(75deg)
+translateY(0);
 
 }
+
+100%{
+
+transform:
+perspective(1200px)
+rotateX(75deg)
+translateY(40px);
+
+}
+
+}
+
+/* =========================================
+PARTICLES
+========================================= */
 
 .particle{
 
 position:absolute;
 
-background:var(--cyan);
-
 border-radius:50%;
+
+background:#00ffff;
 
 opacity:.25;
 
-animation:float linear infinite;
+pointer-events:none;
 
-box-shadow:
-0 0 12px var(--cyan),
-0 0 24px var(--cyan);
+animation:floatParticle linear infinite;
 
 }
 
-@keyframes float{
+@keyframes floatParticle{
 
 0%{
+
 transform:
 translateY(100vh)
 scale(0);
+
 opacity:0;
+
 }
 
-10%{
-opacity:.3;
+20%{
+opacity:.4;
 }
 
 100%{
+
 transform:
-translateY(-100px)
-scale(1.3);
+translateY(-200px)
+scale(1);
+
 opacity:0;
-}
 
 }
 
-/* =========================
-   MAIN
-========================= */
+}
 
-#login,
-#dash{
+/* =========================================
+CENTER
+========================================= */
+
+.center{
+
+width:100%;
+
+display:flex;
+
+justify-content:center;
+
+align-items:center;
+
+padding:20px;
 
 position:relative;
 
-z-index:1;
+z-index:2;
 
-width:100%;
+}
+
+/* =========================================
+LOGIN
+========================================= */
+
+#login{
 
 min-height:100vh;
 
@@ -198,97 +199,121 @@ justify-content:center;
 
 align-items:center;
 
+}
+
+/* =========================================
+DASH
+========================================= */
+
+#dash{
+
+width:100%;
+
+max-width:1400px;
+
+margin:auto;
+
 padding:20px;
 
 }
 
-/* =========================
-   TITLE
-========================= */
+/* =========================================
+TITLE
+========================================= */
 
 .title{
 
-font-size:clamp(42px,8vw,74px);
+font-size:52px;
 
 font-weight:900;
 
+letter-spacing:4px;
+
 margin-bottom:30px;
 
-letter-spacing:3px;
+text-transform:uppercase;
 
 background:
+
 linear-gradient(
 90deg,
-var(--cyan),
-var(--blue));
+#00ffff,
+#0080ff,
+#00ffff
+);
+
+background-size:200% auto;
 
 -webkit-background-clip:text;
 -webkit-text-fill-color:transparent;
 
-text-shadow:
-0 0 30px rgba(0,255,255,.4);
+animation:titleFlow 5s linear infinite;
 
-animation:pulse 3s infinite;
+filter:drop-shadow(
+0 0 25px rgba(0,255,255,.5)
+);
 
-}
-
-@keyframes pulse{
-
-0%,100%{
-filter:brightness(1);
-}
-
-50%{
-filter:brightness(1.3);
-}
+text-align:center;
 
 }
 
-/* =========================
-   CARD
-========================= */
+@keyframes titleFlow{
+
+0%{
+background-position:0%;
+}
+
+100%{
+background-position:200%;
+}
+
+}
+
+/* =========================================
+CARDS
+========================================= */
 
 .card{
-
-background:
-rgba(255,255,255,.04);
-
-backdrop-filter:blur(24px);
-
-border:
-1px solid rgba(255,255,255,.08);
-
-border-radius:28px;
-
-padding:24px;
-
-width:100%;
 
 position:relative;
 
 overflow:hidden;
 
+background:
+rgba(255,255,255,.04);
+
+border:
+1px solid rgba(0,255,255,.2);
+
+border-radius:24px;
+
+padding:24px;
+
+backdrop-filter:blur(20px);
+
 box-shadow:
 
-0 0 30px rgba(0,255,255,.08),
+0 0 30px rgba(0,255,255,.08);
 
-inset 0 0 40px rgba(255,255,255,.02);
+transform-style:preserve-3d;
 
-transition:.35s ease;
+transition:
+all .25s ease;
 
 }
 
 .card:hover{
 
 transform:
-translateY(-4px)
-scale(1.01);
+
+rotateX(6deg)
+rotateY(-6deg)
+translateY(-8px)
+scale(1.02);
 
 box-shadow:
 
-0 0 40px rgba(0,255,255,.15),
-
-0 0 80px rgba(0,255,255,.08);
+0 40px 80px rgba(0,255,255,.18);
 
 }
 
@@ -298,129 +323,24 @@ content:'';
 
 position:absolute;
 
-top:-100%;
-left:-100%;
-
-width:200%;
-height:200%;
+inset:0;
 
 background:
+
 linear-gradient(
-45deg,
+135deg,
+rgba(0,255,255,.08),
 transparent,
-rgba(255,255,255,.05),
-transparent);
+rgba(0,128,255,.08)
+);
 
-transform:rotate(25deg);
-
-animation:shine 7s linear infinite;
+pointer-events:none;
 
 }
 
-@keyframes shine{
-
-100%{
-transform:
-translateX(100%)
-translateY(100%)
-rotate(25deg);
-}
-
-}
-
-/* =========================
-   LOGIN
-========================= */
-
-#login .card{
-
-max-width:520px;
-
-}
-
-/* =========================
-   DASH
-========================= */
-
-#dash{
-
-max-width:1450px;
-
-margin:auto;
-
-}
-
-/* =========================
-   GRID
-========================= */
-
-.grid{
-
-display:grid;
-
-grid-template-columns:
-repeat(auto-fit,minmax(240px,1fr));
-
-gap:18px;
-
-width:100%;
-
-max-width:1300px;
-
-margin:20px auto;
-
-}
-
-.grid .card{
-
-min-height:180px;
-
-display:flex;
-
-flex-direction:column;
-
-justify-content:center;
-
-align-items:center;
-
-}
-
-/* =========================
-   LABEL
-========================= */
-
-.label{
-
-font-size:12px;
-
-letter-spacing:2px;
-
-opacity:.6;
-
-text-transform:uppercase;
-
-}
-
-/* =========================
-   VALUE
-========================= */
-
-.value{
-
-font-size:clamp(40px,5vw,58px);
-
-font-weight:800;
-
-margin-top:12px;
-
-text-shadow:
-0 0 25px currentColor;
-
-}
-
-/* =========================
-   INPUT
-========================= */
+/* =========================================
+INPUTS
+========================================= */
 
 input,
 button{
@@ -431,530 +351,250 @@ max-width:500px;
 
 padding:18px;
 
-border-radius:18px;
+margin-top:14px;
 
-border:none;
+border-radius:16px;
 
-outline:none;
-
-margin-top:16px;
-
-font-size:18px;
-
-transition:.25s;
-
-}
-
-input{
+border:
+1px solid rgba(0,255,255,.2);
 
 background:
 rgba(0,0,0,.35);
 
 color:#fff;
 
-font-family:monospace;
+font-size:18px;
 
-letter-spacing:2px;
+text-align:center;
 
-border:
-1px solid rgba(0,255,255,.2);
-
-box-shadow:
-0 0 20px rgba(0,255,255,.05);
+outline:none;
 
 }
-
-input:focus{
-
-border-color:var(--cyan);
-
-box-shadow:
-0 0 25px rgba(0,255,255,.2);
-
-}
-
-/* =========================
-   BUTTON
-========================= */
 
 button{
 
-background:
-linear-gradient(
-90deg,
-var(--blue),
-var(--cyan));
-
-color:#fff;
+cursor:pointer;
 
 font-weight:700;
 
-cursor:pointer;
+background:
+
+linear-gradient(
+90deg,
+#0080ff,
+#00ffff
+);
+
+border:none;
 
 box-shadow:
-0 0 30px rgba(0,255,255,.25);
+
+0 0 30px rgba(0,255,255,.3);
 
 }
 
-button:hover{
+/* =========================================
+GRID
+========================================= */
 
-transform:
-translateY(-2px)
-scale(1.02);
+.grid{
 
-box-shadow:
-0 0 45px rgba(0,255,255,.4);
+display:grid;
+
+grid-template-columns:
+repeat(auto-fit,minmax(250px,1fr));
+
+gap:20px;
+
+margin-top:20px;
 
 }
 
-/* =========================
-   STATUS
-========================= */
+/* =========================================
+VALUES
+========================================= */
+
+.value{
+
+font-size:46px;
+
+font-weight:900;
+
+margin-top:12px;
+
+text-shadow:
+
+0 0 20px currentColor,
+0 0 40px currentColor;
+
+}
+
+.label{
+
+opacity:.7;
+
+font-size:12px;
+
+letter-spacing:3px;
+
+text-transform:uppercase;
+
+}
+
+/* =========================================
+STATUS
+========================================= */
 
 .status{
 
-display:inline-flex;
+display:inline-block;
 
-align-items:center;
+padding:10px 24px;
 
-gap:10px;
-
-padding:14px 26px;
-
-border-radius:999px;
+border-radius:30px;
 
 font-weight:700;
 
-margin-top:14px;
+margin-top:16px;
+
+animation:pulseGlow 2s infinite;
 
 }
 
 .on{
 
 background:
-rgba(0,255,136,.12);
-
-color:var(--green);
+rgba(0,255,136,.15);
 
 border:
-1px solid rgba(0,255,136,.3);
+1px solid rgba(0,255,136,.35);
 
-box-shadow:
-0 0 25px rgba(0,255,136,.2);
+color:#00ff88;
 
 }
 
 .off{
 
 background:
-rgba(255,68,68,.12);
-
-color:var(--red);
+rgba(255,68,68,.15);
 
 border:
-1px solid rgba(255,68,68,.3);
+1px solid rgba(255,68,68,.35);
 
-box-shadow:
-0 0 25px rgba(255,68,68,.2);
-
-}
-
-/* =========================
-   GAUGE
-========================= */
-
-.gauge-wrap{
-
-width:100%;
-max-width:1200px;
-
-margin:20px auto;
+color:#ff4444;
 
 }
 
-.gauge-card{
+@keyframes pulseGlow{
 
-padding:40px;
-
-}
-
-.gauge{
-
-width:240px;
-height:240px;
-
-margin:auto;
-
-border-radius:50%;
-
-background:
-conic-gradient(
-#00ff88 0deg,
-#00ffff 180deg,
-rgba(255,255,255,.08) 180deg
-);
-
-position:relative;
-
-box-shadow:
-0 0 40px rgba(0,255,255,.2),
-0 0 80px rgba(0,255,255,.08);
-
-animation:gaugeGlow 3s infinite;
-
-}
-
-@keyframes gaugeGlow{
-
-0%,100%{
-filter:brightness(1);
+0%{
+box-shadow:0 0 10px currentColor;
 }
 
 50%{
-filter:brightness(1.2);
+box-shadow:0 0 30px currentColor;
+}
+
+100%{
+box-shadow:0 0 10px currentColor;
 }
 
 }
 
-.gauge::before{
-
-content:'';
-
-position:absolute;
-
-inset:18px;
-
-border-radius:50%;
-
-background:#05070d;
-
-box-shadow:
-inset 0 0 30px rgba(0,255,255,.1);
-
-}
-
-.gauge-inner{
-
-position:absolute;
-
-inset:0;
-
-display:flex;
-
-flex-direction:column;
-
-justify-content:center;
-
-align-items:center;
-
-z-index:2;
-
-}
-
-.gauge-value{
-
-font-size:58px;
-
-font-weight:900;
-
-color:#00ff88;
-
-text-shadow:
-0 0 20px #00ff88;
-
-}
-
-.gauge-label{
-
-opacity:.6;
-
-letter-spacing:2px;
-
-font-size:12px;
-
-}
-
-/* =========================
-   BAR
-========================= */
-
-.bar-wrap{
-
-margin-top:24px;
-
-}
-
-.bar-label{
-
-display:flex;
-
-justify-content:space-between;
-
-margin-bottom:10px;
-
-font-size:14px;
-
-opacity:.7;
-
-}
-
-.bar{
-
-height:16px;
-
-background:
-rgba(255,255,255,.06);
-
-border-radius:999px;
-
-overflow:hidden;
-
-}
-
-.bar-fill{
-
-height:100%;
-width:0%;
-
-border-radius:999px;
-
-background:
-linear-gradient(
-90deg,
-#00ff88,
-#00ffff
-);
-
-box-shadow:
-0 0 20px rgba(0,255,255,.4);
-
-transition:1s;
-
-}
-
-/* =========================
-   DIFF
-========================= */
-
-.diff{
-
-display:flex;
-
-justify-content:center;
-
-flex-wrap:wrap;
-
-gap:24px;
-
-margin-top:20px;
-
-}
-
-.diff-item{
-
-padding:14px 20px;
-
-border-radius:18px;
-
-background:
-rgba(255,255,255,.03);
-
-min-width:120px;
-
-backdrop-filter:blur(8px);
-
-}
-
-.diff-item span{
-
-display:block;
-
-margin-top:8px;
-
-font-size:26px;
-
-font-weight:800;
-
-}
-
-/* =========================
-   CELLS
-========================= */
+/* =========================================
+CELLS
+========================================= */
 
 .cells{
 
 display:grid;
 
 grid-template-columns:
-repeat(auto-fill,minmax(95px,1fr));
+repeat(auto-fill,minmax(90px,1fr));
 
 gap:12px;
 
-margin-top:24px;
+margin-top:20px;
 
 }
 
 .cell{
 
 background:
-rgba(0,0,0,.28);
+rgba(0,0,0,.35);
+
+border:
+1px solid rgba(0,255,255,.15);
 
 border-radius:18px;
 
 padding:14px;
 
-transition:.3s;
-
-border:
-1px solid rgba(255,255,255,.05);
-
-backdrop-filter:blur(8px);
+transition:.25s;
 
 }
 
 .cell:hover{
 
-transform:scale(1.05);
+transform:
+translateY(-5px)
+scale(1.05);
+
+box-shadow:
+0 0 20px rgba(0,255,255,.2);
 
 }
 
 .cell-num{
 
-font-size:11px;
-
 opacity:.5;
 
-margin-bottom:6px;
+font-size:11px;
 
 }
 
 .cell-val{
 
-font-size:20px;
+font-size:18px;
 
 font-weight:700;
 
-}
-
-.cell.ok{
-
-border-color:
-rgba(0,255,136,.25);
-
-box-shadow:
-0 0 20px rgba(0,255,136,.08);
+margin-top:6px;
 
 }
 
-.cell.warn{
-
-border-color:
-rgba(255,170,0,.25);
-
-box-shadow:
-0 0 20px rgba(255,170,0,.08);
-
-}
-
-.cell.crit{
-
-border-color:
-rgba(255,68,68,.25);
-
-box-shadow:
-0 0 20px rgba(255,68,68,.08);
-
-}
-
-/* =========================
-   CHART
-========================= */
+/* =========================================
+CHART
+========================================= */
 
 .chart-card{
 
-width:100%;
-max-width:1200px;
+margin-top:24px;
 
-margin:20px auto;
-
-padding:30px;
+height:420px;
 
 }
 
-.chart-title{
-
-margin-bottom:20px;
-
-font-size:14px;
-
-letter-spacing:2px;
-
-opacity:.7;
-
-text-transform:uppercase;
-
-}
-
-canvas{
-
-width:100%!important;
-height:320px!important;
-
-}
-
-/* =========================
-   LOGOUT
-========================= */
-
-.logout{
-
-margin-top:40px;
-
-background:
-rgba(255,68,68,.08);
-
-border:
-1px solid rgba(255,68,68,.2);
-
-}
-
-/* =========================
-   HIDDEN
-========================= */
+/* =========================================
+HIDDEN
+========================================= */
 
 .hidden{
-display:none!important;
+display:none;
 }
-
-/* =========================
-   RESPONSIVE
-========================= */
 
 @media(max-width:768px){
 
-.grid{
-grid-template-columns:1fr 1fr;
-}
-
-}
-
-@media(max-width:520px){
-
-.grid{
-grid-template-columns:1fr;
-}
-
 .title{
-font-size:46px;
+font-size:38px;
 }
 
 .value{
-font-size:42px;
+font-size:34px;
 }
 
-.gauge{
-width:200px;
-height:200px;
+.chart-card{
+height:300px;
 }
 
 }
@@ -965,11 +605,13 @@ height:200px;
 
 <body>
 
-<div id="particles"></div>
+<div class="cyber-grid"></div>
 
 <!-- LOGIN -->
 
-<div id="login">
+<div id="login" class="center">
+
+<div>
 
 <div class="title">
 SMART BMS
@@ -984,21 +626,18 @@ Código da BMS
 <input
 id="code"
 placeholder="SL00000000"
-maxlength="10"
->
+maxlength="10">
 
 <button onclick="login()">
-Entrar
+ENTRAR
 </button>
 
 <p
 id="error"
-style="
-color:#ff4444;
-margin-top:12px;
-display:none;
-">
+style="margin-top:14px;color:#ff4444;display:none">
 </p>
+
+</div>
 
 </div>
 
@@ -1006,64 +645,32 @@ display:none;
 
 <!-- DASH -->
 
-<div id="dash" class="hidden">
+<div
+id="dash"
+class="hidden">
 
 <div class="title">
 SMART BMS
 </div>
 
-<div class="gauge-wrap">
+<div class="card">
 
-<div class="card gauge-card">
+<div
+class="label"
+id="bmsName">
 
-<div class="gauge" id="socGauge">
-
-<div class="gauge-inner">
-
-<div class="gauge-value" id="socGaugeValue">
-0%
-</div>
-
-<div class="gauge-label">
-STATE OF CHARGE
-</div>
-
-</div>
-
-</div>
-
-<div class="bar-wrap">
-
-<div class="bar-label">
-
-<span>Bateria</span>
-
-<span id="socBarText">
-0%
-</span>
-
-</div>
-
-<div class="bar">
-<div class="bar-fill" id="socBar"></div>
-</div>
-
-</div>
-
-</div>
-
-</div>
-
-<div class="card" style="max-width:1200px">
-
-<div class="label" id="bmsName">
 BMS
+
 </div>
 
-<div style="margin-top:16px">
+<div>
 
-<span id="connStatus" class="status off">
-Offline
+<span
+id="connStatus"
+class="status off">
+
+OFFLINE
+
 </span>
 
 </div>
@@ -1073,346 +680,210 @@ Offline
 <div class="grid">
 
 <div class="card">
-<div class="label">SOC</div>
-<div class="value" id="soc" style="color:#00ff88">0%</div>
+
+<div class="label">
+SOC
+</div>
+
+<div
+class="value"
+style="color:#00ff88"
+id="soc">
+
+0%
+
+</div>
+
 </div>
 
 <div class="card">
-<div class="label">Tensão</div>
-<div class="value" id="voltage" style="color:#00ffff">0V</div>
+
+<div class="label">
+TENSÃO
+</div>
+
+<div
+class="value"
+style="color:#00ffff"
+id="voltage">
+
+0V
+
+</div>
+
 </div>
 
 <div class="card">
-<div class="label">Corrente</div>
-<div class="value" id="current" style="color:#ffaa00">0A</div>
+
+<div class="label">
+CORRENTE
+</div>
+
+<div
+class="value"
+style="color:#ffaa00"
+id="current">
+
+0A
+
+</div>
+
 </div>
 
 <div class="card">
-<div class="label">Temperatura</div>
-<div class="value" id="temp" style="color:#ff4444">0°C</div>
+
+<div class="label">
+TEMPERATURA
+</div>
+
+<div
+class="value"
+style="color:#ff4444"
+id="temp">
+
+0°C
+
+</div>
+
 </div>
 
 </div>
 
 <div class="card chart-card">
 
-<div class="chart-title">
-Realtime Monitor
-</div>
-
-<canvas id="mainChart"></canvas>
+<canvas id="cellChart"></canvas>
 
 </div>
 
-<div class="card" style="max-width:1200px">
+<div class="card">
 
 <div class="label">
-Células - Tensão Individual
+CÉLULAS
 </div>
 
-<div class="diff">
-
-<div class="diff-item">
-Min
-<div>
-<span id="cellMin" style="color:#00ff88">0.00V</span>
-</div>
-</div>
-
-<div class="diff-item">
-Max
-<div>
-<span id="cellMax" style="color:#ffaa00">0.00V</span>
-</div>
-</div>
-
-<div class="diff-item">
-Diferença
-<div>
-<span id="cellDiff" style="color:#ff4444">0.00V</span>
-</div>
-</div>
-
-<div class="diff-item">
-Total
-<div>
-<span id="cellCount" style="color:#00ffff">0</span>
-</div>
+<div
+id="cells"
+class="cells">
 </div>
 
 </div>
-
-<div id="cells" class="cells"></div>
-
-</div>
-
-<button class="logout" onclick="logout()">
-Sair do Painel
-</button>
 
 </div>
 
 <script>
 
-/* =========================
-   PARTICLES
-========================= */
+/* =========================================
+PWA
+========================================= */
+
+if('serviceWorker' in navigator){
+
+navigator.serviceWorker
+.register('/service-worker.js');
+
+}
+
+/* =========================================
+PARTICLES
+========================================= */
 
 function createParticles(){
 
-const container =
-document.getElementById('particles');
-
-setInterval(() => {
+setInterval(()=>{
 
 const p =
 document.createElement('div');
 
-p.className = 'particle';
+p.className='particle';
 
 const size =
-Math.random() * 4 + 1;
+Math.random()*5+2;
 
-p.style.width = size + 'px';
-p.style.height = size + 'px';
+p.style.width=size+'px';
 
-p.style.left =
-Math.random() * 100 + '%';
+p.style.height=size+'px';
 
-p.style.animationDuration =
-(Math.random() * 10 + 10) + 's';
+p.style.left=
+Math.random()*100+'%';
 
-container.appendChild(p);
+p.style.animationDuration=
+(Math.random()*10+8)+'s';
 
-setTimeout(() => p.remove(),20000);
+document.body.appendChild(p);
 
-},300);
+setTimeout(()=>{
+p.remove();
+},20000);
+
+},200);
 
 }
 
 createParticles();
 
-/* =========================
-   API
-========================= */
+/* =========================================
+3D PARALLAX
+========================================= */
 
-const API = '/api/bms';
+document.addEventListener('mousemove', e=>{
 
-let interval;
+const x =
+(window.innerWidth/2 - e.clientX)/40;
 
-/* =========================
-   AUTO LOGIN
-========================= */
-
-if(localStorage.getItem('bms_token')){
-showDash();
-}
-
-/* =========================
-   INPUT
-========================= */
-
-document.getElementById('code').oninput = e => {
-
-if(!e.target.value.startsWith('SL')){
-e.target.value = 'SL';
-}
-
-e.target.value =
-'SL' +
-e.target.value
-.slice(2)
-.replace(/[^0-9]/g,'')
-.slice(0,8);
-
-};
-
-/* =========================
-   LOGIN
-========================= */
-
-async function login(){
-
-const code =
-document.getElementById('code')
-.value
-.trim();
-
-const errorEl =
-document.getElementById('error');
-
-errorEl.style.display='none';
-
-try{
-
-const r = await fetch(
-API + '?action=login',
-{
-method:'POST',
-headers:{
-'Content-Type':'application/json'
-},
-body:JSON.stringify({code})
-}
-);
-
-const d = await r.json();
-
-if(d.ok && d.token){
-
-localStorage.setItem(
-'bms_token',
-d.token
-);
-
-showDash();
-
-}else{
-
-errorEl.textContent =
-d.error || 'BMS não encontrada';
-
-errorEl.style.display='block';
-
-}
-
-}catch(e){
-
-errorEl.textContent =
-'Erro de conexão';
-
-errorEl.style.display='block';
-
-}
-
-}
-
-/* =========================
-   SHOW DASH
-========================= */
-
-function showDash(){
+const y =
+(window.innerHeight/2 - e.clientY)/40;
 
 document
-.getElementById('login')
-.classList
-.add('hidden');
+.querySelectorAll('.card')
+.forEach(card=>{
 
-document
-.getElementById('dash')
-.classList
-.remove('hidden');
+card.style.transform=`
 
-update();
+rotateY(${x}deg)
+rotateX(${-y}deg)
 
-interval =
-setInterval(update,3000);
-
-}
-
-/* =========================
-   CELLS
-========================= */
-
-function renderCells(cells){
-
-if(!cells || cells.length === 0){
-
-document.getElementById('cells').innerHTML =
-'<div style="grid-column:1/-1;opacity:.4;padding:20px">Sem dados das células</div>';
-
-return;
-
-}
-
-const vals =
-cells
-.map(c => parseFloat(c))
-.filter(v => v > 0);
-
-const min = Math.min(...vals);
-const max = Math.max(...vals);
-const diff = max - min;
-
-document.getElementById('cellMin').textContent =
-min.toFixed(3)+'V';
-
-document.getElementById('cellMax').textContent =
-max.toFixed(3)+'V';
-
-document.getElementById('cellDiff').textContent =
-diff.toFixed(3)+'V';
-
-document.getElementById('cellCount').textContent =
-cells.length;
-
-document.getElementById('cells').innerHTML =
-
-cells.map((v,i)=>{
-
-const val = parseFloat(v);
-
-let cls = 'ok';
-
-if(val < 3.2 || val > 4.2){
-cls = 'crit';
-}
-else if(val < 3.4 || val > 4.15){
-cls = 'warn';
-}
-
-return `
-<div class="cell ${cls}">
-<div class="cell-num">C${i+1}</div>
-<div class="cell-val">${val.toFixed(3)}</div>
-</div>
 `;
 
-}).join('');
+});
 
-}
+});
 
-/* =========================
-   CHART
-========================= */
+/* =========================================
+CHART
+========================================= */
 
-const voltageHistory = [];
-const currentHistory = [];
-const labelsHistory = [];
-
-const ctx = document
-.getElementById('mainChart')
+const ctx =
+document
+.getElementById('cellChart')
 .getContext('2d');
 
-const chart = new Chart(ctx,{
+const chart =
+new Chart(ctx,{
 
 type:'line',
 
 data:{
 
-labels:labelsHistory,
+labels:[],
 
-datasets:[
+datasets:[{
 
-{
-label:'Tensão',
-data:voltageHistory,
+label:'Cells',
+
+data:[],
+
 borderColor:'#00ffff',
-backgroundColor:'rgba(0,255,255,.08)',
-tension:.4,
-fill:true
-},
 
-{
-label:'Corrente',
-data:currentHistory,
-borderColor:'#ffaa00',
-backgroundColor:'rgba(255,170,0,.08)',
-tension:.4,
-fill:true
-}
+backgroundColor:
+'rgba(0,255,255,.08)',
 
-]
+fill:true,
+
+tension:.4,
+
+borderWidth:3
+
+}]
 
 },
 
@@ -1423,11 +894,15 @@ responsive:true,
 maintainAspectRatio:false,
 
 plugins:{
+
 legend:{
+
 labels:{
-color:'#ffffff'
+color:'#fff'
 }
+
 }
+
 },
 
 scales:{
@@ -1462,176 +937,367 @@ color:'rgba(255,255,255,.05)'
 
 });
 
-/* =========================
-   GAUGE
-========================= */
+/* =========================================
+API
+========================================= */
 
-function updateGauge(soc){
+const API='/api/bms';
 
-const gauge =
-document.getElementById('socGauge');
+let token=
+localStorage.getItem('bms_token');
 
-const value =
-document.getElementById('socGaugeValue');
+let interval;
 
-const bar =
-document.getElementById('socBar');
+/* =========================================
+AUTO LOGIN
+========================================= */
 
-const text =
-document.getElementById('socBarText');
+if(token){
 
-const deg = soc * 3.6;
-
-value.textContent = soc + '%';
-
-text.textContent = soc + '%';
-
-bar.style.width = soc + '%';
-
-gauge.style.background = `
-conic-gradient(
-#00ff88 0deg,
-#00ffff ${deg}deg,
-rgba(255,255,255,.08) ${deg}deg
-)
-`;
+showDash();
 
 }
 
-/* =========================
-   UPDATE
-========================= */
+/* =========================================
+INPUT MASK
+========================================= */
 
-async function update(){
+document
+.getElementById('code')
+.oninput = e=>{
 
-const token =
-localStorage.getItem('bms_token');
+if(!e.target.value.startsWith('SL'))
+e.target.value='SL';
+
+e.target.value=
+'SL'+
+e.target.value
+.slice(2)
+.replace(/[^0-9]/g,'')
+.slice(0,8);
+
+};
+
+/* =========================================
+LOGIN
+========================================= */
+
+async function login(){
+
+const code =
+document
+.getElementById('code')
+.value.trim();
+
+const errorEl =
+document
+.getElementById('error');
+
+errorEl.style.display='none';
 
 try{
 
-const r = await fetch(
-API + '?action=data',
+const r =
+await fetch(
+API+'?action=login',
+{
+method:'POST',
+headers:{
+'Content-Type':'application/json'
+},
+body:JSON.stringify({code})
+}
+);
+
+const d =
+await r.json();
+
+if(d.ok){
+
+token=d.token;
+
+localStorage
+.setItem('bms_token',token);
+
+showDash();
+
+}else{
+
+errorEl.textContent=
+d.error;
+
+errorEl.style.display='block';
+
+}
+
+}catch(e){
+
+errorEl.textContent=
+'Erro de conexão';
+
+errorEl.style.display='block';
+
+}
+
+}
+
+/* =========================================
+SHOW DASH
+========================================= */
+
+function showDash(){
+
+document
+.getElementById('login')
+.classList.add('hidden');
+
+document
+.getElementById('dash')
+.classList.remove('hidden');
+
+update();
+
+interval=
+setInterval(update,3000);
+
+}
+
+/* =========================================
+RENDER CELLS
+========================================= */
+
+function renderCells(cells){
+
+if(!cells) return;
+
+document
+.getElementById('cells')
+.innerHTML=
+
+cells.map((v,i)=>{
+
+const val =
+parseFloat(v);
+
+return `
+
+<div class="cell">
+
+<div class="cell-num">
+C${i+1}
+</div>
+
+<div class="cell-val">
+${val.toFixed(3)}V
+</div>
+
+</div>
+
+`;
+
+}).join('');
+
+}
+
+/* =========================================
+UPDATE
+========================================= */
+
+async function update(){
+
+try{
+
+const r =
+await fetch(
+API+'?action=data',
 {
 headers:{
-'Authorization':'Bearer '+token
+'Authorization':
+'Bearer '+token
 }
 }
 );
 
 if(r.status===401){
+
 logout();
 return;
+
 }
 
-const d = await r.json();
+const d =
+await r.json();
 
-document.getElementById('bmsName').textContent =
+document
+.getElementById('bmsName')
+.textContent=
 d.nome || d.code;
 
-document.getElementById('soc').textContent =
+document
+.getElementById('soc')
+.textContent=
 (d.soc?.toFixed(0)||0)+'%';
 
-document.getElementById('voltage').textContent =
+document
+.getElementById('voltage')
+.textContent=
 (d.voltage?.toFixed(2)||0)+'V';
 
-document.getElementById('current').textContent =
+document
+.getElementById('current')
+.textContent=
 (d.current?.toFixed(1)||0)+'A';
 
-document.getElementById('temp').textContent =
+document
+.getElementById('temp')
+.textContent=
 (d.temp?.toFixed(1)||0)+'°C';
 
-document.getElementById('connStatus').textContent =
-d.online ? 'Online' : 'Offline';
+document
+.getElementById('connStatus')
+.textContent=
+d.online
+?'ONLINE'
+:'OFFLINE';
 
-document.getElementById('connStatus').className =
-'status ' + (d.online ? 'on' : 'off');
+document
+.getElementById('connStatus')
+.className=
+'status '+
+(d.online?'on':'off');
 
 renderCells(d.cells);
 
-/* GAUGE */
+/* chart */
 
-updateGauge(
-parseInt(d.soc || 0)
-);
+chart.data.labels=
+d.cells.map((_,i)=>'C'+(i+1));
 
-/* HISTORY */
-
-const now = new Date()
-.toLocaleTimeString();
-
-labelsHistory.push(now);
-
-voltageHistory.push(d.voltage || 0);
-
-currentHistory.push(d.current || 0);
-
-if(labelsHistory.length > 20){
-
-labelsHistory.shift();
-voltageHistory.shift();
-currentHistory.shift();
-
-}
+chart.data.datasets[0].data=
+d.cells;
 
 chart.update();
 
+/* alerts */
+
+smartAlerts(d);
+
 }catch(e){
 
-document.getElementById('connStatus').textContent =
-'Erro';
+document
+.getElementById('connStatus')
+.textContent='ERRO';
 
-document.getElementById('connStatus').className =
-'status off';
+}
+
+/* =========================================
+SMART ALERTS
+========================================= */
+
+function smartAlerts(data){
+
+if(!data.cells) return;
+
+const vals =
+data.cells.map(v=>parseFloat(v));
+
+const min =
+Math.min(...vals);
+
+const max =
+Math.max(...vals);
+
+const diff =
+max-min;
+
+if(diff > 0.080){
+
+showAlert(
+'⚠️ Diferença crítica: '
++ diff.toFixed(3)+'V'
+);
+
+}
+
+if(data.temp > 60){
+
+showAlert(
+'🔥 Temperatura crítica'
+);
 
 }
 
 }
 
-/* =========================
-   LOGOUT
-========================= */
+/* =========================================
+SHOW ALERT
+========================================= */
+
+function showAlert(msg){
+
+const old =
+document
+.getElementById('alert');
+
+if(old) old.remove();
+
+const div =
+document.createElement('div');
+
+div.id='alert';
+
+div.style.cssText=`
+
+position:fixed;
+
+top:30px;
+right:30px;
+
+padding:18px 24px;
+
+border-radius:18px;
+
+background:
+rgba(255,68,68,.15);
+
+border:
+1px solid rgba(255,68,68,.35);
+
+backdrop-filter:blur(20px);
+
+box-shadow:
+0 0 40px rgba(255,68,68,.3);
+
+z-index:99999;
+
+font-weight:700;
+
+`;
+
+div.innerHTML=msg;
+
+document.body.appendChild(div);
+
+setTimeout(()=>{
+div.remove();
+},5000);
+
+}
+
+}
+
+/* =========================================
+LOGOUT
+========================================= */
 
 function logout(){
 
 clearInterval(interval);
 
-localStorage.removeItem('bms_token');
+localStorage
+.removeItem('bms_token');
 
-document
-.getElementById('dash')
-.classList
-.add('hidden');
-
-document
-.getElementById('login')
-.classList
-.remove('hidden');
-
-document.getElementById('code').value='';
-
-}
-
-/* =========================
-   PWA
-========================= */
-
-if ('serviceWorker' in navigator) {
-
-window.addEventListener('load', async () => {
-
-try {
-
-await navigator.serviceWorker.register('/service-worker.js');
-
-console.log('PWA ativo');
-
-} catch (e) {
-
-console.log(e);
-
-}
-
-});
+location.reload();
 
 }
 
