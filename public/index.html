@@ -89,8 +89,7 @@ padding:20px;
 .title{
 font-size:clamp(42px,8vw,74px);
 font-weight:900;
-margin-bottom:20px;
-padding-top:10px;
+margin-bottom:30px;
 letter-spacing:3px;
 background:linear-gradient(90deg,var(--cyan),var(--blue));
 -webkit-background-clip:text;
@@ -137,36 +136,21 @@ max-width:520px;
 #dash{
 max-width:1450px;
 margin:auto;
-padding-top:10px;
 }
 
-.top-grid{
-display:grid;
-grid-template-columns:1fr 1fr;
-gap:18px;
+.gauge-wrap{
 width:100%;
 max-width:1200px;
 margin:20px auto;
 }
 
-.top-card{
-background:rgba(10,15,25,.92);
-border:1px solid rgba(0,255,255,.12);
-border-radius:20px;
-padding:30px;
-position:relative;
-overflow:hidden;
-box-shadow:0 4px 20px rgba(0,0,0,.4);
-display:flex;
-flex-direction:column;
-align-items:center;
-justify-content:center;
-min-height:280px;
+.gauge-card{
+padding:40px;
 }
 
-.top-gauge{
-width:180px;
-height:180px;
+.gauge{
+width:240px;
+height:240px;
 margin:auto;
 border-radius:50%;
 background:conic-gradient(#00ff88 0deg,#00ffff 180deg,rgba(255,255,255,.08) 180deg);
@@ -174,15 +158,15 @@ position:relative;
 box-shadow:0 0 30px rgba(0,255,255,.15);
 }
 
-.top-gauge::before{
+.gauge::before{
 content:'';
 position:absolute;
-inset:14px;
+inset:18px;
 border-radius:50%;
 background:#05070d;
 }
 
-.top-gauge-inner{
+.gauge-inner{
 position:absolute;
 inset:0;
 display:flex;
@@ -192,29 +176,43 @@ align-items:center;
 z-index:2;
 }
 
-.top-gauge-value{
-font-size:48px;
+.gauge-value{
+font-size:58px;
 font-weight:900;
 color:#00ff88;
 }
 
-.top-gauge-label{
+.gauge-label{
 opacity:.6;
 letter-spacing:2px;
-font-size:11px;
+font-size:12px;
 }
 
-.top-value{
-font-size:clamp(52px,6vw,68px);
-font-weight:900;
-margin-top:12px;
-color:#00ffff;
+.bar-wrap{
+margin-top:24px;
 }
 
-@media(max-width:768px){
-.top-grid{grid-template-columns:1fr}
-.top-gauge{width:160px;height:160px}
-.top-gauge-value{font-size:42px}
+.bar-label{
+display:flex;
+justify-content:space-between;
+margin-bottom:10px;
+font-size:14px;
+opacity:.7;
+}
+
+.bar{
+height:16px;
+background:rgba(255,255,255,.06);
+border-radius:999px;
+overflow:hidden;
+}
+
+.bar-fill{
+height:100%;
+width:0%;
+border-radius:999px;
+background:linear-gradient(90deg,#00ff88,#00ffff);
+transition:width .8s ease;
 }
 
 .grid{
@@ -309,33 +307,6 @@ border:1px solid rgba(0,255,136,.3);
 background:rgba(255,68,68,.12);
 color:var(--red);
 border:1px solid rgba(255,68,68,.3);
-}
-
-.bar-wrap{
-margin-top:24px;
-}
-
-.bar-label{
-display:flex;
-justify-content:space-between;
-margin-bottom:10px;
-font-size:14px;
-opacity:.7;
-}
-
-.bar{
-height:16px;
-background:rgba(255,255,255,.06);
-border-radius:999px;
-overflow:hidden;
-}
-
-.bar-fill{
-height:100%;
-width:0%;
-border-radius:999px;
-background:linear-gradient(90deg,#00ff88,#00ffff);
-transition:width .8s ease;
 }
 
 .diff{
@@ -446,6 +417,7 @@ display:none!important;
 .grid{grid-template-columns:1fr}
 .title{font-size:46px}
 .value{font-size:42px}
+.gauge{width:200px;height:200px}
 }
 </style>
 </head>
@@ -466,34 +438,40 @@ display:none!important;
 <div id="dash" class="hidden">
 <div class="title">SMART BMS</div>
 
-<div class="top-grid">
-  <div class="top-card">
-    <div class="top-gauge" id="socGauge">
-      <div class="top-gauge-inner">
-        <div class="top-gauge-value" id="socGaugeValue">0%</div>
-        <div class="top-gauge-label">SOC</div>
-      </div>
-    </div>
-    <div class="bar-wrap" style="width:100%;margin-top:20px">
-      <div class="bar-label">
-        <span>Bateria</span>
-        <span id="socBarText">0%</span>
-      </div>
-      <div class="bar"><div class="bar-fill" id="socBar"></div></div>
-    </div>
-  </div>
+<div class="gauge-wrap">
+<div class="card gauge-card">
+<div class="gauge" id="socGauge">
+<div class="gauge-inner">
+<div class="gauge-value" id="socGaugeValue">0%</div>
+<div class="gauge-label">STATE OF CHARGE</div>
+</div>
+</div>
+<div class="bar-wrap">
+<div class="bar-label">
+<span>Bateria</span>
+<span id="socBarText">0%</span>
+</div>
+<div class="bar"><div class="bar-fill" id="socBar"></div></div>
+</div>
+</div>
+</div>
 
-  <div class="top-card">
-    <div class="label" style="opacity:.7">TENSÃO</div>
-    <div class="top-value" id="voltage">0V</div>
-    <div style="margin-top:20px">
-      <span id="connStatus" class="status off">Offline</span>
-      <div class="label" id="bmsName" style="margin-top:12px;opacity:.5">BMS</div>
-    </div>
-  </div>
+<div class="card" style="max-width:1200px">
+<div class="label" id="bmsName">BMS</div>
+<div style="margin-top:16px">
+<span id="connStatus" class="status off">Offline</span>
+</div>
 </div>
 
 <div class="grid">
+<div class="card">
+<div class="label">SOC</div>
+<div class="value" id="soc" style="color:#00ff88">0%</div>
+</div>
+<div class="card">
+<div class="label">Tensão</div>
+<div class="value" id="voltage" style="color:#00ffff">0V</div>
+</div>
 <div class="card">
 <div class="label">Corrente</div>
 <div class="value" id="current" style="color:#ffaa00">0A</div>
@@ -710,6 +688,7 @@ async function update(){
     
     requestAnimationFrame(() => {
       document.getElementById('bmsName').textContent = d.nome || d.code;
+      document.getElementById('soc').textContent = (d.soc?.toFixed(0)||0)+'%';
       document.getElementById('voltage').textContent = (d.voltage?.toFixed(2)||0)+'V';
       document.getElementById('current').textContent = (d.current?.toFixed(1)||0)+'A';
       document.getElementById('temp').textContent = (d.temp?.toFixed(1)||0)+'°C';
