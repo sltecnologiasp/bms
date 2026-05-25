@@ -543,7 +543,7 @@ createParticles();
 const API = '/api/bms';
 let interval;
 let chart;
-let lastUpdate = 0;
+let offlineTimer;
 
 if(localStorage.getItem('bms_token')){
   showDash();
@@ -706,12 +706,7 @@ function setOffline(){
   document.getElementById('socGaugeValue').textContent = '--%';
   document.getElementById('socBarText').textContent = '--%';
   document.getElementById('socBar').style.width = '0%';
-}
-
-function checkTimeout(){
-  if(Date.now() - lastUpdate > 10000){
-    setOffline();
-  }
+  updateGauge(0);
 }
 
 async function update(){
@@ -723,11 +718,11 @@ async function update(){
     if(r.status===401){ logout(); return; }
     const d = await r.json();
     
-    if(d.timestamp && d.timestamp === lastUpdate){
-      checkTimeout();
-      return;
-    }
-    lastUpdate = d.timestamp || Date.now();
+    // Recebeu resposta = cancela timeout e agenda novo
+    clearTimeout(offlineTimer);
+    offlineTimer = setTimeout(() => {
+      setOffline();
+    }, 10000);
     
     document.getElementById('bmsName').textContent = d.nome || d.code;
     document.getElementById('soc').textContent = (d.soc?.toFixed(0)||0)+'%';
@@ -761,6 +756,7 @@ async function update(){
 
 window.logout = function(){
   clearInterval(interval);
+  clearTimeout(offlineTimer);
   localStorage.removeItem('bms_token');
   document.getElementById('dash').classList.add('hidden');
   document.getElementById('login').classList.remove('hidden');
