@@ -165,7 +165,8 @@ margin-bottom:30px;
 
 letter-spacing:3px;
 
-background:linear-gradient(
+background:
+linear-gradient(
 90deg,
 var(--cyan),
 var(--blue));
@@ -176,15 +177,31 @@ var(--blue));
 text-shadow:
 0 0 30px rgba(0,255,255,.4);
 
+animation:pulse 3s infinite;
+
+}
+
+@keyframes pulse{
+
+0%,100%{
+filter:brightness(1);
+}
+
+50%{
+filter:brightness(1.3);
+}
+
 }
 
 .card{
 
-background:rgba(255,255,255,.04);
+background:
+rgba(255,255,255,.04);
 
 backdrop-filter:blur(24px);
 
-border:1px solid rgba(255,255,255,.08);
+border:
+1px solid rgba(255,255,255,.08);
 
 border-radius:28px;
 
@@ -197,7 +214,9 @@ position:relative;
 overflow:hidden;
 
 box-shadow:
+
 0 0 30px rgba(0,255,255,.08),
+
 inset 0 0 40px rgba(255,255,255,.02);
 
 transition:.35s ease;
@@ -206,11 +225,51 @@ transition:.35s ease;
 
 .card:hover{
 
-transform:translateY(-4px);
+transform:
+translateY(-4px)
+scale(1.01);
 
 box-shadow:
+
 0 0 40px rgba(0,255,255,.15),
+
 0 0 80px rgba(0,255,255,.08);
+
+}
+
+.card::before{
+
+content:'';
+
+position:absolute;
+
+top:-100%;
+left:-100%;
+
+width:200%;
+height:200%;
+
+background:
+linear-gradient(
+45deg,
+transparent,
+rgba(255,255,255,.05),
+transparent);
+
+transform:rotate(25deg);
+
+animation:shine 7s linear infinite;
+
+}
+
+@keyframes shine{
+
+100%{
+transform:
+translateX(100%)
+translateY(100%)
+rotate(25deg);
+}
 
 }
 
@@ -223,9 +282,7 @@ max-width:1450px;
 margin:auto;
 }
 
-/* =========================
-   GRID FIXADO 2x2
-========================= */
+/* GRID PREMIUM */
 
 .grid{
 
@@ -241,6 +298,8 @@ max-width:1300px;
 
 margin:20px auto;
 
+align-items:stretch;
+
 }
 
 .grid .card{
@@ -254,70 +313,6 @@ flex-direction:column;
 justify-content:center;
 
 align-items:center;
-
-}
-
-/* MOBILE */
-
-@media(max-width:768px){
-
-.grid{
-
-grid-template-columns:repeat(2,1fr);
-
-gap:12px;
-
-padding:0 6px;
-
-}
-
-.grid .card{
-
-min-height:140px;
-
-padding:18px;
-
-}
-
-.value{
-
-font-size:34px;
-
-}
-
-}
-
-/* TELAS MUITO PEQUENAS */
-
-@media(max-width:420px){
-
-.grid{
-
-grid-template-columns:repeat(2,1fr);
-
-gap:10px;
-
-}
-
-.grid .card{
-
-min-height:120px;
-
-padding:14px;
-
-}
-
-.value{
-
-font-size:28px;
-
-}
-
-.label{
-
-font-size:10px;
-
-}
 
 }
 
@@ -371,7 +366,8 @@ transition:.25s;
 
 input{
 
-background:rgba(0,0,0,.35);
+background:
+rgba(0,0,0,.35);
 
 color:#fff;
 
@@ -379,13 +375,18 @@ font-family:monospace;
 
 letter-spacing:2px;
 
-border:1px solid rgba(0,255,255,.2);
+border:
+1px solid rgba(0,255,255,.2);
+
+box-shadow:
+0 0 20px rgba(0,255,255,.05);
 
 }
 
 button{
 
-background:linear-gradient(
+background:
+linear-gradient(
 90deg,
 var(--blue),
 var(--cyan));
@@ -398,6 +399,17 @@ cursor:pointer;
 
 box-shadow:
 0 0 30px rgba(0,255,255,.25);
+
+}
+
+button:hover{
+
+transform:
+translateY(-2px)
+scale(1.02);
+
+box-shadow:
+0 0 45px rgba(0,255,255,.4);
 
 }
 
@@ -421,77 +433,145 @@ margin-top:14px;
 
 .on{
 
-background:rgba(0,255,136,.12);
+background:
+rgba(0,255,136,.12);
 
 color:var(--green);
 
-border:1px solid rgba(0,255,136,.3);
+border:
+1px solid rgba(0,255,136,.3);
+
+box-shadow:
+0 0 25px rgba(0,255,136,.2);
 
 }
 
 .off{
 
-background:rgba(255,68,68,.12);
+background:
+rgba(255,68,68,.12);
 
 color:var(--red);
 
-border:1px solid rgba(255,68,68,.3);
+border:
+1px solid rgba(255,68,68,.3);
+
+box-shadow:
+0 0 25px rgba(255,68,68,.2);
 
 }
 
-.cells{
+.gauge-wrap{
 
-display:grid;
+width:100%;
+max-width:1200px;
 
-grid-template-columns:
-repeat(auto-fill,minmax(95px,1fr));
+margin:20px auto;
 
-gap:12px;
+}
 
+.gauge-card{
+
+padding:40px;
+
+}
+
+.gauge{
+
+width:240px;
+height:240px;
+
+margin:auto;
+
+border-radius:50%;
+
+background:
+conic-gradient(
+#00ff88 0deg,
+#00ffff 180deg,
+rgba(255,255,255,.08) 180deg
+);
+
+position:relative;
+
+box-shadow:
+0 0 40px rgba(0,255,255,.2),
+0 0 80px rgba(0,255,255,.08);
+
+}
+
+.gauge::before{
+
+content:'';
+
+position:absolute;
+
+inset:18px;
+
+border-radius:50%;
+
+background:#05070d;
+
+}
+
+.gauge-inner{
+
+position:absolute;
+
+inset:0;
+
+display:flex;
+
+flex-direction:column;
+
+justify-content:center;
+
+align-items:center;
+
+z-index:2;
+
+}
+
+.gauge-value{
+
+font-size:58px;
+
+font-weight:900;
+
+color:#00ff88;
+
+text-shadow:
+0 0 20px #00ff88;
+
+}
+
+.gauge-label{
+
+opacity:.6;
+
+letter-spacing:2px;
+
+font-size:12px;
+
+}
+
+.bar-wrap{
 margin-top:24px;
-
 }
 
-.cell{
-
-background:rgba(0,0,0,.28);
-
-border-radius:18px;
-
-padding:14px;
-
-border:1px solid rgba(255,255,255,.05);
-
+.bar{
+height:16px;
+background:rgba(255,255,255,.06);
+border-radius:999px;
+overflow:hidden;
 }
 
-.cell-num{
-
-font-size:11px;
-
-opacity:.5;
-
-margin-bottom:6px;
-
-}
-
-.cell-val{
-
-font-size:20px;
-
-font-weight:700;
-
-}
-
-.cell.ok{
-border-color:rgba(0,255,136,.25);
-}
-
-.cell.warn{
-border-color:rgba(255,170,0,.25);
-}
-
-.cell.crit{
-border-color:rgba(255,68,68,.25);
+.bar-fill{
+height:100%;
+width:0%;
+border-radius:999px;
+background:linear-gradient(90deg,#00ff88,#00ffff);
+transition:1s;
 }
 
 .diff{
@@ -514,7 +594,8 @@ padding:14px 20px;
 
 border-radius:18px;
 
-background:rgba(255,255,255,.03);
+background:
+rgba(255,255,255,.03);
 
 min-width:120px;
 
@@ -532,30 +613,173 @@ font-weight:800;
 
 }
 
-.hidden{
-display:none!important;
+.cells{
+
+display:grid;
+
+grid-template-columns:
+repeat(auto-fill,minmax(95px,1fr));
+
+gap:12px;
+
+margin-top:24px;
+
+}
+
+.cell{
+
+background:
+rgba(0,0,0,.28);
+
+border-radius:18px;
+
+padding:14px;
+
+border:
+1px solid rgba(255,255,255,.05);
+
+}
+
+.cell-num{
+font-size:11px;
+opacity:.5;
+margin-bottom:6px;
+}
+
+.cell-val{
+font-size:20px;
+font-weight:700;
+}
+
+.cell.ok{
+border-color:rgba(0,255,136,.25);
+}
+
+.cell.warn{
+border-color:rgba(255,170,0,.25);
+}
+
+.cell.crit{
+border-color:rgba(255,68,68,.25);
+}
+
+.chart-card{
+
+width:100%;
+max-width:1200px;
+
+margin:20px auto;
+
+padding:30px;
+
+}
+
+canvas{
+width:100%!important;
+height:320px!important;
 }
 
 .logout{
 
 margin-top:40px;
 
-background:rgba(255,68,68,.08);
+background:
+rgba(255,68,68,.08);
 
-border:1px solid rgba(255,68,68,.2);
+border:
+1px solid rgba(255,68,68,.2);
 
 }
 
-.chart-card{
-width:100%;
-max-width:1200px;
-margin:20px auto;
-padding:30px;
+.hidden{
+display:none!important;
 }
 
-canvas{
-width:100%!important;
-height:320px!important;
+/* RESPONSIVO */
+
+@media(max-width:768px){
+
+.grid{
+
+grid-template-columns:repeat(2,1fr);
+
+gap:12px;
+
+padding:0 6px;
+
+}
+
+.grid .card{
+
+min-height:150px;
+
+padding:18px;
+
+border-radius:22px;
+
+}
+
+.value{
+font-size:34px;
+}
+
+}
+
+@media(max-width:520px){
+
+.grid{
+
+grid-template-columns:repeat(2,1fr);
+
+gap:10px;
+
+padding:0 4px;
+
+}
+
+.grid .card{
+
+min-height:130px;
+
+padding:14px;
+
+border-radius:18px;
+
+}
+
+.value{
+font-size:28px;
+}
+
+.label{
+font-size:10px;
+letter-spacing:1px;
+}
+
+}
+
+@media(max-width:380px){
+
+.grid{
+gap:8px;
+}
+
+.grid .card{
+
+min-height:115px;
+
+padding:12px;
+
+}
+
+.value{
+font-size:24px;
+}
+
+.label{
+font-size:9px;
+}
+
 }
 
 </style>
@@ -610,6 +834,42 @@ display:none;
 <div class="title">
 SMART BMS
 </div>
+
+<!-- GAUGE -->
+
+<div class="gauge-wrap">
+
+<div class="card gauge-card">
+
+<div class="gauge" id="socGauge">
+
+<div class="gauge-inner">
+
+<div class="gauge-value" id="socGaugeValue">
+0%
+</div>
+
+<div class="gauge-label">
+STATE OF CHARGE
+</div>
+
+</div>
+
+</div>
+
+<div class="bar-wrap">
+
+<div class="bar">
+<div class="bar-fill" id="socBar"></div>
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+<!-- STATUS -->
 
 <div class="card" style="max-width:1200px">
 
@@ -710,354 +970,6 @@ Sair do Painel
 </button>
 
 </div>
-
-<script>
-
-function createParticles(){
-
-const container =
-document.getElementById('particles');
-
-setInterval(() => {
-
-const p =
-document.createElement('div');
-
-p.className = 'particle';
-
-const size =
-Math.random() * 4 + 1;
-
-p.style.width = size + 'px';
-p.style.height = size + 'px';
-
-p.style.left =
-Math.random() * 100 + '%';
-
-p.style.animationDuration =
-(Math.random() * 10 + 10) + 's';
-
-container.appendChild(p);
-
-setTimeout(() => p.remove(),20000);
-
-},300);
-
-}
-
-createParticles();
-
-const API = '/api/bms';
-
-let interval;
-
-if(localStorage.getItem('bms_token')){
-showDash();
-}
-
-document.getElementById('code').oninput = e => {
-
-if(!e.target.value.startsWith('SL')){
-e.target.value = 'SL';
-}
-
-e.target.value =
-'SL' +
-e.target.value
-.slice(2)
-.replace(/[^0-9]/g,'')
-.slice(0,8);
-
-};
-
-async function login(){
-
-const code =
-document.getElementById('code')
-.value
-.trim();
-
-const errorEl =
-document.getElementById('error');
-
-errorEl.style.display='none';
-
-try{
-
-const r = await fetch(
-API + '?action=login',
-{
-method:'POST',
-headers:{
-'Content-Type':'application/json'
-},
-body:JSON.stringify({code})
-}
-);
-
-const d = await r.json();
-
-if(d.ok && d.token){
-
-localStorage.setItem(
-'bms_token',
-d.token
-);
-
-showDash();
-
-}else{
-
-errorEl.textContent =
-d.error || 'BMS não encontrada';
-
-errorEl.style.display='block';
-
-}
-
-}catch(e){
-
-errorEl.textContent =
-'Erro de conexão';
-
-errorEl.style.display='block';
-
-}
-
-}
-
-function showDash(){
-
-document
-.getElementById('login')
-.classList
-.add('hidden');
-
-document
-.getElementById('dash')
-.classList
-.remove('hidden');
-
-update();
-
-interval =
-setInterval(update,3000);
-
-}
-
-function renderCells(cells){
-
-if(!cells || cells.length === 0){
-
-document.getElementById('cells').innerHTML =
-'<div style="grid-column:1/-1;opacity:.4;padding:20px">Sem dados das células</div>';
-
-return;
-
-}
-
-const vals =
-cells
-.map(c => parseFloat(c))
-.filter(v => v > 0);
-
-const min = Math.min(...vals);
-const max = Math.max(...vals);
-const diff = max - min;
-
-document.getElementById('cellMin').textContent =
-min.toFixed(3)+'V';
-
-document.getElementById('cellMax').textContent =
-max.toFixed(3)+'V';
-
-document.getElementById('cellDiff').textContent =
-diff.toFixed(3)+'V';
-
-document.getElementById('cellCount').textContent =
-cells.length;
-
-document.getElementById('cells').innerHTML =
-
-cells.map((v,i)=>{
-
-const val = parseFloat(v);
-
-let cls = 'ok';
-
-if(val < 3.2 || val > 4.2){
-cls = 'crit';
-}
-else if(val < 3.4 || val > 4.15){
-cls = 'warn';
-}
-
-return `
-<div class="cell ${cls}">
-<div class="cell-num">C${i+1}</div>
-<div class="cell-val">${val.toFixed(3)}V</div>
-</div>
-`;
-
-}).join('');
-
-}
-
-const voltageHistory = [];
-const currentHistory = [];
-const labelsHistory = [];
-
-const ctx = document
-.getElementById('mainChart')
-.getContext('2d');
-
-const chart = new Chart(ctx,{
-
-type:'line',
-
-data:{
-
-labels:labelsHistory,
-
-datasets:[
-
-{
-label:'Tensão',
-data:voltageHistory,
-borderColor:'#00ffff',
-tension:.4
-},
-
-{
-label:'Corrente',
-data:currentHistory,
-borderColor:'#ffaa00',
-tension:.4
-}
-
-]
-
-},
-
-options:{
-responsive:true,
-maintainAspectRatio:false
-}
-
-});
-
-async function update(){
-
-const token =
-localStorage.getItem('bms_token');
-
-try{
-
-const r = await fetch(
-API + '?action=data',
-{
-headers:{
-'Authorization':'Bearer '+token
-}
-}
-);
-
-if(r.status===401){
-logout();
-return;
-}
-
-const d = await r.json();
-
-document.getElementById('bmsName').textContent =
-d.nome || d.code;
-
-document.getElementById('soc').textContent =
-(d.soc?.toFixed(0)||0)+'%';
-
-document.getElementById('voltage').textContent =
-(d.voltage?.toFixed(2)||0)+'V';
-
-document.getElementById('current').textContent =
-(d.current?.toFixed(1)||0)+'A';
-
-document.getElementById('temp').textContent =
-(d.temp?.toFixed(1)||0)+'°C';
-
-document.getElementById('connStatus').textContent =
-d.online ? 'Online' : 'Offline';
-
-document.getElementById('connStatus').className =
-'status ' + (d.online ? 'on' : 'off');
-
-renderCells(d.cells);
-
-const now = new Date()
-.toLocaleTimeString();
-
-labelsHistory.push(now);
-
-voltageHistory.push(d.voltage || 0);
-
-currentHistory.push(d.current || 0);
-
-if(labelsHistory.length > 20){
-
-labelsHistory.shift();
-voltageHistory.shift();
-currentHistory.shift();
-
-}
-
-chart.update();
-
-}catch(e){
-
-document.getElementById('connStatus').textContent =
-'Erro';
-
-document.getElementById('connStatus').className =
-'status off';
-
-}
-
-}
-
-function logout(){
-
-clearInterval(interval);
-
-localStorage.removeItem('bms_token');
-
-document
-.getElementById('dash')
-.classList
-.add('hidden');
-
-document
-.getElementById('login')
-.classList
-.remove('hidden');
-
-document.getElementById('code').value='';
-
-}
-
-if ('serviceWorker' in navigator) {
-
-window.addEventListener('load', async () => {
-
-try {
-
-await navigator.serviceWorker.register('/service-worker.js');
-
-} catch (e) {}
-
-});
-
-}
-
-</script>
 
 </body>
 </html>
