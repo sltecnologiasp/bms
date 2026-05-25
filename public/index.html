@@ -74,7 +74,7 @@ animation:float linear infinite;
 100%{transform:translateY(-100px)}
 }
 
-#login,#dash{
+.tela{
 position:relative;
 z-index:1;
 width:100%;
@@ -115,14 +115,96 @@ animation:shine 4s linear infinite;
 background:rgba(10,15,25,.92);
 border:1px solid rgba(0,255,255,.12);
 border-radius:16px;
-padding:16px;
+padding:20px;
 width:100%;
+max-width:520px;
 position:relative;
 box-shadow:0 4px 20px rgba(0,0,0,.4);
 }
 
-#login .card{
-max-width:520px;
+.card-wide{
+max-width:1200px;
+}
+
+.label{
+font-size:11px;
+letter-spacing:1.5px;
+opacity:.6;
+text-transform:uppercase;
+margin-bottom:8px;
+}
+
+input,button{
+width:100%;
+padding:18px;
+border-radius:18px;
+border:none;
+outline:none;
+margin-top:12px;
+font-size:16px;
+transition:.2s;
+}
+
+input{
+background:rgba(0,0,0,.5);
+color:#fff;
+border:1px solid rgba(0,255,255,.2);
+}
+
+input:focus{
+border-color:var(--cyan);
+box-shadow:0 0 15px rgba(0,255,255,.2);
+}
+
+button{
+background:linear-gradient(90deg,var(--blue),var(--cyan));
+color:#fff;
+font-weight:700;
+cursor:pointer;
+box-shadow:0 4px 20px rgba(0,255,255,.25);
+}
+
+button:hover{
+transform:translateY(-1px);
+box-shadow:0 6px 25px rgba(0,255,255,.35);
+}
+
+button.secondary{
+background:rgba(0,255,255,.1);
+border:1px solid rgba(0,255,255,.3);
+box-shadow:0 0 15px rgba(0,255,255,.2);
+}
+
+button.danger{
+background:rgba(255,68,68,.1);
+border:1px solid rgba(255,68,68,.3);
+box-shadow:0 0 15px rgba(255,68,68,.2);
+}
+
+.link{
+color:var(--cyan);
+text-align:center;
+margin-top:16px;
+cursor:pointer;
+font-size:14px;
+}
+
+.link:hover{
+text-decoration:underline;
+}
+
+.error{
+color:#ff4444;
+margin-top:12px;
+text-align:center;
+font-size:14px;
+}
+
+.success{
+color:#00ff88;
+margin-top:12px;
+text-align:center;
+font-size:14px;
 }
 
 #dash{
@@ -209,7 +291,7 @@ height:100%;
 width:0%;
 border-radius:999px;
 background:linear-gradient(90deg,#00ff88,#00ffff);
-transition:width .8s ease;
+transition:width.8s ease;
 }
 
 .grid{
@@ -236,14 +318,6 @@ transform:translateZ(0);
 backface-visibility:hidden;
 }
 
-.label{
-font-size:10px;
-letter-spacing:1.5px;
-opacity:.6;
-text-transform:uppercase;
-white-space:nowrap;
-}
-
 .value{
 font-size:30px;
 font-weight:800;
@@ -253,48 +327,6 @@ white-space:nowrap;
 width:7ch;
 text-align:center;
 font-variant-numeric:tabular-nums;
-}
-
-input,button{
-width:100%;
-max-width:500px;
-padding:18px;
-border-radius:18px;
-border:none;
-outline:none;
-margin-top:16px;
-font-size:18px;
-transition:.2s;
-}
-
-input{
-background:rgba(0,0,0,.5);
-color:#fff;
-font-family:monospace;
-letter-spacing:2px;
-border:1px solid rgba(0,255,255,.2);
-}
-
-input:focus{
-border-color:var(--cyan);
-box-shadow:0 0 15px rgba(0,255,255,.2);
-}
-
-button{
-background:linear-gradient(90deg,var(--blue),var(--cyan));
-color:#fff;
-font-weight:700;
-cursor:pointer;
-box-shadow:0 4px 20px rgba(0,255,255,.25);
-}
-
-button:hover{
-transform:translateY(-1px);
-box-shadow:0 6px 25px rgba(0,255,255,.35);
-}
-
-button:active{
-transform:translateY(0);
 }
 
 .status{
@@ -413,18 +445,46 @@ height:320px!important;
 touch-action: none;
 }
 
-.logout{
-margin-top:24px;
-background:rgba(255,68,68,.08);
-border:1px solid rgba(255,68,68,.2);
+.header{
+display:flex;
+justify-content:space-between;
+align-items:center;
+margin-bottom:20px;
+}
+
+.bms-list{
+display:grid;
+grid-template-columns:repeat(auto-fill,minmax(300px,1fr));
+gap:16px;
+margin:20px 0;
+}
+
+.bms-item{
+background:rgba(0,0,0,.4);
+border:1px solid rgba(0,255,255,.2);
+border-radius:12px;
+padding:16px;
+cursor:pointer;
+transition:.2s;
+}
+
+.bms-item:hover{
+border-color:rgba(0,255,255,.5);
+transform:translateY(-2px);
+}
+
+.bms-item.active{
+border-color:var(--cyan);
+background:rgba(0,255,255,.05);
+}
+
+.bms-item.offline{
+opacity:.4;
+border-color:rgba(255,68,68,.2);
 }
 
 .hidden{
 display:none!important;
-}
-
-@media (prefers-reduced-motion: reduce) {
-    * { animation: none !important; transition: none !important; }
 }
 
 @media(max-width:520px){
@@ -436,6 +496,7 @@ display:none!important;
 .grid .card{padding:8px;height:100px}
 .label{font-size:8px}
 .diff-item span{font-size:18px}
+.grid{grid-template-columns:repeat(2,1fr)}
 }
 </style>
 </head>
@@ -443,88 +504,127 @@ display:none!important;
 <body>
 <div id="particles"></div>
 
-<div id="login">
-<div class="title">SMART BMS</div>
-<div class="card">
-<div class="label">Código da BMS</div>
-<input id="code" placeholder="SL00000000" maxlength="10">
-<button onclick="login()">Entrar</button>
-<p id="error" style="color:#ff4444;margin-top:12px;display:none;"></p>
-</div>
-</div>
-
-<div id="dash" class="hidden">
-<div class="title">SMART BMS</div>
-
-<div class="gauge-wrap">
-<div class="card gauge-card">
-<div class="gauge" id="socGauge">
-<div class="gauge-inner">
-<div class="gauge-value" id="socGaugeValue">0%</div>
-<div class="gauge-label">STATE OF CHARGE</div>
-</div>
-</div>
-<div class="bar-wrap">
-<div class="bar-label">
-<span>Bateria</span>
-<span id="socBarText">0%</span>
-</div>
-<div class="bar"><div class="bar-fill" id="socBar"></div></div>
-</div>
-</div>
+<!-- TELA LOGIN -->
+<div id="login" class="tela">
+  <div class="title">SMART BMS</div>
+  <div class="card">
+    <div class="label">Login</div>
+    <input id="loginEmail" placeholder="E-mail ou Telefone">
+    <input id="loginSenha" type="password" placeholder="Senha">
+    <button onclick="login()">Entrar</button>
+    <div class="link" onclick="showCadastro()">Não tem conta? Cadastre-se</div>
+    <p id="loginError" class="error" style="display:none;"></p>
+  </div>
 </div>
 
-<div class="card" style="max-width:1200px;margin:12px auto">
-<div class="label" id="bmsName">BMS</div>
-<div style="margin-top:12px">
-<span id="connStatus" class="status off">Offline</span>
-</div>
-</div>
-
-<div class="grid">
-<div class="card">
-<div class="label">SOC</div>
-<div class="value" id="soc" style="color:#00ff88">0%</div>
-</div>
-<div class="card">
-<div class="label">Tensão</div>
-<div class="value" id="voltage" style="color:#00ffff">0V</div>
-</div>
-<div class="card">
-<div class="label">Corrente</div>
-<div class="value" id="current" style="color:#ffaa00">0A</div>
-</div>
-<div class="card">
-<div class="label">Temperatura</div>
-<div class="value" id="temp" style="color:#ff4444">0°C</div>
-</div>
+<!-- TELA CADASTRO -->
+<div id="cadastro" class="tela hidden">
+  <div class="title">SMART BMS</div>
+  <div class="card">
+    <div class="label">Criar Conta</div>
+    <input id="cadNome" placeholder="Nome Completo">
+    <input id="cadEmail" placeholder="E-mail ou Telefone">
+    <input id="cadSenha" type="password" placeholder="Senha">
+    <input id="cadSenha2" type="password" placeholder="Confirmar Senha">
+    <button onclick="cadastrar()">Criar Conta</button>
+    <div class="link" onclick="showLogin()">Já tem conta? Fazer login</div>
+    <p id="cadMsg" style="display:none;"></p>
+  </div>
 </div>
 
-<div class="card chart-card">
-<div class="chart-title">Realtime Monitor</div>
-<canvas id="mainChart"></canvas>
+<!-- TELA SELEÇÃO BMS -->
+<div id="selectBMS" class="tela hidden">
+  <div class="title">SMART BMS</div>
+  <div class="card card-wide">
+    <div class="header">
+      <div class="label">Olá, <span id="userName"></span></div>
+      <button class="danger" style="width:auto;padding:10px 20px;" onclick="logout()">Sair</button>
+    </div>
+
+    <div class="label">Adicionar Dispositivo</div>
+    <input id="bmsCode" placeholder="SL82576655" maxlength="10">
+    <input id="bmsNome" placeholder="Nome da BMS (ex: Casa, Sítio)">
+    <button onclick="addBMS()">Adicionar BMS</button>
+    <p id="addMsg" style="display:none;"></p>
+
+    <div class="label" style="margin-top:30px;">Meus Dispositivos</div>
+    <div id="bmsList" class="bms-list"></div>
+  </div>
 </div>
 
-<div class="card" style="max-width:1200px;margin:12px auto">
-<div class="label">Células - Tensão Individual</div>
-<div class="diff">
-<div class="diff-item">Min<div><span id="cellMin" style="color:#00ff88">0.00V</span></div></div>
-<div class="diff-item">Max<div><span id="cellMax" style="color:#ffaa00">0.00V</span></div></div>
-<div class="diff-item">Diferença<div><span id="cellDiff" style="color:#ff4444">0.00V</span></div></div>
-<div class="diff-item">Total<div><span id="cellCount" style="color:#00ffff">0</span></div></div>
-</div>
-<div id="cells" class="cells"></div>
-</div>
+<!-- TELA DASHBOARD -->
+<div id="dash" class="tela hidden">
+  <div class="title">SMART BMS</div>
 
-<button class="logout" onclick="logout()">Sair do Painel</button>
+  <button class="secondary" style="max-width:300px;margin:0 auto 20px;" onclick="voltarLista()">← Voltar para Lista</button>
+
+  <div class="gauge-wrap">
+    <div class="card gauge-card">
+      <div class="gauge" id="socGauge">
+        <div class="gauge-inner">
+          <div class="gauge-value" id="socGaugeValue">0%</div>
+          <div class="gauge-label">STATE OF CHARGE</div>
+        </div>
+      </div>
+      <div class="bar-wrap">
+        <div class="bar-label">
+          <span>Bateria</span>
+          <span id="socBarText">0%</span>
+        </div>
+        <div class="bar"><div class="bar-fill" id="socBar"></div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card card-wide">
+    <div class="label" id="bmsName">BMS</div>
+    <div style="margin-top:12px">
+      <span id="connStatus" class="status off">Offline</span>
+    </div>
+  </div>
+
+  <div class="grid">
+    <div class="card">
+      <div class="label">SOC</div>
+      <div class="value" id="soc" style="color:#00ff88">0%</div>
+    </div>
+    <div class="card">
+      <div class="label">Tensão</div>
+      <div class="value" id="voltage" style="color:#00ffff">0V</div>
+    </div>
+    <div class="card">
+      <div class="label">Corrente</div>
+      <div class="value" id="current" style="color:#ffaa00">0A</div>
+    </div>
+    <div class="card">
+      <div class="label">Temperatura</div>
+      <div class="value" id="temp" style="color:#ff4444">0°C</div>
+    </div>
+  </div>
+
+  <div class="card chart-card">
+    <div class="chart-title">Realtime Monitor</div>
+    <canvas id="mainChart"></canvas>
+  </div>
+
+  <div class="card card-wide">
+    <div class="label">Células - Tensão Individual</div>
+    <div class="diff">
+      <div class="diff-item">Min<div><span id="cellMin" style="color:#00ff88">0.00V</span></div></div>
+      <div class="diff-item">Max<div><span id="cellMax" style="color:#ffaa00">0.00V</span></div></div>
+      <div class="diff-item">Diferença<div><span id="cellDiff" style="color:#ff4444">0.00V</span></div></div>
+      <div class="diff-item">Total<div><span id="cellCount" style="color:#00ffff">0</span></div></div>
+    </div>
+    <div id="cells" class="cells"></div>
+  </div>
 </div>
 
 <script type="module">
+// Particles
 function createParticles(){
   if(window.innerWidth < 768) return;
   const container = document.getElementById('particles');
   const maxParticles = 6;
-  
   setInterval(() => {
     if(container.children.length >= maxParticles) return;
     const p = document.createElement('div');
@@ -541,263 +641,237 @@ function createParticles(){
 createParticles();
 
 const API = '/api/bms';
+let userToken = localStorage.getItem('bms_token');
+let currentBMS = null;
 let interval;
 let chart;
-let lastDataHash = localStorage.getItem('bms_lastHash') || '';
+let lastDataHash = '';
 let offlineTimer;
-let isOffline = localStorage.getItem('bms_offline') === 'true';
+let isOffline = false;
 
-if(localStorage.getItem('bms_token')){
-  showDash();
+// ========== INIT ==========
+if(userToken) {
+  checkSession();
 }
 
-let inputTimer;
-document.getElementById('code').oninput = e => {
-  clearTimeout(inputTimer);
-  inputTimer = setTimeout(() => {
-    if(!e.target.value.startsWith('SL')) e.target.value = 'SL';
-    e.target.value = 'SL' + e.target.value.slice(2).replace(/[^0-9]/g,'').slice(0,8);
-  }, 50);
-};
-
-window.login = async function(){
-  const code = document.getElementById('code').value.trim();
-  const errorEl = document.getElementById('error');
-  errorEl.style.display='none';
-  
+// ========== AUTH ==========
+async function checkSession(){
   try{
-    const r = await fetch(API + '?action=login', {
+    const r = await fetch(API+'?action=user_bms', {
+      headers: {'Authorization': 'Bearer ' + userToken}
+    });
+    if(r.ok){
+      const userData = JSON.parse(localStorage.getItem('bms_user_data') || '{}');
+      showSelectBMS(userData.nome);
+    }else{
+      logout();
+    }
+  }catch(e){
+    logout();
+  }
+}
+
+function showLogin(){
+  document.getElementById('cadastro').classList.add('hidden');
+  document.getElementById('selectBMS').classList.add('hidden');
+  document.getElementById('dash').classList.add('hidden');
+  document.getElementById('login').classList.remove('hidden');
+}
+
+function showCadastro(){
+  document.getElementById('login').classList.add('hidden');
+  document.getElementById('cadastro').classList.remove('hidden');
+}
+
+async function cadastrar(){
+  const nome = document.getElementById('cadNome').value.trim();
+  const email = document.getElementById('cadEmail').value.trim();
+  const senha = document.getElementById('cadSenha').value;
+  const senha2 = document.getElementById('cadSenha2').value;
+  const msgEl = document.getElementById('cadMsg');
+
+  if(!nome ||!email ||!senha){
+    msgEl.textContent = 'Preencha todos os campos';
+    msgEl.className = 'error';
+    msgEl.style.display = 'block';
+    return;
+  }
+
+  if(senha!== senha2){
+    msgEl.textContent = 'Senhas não conferem';
+    msgEl.className = 'error';
+    msgEl.style.display = 'block';
+    return;
+  }
+
+  if(senha.length < 6){
+    msgEl.textContent = 'Senha deve ter no mínimo 6 caracteres';
+    msgEl.className = 'error';
+    msgEl.style.display = 'block';
+    return;
+  }
+
+  try{
+    const r = await fetch(API+'?action=register', {
       method:'POST',
       headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({code})
+      body:JSON.stringify({nome, email, senha})
     });
     const d = await r.json();
-    if(d.ok && d.token){
-      localStorage.setItem('bms_token', d.token);
-      localStorage.removeItem('bms_offline');
-      localStorage.removeItem('bms_lastHash');
-      isOffline = false;
-      lastDataHash = '';
-      showDash();
+    
+    if(d.ok){
+      msgEl.textContent = 'Conta criada com sucesso!';
+      msgEl.className = 'success';
+      msgEl.style.display = 'block';
+      setTimeout(() => {
+        document.getElementById('cadNome').value = '';
+        document.getElementById('cadEmail').value = '';
+        document.getElementById('cadSenha').value = '';
+        document.getElementById('cadSenha2').value = '';
+        showLogin();
+      }, 1500);
     }else{
-      errorEl.textContent = d.error || 'BMS não encontrada';
-      errorEl.style.display='block';
+      msgEl.textContent = d.error || 'Erro ao criar conta';
+      msgEl.className = 'error';
+      msgEl.style.display = 'block';
+    }
+  }catch(e){
+    msgEl.textContent = 'Erro de conexão';
+    msgEl.className = 'error';
+    msgEl.style.display = 'block';
+  }
+}
+
+async function login(){
+  const email = document.getElementById('loginEmail').value.trim();
+  const senha = document.getElementById('loginSenha').value;
+  const errorEl = document.getElementById('loginError');
+
+  if(!email ||!senha){
+    errorEl.textContent = 'Preencha e-mail e senha';
+    errorEl.style.display = 'block';
+    return;
+  }
+
+  try{
+    const r = await fetch(API+'?action=login', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({email, senha})
+    });
+    const d = await r.json();
+    
+    if(d.ok){
+      userToken = d.token;
+      localStorage.setItem('bms_token', userToken);
+      localStorage.setItem('bms_user_data', JSON.stringify({nome: d.nome, email: d.email}));
+      showSelectBMS(d.nome);
+    }else{
+      errorEl.textContent = d.error || 'E-mail ou senha incorretos';
+      errorEl.style.display = 'block';
     }
   }catch(e){
     errorEl.textContent = 'Erro de conexão';
-    errorEl.style.display='block';
+    errorEl.style.display = 'block';
   }
 }
 
-async function showDash(){
-  document.getElementById('login').classList.add('hidden');
-  document.getElementById('dash').classList.remove('hidden');
-  
-  if(isOffline) setOffline();
-  
-  if(!window.Chart){
-    const { Chart, registerables } = await import('https://cdn.jsdelivr.net/npm/chart.js@4.4.1/+esm');
-    Chart.register(...registerables);
-    window.Chart = Chart;
-  }
-  initChart();
-  update();
-  interval = setInterval(update, 5000);
-}
-
-function renderCells(cells){
-  if(!cells || cells.length === 0){
-    document.getElementById('cells').innerHTML = '<div style="grid-column:1/-1;opacity:.4;padding:20px">Sem dados das células</div>';
-    return;
-  }
-  
-  const vals = cells.map(c => parseFloat(c)).filter(v => v > 0);
-  if(vals.length === 0) return;
-  
-  const min = Math.min(...vals);
-  const max = Math.max(...vals);
-  const diff = max - min;
-  
-  document.getElementById('cellMin').textContent = min.toFixed(3)+'V';
-  document.getElementById('cellMax').textContent = max.toFixed(3)+'V';
-  document.getElementById('cellDiff').textContent = diff.toFixed(3)+'V';
-  document.getElementById('cellCount').textContent = cells.length;
-  
-  document.getElementById('cells').innerHTML = cells.map((v,i)=>{
-    const val = parseFloat(v);
-    let cls = 'ok';
-    if(val < 3.2 || val > 4.2) cls = 'crit';
-    else if(val < 3.4 || val > 4.15) cls = 'warn';
-    return `
-      <div class="cell ${cls}">
-        <div class="cell-num">C${i+1}</div>
-        <div class="cell-val">${val.toFixed(3)}</div>
-      </div>
-    `;
-  }).join('');
-}
-
-const voltageHistory = [];
-const currentHistory = [];
-const labelsHistory = [];
-
-function initChart(){
-  const ctx = document.getElementById('mainChart').getContext('2d');
-  chart = new window.Chart(ctx, {
-    type:'line',
-    data:{
-      labels:labelsHistory,
-      datasets:[
-        {
-          label:'Tensão',
-          data:voltageHistory,
-          borderColor:'#00ffff',
-          backgroundColor:'rgba(0,255,255,.08)',
-          tension:.4,
-          fill:true,
-          borderWidth:2
-        },
-        {
-          label:'Corrente',
-          data:currentHistory,
-          borderColor:'#ffaa00',
-          backgroundColor:'rgba(255,170,0,.08)',
-          tension:.4,
-          fill:true,
-          borderWidth:2
-        }
-      ]
-    },
-    options:{
-      responsive:true,
-      maintainAspectRatio:false,
-      animation:false,
-      elements:{
-        point:{radius:0}
-      },
-      plugins:{
-        legend:{labels:{color:'#ffffff'}}
-      },
-      scales:{
-        x:{
-          ticks:{color:'#aaa'},
-          grid:{color:'rgba(255,255,255,.05)'}
-        },
-        y:{
-          ticks:{color:'#aaa'},
-          grid:{color:'rgba(255,255,255,.05)'}
-        }
-      }
-    }
-  });
-}
-
-function updateGauge(soc){
-  const gauge = document.getElementById('socGauge');
-  const value = document.getElementById('socGaugeValue');
-  const bar = document.getElementById('socBar');
-  const text = document.getElementById('socBarText');
-  const deg = soc * 3.6;
-  value.textContent = soc + '%';
-  text.textContent = soc + '%';
-  bar.style.width = soc + '%';
-  gauge.style.background = `conic-gradient(#00ff88 0deg,#00ffff ${deg}deg,rgba(255,255,255,.08) ${deg}deg)`;
-}
-
-function setOffline(){
-  isOffline = true;
-  localStorage.setItem('bms_offline', 'true');
-  clearTimeout(offlineTimer);
-  document.getElementById('connStatus').textContent = 'Offline';
-  document.getElementById('connStatus').className = 'status off';
-  document.getElementById('soc').textContent = '--%';
-  document.getElementById('voltage').textContent = '--V';
-  document.getElementById('current').textContent = '--A';
-  document.getElementById('temp').textContent = '--°C';
-  document.getElementById('socGaugeValue').textContent = '--%';
-  document.getElementById('socBarText').textContent = '--%';
-  document.getElementById('socBar').style.width = '0%';
-  updateGauge(0);
-}
-
-async function update(){
-  const token = localStorage.getItem('bms_token');
-  try{
-    const r = await fetch(API + '?action=data', {
-      headers:{'Authorization':'Bearer '+token}
-    });
-    if(r.status===401){ logout(); return; }
-    const d = await r.json();
-    
-    const dataHash = `${d.soc?.toFixed(0)}-${d.voltage?.toFixed(1)}-${d.current?.toFixed(1)}-${d.temp?.toFixed(1)}`;
-    
-    if(dataHash !== lastDataHash){
-      lastDataHash = dataHash;
-      localStorage.setItem('bms_lastHash', dataHash);
-      isOffline = false;
-      localStorage.removeItem('bms_offline');
-      clearTimeout(offlineTimer);
-      
-      offlineTimer = setTimeout(() => {
-        setOffline();
-      }, 10000);
-    }
-    
-    if(isOffline) return;
-    
-    document.getElementById('bmsName').textContent = d.nome || d.code;
-    document.getElementById('soc').textContent = (d.soc?.toFixed(0)||0)+'%';
-    document.getElementById('voltage').textContent = (d.voltage?.toFixed(2)||0)+'V';
-    document.getElementById('current').textContent = (d.current?.toFixed(1)||0)+'A';
-    document.getElementById('temp').textContent = (d.temp?.toFixed(1)||0)+'°C';
-    
-    const connEl = document.getElementById('connStatus');
-    connEl.textContent = 'Online';
-    connEl.className = 'status on';
-    
-    renderCells(d.cells);
-    updateGauge(parseInt(d.soc || 0));
-    
-    const now = new Date().toLocaleTimeString('pt-BR', {hour:'2-digit', minute:'2-digit', second:'2-digit'});
-    labelsHistory.push(now);
-    voltageHistory.push(d.voltage || 0);
-    currentHistory.push(d.current || 0);
-    
-    if(labelsHistory.length > 15){
-      labelsHistory.shift();
-      voltageHistory.shift();
-      currentHistory.shift();
-    }
-    
-    if(chart) chart.update('none');
-  }catch(e){
-    setOffline();
-  }
-}
-
-window.logout = function(){
+function logout(){
   clearInterval(interval);
   clearTimeout(offlineTimer);
   localStorage.removeItem('bms_token');
-  localStorage.removeItem('bms_offline');
-  localStorage.removeItem('bms_lastHash');
-  document.getElementById('dash').classList.add('hidden');
-  document.getElementById('login').classList.remove('hidden');
-  document.getElementById('code').value='';
-  isOffline = false;
-  lastDataHash = '';
+  localStorage.removeItem('bms_user_data');
+  userToken = null;
+  currentBMS = null;
+  location.reload();
 }
 
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', async () => {
-    try {
-      await navigator.serviceWorker.register('/service-worker.js');
-      console.log('PWA ativo');
-    } catch (e) {
-      console.log(e);
-    }
-  });
+function showSelectBMS(nome){
+  document.getElementById('login').classList.add('hidden');
+  document.getElementById('cadastro').classList.add('hidden');
+  document.getElementById('dash').classList.add('hidden');
+  document.getElementById('selectBMS').classList.remove('hidden');
+  
+  if(nome) document.getElementById('userName').textContent = nome;
+  loadBMSList();
 }
-</script>
-</body>
-</html>
+
+// ========== BMS MANAGEMENT ==========
+document.getElementById('bmsCode').oninput = e => {
+  if(!e.target.value.startsWith('SL')) e.target.value = 'SL';
+  e.target.value = 'SL' + e.target.value.slice(2).replace(/[^0-9]/g,'').slice(0,8);
+};
+
+async function addBMS(){
+  const code = document.getElementById('bmsCode').value.trim();
+  const nome = document.getElementById('bmsNome').value.trim();
+  const msgEl = document.getElementById('addMsg');
+
+  if(!code || code.length!== 10){
+    msgEl.textContent = 'Código inválido. Use SL + 8 números';
+    msgEl.className = 'error';
+    msgEl.style.display = 'block';
+    return;
+  }
+
+  if(!nome){
+    msgEl.textContent = 'Dê um nome para sua BMS';
+    msgEl.className = 'error';
+    msgEl.style.display = 'block';
+    return;
+  }
+
+  try{
+    const r = await fetch(API+'?action=add_bms', {
+      method:'POST',
+      headers:{
+        'Content-Type':'application/json',
+        'Authorization': 'Bearer ' + userToken
+      },
+      body:JSON.stringify({code, nome})
+    });
+    const d = await r.json();
+    
+    if(d.ok){
+      msgEl.textContent = 'BMS adicionada com sucesso!';
+      msgEl.className = 'success';
+      msgEl.style.display = 'block';
+      document.getElementById('bmsCode').value = '';
+      document.getElementById('bmsNome').value = '';
+      setTimeout(() => msgEl.style.display = 'none', 2000);
+      loadBMSList();
+    }else{
+      msgEl.textContent = d.error || 'Erro ao adicionar BMS';
+      msgEl.className = 'error';
+      msgEl.style.display = 'block';
+    }
+  }catch(e){
+    msgEl.textContent = 'Erro de conexão';
+    msgEl.className = 'error';
+    msgEl.style.display = 'block';
+  }
+}
+
+async function loadBMSList(){
+  try{
+    const r = await fetch(API+'?action=user_bms', {
+      headers: {'Authorization': 'Bearer ' + userToken}
+    });
+    if(r.status===401){logout();return;}
+    const data = await r.json();
+    
+    const listEl = document.getElementById('bmsList');
+    if(data.length === 0){
+      listEl.innerHTML = '<div style="grid-column:1/-1;opacity:.4;text-align:center;padding:40px">Nenhuma BMS cadastrada</div>';
+      return;
+    }
+    
+    listEl.innerHTML = data.map(bms => {
+      const lastHash = localStorage.getItem('bms_hash_' + bms.code) || '';
+      const lastTime = parseInt(localStorage.getItem('bms_time_' + bms.code) || '0');
+      const isOnline = lastHash && (Date.now() - lastTime < 10000);
+      
+      return `
+        <div class="bms-item ${isOnline?'':'offline'} ${currentBMS?.code===bms.code?'active':''}" onclick="selectBMS('${bms.code}','${bms.nome}')">
+          <div style="font-weight:700;font-size:18px;margin-bottom:8px">${bms.nome}</div>
+          <div style="opacity:.6;font-size:13px;margin-bottom:12px;font-family:monos
