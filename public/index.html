@@ -1,34 +1,21 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-
 <title>SMART BMS</title>
-
 <link rel="manifest" href="/manifest.json">
-
 <meta name="theme-color" content="#00ffff">
-
 <link rel="icon" href="/icon-192.png">
-
 <link rel="apple-touch-icon" href="/icon-192.png">
-
 <meta name="apple-mobile-web-app-capable" content="yes">
-
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
 <style>
-
 /* =========================
    RESET
 ========================= */
-
 *{
 margin:0;
 padding:0;
@@ -38,1607 +25,827 @@ box-sizing:border-box;
 /* =========================
    ROOT
 ========================= */
-
 :root{
-
 --bg:#05070d;
-
 --cyan:#00ffff;
 --blue:#0080ff;
 --green:#00ff88;
 --red:#ff4444;
 --orange:#ffaa00;
-
 }
 
 /* =========================
    BODY
 ========================= */
-
 body{
-
 font-family:'Inter',sans-serif;
-
-background:
-
-radial-gradient(circle at top,
-rgba(0,255,255,.12),
-transparent 40%),
-
-radial-gradient(circle at bottom,
-rgba(0,128,255,.08),
-transparent 40%),
-
-var(--bg);
-
+background:var(--bg);
 color:#fff;
-
 overflow-x:hidden;
-
 min-height:100vh;
-
 position:relative;
-
 }
 
 /* =========================
-   GRID BACKGROUND
+   GRID BACKGROUND - LEVE
 ========================= */
-
 body::before{
-
 content:'';
-
 position:fixed;
-
 inset:0;
-
-background-image:
-
-linear-gradient(
-rgba(255,255,255,.03) 1px,
-transparent 1px),
-
-linear-gradient(
-90deg,
-rgba(255,255,255,.03) 1px,
-transparent 1px);
-
-background-size:40px 40px;
-
-mask-image:
-radial-gradient(circle at center,
-black,
-transparent 90%);
-
+background:
+  repeating-linear-gradient(0deg, rgba(255,255,255,.03) 0 1px, transparent 1px 40px),
+  repeating-linear-gradient(90deg, rgba(255,255,255,.03) 0 1px, transparent 1px 40px);
+opacity:.4;
 pointer-events:none;
-
 z-index:0;
-
 }
 
 /* =========================
    PARTICLES
 ========================= */
-
 #particles{
-
 position:fixed;
-
 inset:0;
-
 overflow:hidden;
-
 z-index:0;
-
 pointer-events:none;
-
 }
 
 .particle{
-
 position:absolute;
-
 background:var(--cyan);
-
 border-radius:50%;
-
-opacity:.25;
-
+opacity:.15;
 animation:float linear infinite;
-
-box-shadow:
-0 0 12px var(--cyan),
-0 0 24px var(--cyan);
-
+will-change:transform;
 }
 
 @keyframes float{
-
-0%{
-transform:
-translateY(100vh)
-scale(0);
-opacity:0;
-}
-
-10%{
-opacity:.3;
-}
-
-100%{
-transform:
-translateY(-100px)
-scale(1.3);
-opacity:0;
-}
-
+0%{transform:translateY(100vh)}
+100%{transform:translateY(-100px)}
 }
 
 /* =========================
    MAIN
 ========================= */
-
-#login,
-#dash{
-
+#login,#dash{
 position:relative;
-
 z-index:1;
-
 width:100%;
-
 min-height:100vh;
-
 display:flex;
-
 flex-direction:column;
-
 justify-content:center;
-
 align-items:center;
-
 padding:20px;
-
 }
 
 /* =========================
    TITLE
 ========================= */
-
 .title{
-
 font-size:clamp(42px,8vw,74px);
-
 font-weight:900;
-
 margin-bottom:30px;
-
 letter-spacing:3px;
-
-background:
-linear-gradient(
-90deg,
-var(--cyan),
-var(--blue));
-
+background:linear-gradient(90deg,var(--cyan),var(--blue));
 -webkit-background-clip:text;
 -webkit-text-fill-color:transparent;
-
-text-shadow:
-0 0 30px rgba(0,255,255,.4);
-
-animation:pulse 3s infinite;
-
-}
-
-@keyframes pulse{
-
-0%,100%{
-filter:brightness(1);
-}
-
-50%{
-filter:brightness(1.3);
-}
-
-}
-
-/* =========================
-   CARD
-========================= */
-
-.card{
-
-background:
-rgba(255,255,255,.04);
-
-backdrop-filter:blur(24px);
-
-border:
-1px solid rgba(255,255,255,.08);
-
-border-radius:28px;
-
-padding:24px;
-
-width:100%;
-
 position:relative;
-
-overflow:hidden;
-
-box-shadow:
-
-0 0 30px rgba(0,255,255,.08),
-
-inset 0 0 40px rgba(255,255,255,.02);
-
-transition:.35s ease;
-
 }
 
-.card:hover{
-
-transform:
-translateY(-4px)
-scale(1.01);
-
-box-shadow:
-
-0 0 40px rgba(0,255,255,.15),
-
-0 0 80px rgba(0,255,255,.08);
-
-}
-
-.card::before{
-
+.title::after{
 content:'';
-
 position:absolute;
-
-top:-100%;
-left:-100%;
-
-width:200%;
-height:200%;
-
-background:
-linear-gradient(
-45deg,
-transparent,
-rgba(255,255,255,.05),
-transparent);
-
-transform:rotate(25deg);
-
-animation:shine 7s linear infinite;
-
+inset:0;
+background:linear-gradient(90deg,transparent,rgba(255,255,255,.1),transparent);
+animation:shine 4s linear infinite;
 }
 
 @keyframes shine{
-
-100%{
-transform:
-translateX(100%)
-translateY(100%)
-rotate(25deg);
+0%{transform:translateX(-100%)}
+100%{transform:translateX(100%)}
 }
 
+/* =========================
+   CARD - SEM BLUR
+========================= */
+.card{
+background:rgba(10,15,25,.92);
+border:1px solid rgba(0,255,255,.12);
+border-radius:20px;
+padding:24px;
+width:100%;
+position:relative;
+overflow:hidden;
+box-shadow:0 4px 20px rgba(0,0,0,.4);
+transition:transform .2s ease;
+will-change:transform;
+contain:layout style paint;
+}
+
+.card:hover{
+transform:translateY(-2px);
+box-shadow:0 6px 30px rgba(0,255,255,.15);
 }
 
 /* =========================
    LOGIN
 ========================= */
-
 #login .card{
-
 max-width:520px;
-
 }
 
 /* =========================
    DASH
 ========================= */
-
 #dash{
-
 max-width:1450px;
-
 margin:auto;
-
 }
 
 /* =========================
    GRID
 ========================= */
-
 .grid{
-
 display:grid;
-
-grid-template-columns:
-repeat(auto-fit,minmax(240px,1fr));
-
+grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
 gap:18px;
-
 width:100%;
-
 max-width:1300px;
-
 margin:20px auto;
-
 }
 
 .grid .card{
-
 min-height:180px;
-
 display:flex;
-
 flex-direction:column;
-
 justify-content:center;
-
 align-items:center;
-
 }
 
 /* =========================
    LABEL
 ========================= */
-
 .label{
-
 font-size:12px;
-
 letter-spacing:2px;
-
 opacity:.6;
-
 text-transform:uppercase;
-
 }
 
 /* =========================
    VALUE
 ========================= */
-
 .value{
-
 font-size:clamp(40px,5vw,58px);
-
 font-weight:800;
-
 margin-top:12px;
-
-text-shadow:
-0 0 25px currentColor;
-
 }
 
 /* =========================
    INPUT
 ========================= */
-
-input,
-button{
-
+input,button{
 width:100%;
-
 max-width:500px;
-
 padding:18px;
-
 border-radius:18px;
-
 border:none;
-
 outline:none;
-
 margin-top:16px;
-
 font-size:18px;
-
-transition:.25s;
-
+transition:.2s;
 }
 
 input{
-
-background:
-rgba(0,0,0,.35);
-
+background:rgba(0,0,0,.5);
 color:#fff;
-
 font-family:monospace;
-
 letter-spacing:2px;
-
-border:
-1px solid rgba(0,255,255,.2);
-
-box-shadow:
-0 0 20px rgba(0,255,255,.05);
-
+border:1px solid rgba(0,255,255,.2);
 }
 
 input:focus{
-
 border-color:var(--cyan);
-
-box-shadow:
-0 0 25px rgba(0,255,255,.2);
-
+box-shadow:0 0 15px rgba(0,255,255,.2);
 }
 
 /* =========================
    BUTTON
 ========================= */
-
 button{
-
-background:
-linear-gradient(
-90deg,
-var(--blue),
-var(--cyan));
-
+background:linear-gradient(90deg,var(--blue),var(--cyan));
 color:#fff;
-
 font-weight:700;
-
 cursor:pointer;
-
-box-shadow:
-0 0 30px rgba(0,255,255,.25);
-
+box-shadow:0 4px 20px rgba(0,255,255,.25);
 }
 
 button:hover{
+transform:translateY(-1px);
+box-shadow:0 6px 25px rgba(0,255,255,.35);
+}
 
-transform:
-translateY(-2px)
-scale(1.02);
-
-box-shadow:
-0 0 45px rgba(0,255,255,.4);
-
+button:active{
+transform:translateY(0);
 }
 
 /* =========================
    STATUS
 ========================= */
-
 .status{
-
 display:inline-flex;
-
 align-items:center;
-
 gap:10px;
-
 padding:14px 26px;
-
 border-radius:999px;
-
 font-weight:700;
-
 margin-top:14px;
-
 }
 
 .on{
-
-background:
-rgba(0,255,136,.12);
-
+background:rgba(0,255,136,.12);
 color:var(--green);
-
-border:
-1px solid rgba(0,255,136,.3);
-
-box-shadow:
-0 0 25px rgba(0,255,136,.2);
-
+border:1px solid rgba(0,255,136,.3);
 }
 
 .off{
-
-background:
-rgba(255,68,68,.12);
-
+background:rgba(255,68,68,.12);
 color:var(--red);
-
-border:
-1px solid rgba(255,68,68,.3);
-
-box-shadow:
-0 0 25px rgba(255,68,68,.2);
-
+border:1px solid rgba(255,68,68,.3);
 }
 
 /* =========================
    GAUGE
 ========================= */
-
 .gauge-wrap{
-
 width:100%;
 max-width:1200px;
-
 margin:20px auto;
-
 }
 
 .gauge-card{
-
 padding:40px;
-
 }
 
 .gauge{
-
 width:240px;
 height:240px;
-
 margin:auto;
-
 border-radius:50%;
-
-background:
-conic-gradient(
-#00ff88 0deg,
-#00ffff 180deg,
-rgba(255,255,255,.08) 180deg
-);
-
+background:conic-gradient(#00ff88 0deg,#00ffff 180deg,rgba(255,255,255,.08) 180deg);
 position:relative;
-
-box-shadow:
-0 0 40px rgba(0,255,255,.2),
-0 0 80px rgba(0,255,255,.08);
-
-animation:gaugeGlow 3s infinite;
-
-}
-
-@keyframes gaugeGlow{
-
-0%,100%{
-filter:brightness(1);
-}
-
-50%{
-filter:brightness(1.2);
-}
-
+box-shadow:0 0 30px rgba(0,255,255,.15);
 }
 
 .gauge::before{
-
 content:'';
-
 position:absolute;
-
 inset:18px;
-
 border-radius:50%;
-
 background:#05070d;
-
-box-shadow:
-inset 0 0 30px rgba(0,255,255,.1);
-
 }
 
 .gauge-inner{
-
 position:absolute;
-
 inset:0;
-
 display:flex;
-
 flex-direction:column;
-
 justify-content:center;
-
 align-items:center;
-
 z-index:2;
-
 }
 
 .gauge-value{
-
 font-size:58px;
-
 font-weight:900;
-
 color:#00ff88;
-
-text-shadow:
-0 0 20px #00ff88;
-
 }
 
 .gauge-label{
-
 opacity:.6;
-
 letter-spacing:2px;
-
 font-size:12px;
-
 }
 
 /* =========================
    BAR
 ========================= */
-
 .bar-wrap{
-
 margin-top:24px;
-
 }
 
 .bar-label{
-
 display:flex;
-
 justify-content:space-between;
-
 margin-bottom:10px;
-
 font-size:14px;
-
 opacity:.7;
-
 }
 
 .bar{
-
 height:16px;
-
-background:
-rgba(255,255,255,.06);
-
+background:rgba(255,255,255,.06);
 border-radius:999px;
-
 overflow:hidden;
-
 }
 
 .bar-fill{
-
 height:100%;
 width:0%;
-
 border-radius:999px;
-
-background:
-linear-gradient(
-90deg,
-#00ff88,
-#00ffff
-);
-
-box-shadow:
-0 0 20px rgba(0,255,255,.4);
-
-transition:1s;
-
+background:linear-gradient(90deg,#00ff88,#00ffff);
+transition:width .8s ease;
 }
 
 /* =========================
    DIFF
 ========================= */
-
 .diff{
-
 display:flex;
-
 justify-content:center;
-
 flex-wrap:wrap;
-
 gap:24px;
-
 margin-top:20px;
-
 }
 
 .diff-item{
-
 padding:14px 20px;
-
 border-radius:18px;
-
-background:
-rgba(255,255,255,.03);
-
+background:rgba(255,255,255,.03);
 min-width:120px;
-
-backdrop-filter:blur(8px);
-
 }
 
 .diff-item span{
-
 display:block;
-
 margin-top:8px;
-
 font-size:26px;
-
 font-weight:800;
-
 }
 
 /* =========================
    CELLS
 ========================= */
-
 .cells{
-
 display:grid;
-
-grid-template-columns:
-repeat(auto-fill,minmax(95px,1fr));
-
+grid-template-columns:repeat(auto-fill,minmax(95px,1fr));
 gap:12px;
-
 margin-top:24px;
-
 }
 
 .cell{
-
-background:
-rgba(0,0,0,.28);
-
+background:rgba(0,0,0,.4);
 border-radius:18px;
-
 padding:14px;
-
-transition:.3s;
-
-border:
-1px solid rgba(255,255,255,.05);
-
-backdrop-filter:blur(8px);
-
+transition:.2s;
+border:1px solid rgba(255,255,255,.05);
+contain:layout style paint;
 }
 
 .cell:hover{
-
-transform:scale(1.05);
-
+transform:scale(1.03);
 }
 
 .cell-num{
-
 font-size:11px;
-
 opacity:.5;
-
 margin-bottom:6px;
-
 }
 
 .cell-val{
-
 font-size:20px;
-
 font-weight:700;
-
 }
 
 .cell.ok{
-
-border-color:
-rgba(0,255,136,.25);
-
-box-shadow:
-0 0 20px rgba(0,255,136,.08);
-
+border-color:rgba(0,255,136,.25);
 }
 
 .cell.warn{
-
-border-color:
-rgba(255,170,0,.25);
-
-box-shadow:
-0 0 20px rgba(255,170,0,.08);
-
+border-color:rgba(255,170,0,.25);
 }
 
 .cell.crit{
-
-border-color:
-rgba(255,68,68,.25);
-
-box-shadow:
-0 0 20px rgba(255,68,68,.08);
-
+border-color:rgba(255,68,68,.25);
 }
 
 /* =========================
    CHART
 ========================= */
-
 .chart-card{
-
 width:100%;
 max-width:1200px;
-
 margin:20px auto;
-
 padding:30px;
-
 }
 
 .chart-title{
-
 margin-bottom:20px;
-
 font-size:14px;
-
 letter-spacing:2px;
-
 opacity:.7;
-
 text-transform:uppercase;
-
 }
 
 canvas{
-
 width:100%!important;
 height:320px!important;
-
 }
 
 /* =========================
    LOGOUT
 ========================= */
-
 .logout{
-
 margin-top:40px;
-
-background:
-rgba(255,68,68,.08);
-
-border:
-1px solid rgba(255,68,68,.2);
-
+background:rgba(255,68,68,.08);
+border:1px solid rgba(255,68,68,.2);
 }
 
 /* =========================
    HIDDEN
 ========================= */
-
 .hidden{
 display:none!important;
 }
 
 /* =========================
-   RESPONSIVE
+   REDUCE MOTION
 ========================= */
-
-@media(max-width:768px){
-
-.grid{
-grid-template-columns:1fr 1fr;
+@media (prefers-reduced-motion: reduce) {
+    * { animation: none !important; transition: none !important; }
 }
 
+/* =========================
+   RESPONSIVE
+========================= */
+@media(max-width:768px){
+.grid{grid-template-columns:1fr 1fr}
 }
 
 @media(max-width:520px){
-
-.grid{
-grid-template-columns:1fr;
+.grid{grid-template-columns:1fr}
+.title{font-size:46px}
+.value{font-size:42px}
+.gauge{width:200px;height:200px}
 }
-
-.title{
-font-size:46px;
-}
-
-.value{
-font-size:42px;
-}
-
-.gauge{
-width:200px;
-height:200px;
-}
-
-}
-
 </style>
-
 </head>
 
 <body>
-
 <div id="particles"></div>
 
 <!-- LOGIN -->
-
 <div id="login">
-
-<div class="title">
-SMART BMS
-</div>
-
+<div class="title">SMART BMS</div>
 <div class="card">
-
-<div class="label">
-Código da BMS
+<div class="label">Código da BMS</div>
+<input id="code" placeholder="SL00000000" maxlength="10">
+<button onclick="login()">Entrar</button>
+<p id="error" style="color:#ff4444;margin-top:12px;display:none;"></p>
 </div>
-
-<input
-id="code"
-placeholder="SL00000000"
-maxlength="10"
->
-
-<button onclick="login()">
-Entrar
-</button>
-
-<p
-id="error"
-style="
-color:#ff4444;
-margin-top:12px;
-display:none;
-">
-</p>
-
-</div>
-
 </div>
 
 <!-- DASH -->
-
 <div id="dash" class="hidden">
-   
-<div class="title">
-</div>
-   
-<div class="title">
-SMART BMS
-   </div>
+<div class="title">SMART BMS</div>
 
 <div class="gauge-wrap">
-
 <div class="card gauge-card">
-
 <div class="gauge" id="socGauge">
-
 <div class="gauge-inner">
-
-<div class="gauge-value" id="socGaugeValue">
-0%
+<div class="gauge-value" id="socGaugeValue">0%</div>
+<div class="gauge-label">STATE OF CHARGE</div>
 </div>
-
-<div class="gauge-label">
-CARGA
 </div>
-
-</div>
-
-</div>
-
 <div class="bar-wrap">
-
 <div class="bar-label">
-
 <span>Bateria</span>
-
-<span id="socBarText">
-0%
-</span>
-
+<span id="socBarText">0%</span>
 </div>
-
-<div class="bar">
-<div class="bar-fill" id="socBar"></div>
+<div class="bar"><div class="bar-fill" id="socBar"></div></div>
 </div>
-
 </div>
-
-</div>
-
 </div>
 
 <div class="card" style="max-width:1200px">
-
-<div class="label" id="bmsName">
-BMS
-</div>
-
+<div class="label" id="bmsName">BMS</div>
 <div style="margin-top:16px">
-
-<span id="connStatus" class="status off">
-Offline
-</span>
-
+<span id="connStatus" class="status off">Offline</span>
 </div>
-
 </div>
 
 <div class="grid">
-
 <div class="card">
 <div class="label">SOC</div>
 <div class="value" id="soc" style="color:#00ff88">0%</div>
 </div>
-
 <div class="card">
 <div class="label">Tensão</div>
 <div class="value" id="voltage" style="color:#00ffff">0V</div>
 </div>
-
 <div class="card">
 <div class="label">Corrente</div>
 <div class="value" id="current" style="color:#ffaa00">0A</div>
 </div>
-
 <div class="card">
 <div class="label">Temperatura</div>
 <div class="value" id="temp" style="color:#ff4444">0°C</div>
 </div>
-
 </div>
 
 <div class="card chart-card">
-
-<div class="chart-title">
-Realtime Monitor
-</div>
-
+<div class="chart-title">Realtime Monitor</div>
 <canvas id="mainChart"></canvas>
-
 </div>
 
 <div class="card" style="max-width:1200px">
-
-<div class="label">
-Células - Tensão Individual
-</div>
-
+<div class="label">Células - Tensão Individual</div>
 <div class="diff">
-
-<div class="diff-item">
-Min
-<div>
-<span id="cellMin" style="color:#00ff88">0.00V</span>
+<div class="diff-item">Min<div><span id="cellMin" style="color:#00ff88">0.00V</span></div></div>
+<div class="diff-item">Max<div><span id="cellMax" style="color:#ffaa00">0.00V</span></div></div>
+<div class="diff-item">Diferença<div><span id="cellDiff" style="color:#ff4444">0.00V</span></div></div>
+<div class="diff-item">Total<div><span id="cellCount" style="color:#00ffff">0</span></div></div>
 </div>
-</div>
-
-<div class="diff-item">
-Max
-<div>
-<span id="cellMax" style="color:#ffaa00">0.00V</span>
-</div>
-</div>
-
-<div class="diff-item">
-Diferença
-<div>
-<span id="cellDiff" style="color:#ff4444">0.00V</span>
-</div>
-</div>
-
-<div class="diff-item">
-Total
-<div>
-<span id="cellCount" style="color:#00ffff">0</span>
-</div>
-</div>
-
-</div>
-
 <div id="cells" class="cells"></div>
-
 </div>
 
-<button class="logout" onclick="logout()">
-Sair do Painel
-</button>
-
+<button class="logout" onclick="logout()">Sair do Painel</button>
 </div>
 
-<script>
-
+<script type="module">
 /* =========================
-   PARTICLES
+   PARTICLES - OTIMIZADO
 ========================= */
-
 function createParticles(){
-
-const container =
-document.getElementById('particles');
-
-setInterval(() => {
-
-const p =
-document.createElement('div');
-
-p.className = 'particle';
-
-const size =
-Math.random() * 4 + 1;
-
-p.style.width = size + 'px';
-p.style.height = size + 'px';
-
-p.style.left =
-Math.random() * 100 + '%';
-
-p.style.animationDuration =
-(Math.random() * 10 + 10) + 's';
-
-container.appendChild(p);
-
-setTimeout(() => p.remove(),20000);
-
-},300);
-
+  if(window.innerWidth < 768) return;
+  const container = document.getElementById('particles');
+  const maxParticles = 6;
+  
+  setInterval(() => {
+    if(container.children.length >= maxParticles) return;
+    const p = document.createElement('div');
+    p.className = 'particle';
+    const size = Math.random() * 2 + 1;
+    p.style.width = size + 'px';
+    p.style.height = size + 'px';
+    p.style.left = Math.random() * 100 + '%';
+    p.style.animationDuration = (Math.random() * 8 + 12) + 's';
+    container.appendChild(p);
+    setTimeout(() => p.remove(), 20000);
+  }, 2500);
 }
-
 createParticles();
 
 /* =========================
    API
 ========================= */
-
 const API = '/api/bms';
-
 let interval;
+let chart;
 
 /* =========================
    AUTO LOGIN
 ========================= */
-
 if(localStorage.getItem('bms_token')){
-showDash();
+  showDash();
 }
 
 /* =========================
    INPUT
 ========================= */
-
+let inputTimer;
 document.getElementById('code').oninput = e => {
-
-if(!e.target.value.startsWith('SL')){
-e.target.value = 'SL';
-}
-
-e.target.value =
-'SL' +
-e.target.value
-.slice(2)
-.replace(/[^0-9]/g,'')
-.slice(0,8);
-
+  clearTimeout(inputTimer);
+  inputTimer = setTimeout(() => {
+    if(!e.target.value.startsWith('SL')) e.target.value = 'SL';
+    e.target.value = 'SL' + e.target.value.slice(2).replace(/[^0-9]/g,'').slice(0,8);
+  }, 50);
 };
 
 /* =========================
    LOGIN
 ========================= */
-
-async function login(){
-
-const code =
-document.getElementById('code')
-.value
-.trim();
-
-const errorEl =
-document.getElementById('error');
-
-errorEl.style.display='none';
-
-try{
-
-const r = await fetch(
-API + '?action=login',
-{
-method:'POST',
-headers:{
-'Content-Type':'application/json'
-},
-body:JSON.stringify({code})
-}
-);
-
-const d = await r.json();
-
-if(d.ok && d.token){
-
-localStorage.setItem(
-'bms_token',
-d.token
-);
-
-showDash();
-
-}else{
-
-errorEl.textContent =
-d.error || 'BMS não encontrada';
-
-errorEl.style.display='block';
-
-}
-
-}catch(e){
-
-errorEl.textContent =
-'Erro de conexão';
-
-errorEl.style.display='block';
-
-}
-
+window.login = async function(){
+  const code = document.getElementById('code').value.trim();
+  const errorEl = document.getElementById('error');
+  errorEl.style.display='none';
+  
+  try{
+    const r = await fetch(API + '?action=login', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({code})
+    });
+    const d = await r.json();
+    if(d.ok && d.token){
+      localStorage.setItem('bms_token', d.token);
+      showDash();
+    }else{
+      errorEl.textContent = d.error || 'BMS não encontrada';
+      errorEl.style.display='block';
+    }
+  }catch(e){
+    errorEl.textContent = 'Erro de conexão';
+    errorEl.style.display='block';
+  }
 }
 
 /* =========================
-   SHOW DASH
+   SHOW DASH + CHART LAZY LOAD
 ========================= */
-
-function showDash(){
-
-document
-.getElementById('login')
-.classList
-.add('hidden');
-
-document
-.getElementById('dash')
-.classList
-.remove('hidden');
-
-update();
-
-interval =
-setInterval(update,3000);
-
+async function showDash(){
+  document.getElementById('login').classList.add('hidden');
+  document.getElementById('dash').classList.remove('hidden');
+  
+  if(!window.Chart){
+    const { Chart, registerables } = await import('https://cdn.jsdelivr.net/npm/chart.js@4.4.1/+esm');
+    Chart.register(...registerables);
+    window.Chart = Chart;
+  }
+  initChart();
+  update();
+  interval = setInterval(update, 5000);
 }
 
 /* =========================
    CELLS
 ========================= */
-
 function renderCells(cells){
-
-if(!cells || cells.length === 0){
-
-document.getElementById('cells').innerHTML =
-'<div style="grid-column:1/-1;opacity:.4;padding:20px">Sem dados das células</div>';
-
-return;
-
-}
-
-const vals =
-cells
-.map(c => parseFloat(c))
-.filter(v => v > 0);
-
-const min = Math.min(...vals);
-const max = Math.max(...vals);
-const diff = max - min;
-
-document.getElementById('cellMin').textContent =
-min.toFixed(3)+'V';
-
-document.getElementById('cellMax').textContent =
-max.toFixed(3)+'V';
-
-document.getElementById('cellDiff').textContent =
-diff.toFixed(3)+'V';
-
-document.getElementById('cellCount').textContent =
-cells.length;
-
-document.getElementById('cells').innerHTML =
-
-cells.map((v,i)=>{
-
-const val = parseFloat(v);
-
-let cls = 'ok';
-
-if(val < 3.2 || val > 4.2){
-cls = 'crit';
-}
-else if(val < 3.4 || val > 4.15){
-cls = 'warn';
-}
-
-return `
-<div class="cell ${cls}">
-<div class="cell-num">C${i+1}</div>
-<div class="cell-val">${val.toFixed(3)}</div>
-</div>
-`;
-
-}).join('');
-
+  if(!cells || cells.length === 0){
+    document.getElementById('cells').innerHTML = '<div style="grid-column:1/-1;opacity:.4;padding:20px">Sem dados das células</div>';
+    return;
+  }
+  
+  const vals = cells.map(c => parseFloat(c)).filter(v => v > 0);
+  if(vals.length === 0) return;
+  
+  const min = Math.min(...vals);
+  const max = Math.max(...vals);
+  const diff = max - min;
+  
+  document.getElementById('cellMin').textContent = min.toFixed(3)+'V';
+  document.getElementById('cellMax').textContent = max.toFixed(3)+'V';
+  document.getElementById('cellDiff').textContent = diff.toFixed(3)+'V';
+  document.getElementById('cellCount').textContent = cells.length;
+  
+  document.getElementById('cells').innerHTML = cells.map((v,i)=>{
+    const val = parseFloat(v);
+    let cls = 'ok';
+    if(val < 3.2 || val > 4.2) cls = 'crit';
+    else if(val < 3.4 || val > 4.15) cls = 'warn';
+    return `
+      <div class="cell ${cls}">
+        <div class="cell-num">C${i+1}</div>
+        <div class="cell-val">${val.toFixed(3)}</div>
+      </div>
+    `;
+  }).join('');
 }
 
 /* =========================
    CHART
 ========================= */
-
 const voltageHistory = [];
 const currentHistory = [];
 const labelsHistory = [];
 
-const ctx = document
-.getElementById('mainChart')
-.getContext('2d');
-
-const chart = new Chart(ctx,{
-
-type:'line',
-
-data:{
-
-labels:labelsHistory,
-
-datasets:[
-
-{
-label:'Tensão',
-data:voltageHistory,
-borderColor:'#00ffff',
-backgroundColor:'rgba(0,255,255,.08)',
-tension:.4,
-fill:true
-},
-
-{
-label:'Corrente',
-data:currentHistory,
-borderColor:'#ffaa00',
-backgroundColor:'rgba(255,170,0,.08)',
-tension:.4,
-fill:true
+function initChart(){
+  const ctx = document.getElementById('mainChart').getContext('2d');
+  chart = new window.Chart(ctx, {
+    type:'line',
+    data:{
+      labels:labelsHistory,
+      datasets:[
+        {
+          label:'Tensão',
+          data:voltageHistory,
+          borderColor:'#00ffff',
+          backgroundColor:'rgba(0,255,255,.08)',
+          tension:.4,
+          fill:true,
+          borderWidth:2
+        },
+        {
+          label:'Corrente',
+          data:currentHistory,
+          borderColor:'#ffaa00',
+          backgroundColor:'rgba(255,170,0,.08)',
+          tension:.4,
+          fill:true,
+          borderWidth:2
+        }
+      ]
+    },
+    options:{
+      responsive:true,
+      maintainAspectRatio:false,
+      animation:false,
+      elements:{
+        point:{radius:0}
+      },
+      plugins:{
+        legend:{labels:{color:'#ffffff'}}
+      },
+      scales:{
+        x:{
+          ticks:{color:'#aaa'},
+          grid:{color:'rgba(255,255,255,.05)'}
+        },
+        y:{
+          ticks:{color:'#aaa'},
+          grid:{color:'rgba(255,255,255,.05)'}
+        }
+      }
+    }
+  });
 }
-
-]
-
-},
-
-options:{
-
-responsive:true,
-
-maintainAspectRatio:false,
-
-plugins:{
-legend:{
-labels:{
-color:'#ffffff'
-}
-}
-},
-
-scales:{
-
-x:{
-
-ticks:{
-color:'#aaa'
-},
-
-grid:{
-color:'rgba(255,255,255,.05)'
-}
-
-},
-
-y:{
-
-ticks:{
-color:'#aaa'
-},
-
-grid:{
-color:'rgba(255,255,255,.05)'
-}
-
-}
-
-}
-
-}
-
-});
 
 /* =========================
    GAUGE
 ========================= */
-
 function updateGauge(soc){
-
-const gauge =
-document.getElementById('socGauge');
-
-const value =
-document.getElementById('socGaugeValue');
-
-const bar =
-document.getElementById('socBar');
-
-const text =
-document.getElementById('socBarText');
-
-const deg = soc * 3.6;
-
-value.textContent = soc + '%';
-
-text.textContent = soc + '%';
-
-bar.style.width = soc + '%';
-
-gauge.style.background = `
-conic-gradient(
-#00ff88 0deg,
-#00ffff ${deg}deg,
-rgba(255,255,255,.08) ${deg}deg
-)
-`;
-
+  const gauge = document.getElementById('socGauge');
+  const value = document.getElementById('socGaugeValue');
+  const bar = document.getElementById('socBar');
+  const text = document.getElementById('socBarText');
+  const deg = soc * 3.6;
+  value.textContent = soc + '%';
+  text.textContent = soc + '%';
+  bar.style.width = soc + '%';
+  gauge.style.background = `conic-gradient(#00ff88 0deg,#00ffff ${deg}deg,rgba(255,255,255,.08) ${deg}deg)`;
 }
 
 /* =========================
    UPDATE
 ========================= */
-
 async function update(){
-
-const token =
-localStorage.getItem('bms_token');
-
-try{
-
-const r = await fetch(
-API + '?action=data',
-{
-headers:{
-'Authorization':'Bearer '+token
-}
-}
-);
-
-if(r.status===401){
-logout();
-return;
-}
-
-const d = await r.json();
-
-document.getElementById('bmsName').textContent =
-d.nome || d.code;
-
-document.getElementById('soc').textContent =
-(d.soc?.toFixed(0)||0)+'%';
-
-document.getElementById('voltage').textContent =
-(d.voltage?.toFixed(2)||0)+'V';
-
-document.getElementById('current').textContent =
-(d.current?.toFixed(1)||0)+'A';
-
-document.getElementById('temp').textContent =
-(d.temp?.toFixed(1)||0)+'°C';
-
-document.getElementById('connStatus').textContent =
-d.online ? 'Online' : 'Offline';
-
-document.getElementById('connStatus').className =
-'status ' + (d.online ? 'on' : 'off');
-
-renderCells(d.cells);
-
-/* GAUGE */
-
-updateGauge(
-parseInt(d.soc || 0)
-);
-
-/* HISTORY */
-
-const now = new Date()
-.toLocaleTimeString();
-
-labelsHistory.push(now);
-
-voltageHistory.push(d.voltage || 0);
-
-currentHistory.push(d.current || 0);
-
-if(labelsHistory.length > 20){
-
-labelsHistory.shift();
-voltageHistory.shift();
-currentHistory.shift();
-
-}
-
-chart.update();
-
-}catch(e){
-
-document.getElementById('connStatus').textContent =
-'Erro';
-
-document.getElementById('connStatus').className =
-'status off';
-
-}
-
+  const token = localStorage.getItem('bms_token');
+  try{
+    const r = await fetch(API + '?action=data', {
+      headers:{'Authorization':'Bearer '+token}
+    });
+    if(r.status===401){ logout(); return; }
+    const d = await r.json();
+    
+    requestAnimationFrame(() => {
+      document.getElementById('bmsName').textContent = d.nome || d.code;
+      document.getElementById('soc').textContent = (d.soc?.toFixed(0)||0)+'%';
+      document.getElementById('voltage').textContent = (d.voltage?.toFixed(2)||0)+'V';
+      document.getElementById('current').textContent = (d.current?.toFixed(1)||0)+'A';
+      document.getElementById('temp').textContent = (d.temp?.toFixed(1)||0)+'°C';
+      
+      const connEl = document.getElementById('connStatus');
+      connEl.textContent = d.online ? 'Online' : 'Offline';
+      connEl.className = 'status ' + (d.online ? 'on' : 'off');
+      
+      renderCells(d.cells);
+      updateGauge(parseInt(d.soc || 0));
+    });
+    
+    const now = new Date().toLocaleTimeString('pt-BR', {hour:'2-digit', minute:'2-digit', second:'2-digit'});
+    labelsHistory.push(now);
+    voltageHistory.push(d.voltage || 0);
+    currentHistory.push(d.current || 0);
+    
+    if(labelsHistory.length > 15){
+      labelsHistory.shift();
+      voltageHistory.shift();
+      currentHistory.shift();
+    }
+    
+    if(chart) chart.update('none');
+  }catch(e){
+    document.getElementById('connStatus').textContent = 'Erro';
+    document.getElementById('connStatus').className = 'status off';
+  }
 }
 
 /* =========================
    LOGOUT
 ========================= */
-
-function logout(){
-
-clearInterval(interval);
-
-localStorage.removeItem('bms_token');
-
-document
-.getElementById('dash')
-.classList
-.add('hidden');
-
-document
-.getElementById('login')
-.classList
-.remove('hidden');
-
-document.getElementById('code').value='';
-
+window.logout = function(){
+  clearInterval(interval);
+  localStorage.removeItem('bms_token');
+  document.getElementById('dash').classList.add('hidden');
+  document.getElementById('login').classList.remove('hidden');
+  document.getElementById('code').value='';
 }
 
 /* =========================
    PWA
 ========================= */
-
 if ('serviceWorker' in navigator) {
-
-window.addEventListener('load', async () => {
-
-try {
-
-await navigator.serviceWorker.register('/service-worker.js');
-
-console.log('PWA ativo');
-
-} catch (e) {
-
-console.log(e);
-
+  window.addEventListener('load', async () => {
+    try {
+      await navigator.serviceWorker.register('/service-worker.js');
+      console.log('PWA ativo');
+    } catch (e) {
+      console.log(e);
+    }
+  });
 }
-
-});
-
-}
-
 </script>
-
 </body>
-  </html>
+</html>
