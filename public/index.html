@@ -114,8 +114,8 @@ animation:shine 4s linear infinite;
 .card{
 background:rgba(10,15,25,.92);
 border:1px solid rgba(0,255,255,.12);
-border-radius:20px;
-padding:20px;
+border-radius:16px;
+padding:16px;
 width:100%;
 position:relative;
 overflow:hidden;
@@ -219,32 +219,33 @@ transition:width .8s ease;
 
 .grid{
 display:grid;
-grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
-gap:12px;
+grid-template-columns:repeat(4,1fr);
+gap:10px;
 width:100%;
 max-width:1300px;
 margin:12px auto;
 }
 
 .grid .card{
-min-height:160px;
+min-height:140px;
 display:flex;
 flex-direction:column;
 justify-content:center;
 align-items:center;
+padding:14px;
 }
 
 .label{
-font-size:12px;
-letter-spacing:2px;
+font-size:11px;
+letter-spacing:1.5px;
 opacity:.6;
 text-transform:uppercase;
 }
 
 .value{
-font-size:clamp(40px,5vw,58px);
+font-size:clamp(32px,4vw,48px);
 font-weight:800;
-margin-top:12px;
+margin-top:10px;
 }
 
 input,button{
@@ -411,15 +412,11 @@ display:none!important;
     * { animation: none !important; transition: none !important; }
 }
 
-@media(max-width:768px){
-.grid{grid-template-columns:1fr 1fr}
-}
-
 @media(max-width:520px){
-.grid{grid-template-columns:1fr}
-.title{font-size:46px}
-.value{font-size:42px}
+.title{font-size:38px}
+.value{font-size:28px}
 .gauge{width:200px;height:200px}
+.gauge-value{font-size:48px}
 }
 </style>
 </head>
