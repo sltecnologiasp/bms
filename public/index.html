@@ -543,6 +543,7 @@ createParticles();
 const API = '/api/bms';
 let interval;
 let chart;
+let lastDataHash = '';
 let offlineTimer;
 
 if(localStorage.getItem('bms_token')){
@@ -697,6 +698,7 @@ function updateGauge(soc){
 }
 
 function setOffline(){
+  clearTimeout(offlineTimer);
   document.getElementById('connStatus').textContent = 'Offline';
   document.getElementById('connStatus').className = 'status off';
   document.getElementById('soc').textContent = '--%';
@@ -718,11 +720,19 @@ async function update(){
     if(r.status===401){ logout(); return; }
     const d = await r.json();
     
-    // Recebeu resposta = cancela timeout e agenda novo
-    clearTimeout(offlineTimer);
-    offlineTimer = setTimeout(() => {
-      setOffline();
-    }, 10000);
+    // Cria hash dos dados principais com 1 casa decimal pra evitar ruído
+    const dataHash = `${d.soc?.toFixed(0)}-${d.voltage?.toFixed(1)}-${d.current?.toFixed(1)}-${d.temp?.toFixed(1)}-${d.cells?.join(',')}`;
+    
+    // Se o dado mudou, reseta o timer de offline
+    if(dataHash !== lastDataHash){
+      lastDataHash = dataHash;
+      clearTimeout(offlineTimer);
+      
+      // Se ficar 10s sem mudar = offline
+      offlineTimer = setTimeout(() => {
+        setOffline();
+      }, 10000);
+    }
     
     document.getElementById('bmsName').textContent = d.nome || d.code;
     document.getElementById('soc').textContent = (d.soc?.toFixed(0)||0)+'%';
