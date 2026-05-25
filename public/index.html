@@ -175,6 +175,9 @@ z-index:2;
 font-size:58px;
 font-weight:900;
 color:#00ff88;
+width:3ch;
+text-align:center;
+font-variant-numeric:tabular-nums;
 }
 
 .gauge-label{
@@ -232,6 +235,7 @@ padding:14px;
 overflow:hidden;
 transform:translateZ(0);
 backface-visibility:hidden;
+contain:size layout;
 }
 
 .label{
@@ -248,7 +252,9 @@ font-weight:800;
 margin-top:8px;
 line-height:1;
 white-space:nowrap;
-text-overflow:clip;
+width:7ch;
+text-align:center;
+font-variant-numeric:tabular-nums;
 transform:translateZ(0);
 }
 
@@ -311,7 +317,7 @@ border:1px solid rgba(0,255,136,.3);
 }
 
 .off{
-background:rgba(255,68,.12);
+background:rgba(255,68,68,.12);
 color:var(--red);
 border:1px solid rgba(255,68,68,.3);
 }
@@ -336,6 +342,9 @@ display:block;
 margin-top:8px;
 font-size:26px;
 font-weight:800;
+width:8ch;
+text-align:center;
+font-variant-numeric:tabular-nums;
 }
 
 .cells{
@@ -366,6 +375,9 @@ margin-bottom:6px;
 .cell-val{
 font-size:20px;
 font-weight:700;
+width:7ch;
+text-align:center;
+font-variant-numeric:tabular-nums;
 }
 
 .cell.ok{
@@ -438,7 +450,6 @@ display:none!important;
 <input id="code" placeholder="SL00000000" maxlength="10">
 <button onclick="login()">Entrar</button>
 <p id="error" style="color:#ff4444;margin-top:12px;display:none;"></p>
-</div>
 </div>
 
 <div id="dash" class="hidden">
