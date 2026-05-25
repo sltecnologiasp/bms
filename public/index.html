@@ -219,6 +219,7 @@ gap:8px;
 width:100%;
 max-width:1300px;
 margin:12px auto;
+transform:translateZ(0);
 }
 
 .grid .card{
@@ -231,6 +232,8 @@ justify-content:center;
 align-items:center;
 padding:14px;
 overflow:hidden;
+transform:translateZ(0);
+backface-visibility:hidden;
 }
 
 .label{
@@ -317,26 +320,28 @@ border:1px solid rgba(255,68,68,.3);
 }
 
 .diff{
-display:flex;
-justify-content:center;
-flex-wrap:wrap;
-gap:18px;
+display:grid;
+grid-template-columns:repeat(4, 1fr);
+gap:8px;
 margin-top:18px;
 }
 
 .diff-item{
-padding:14px 20px;
-border-radius:18px;
+padding:12px 8px;
+border-radius:14px;
 background:rgba(255,255,255,.03);
-min-width:120px;
+min-width:0;
+text-align:center;
 }
 
 .diff-item span{
 display:block;
-margin-top:8px;
-font-size:26px;
+margin-top:6px;
+font-size:22px;
 font-weight:800;
-width:8ch;
+width:6ch;
+margin-left:auto;
+margin-right:auto;
 text-align:center;
 font-variant-numeric:tabular-nums;
 }
@@ -430,6 +435,7 @@ display:none!important;
 .gauge-card{min-height:280px;padding:20px 20px 30px}
 .grid .card{padding:8px;height:100px}
 .label{font-size:8px}
+.diff-item span{font-size:18px}
 }
 </style>
 </head>
@@ -441,7 +447,7 @@ display:none!important;
 <div class="title">SMART BMS</div>
 <div class="card">
 <div class="label">Código da BMS</div>
-<input id="code" placeholder="SL00000000" maxlength="10">
+<input id="code" placeholder="SL00000" maxlength="10">
 <button onclick="login()">Entrar</button>
 <p id="error" style="color:#ff4444;margin-top:12px;display:none;"></p>
 </div>
@@ -464,8 +470,6 @@ display:none!important;
 <span id="socBarText">0%</span>
 </div>
 <div class="bar"><div class="bar-fill" id="socBar"></div></div>
-</div>
-</div>
 </div>
 
 <div class="card" style="max-width:1200px;margin:12px auto">
