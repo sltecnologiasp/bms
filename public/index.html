@@ -8,7 +8,16 @@
 <title>SMART BMS</title>
 
 <link rel="manifest" href="/manifest.json">
+
 <meta name="theme-color" content="#00ffff">
+
+<link rel="icon" href="/icon-192.png">
+
+<link rel="apple-touch-icon" href="/icon-192.png">
+
+<meta name="apple-mobile-web-app-capable" content="yes">
+
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
 
@@ -16,29 +25,50 @@
 
 <style>
 
+/* =========================
+   RESET
+========================= */
+
 *{
 margin:0;
 padding:0;
 box-sizing:border-box;
 }
 
+/* =========================
+   ROOT
+========================= */
+
 :root{
+
 --bg:#05070d;
+
 --cyan:#00ffff;
 --blue:#0080ff;
 --green:#00ff88;
 --red:#ff4444;
 --orange:#ffaa00;
+
 }
+
+/* =========================
+   BODY
+========================= */
 
 body{
 
 font-family:'Inter',sans-serif;
 
 background:
+
 radial-gradient(circle at top,
 rgba(0,255,255,.12),
 transparent 40%),
+
+radial-gradient(circle at bottom,
+rgba(0,128,255,.08),
+transparent 40%),
+
 var(--bg);
 
 color:#fff;
@@ -47,31 +77,88 @@ overflow-x:hidden;
 
 min-height:100vh;
 
+position:relative;
+
 }
 
-/* PARTICLES */
+/* =========================
+   GRID BACKGROUND
+========================= */
+
+body::before{
+
+content:'';
+
+position:fixed;
+
+inset:0;
+
+background-image:
+
+linear-gradient(
+rgba(255,255,255,.03) 1px,
+transparent 1px),
+
+linear-gradient(
+90deg,
+rgba(255,255,255,.03) 1px,
+transparent 1px);
+
+background-size:40px 40px;
+
+mask-image:
+radial-gradient(circle at center,
+black,
+transparent 90%);
+
+pointer-events:none;
+
+z-index:0;
+
+}
+
+/* =========================
+   PARTICLES
+========================= */
 
 #particles{
+
 position:fixed;
+
 inset:0;
+
 overflow:hidden;
-pointer-events:none;
+
 z-index:0;
+
+pointer-events:none;
+
 }
 
 .particle{
+
 position:absolute;
-background:#00ffff;
+
+background:var(--cyan);
+
 border-radius:50%;
+
 opacity:.25;
+
 animation:float linear infinite;
-box-shadow:0 0 12px #00ffff;
+
+box-shadow:
+0 0 12px var(--cyan),
+0 0 24px var(--cyan);
+
 }
 
 @keyframes float{
 
 0%{
-transform:translateY(100vh) scale(0);
+transform:
+translateY(100vh)
+scale(0);
 opacity:0;
 }
 
@@ -80,114 +167,227 @@ opacity:.3;
 }
 
 100%{
-transform:translateY(-100px) scale(1.2);
+transform:
+translateY(-100px)
+scale(1.3);
 opacity:0;
 }
 
 }
 
-/* MAIN */
+/* =========================
+   MAIN
+========================= */
 
 #login,
 #dash{
 
 position:relative;
+
 z-index:1;
+
+width:100%;
 
 min-height:100vh;
 
 display:flex;
+
 flex-direction:column;
+
 justify-content:center;
+
 align-items:center;
 
 padding:20px;
 
 }
 
-/* TITLE */
+/* =========================
+   TITLE
+========================= */
 
 .title{
 
-font-size:56px;
+font-size:clamp(42px,8vw,74px);
+
 font-weight:900;
 
-margin-bottom:25px;
+margin-bottom:30px;
+
+letter-spacing:3px;
 
 background:
-linear-gradient(90deg,#00ffff,#0080ff);
+linear-gradient(
+90deg,
+var(--cyan),
+var(--blue));
 
 -webkit-background-clip:text;
 -webkit-text-fill-color:transparent;
 
-text-shadow:0 0 25px rgba(0,255,255,.3);
+text-shadow:
+0 0 30px rgba(0,255,255,.4);
+
+animation:pulse 3s infinite;
 
 }
 
-/* CARD */
+@keyframes pulse{
+
+0%,100%{
+filter:brightness(1);
+}
+
+50%{
+filter:brightness(1.3);
+}
+
+}
+
+/* =========================
+   CARD
+========================= */
 
 .card{
-
-width:100%;
-max-width:1200px;
 
 background:
 rgba(255,255,255,.04);
 
-border:
-1px solid rgba(255,255,255,.06);
+backdrop-filter:blur(24px);
 
-backdrop-filter:blur(20px);
+border:
+1px solid rgba(255,255,255,.08);
 
 border-radius:28px;
 
 padding:24px;
 
-margin-top:18px;
+width:100%;
+
+position:relative;
+
+overflow:hidden;
 
 box-shadow:
-0 0 35px rgba(0,255,255,.08);
+
+0 0 30px rgba(0,255,255,.08),
+
+inset 0 0 40px rgba(255,255,255,.02);
+
+transition:.35s ease;
 
 }
 
-/* LOGIN */
+.card:hover{
+
+transform:
+translateY(-4px)
+scale(1.01);
+
+box-shadow:
+
+0 0 40px rgba(0,255,255,.15),
+
+0 0 80px rgba(0,255,255,.08);
+
+}
+
+.card::before{
+
+content:'';
+
+position:absolute;
+
+top:-100%;
+left:-100%;
+
+width:200%;
+height:200%;
+
+background:
+linear-gradient(
+45deg,
+transparent,
+rgba(255,255,255,.05),
+transparent);
+
+transform:rotate(25deg);
+
+animation:shine 7s linear infinite;
+
+}
+
+@keyframes shine{
+
+100%{
+transform:
+translateX(100%)
+translateY(100%)
+rotate(25deg);
+}
+
+}
+
+/* =========================
+   LOGIN
+========================= */
 
 #login .card{
-max-width:500px;
+
+max-width:520px;
+
 }
 
-/* GRID */
+/* =========================
+   DASH
+========================= */
+
+#dash{
+
+max-width:1450px;
+
+margin:auto;
+
+}
+
+/* =========================
+   GRID
+========================= */
 
 .grid{
 
 display:grid;
 
 grid-template-columns:
-repeat(2,minmax(0,1fr));
+repeat(auto-fit,minmax(240px,1fr));
 
-gap:16px;
+gap:18px;
 
 width:100%;
-max-width:1200px;
 
-margin-top:18px;
+max-width:1300px;
+
+margin:20px auto;
 
 }
 
-/* CARDS METRICAS */
+.grid .card{
 
-.metric{
-
-min-height:160px;
+min-height:180px;
 
 display:flex;
+
 flex-direction:column;
+
 justify-content:center;
+
 align-items:center;
 
 }
 
-/* LABEL */
+/* =========================
+   LABEL
+========================= */
 
 .label{
 
@@ -201,26 +401,33 @@ text-transform:uppercase;
 
 }
 
-/* VALUE */
+/* =========================
+   VALUE
+========================= */
 
 .value{
 
-font-size:48px;
+font-size:clamp(40px,5vw,58px);
 
 font-weight:800;
 
-margin-top:10px;
+margin-top:12px;
 
-text-shadow:0 0 20px currentColor;
+text-shadow:
+0 0 25px currentColor;
 
 }
 
-/* INPUT */
+/* =========================
+   INPUT
+========================= */
 
 input,
 button{
 
 width:100%;
+
+max-width:500px;
 
 padding:18px;
 
@@ -234,6 +441,8 @@ margin-top:16px;
 
 font-size:18px;
 
+transition:.25s;
+
 }
 
 input{
@@ -243,15 +452,38 @@ rgba(0,0,0,.35);
 
 color:#fff;
 
+font-family:monospace;
+
+letter-spacing:2px;
+
 border:
 1px solid rgba(0,255,255,.2);
 
+box-shadow:
+0 0 20px rgba(0,255,255,.05);
+
 }
+
+input:focus{
+
+border-color:var(--cyan);
+
+box-shadow:
+0 0 25px rgba(0,255,255,.2);
+
+}
+
+/* =========================
+   BUTTON
+========================= */
 
 button{
 
 background:
-linear-gradient(90deg,#0080ff,#00ffff);
+linear-gradient(
+90deg,
+var(--blue),
+var(--cyan));
 
 color:#fff;
 
@@ -259,13 +491,33 @@ font-weight:700;
 
 cursor:pointer;
 
+box-shadow:
+0 0 30px rgba(0,255,255,.25);
+
 }
 
-/* STATUS */
+button:hover{
+
+transform:
+translateY(-2px)
+scale(1.02);
+
+box-shadow:
+0 0 45px rgba(0,255,255,.4);
+
+}
+
+/* =========================
+   STATUS
+========================= */
 
 .status{
 
 display:inline-flex;
+
+align-items:center;
+
+gap:10px;
 
 padding:14px 26px;
 
@@ -282,7 +534,13 @@ margin-top:14px;
 background:
 rgba(0,255,136,.12);
 
-color:#00ff88;
+color:var(--green);
+
+border:
+1px solid rgba(0,255,136,.3);
+
+box-shadow:
+0 0 25px rgba(0,255,136,.2);
 
 }
 
@@ -291,13 +549,36 @@ color:#00ff88;
 background:
 rgba(255,68,68,.12);
 
-color:#ff4444;
+color:var(--red);
+
+border:
+1px solid rgba(255,68,68,.3);
+
+box-shadow:
+0 0 25px rgba(255,68,68,.2);
 
 }
 
-/* GAUGE */
+/* =========================
+   GAUGE
+========================= */
 
 .gauge-wrap{
+
+width:100%;
+max-width:1200px;
+
+margin:20px auto;
+
+}
+
+.gauge-card{
+
+padding:40px;
+
+}
+
+.gauge{
 
 width:240px;
 height:240px;
@@ -315,9 +596,27 @@ rgba(255,255,255,.08) 180deg
 
 position:relative;
 
+box-shadow:
+0 0 40px rgba(0,255,255,.2),
+0 0 80px rgba(0,255,255,.08);
+
+animation:gaugeGlow 3s infinite;
+
 }
 
-.gauge-wrap::before{
+@keyframes gaugeGlow{
+
+0%,100%{
+filter:brightness(1);
+}
+
+50%{
+filter:brightness(1.2);
+}
+
+}
+
+.gauge::before{
 
 content:'';
 
@@ -329,16 +628,23 @@ border-radius:50%;
 
 background:#05070d;
 
+box-shadow:
+inset 0 0 30px rgba(0,255,255,.1);
+
 }
 
 .gauge-inner{
 
 position:absolute;
+
 inset:0;
 
 display:flex;
+
 flex-direction:column;
+
 justify-content:center;
+
 align-items:center;
 
 z-index:2;
@@ -348,12 +654,49 @@ z-index:2;
 .gauge-value{
 
 font-size:58px;
+
 font-weight:900;
+
 color:#00ff88;
+
+text-shadow:
+0 0 20px #00ff88;
 
 }
 
-/* BAR */
+.gauge-label{
+
+opacity:.6;
+
+letter-spacing:2px;
+
+font-size:12px;
+
+}
+
+/* =========================
+   BAR
+========================= */
+
+.bar-wrap{
+
+margin-top:24px;
+
+}
+
+.bar-label{
+
+display:flex;
+
+justify-content:space-between;
+
+margin-bottom:10px;
+
+font-size:14px;
+
+opacity:.7;
+
+}
 
 .bar{
 
@@ -366,8 +709,6 @@ border-radius:999px;
 
 overflow:hidden;
 
-margin-top:20px;
-
 }
 
 .bar-fill{
@@ -375,86 +716,35 @@ margin-top:20px;
 height:100%;
 width:0%;
 
+border-radius:999px;
+
 background:
-linear-gradient(90deg,#00ff88,#00ffff);
+linear-gradient(
+90deg,
+#00ff88,
+#00ffff
+);
+
+box-shadow:
+0 0 20px rgba(0,255,255,.4);
 
 transition:1s;
 
 }
 
-/* CELLS */
-
-.cells{
-
-display:grid;
-
-grid-template-columns:
-repeat(auto-fill,minmax(90px,1fr));
-
-gap:12px;
-
-margin-top:20px;
-
-}
-
-.cell{
-
-padding:14px;
-
-border-radius:18px;
-
-background:
-rgba(255,255,255,.03);
-
-text-align:center;
-
-}
-
-.cell-num{
-
-font-size:11px;
-opacity:.5;
-
-}
-
-.cell-val{
-
-font-size:18px;
-font-weight:700;
-margin-top:6px;
-
-}
-
-.ok{
-border:1px solid rgba(0,255,136,.25);
-}
-
-.warn{
-border:1px solid rgba(255,170,0,.25);
-}
-
-.crit{
-border:1px solid rgba(255,68,68,.25);
-}
-
-/* CHART */
-
-.chart-card{
-height:360px;
-}
-
-canvas{
-height:100%!important;
-}
-
-/* DIFF */
+/* =========================
+   DIFF
+========================= */
 
 .diff{
 
 display:flex;
+
 justify-content:center;
+
 flex-wrap:wrap;
-gap:18px;
+
+gap:24px;
 
 margin-top:20px;
 
@@ -462,7 +752,7 @@ margin-top:20px;
 
 .diff-item{
 
-padding:14px 18px;
+padding:14px 20px;
 
 border-radius:18px;
 
@@ -471,7 +761,7 @@ rgba(255,255,255,.03);
 
 min-width:120px;
 
-text-align:center;
+backdrop-filter:blur(8px);
 
 }
 
@@ -479,48 +769,190 @@ text-align:center;
 
 display:block;
 
-font-size:24px;
+margin-top:8px;
+
+font-size:26px;
 
 font-weight:800;
 
-margin-top:6px;
+}
+
+/* =========================
+   CELLS
+========================= */
+
+.cells{
+
+display:grid;
+
+grid-template-columns:
+repeat(auto-fill,minmax(95px,1fr));
+
+gap:12px;
+
+margin-top:24px;
 
 }
 
-/* LOGOUT */
+.cell{
+
+background:
+rgba(0,0,0,.28);
+
+border-radius:18px;
+
+padding:14px;
+
+transition:.3s;
+
+border:
+1px solid rgba(255,255,255,.05);
+
+backdrop-filter:blur(8px);
+
+}
+
+.cell:hover{
+
+transform:scale(1.05);
+
+}
+
+.cell-num{
+
+font-size:11px;
+
+opacity:.5;
+
+margin-bottom:6px;
+
+}
+
+.cell-val{
+
+font-size:20px;
+
+font-weight:700;
+
+}
+
+.cell.ok{
+
+border-color:
+rgba(0,255,136,.25);
+
+box-shadow:
+0 0 20px rgba(0,255,136,.08);
+
+}
+
+.cell.warn{
+
+border-color:
+rgba(255,170,0,.25);
+
+box-shadow:
+0 0 20px rgba(255,170,0,.08);
+
+}
+
+.cell.crit{
+
+border-color:
+rgba(255,68,68,.25);
+
+box-shadow:
+0 0 20px rgba(255,68,68,.08);
+
+}
+
+/* =========================
+   CHART
+========================= */
+
+.chart-card{
+
+width:100%;
+max-width:1200px;
+
+margin:20px auto;
+
+padding:30px;
+
+}
+
+.chart-title{
+
+margin-bottom:20px;
+
+font-size:14px;
+
+letter-spacing:2px;
+
+opacity:.7;
+
+text-transform:uppercase;
+
+}
+
+canvas{
+
+width:100%!important;
+height:320px!important;
+
+}
+
+/* =========================
+   LOGOUT
+========================= */
 
 .logout{
+
+margin-top:40px;
 
 background:
 rgba(255,68,68,.08);
 
-margin-top:30px;
+border:
+1px solid rgba(255,68,68,.2);
 
 }
 
-/* HIDDEN */
+/* =========================
+   HIDDEN
+========================= */
 
 .hidden{
 display:none!important;
 }
 
-/* MOBILE */
+/* =========================
+   RESPONSIVE
+========================= */
 
 @media(max-width:768px){
 
 .grid{
-grid-template-columns:1fr 1fr !important;
+grid-template-columns:1fr 1fr;
 }
 
-.value{
-font-size:36px;
+}
+
+@media(max-width:520px){
+
+.grid{
+grid-template-columns:1fr;
 }
 
 .title{
+font-size:46px;
+}
+
+.value{
 font-size:42px;
 }
 
-.gauge-wrap{
+.gauge{
 width:200px;
 height:200px;
 }
@@ -528,6 +960,7 @@ height:200px;
 }
 
 </style>
+
 </head>
 
 <body>
@@ -558,7 +991,14 @@ maxlength="10"
 Entrar
 </button>
 
-<p id="error" style="color:#ff4444;margin-top:12px;display:none"></p>
+<p
+id="error"
+style="
+color:#ff4444;
+margin-top:12px;
+display:none;
+">
+</p>
 
 </div>
 
@@ -572,11 +1012,11 @@ Entrar
 SMART BMS
 </div>
 
-<!-- GAUGE -->
+<div class="gauge-wrap">
 
-<div class="card">
+<div class="card gauge-card">
 
-<div class="gauge-wrap" id="socGauge">
+<div class="gauge" id="socGauge">
 
 <div class="gauge-inner">
 
@@ -584,11 +1024,23 @@ SMART BMS
 0%
 </div>
 
-<div class="label">
+<div class="gauge-label">
 STATE OF CHARGE
 </div>
 
 </div>
+
+</div>
+
+<div class="bar-wrap">
+
+<div class="bar-label">
+
+<span>Bateria</span>
+
+<span id="socBarText">
+0%
+</span>
 
 </div>
 
@@ -598,15 +1050,17 @@ STATE OF CHARGE
 
 </div>
 
-<!-- STATUS -->
+</div>
 
-<div class="card">
+</div>
+
+<div class="card" style="max-width:1200px">
 
 <div class="label" id="bmsName">
 BMS
 </div>
 
-<div>
+<div style="margin-top:16px">
 
 <span id="connStatus" class="status off">
 Offline
@@ -616,68 +1070,74 @@ Offline
 
 </div>
 
-<!-- GRID -->
-
 <div class="grid">
 
-<div class="card metric">
+<div class="card">
 <div class="label">SOC</div>
 <div class="value" id="soc" style="color:#00ff88">0%</div>
 </div>
 
-<div class="card metric">
+<div class="card">
 <div class="label">Tensão</div>
 <div class="value" id="voltage" style="color:#00ffff">0V</div>
 </div>
 
-<div class="card metric">
+<div class="card">
 <div class="label">Corrente</div>
 <div class="value" id="current" style="color:#ffaa00">0A</div>
 </div>
 
-<div class="card metric">
+<div class="card">
 <div class="label">Temperatura</div>
 <div class="value" id="temp" style="color:#ff4444">0°C</div>
 </div>
 
 </div>
 
-<!-- CHART -->
-
 <div class="card chart-card">
+
+<div class="chart-title">
+Realtime Monitor
+</div>
 
 <canvas id="mainChart"></canvas>
 
 </div>
 
-<!-- CELLS -->
-
-<div class="card">
+<div class="card" style="max-width:1200px">
 
 <div class="label">
-Células
+Células - Tensão Individual
 </div>
 
 <div class="diff">
 
 <div class="diff-item">
 Min
-<span id="cellMin">0.00V</span>
+<div>
+<span id="cellMin" style="color:#00ff88">0.00V</span>
+</div>
 </div>
 
 <div class="diff-item">
 Max
-<span id="cellMax">0.00V</span>
+<div>
+<span id="cellMax" style="color:#ffaa00">0.00V</span>
+</div>
 </div>
 
 <div class="diff-item">
-Dif
-<span id="cellDiff">0.00V</span>
+Diferença
+<div>
+<span id="cellDiff" style="color:#ff4444">0.00V</span>
+</div>
 </div>
 
 <div class="diff-item">
 Total
-<span id="cellCount">0</span>
+<div>
+<span id="cellCount" style="color:#00ffff">0</span>
+</div>
 </div>
 
 </div>
@@ -687,42 +1147,44 @@ Total
 </div>
 
 <button class="logout" onclick="logout()">
-Sair
+Sair do Painel
 </button>
 
 </div>
 
 <script>
 
-/* PARTICLES */
+/* =========================
+   PARTICLES
+========================= */
 
 function createParticles(){
 
 const container =
 document.getElementById('particles');
 
-setInterval(()=>{
+setInterval(() => {
 
 const p =
 document.createElement('div');
 
-p.className='particle';
+p.className = 'particle';
 
 const size =
-Math.random()*4+1;
+Math.random() * 4 + 1;
 
-p.style.width=size+'px';
-p.style.height=size+'px';
+p.style.width = size + 'px';
+p.style.height = size + 'px';
 
-p.style.left=
-Math.random()*100+'%';
+p.style.left =
+Math.random() * 100 + '%';
 
-p.style.animationDuration=
-(Math.random()*10+10)+'s';
+p.style.animationDuration =
+(Math.random() * 10 + 10) + 's';
 
 container.appendChild(p);
 
-setTimeout(()=>p.remove(),20000);
+setTimeout(() => p.remove(),20000);
 
 },300);
 
@@ -730,27 +1192,61 @@ setTimeout(()=>p.remove(),20000);
 
 createParticles();
 
-/* API */
+/* =========================
+   API
+========================= */
 
-const API='/api/bms';
+const API = '/api/bms';
 
 let interval;
 
-/* AUTO LOGIN */
+/* =========================
+   AUTO LOGIN
+========================= */
 
 if(localStorage.getItem('bms_token')){
 showDash();
 }
 
-/* LOGIN */
+/* =========================
+   INPUT
+========================= */
+
+document.getElementById('code').oninput = e => {
+
+if(!e.target.value.startsWith('SL')){
+e.target.value = 'SL';
+}
+
+e.target.value =
+'SL' +
+e.target.value
+.slice(2)
+.replace(/[^0-9]/g,'')
+.slice(0,8);
+
+};
+
+/* =========================
+   LOGIN
+========================= */
 
 async function login(){
 
-const code=
-document.getElementById('code').value.trim();
+const code =
+document.getElementById('code')
+.value
+.trim();
 
-const r=await fetch(
-API+'?action=login',
+const errorEl =
+document.getElementById('error');
+
+errorEl.style.display='none';
+
+try{
+
+const r = await fetch(
+API + '?action=login',
 {
 method:'POST',
 headers:{
@@ -760,9 +1256,9 @@ body:JSON.stringify({code})
 }
 );
 
-const d=await r.json();
+const d = await r.json();
 
-if(d.ok){
+if(d.ok && d.token){
 
 localStorage.setItem(
 'bms_token',
@@ -773,19 +1269,27 @@ showDash();
 
 }else{
 
-const error=
-document.getElementById('error');
+errorEl.textContent =
+d.error || 'BMS não encontrada';
 
-error.style.display='block';
+errorEl.style.display='block';
 
-error.textContent=
-d.error || 'Erro';
+}
+
+}catch(e){
+
+errorEl.textContent =
+'Erro de conexão';
+
+errorEl.style.display='block';
 
 }
 
 }
 
-/* SHOW DASH */
+/* =========================
+   SHOW DASH
+========================= */
 
 function showDash(){
 
@@ -801,170 +1305,34 @@ document
 
 update();
 
-interval=
+interval =
 setInterval(update,3000);
 
 }
 
-/* CHART */
-
-const ctx=
-document
-.getElementById('mainChart')
-.getContext('2d');
-
-const labels=[];
-const voltageData=[];
-const currentData=[];
-
-const chart=
-new Chart(ctx,{
-
-type:'line',
-
-data:{
-
-labels,
-
-datasets:[
-
-{
-label:'Tensão',
-data:voltageData,
-borderColor:'#00ffff',
-tension:.4
-},
-
-{
-label:'Corrente',
-data:currentData,
-borderColor:'#ffaa00',
-tension:.4
-}
-
-]
-
-},
-
-options:{
-responsive:true,
-maintainAspectRatio:false
-}
-
-});
-
-/* UPDATE */
-
-async function update(){
-
-const token=
-localStorage.getItem('bms_token');
-
-const r=await fetch(
-API+'?action=data',
-{
-headers:{
-'Authorization':'Bearer '+token
-}
-}
-);
-
-if(r.status===401){
-logout();
-return;
-}
-
-const d=await r.json();
-
-/* TEXTOS */
-
-document.getElementById('bmsName').textContent =
-d.nome || d.code;
-
-document.getElementById('soc').textContent =
-(d.soc || 0)+'%';
-
-document.getElementById('voltage').textContent =
-(d.voltage || 0)+'V';
-
-document.getElementById('current').textContent =
-(d.current || 0)+'A';
-
-document.getElementById('temp').textContent =
-(d.temp || 0)+'°C';
-
-/* STATUS */
-
-document.getElementById('connStatus').textContent =
-d.online ? 'Online':'Offline';
-
-document.getElementById('connStatus').className =
-'status ' + (d.online ? 'on':'off');
-
-/* GAUGE */
-
-const soc =
-parseInt(d.soc || 0);
-
-document.getElementById('socGaugeValue').textContent =
-soc+'%';
-
-document.getElementById('socBar').style.width =
-soc+'%';
-
-const deg=soc*3.6;
-
-document.getElementById('socGauge').style.background =
-`conic-gradient(
-#00ff88 0deg,
-#00ffff ${deg}deg,
-rgba(255,255,255,.08) ${deg}deg
-)`;
-
-/* CELLS */
-
-renderCells(d.cells || []);
-
-/* CHART */
-
-labels.push(
-new Date().toLocaleTimeString()
-);
-
-voltageData.push(d.voltage || 0);
-currentData.push(d.current || 0);
-
-if(labels.length>20){
-
-labels.shift();
-voltageData.shift();
-currentData.shift();
-
-}
-
-chart.update();
-
-}
-
-/* CELLS */
+/* =========================
+   CELLS
+========================= */
 
 function renderCells(cells){
 
-if(!cells.length){
+if(!cells || cells.length === 0){
 
 document.getElementById('cells').innerHTML =
-'Sem células';
+'<div style="grid-column:1/-1;opacity:.4;padding:20px">Sem dados das células</div>';
 
 return;
 
 }
 
 const vals =
-cells.map(v=>parseFloat(v));
+cells
+.map(c => parseFloat(c))
+.filter(v => v > 0);
 
-const min=Math.min(...vals);
-const max=Math.max(...vals);
-const diff=max-min;
+const min = Math.min(...vals);
+const max = Math.max(...vals);
+const diff = max - min;
 
 document.getElementById('cellMin').textContent =
 min.toFixed(3)+'V';
@@ -979,17 +1347,18 @@ document.getElementById('cellCount').textContent =
 cells.length;
 
 document.getElementById('cells').innerHTML =
+
 cells.map((v,i)=>{
 
-const val=parseFloat(v);
+const val = parseFloat(v);
 
-let cls='ok';
+let cls = 'ok';
 
-if(val<3.2||val>4.2){
-cls='crit';
+if(val < 3.2 || val > 4.2){
+cls = 'crit';
 }
-else if(val<3.4||val>4.15){
-cls='warn';
+else if(val < 3.4 || val > 4.15){
+cls = 'warn';
 }
 
 return `
@@ -1003,7 +1372,224 @@ return `
 
 }
 
-/* LOGOUT */
+/* =========================
+   CHART
+========================= */
+
+const voltageHistory = [];
+const currentHistory = [];
+const labelsHistory = [];
+
+const ctx = document
+.getElementById('mainChart')
+.getContext('2d');
+
+const chart = new Chart(ctx,{
+
+type:'line',
+
+data:{
+
+labels:labelsHistory,
+
+datasets:[
+
+{
+label:'Tensão',
+data:voltageHistory,
+borderColor:'#00ffff',
+backgroundColor:'rgba(0,255,255,.08)',
+tension:.4,
+fill:true
+},
+
+{
+label:'Corrente',
+data:currentHistory,
+borderColor:'#ffaa00',
+backgroundColor:'rgba(255,170,0,.08)',
+tension:.4,
+fill:true
+}
+
+]
+
+},
+
+options:{
+
+responsive:true,
+
+maintainAspectRatio:false,
+
+plugins:{
+legend:{
+labels:{
+color:'#ffffff'
+}
+}
+},
+
+scales:{
+
+x:{
+
+ticks:{
+color:'#aaa'
+},
+
+grid:{
+color:'rgba(255,255,255,.05)'
+}
+
+},
+
+y:{
+
+ticks:{
+color:'#aaa'
+},
+
+grid:{
+color:'rgba(255,255,255,.05)'
+}
+
+}
+
+}
+
+}
+
+});
+
+/* =========================
+   GAUGE
+========================= */
+
+function updateGauge(soc){
+
+const gauge =
+document.getElementById('socGauge');
+
+const value =
+document.getElementById('socGaugeValue');
+
+const bar =
+document.getElementById('socBar');
+
+const text =
+document.getElementById('socBarText');
+
+const deg = soc * 3.6;
+
+value.textContent = soc + '%';
+
+text.textContent = soc + '%';
+
+bar.style.width = soc + '%';
+
+gauge.style.background = `
+conic-gradient(
+#00ff88 0deg,
+#00ffff ${deg}deg,
+rgba(255,255,255,.08) ${deg}deg
+)
+`;
+
+}
+
+/* =========================
+   UPDATE
+========================= */
+
+async function update(){
+
+const token =
+localStorage.getItem('bms_token');
+
+try{
+
+const r = await fetch(
+API + '?action=data',
+{
+headers:{
+'Authorization':'Bearer '+token
+}
+}
+);
+
+if(r.status===401){
+logout();
+return;
+}
+
+const d = await r.json();
+
+document.getElementById('bmsName').textContent =
+d.nome || d.code;
+
+document.getElementById('soc').textContent =
+(d.soc?.toFixed(0)||0)+'%';
+
+document.getElementById('voltage').textContent =
+(d.voltage?.toFixed(2)||0)+'V';
+
+document.getElementById('current').textContent =
+(d.current?.toFixed(1)||0)+'A';
+
+document.getElementById('temp').textContent =
+(d.temp?.toFixed(1)||0)+'°C';
+
+document.getElementById('connStatus').textContent =
+d.online ? 'Online' : 'Offline';
+
+document.getElementById('connStatus').className =
+'status ' + (d.online ? 'on' : 'off');
+
+renderCells(d.cells);
+
+/* GAUGE */
+
+updateGauge(
+parseInt(d.soc || 0)
+);
+
+/* HISTORY */
+
+const now = new Date()
+.toLocaleTimeString();
+
+labelsHistory.push(now);
+
+voltageHistory.push(d.voltage || 0);
+
+currentHistory.push(d.current || 0);
+
+if(labelsHistory.length > 20){
+
+labelsHistory.shift();
+voltageHistory.shift();
+currentHistory.shift();
+
+}
+
+chart.update();
+
+}catch(e){
+
+document.getElementById('connStatus').textContent =
+'Erro';
+
+document.getElementById('connStatus').className =
+'status off';
+
+}
+
+}
+
+/* =========================
+   LOGOUT
+========================= */
 
 function logout(){
 
@@ -1021,9 +1607,35 @@ document
 .classList
 .remove('hidden');
 
+document.getElementById('code').value='';
+
+}
+
+/* =========================
+   PWA
+========================= */
+
+if ('serviceWorker' in navigator) {
+
+window.addEventListener('load', async () => {
+
+try {
+
+await navigator.serviceWorker.register('/service-worker.js');
+
+console.log('PWA ativo');
+
+} catch (e) {
+
+console.log(e);
+
+}
+
+});
+
 }
 
 </script>
 
 </body>
-</html>
+  </html>
