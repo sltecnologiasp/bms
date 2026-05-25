@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <title>SMART BMS</title>
 <link rel="manifest" href="/manifest.json">
 <meta name="theme-color" content="#00ffff">
@@ -44,6 +44,9 @@ color:#fff;
 overflow-x:hidden;
 min-height:100vh;
 position:relative;
+touch-action: pan-y;
+overscroll-behavior: contain;
+-webkit-text-size-adjust: 100%;
 }
 
 /* =========================
@@ -452,6 +455,7 @@ text-transform:uppercase;
 canvas{
 width:100%!important;
 height:320px!important;
+touch-action: none;
 }
 
 /* =========================
