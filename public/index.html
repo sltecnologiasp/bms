@@ -15,10 +15,6 @@
 
 <link rel="apple-touch-icon" href="/icon-192.png">
 
-<meta name="apple-mobile-web-app-capable" content="yes">
-
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -32,12 +28,15 @@ box-sizing:border-box;
 }
 
 :root{
+
 --bg:#05070d;
+
 --cyan:#00ffff;
 --blue:#0080ff;
 --green:#00ff88;
 --red:#ff4444;
 --orange:#ffaa00;
+
 }
 
 body{
@@ -65,8 +64,6 @@ position:relative;
 
 }
 
-/* GRID BACKGROUND */
-
 body::before{
 
 content:'';
@@ -81,35 +78,28 @@ linear-gradient(90deg,rgba(255,255,255,.03) 1px,transparent 1px);
 
 background-size:40px 40px;
 
-mask-image:
-radial-gradient(circle at center,black,transparent 90%);
-
 pointer-events:none;
 
 z-index:0;
 
 }
 
-/* PARTICLES */
-
 #particles{
+
 position:fixed;
 inset:0;
 overflow:hidden;
 z-index:0;
 pointer-events:none;
+
 }
 
 .particle{
 
 position:absolute;
-
 background:var(--cyan);
-
 border-radius:50%;
-
 opacity:.25;
-
 animation:float linear infinite;
 
 box-shadow:
@@ -121,9 +111,7 @@ box-shadow:
 @keyframes float{
 
 0%{
-transform:
-translateY(100vh)
-scale(0);
+transform:translateY(100vh) scale(0);
 opacity:0;
 }
 
@@ -132,15 +120,11 @@ opacity:.3;
 }
 
 100%{
-transform:
-translateY(-100px)
-scale(1.3);
+transform:translateY(-100px) scale(1.3);
 opacity:0;
 }
 
 }
-
-/* MAIN */
 
 #login,
 #dash{
@@ -165,8 +149,6 @@ padding:20px;
 
 }
 
-/* TITLE */
-
 .title{
 
 font-size:clamp(42px,8vw,74px);
@@ -178,10 +160,7 @@ margin-bottom:30px;
 letter-spacing:3px;
 
 background:
-linear-gradient(
-90deg,
-var(--cyan),
-var(--blue));
+linear-gradient(90deg,var(--cyan),var(--blue));
 
 -webkit-background-clip:text;
 -webkit-text-fill-color:transparent;
@@ -190,8 +169,6 @@ text-shadow:
 0 0 30px rgba(0,255,255,.4);
 
 }
-
-/* CARD */
 
 .card{
 
@@ -217,69 +194,21 @@ box-shadow:
 0 0 30px rgba(0,255,255,.08),
 inset 0 0 40px rgba(255,255,255,.02);
 
-transition:.35s ease;
-
 }
-
-.card:hover{
-
-transform:
-translateY(-4px)
-scale(1.01);
-
-box-shadow:
-0 0 40px rgba(0,255,255,.15),
-0 0 80px rgba(0,255,255,.08);
-
-}
-
-/* LOGIN */
 
 #login .card{
-max-width:520px;
-}
 
-/* DASH */
+max-width:520px;
+
+}
 
 #dash{
+
 max-width:1450px;
+
 margin:auto;
-}
-
-/* STATUS GRID */
-
-.stats-grid{
-
-display:grid;
-
-grid-template-columns:
-repeat(2,minmax(0,1fr));
-
-gap:18px;
-
-width:100%;
-
-max-width:1200px;
-
-margin:20px auto;
 
 }
-
-.stat-card{
-
-min-height:180px;
-
-display:flex;
-
-flex-direction:column;
-
-justify-content:center;
-
-align-items:center;
-
-}
-
-/* LABEL */
 
 .label{
 
@@ -293,8 +222,6 @@ text-transform:uppercase;
 
 }
 
-/* VALUE */
-
 .value{
 
 font-size:clamp(40px,5vw,58px);
@@ -307,8 +234,6 @@ text-shadow:
 0 0 25px currentColor;
 
 }
-
-/* INPUT */
 
 input,
 button{
@@ -352,10 +277,7 @@ border:
 button{
 
 background:
-linear-gradient(
-90deg,
-var(--blue),
-var(--cyan));
+linear-gradient(90deg,var(--blue),var(--cyan));
 
 color:#fff;
 
@@ -363,20 +285,7 @@ font-weight:700;
 
 cursor:pointer;
 
-box-shadow:
-0 0 30px rgba(0,255,255,.25);
-
 }
-
-button:hover{
-
-transform:
-translateY(-2px)
-scale(1.02);
-
-}
-
-/* STATUS */
 
 .status{
 
@@ -420,57 +329,32 @@ border:
 
 }
 
-/* GAUGE */
+/* =========================
+   STATUS GRID
+========================= */
 
-.gauge-wrap{
+.stats-grid{
+
 width:100%;
+
 max-width:1200px;
+
 margin:20px auto;
-}
 
-.gauge-card{
-padding:40px;
-}
+display:grid;
 
-.gauge{
+grid-template-columns:
+repeat(2,1fr);
 
-width:240px;
-height:240px;
+gap:18px;
 
-margin:auto;
-
-border-radius:50%;
-
-background:
-conic-gradient(
-#00ff88 0deg,
-#00ffff 180deg,
-rgba(255,255,255,.08) 180deg
-);
-
-position:relative;
+align-items:stretch;
 
 }
 
-.gauge::before{
+.stat-card{
 
-content:'';
-
-position:absolute;
-
-inset:18px;
-
-border-radius:50%;
-
-background:#05070d;
-
-}
-
-.gauge-inner{
-
-position:absolute;
-
-inset:0;
+height:180px;
 
 display:flex;
 
@@ -480,60 +364,13 @@ justify-content:center;
 
 align-items:center;
 
-z-index:2;
+padding:24px;
 
 }
 
-.gauge-value{
-
-font-size:58px;
-
-font-weight:900;
-
-color:#00ff88;
-
-}
-
-.gauge-label{
-
-opacity:.6;
-
-letter-spacing:2px;
-
-font-size:12px;
-
-}
-
-/* BAR */
-
-.bar-wrap{
-margin-top:24px;
-}
-
-.bar{
-height:16px;
-background:rgba(255,255,255,.06);
-border-radius:999px;
-overflow:hidden;
-}
-
-.bar-fill{
-
-height:100%;
-width:0%;
-
-background:
-linear-gradient(
-90deg,
-#00ff88,
-#00ffff
-);
-
-transition:1s;
-
-}
-
-/* CHART */
+/* =========================
+   CHART
+========================= */
 
 .chart-card{
 
@@ -547,11 +384,15 @@ padding:30px;
 }
 
 canvas{
+
 width:100%!important;
 height:320px!important;
+
 }
 
-/* CELLS */
+/* =========================
+   CELLS
+========================= */
 
 .cells{
 
@@ -575,32 +416,49 @@ border-radius:18px;
 
 padding:14px;
 
+border:
+1px solid rgba(255,255,255,.05);
+
 }
 
 .cell-num{
+
 font-size:11px;
+
 opacity:.5;
+
 margin-bottom:6px;
+
 }
 
 .cell-val{
+
 font-size:20px;
+
 font-weight:700;
+
 }
 
 .cell.ok{
-border:1px solid rgba(0,255,136,.25);
+
+border-color:
+rgba(0,255,136,.25);
+
 }
 
 .cell.warn{
-border:1px solid rgba(255,170,0,.25);
+
+border-color:
+rgba(255,170,0,.25);
+
 }
 
 .cell.crit{
-border:1px solid rgba(255,68,68,.25);
-}
 
-/* DIFF */
+border-color:
+rgba(255,68,68,.25);
+
+}
 
 .diff{
 
@@ -641,8 +499,6 @@ font-weight:800;
 
 }
 
-/* LOGOUT */
-
 .logout{
 
 margin-top:40px;
@@ -655,18 +511,24 @@ border:
 
 }
 
-/* HIDDEN */
-
 .hidden{
 display:none!important;
 }
 
-/* MOBILE */
-
 @media(max-width:700px){
 
 .stats-grid{
+
 grid-template-columns:1fr;
+
+}
+
+.title{
+font-size:46px;
+}
+
+.value{
+font-size:42px;
 }
 
 }
@@ -705,11 +567,7 @@ Entrar
 
 <p
 id="error"
-style="
-color:#ff4444;
-margin-top:12px;
-display:none;
-">
+style="color:#ff4444;margin-top:12px;display:none;">
 </p>
 
 </div>
@@ -723,42 +581,6 @@ display:none;
 <div class="title">
 SMART BMS
 </div>
-
-<!-- GAUGE -->
-
-<div class="gauge-wrap">
-
-<div class="card gauge-card">
-
-<div class="gauge" id="socGauge">
-
-<div class="gauge-inner">
-
-<div class="gauge-value" id="socGaugeValue">
-0%
-</div>
-
-<div class="gauge-label">
-STATE OF CHARGE
-</div>
-
-</div>
-
-</div>
-
-<div class="bar-wrap">
-
-<div class="bar">
-<div class="bar-fill" id="socBar"></div>
-</div>
-
-</div>
-
-</div>
-
-</div>
-
-<!-- STATUS -->
 
 <div class="card" style="max-width:1200px">
 
@@ -776,7 +598,7 @@ Offline
 
 </div>
 
-<!-- GRID -->
+<!-- STATUS GRID -->
 
 <div class="stats-grid">
 
@@ -985,7 +807,7 @@ errorEl.style.display='block';
 
 }
 
-/* SHOW DASH */
+/* DASH */
 
 function showDash(){
 
@@ -1058,7 +880,7 @@ cls = 'warn';
 return `
 <div class="cell ${cls}">
 <div class="cell-num">C${i+1}</div>
-<div class="cell-val">${val.toFixed(3)}V</div>
+<div class="cell-val">${val.toFixed(3)}</div>
 </div>
 `;
 
@@ -1068,8 +890,12 @@ return `
 
 /* CHART */
 
-const ctx =
-document.getElementById('mainChart')
+const voltageHistory = [];
+const currentHistory = [];
+const labelsHistory = [];
+
+const ctx = document
+.getElementById('mainChart')
 .getContext('2d');
 
 const chart = new Chart(ctx,{
@@ -1077,21 +903,31 @@ const chart = new Chart(ctx,{
 type:'line',
 
 data:{
-labels:[],
+
+labels:labelsHistory,
+
 datasets:[
+
 {
 label:'Tensão',
-data:[],
+data:voltageHistory,
 borderColor:'#00ffff',
-tension:.4
+backgroundColor:'rgba(0,255,255,.08)',
+tension:.4,
+fill:true
 },
+
 {
 label:'Corrente',
-data:[],
+data:currentHistory,
 borderColor:'#ffaa00',
-tension:.4
+backgroundColor:'rgba(255,170,0,.08)',
+tension:.4,
+fill:true
 }
+
 ]
+
 },
 
 options:{
@@ -1100,35 +936,6 @@ maintainAspectRatio:false
 }
 
 });
-
-/* GAUGE */
-
-function updateGauge(soc){
-
-const gauge =
-document.getElementById('socGauge');
-
-const value =
-document.getElementById('socGaugeValue');
-
-const bar =
-document.getElementById('socBar');
-
-const deg = soc * 3.6;
-
-value.textContent = soc + '%';
-
-bar.style.width = soc + '%';
-
-gauge.style.background = `
-conic-gradient(
-#00ff88 0deg,
-#00ffff ${deg}deg,
-rgba(255,255,255,.08) ${deg}deg
-)
-`;
-
-}
 
 /* UPDATE */
 
@@ -1178,24 +985,22 @@ document.getElementById('connStatus').className =
 
 renderCells(d.cells);
 
-updateGauge(parseInt(d.soc || 0));
+/* HISTORY */
 
-const now =
-new Date().toLocaleTimeString();
+const now = new Date()
+.toLocaleTimeString();
 
-chart.data.labels.push(now);
+labelsHistory.push(now);
 
-chart.data.datasets[0].data.push(d.voltage || 0);
+voltageHistory.push(d.voltage || 0);
 
-chart.data.datasets[1].data.push(d.current || 0);
+currentHistory.push(d.current || 0);
 
-if(chart.data.labels.length > 20){
+if(labelsHistory.length > 20){
 
-chart.data.labels.shift();
-
-chart.data.datasets[0].data.shift();
-
-chart.data.datasets[1].data.shift();
+labelsHistory.shift();
+voltageHistory.shift();
+currentHistory.shift();
 
 }
 
@@ -1230,6 +1035,8 @@ document
 .getElementById('login')
 .classList
 .remove('hidden');
+
+document.getElementById('code').value='';
 
 }
 
