@@ -1084,24 +1084,40 @@ listar();
 }
 
 /* =========================
-DELETE
+DELETE - CORRIGIDO
 ========================= */
 
 async function del(code){
+  if(!confirm(`Excluir ${code}?`)) return;
 
-if(!confirm(`Excluir ${code}?`))
-return;
+  try {
+    const r = await fetch(
+      API+`?action=deletar&code=${encodeURIComponent(code)}`,
+      {
+        method:'DELETE',
+        headers:authHeaders()
+      }
+    );
 
-await fetch(
-API+`?action=deletar&code=${code}`,
-{
-method:'DELETE',
-headers:authHeaders()
-}
-);
+    if(r.status === 401){
+      adminLogout();
+      return;
+    }
 
-listar();
+    const d = await r.json();
+    console.log('Resposta delete:', d);
 
+    if(!r.ok || !d.ok){
+      alert('Erro ao excluir: ' + (d.error || 'Erro desconhecido'));
+      return;
+    }
+
+    listar();
+
+  } catch(err) {
+    console.error(err);
+    alert('Falha na requisição: ' + err.message);
+  }
 }
 
 /* =========================
