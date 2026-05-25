@@ -447,7 +447,7 @@ display:none!important;
 <div class="title">SMART BMS</div>
 <div class="card">
 <div class="label">Código da BMS</div>
-<input id="code" placeholder="SL00000" maxlength="10">
+<input id="code" placeholder="SL00000000" maxlength="10">
 <button onclick="login()">Entrar</button>
 <p id="error" style="color:#ff4444;margin-top:12px;display:none;"></p>
 </div>
@@ -470,6 +470,8 @@ display:none!important;
 <span id="socBarText">0%</span>
 </div>
 <div class="bar"><div class="bar-fill" id="socBar"></div></div>
+</div>
+</div>
 </div>
 
 <div class="card" style="max-width:1200px;margin:12px auto">
@@ -541,6 +543,7 @@ createParticles();
 const API = '/api/bms';
 let interval;
 let chart;
+let lastUpdate = 0;
 
 if(localStorage.getItem('bms_token')){
   showDash();
@@ -693,6 +696,24 @@ function updateGauge(soc){
   gauge.style.background = `conic-gradient(#00ff88 0deg,#00ffff ${deg}deg,rgba(255,255,255,.08) ${deg}deg)`;
 }
 
+function setOffline(){
+  document.getElementById('connStatus').textContent = 'Offline';
+  document.getElementById('connStatus').className = 'status off';
+  document.getElementById('soc').textContent = '--%';
+  document.getElementById('voltage').textContent = '--V';
+  document.getElementById('current').textContent = '--A';
+  document.getElementById('temp').textContent = '--°C';
+  document.getElementById('socGaugeValue').textContent = '--%';
+  document.getElementById('socBarText').textContent = '--%';
+  document.getElementById('socBar').style.width = '0%';
+}
+
+function checkTimeout(){
+  if(Date.now() - lastUpdate > 10000){
+    setOffline();
+  }
+}
+
 async function update(){
   const token = localStorage.getItem('bms_token');
   try{
@@ -701,6 +722,12 @@ async function update(){
     });
     if(r.status===401){ logout(); return; }
     const d = await r.json();
+    
+    if(d.timestamp && d.timestamp === lastUpdate){
+      checkTimeout();
+      return;
+    }
+    lastUpdate = d.timestamp || Date.now();
     
     document.getElementById('bmsName').textContent = d.nome || d.code;
     document.getElementById('soc').textContent = (d.soc?.toFixed(0)||0)+'%';
@@ -728,8 +755,7 @@ async function update(){
     
     if(chart) chart.update('none');
   }catch(e){
-    document.getElementById('connStatus').textContent = 'Erro';
-    document.getElementById('connStatus').className = 'status off';
+    setOffline();
   }
 }
 
