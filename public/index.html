@@ -120,7 +120,6 @@ padding:16px;
 width:100%;
 position:relative;
 box-shadow:0 4px 20px rgba(0,0,0,.4);
-contain:strict;
 }
 
 #login .card{
@@ -141,7 +140,6 @@ margin:12px auto;
 
 .gauge-card{
 padding:30px 30px 40px;
-overflow:visible;
 min-height:340px;
 }
 
@@ -313,7 +311,7 @@ border:1px solid rgba(0,255,136,.3);
 }
 
 .off{
-background:rgba(255,68,68,.12);
+background:rgba(255,68,.12);
 color:var(--red);
 border:1px solid rgba(255,68,68,.3);
 }
@@ -353,7 +351,6 @@ border-radius:18px;
 padding:14px;
 transition:.2s;
 border:1px solid rgba(255,255,255,.05);
-contain:layout style paint;
 }
 
 .cell:hover{
@@ -388,6 +385,7 @@ width:100%;
 max-width:1200px;
 margin:12px auto;
 padding:24px;
+min-height:380px;
 }
 
 .chart-title{
@@ -662,7 +660,7 @@ function initChart(){
       scales:{
         x:{
           ticks:{color:'#aaa'},
-          grid:{color:'rgba(255,255,.05)'}
+          grid:{color:'rgba(255,255,255,.05)'}
         },
         y:{
           ticks:{color:'#aaa'},
