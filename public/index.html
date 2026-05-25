@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
 
 <meta charset="UTF-8">
@@ -22,14 +23,12 @@ box-sizing:border-box;
 }
 
 :root{
-
 --bg:#05070d;
 --cyan:#00ffff;
 --blue:#0080ff;
 --green:#00ff88;
 --red:#ff4444;
 --orange:#ffaa00;
-
 }
 
 body{
@@ -94,21 +93,17 @@ z-index:0;
 @keyframes gridMove{
 
 0%{
-
 transform:
 perspective(1200px)
 rotateX(75deg)
 translateY(0);
-
 }
 
 100%{
-
 transform:
 perspective(1200px)
 rotateX(75deg)
 translateY(40px);
-
 }
 
 }
@@ -162,12 +157,12 @@ opacity:0;
 }
 
 /* =========================================
-CENTER
+LOGIN
 ========================================= */
 
-.center{
+#login{
 
-width:100%;
+min-height:100vh;
 
 display:flex;
 
@@ -184,28 +179,12 @@ z-index:2;
 }
 
 /* =========================================
-LOGIN
-========================================= */
-
-#login{
-
-min-height:100vh;
-
-display:flex;
-
-flex-direction:column;
-
-justify-content:center;
-
-align-items:center;
-
-}
-
-/* =========================================
 DASH
 ========================================= */
 
 #dash{
+
+display:none;
 
 width:100%;
 
@@ -215,6 +194,14 @@ margin:auto;
 
 padding:20px;
 
+position:relative;
+
+z-index:2;
+
+}
+
+#dash.active{
+display:block;
 }
 
 /* =========================================
@@ -292,7 +279,6 @@ padding:24px;
 backdrop-filter:blur(20px);
 
 box-shadow:
-
 0 0 30px rgba(0,255,255,.08);
 
 transform-style:preserve-3d;
@@ -300,19 +286,19 @@ transform-style:preserve-3d;
 transition:
 all .25s ease;
 
+margin-bottom:20px;
+
 }
 
 .card:hover{
 
 transform:
-
 rotateX(6deg)
 rotateY(-6deg)
 translateY(-8px)
 scale(1.02);
 
 box-shadow:
-
 0 40px 80px rgba(0,255,255,.18);
 
 }
@@ -326,7 +312,6 @@ position:absolute;
 inset:0;
 
 background:
-
 linear-gradient(
 135deg,
 rgba(0,255,255,.08),
@@ -369,6 +354,11 @@ text-align:center;
 
 outline:none;
 
+display:block;
+
+margin-left:auto;
+margin-right:auto;
+
 }
 
 button{
@@ -378,7 +368,6 @@ cursor:pointer;
 font-weight:700;
 
 background:
-
 linear-gradient(
 90deg,
 #0080ff,
@@ -388,7 +377,6 @@ linear-gradient(
 border:none;
 
 box-shadow:
-
 0 0 30px rgba(0,255,255,.3);
 
 }
@@ -423,7 +411,6 @@ font-weight:900;
 margin-top:12px;
 
 text-shadow:
-
 0 0 20px currentColor,
 0 0 40px currentColor;
 
@@ -438,6 +425,8 @@ font-size:12px;
 letter-spacing:3px;
 
 text-transform:uppercase;
+
+text-align:center;
 
 }
 
@@ -576,12 +565,8 @@ height:420px;
 }
 
 /* =========================================
-HIDDEN
+RESPONSIVE
 ========================================= */
-
-.hidden{
-display:none;
-}
 
 @media(max-width:768px){
 
@@ -609,9 +594,9 @@ height:300px;
 
 <!-- LOGIN -->
 
-<div id="login" class="center">
+<div id="login">
 
-<div>
+<div style="width:100%;max-width:520px">
 
 <div class="title">
 SMART BMS
@@ -634,7 +619,7 @@ ENTRAR
 
 <p
 id="error"
-style="margin-top:14px;color:#ff4444;display:none">
+style="margin-top:14px;color:#ff4444;display:none;text-align:center">
 </p>
 
 </div>
@@ -645,15 +630,13 @@ style="margin-top:14px;color:#ff4444;display:none">
 
 <!-- DASH -->
 
-<div
-id="dash"
-class="hidden">
+<div id="dash">
 
 <div class="title">
 SMART BMS
 </div>
 
-<div class="card">
+<div class="card" style="text-align:center">
 
 <div
 class="label"
@@ -768,6 +751,19 @@ class="cells">
 
 </div>
 
+<button
+onclick="logout()"
+style="
+max-width:400px;
+margin:40px auto;
+background:rgba(255,68,68,.15);
+border:1px solid rgba(255,68,68,.35)
+">
+
+SAIR
+
+</button>
+
 </div>
 
 <script>
@@ -820,33 +816,6 @@ p.remove();
 }
 
 createParticles();
-
-/* =========================================
-3D PARALLAX
-========================================= */
-
-document.addEventListener('mousemove', e=>{
-
-const x =
-(window.innerWidth/2 - e.clientX)/40;
-
-const y =
-(window.innerHeight/2 - e.clientY)/40;
-
-document
-.querySelectorAll('.card')
-.forEach(card=>{
-
-card.style.transform=`
-
-rotateY(${x}deg)
-rotateX(${-y}deg)
-
-`;
-
-});
-
-});
 
 /* =========================================
 CHART
@@ -953,9 +922,7 @@ AUTO LOGIN
 ========================================= */
 
 if(token){
-
 showDash();
-
 }
 
 /* =========================================
@@ -1024,7 +991,7 @@ showDash();
 }else{
 
 errorEl.textContent=
-d.error;
+d.error || 'Erro';
 
 errorEl.style.display='block';
 
@@ -1049,11 +1016,11 @@ function showDash(){
 
 document
 .getElementById('login')
-.classList.add('hidden');
+.style.display='none';
 
 document
 .getElementById('dash')
-.classList.remove('hidden');
+.classList.add('active');
 
 update();
 
@@ -1166,121 +1133,23 @@ document
 'status '+
 (d.online?'on':'off');
 
-renderCells(d.cells);
+renderCells(d.cells || []);
 
 /* chart */
 
 chart.data.labels=
-d.cells.map((_,i)=>'C'+(i+1));
+(d.cells || []).map((_,i)=>'C'+(i+1));
 
 chart.data.datasets[0].data=
-d.cells;
+d.cells || [];
 
 chart.update();
-
-/* alerts */
-
-smartAlerts(d);
 
 }catch(e){
 
 document
 .getElementById('connStatus')
 .textContent='ERRO';
-
-}
-
-/* =========================================
-SMART ALERTS
-========================================= */
-
-function smartAlerts(data){
-
-if(!data.cells) return;
-
-const vals =
-data.cells.map(v=>parseFloat(v));
-
-const min =
-Math.min(...vals);
-
-const max =
-Math.max(...vals);
-
-const diff =
-max-min;
-
-if(diff > 0.080){
-
-showAlert(
-'⚠️ Diferença crítica: '
-+ diff.toFixed(3)+'V'
-);
-
-}
-
-if(data.temp > 60){
-
-showAlert(
-'🔥 Temperatura crítica'
-);
-
-}
-
-}
-
-/* =========================================
-SHOW ALERT
-========================================= */
-
-function showAlert(msg){
-
-const old =
-document
-.getElementById('alert');
-
-if(old) old.remove();
-
-const div =
-document.createElement('div');
-
-div.id='alert';
-
-div.style.cssText=`
-
-position:fixed;
-
-top:30px;
-right:30px;
-
-padding:18px 24px;
-
-border-radius:18px;
-
-background:
-rgba(255,68,68,.15);
-
-border:
-1px solid rgba(255,68,68,.35);
-
-backdrop-filter:blur(20px);
-
-box-shadow:
-0 0 40px rgba(255,68,68,.3);
-
-z-index:99999;
-
-font-weight:700;
-
-`;
-
-div.innerHTML=msg;
-
-document.body.appendChild(div);
-
-setTimeout(()=>{
-div.remove();
-},5000);
 
 }
 
@@ -1297,7 +1166,13 @@ clearInterval(interval);
 localStorage
 .removeItem('bms_token');
 
-location.reload();
+document
+.getElementById('dash')
+.classList.remove('active');
+
+document
+.getElementById('login')
+.style.display='flex';
 
 }
 
