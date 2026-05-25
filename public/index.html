@@ -38,6 +38,7 @@ position:relative;
 touch-action: pan-y;
 overscroll-behavior: contain;
 -webkit-text-size-adjust: 100%;
+-webkit-font-smoothing: antialiased;
 }
 
 body::before{
@@ -119,8 +120,7 @@ padding:16px;
 width:100%;
 position:relative;
 box-shadow:0 4px 20px rgba(0,0,0,.4);
-transition:none;
-contain:layout;
+contain:strict;
 }
 
 #login .card{
@@ -213,16 +213,17 @@ transition:width .8s ease;
 
 .grid{
 display:grid;
-grid-template-columns:repeat(4,1fr);
+grid-template-columns:repeat(4, 1fr);
 gap:8px;
 width:100%;
 max-width:1300px;
 margin:12px auto;
+transform:translateZ(0);
 }
 
 .grid .card{
-min-height:120px;
-height:auto;
+width:100%;
+height:120px;
 min-width:0;
 display:flex;
 flex-direction:column;
@@ -230,6 +231,8 @@ justify-content:center;
 align-items:center;
 padding:14px;
 overflow:hidden;
+transform:translateZ(0);
+backface-visibility:hidden;
 }
 
 .label{
@@ -241,11 +244,13 @@ white-space:nowrap;
 }
 
 .value{
-font-size:32px;
+font-size:30px;
 font-weight:800;
 margin-top:8px;
 line-height:1;
 white-space:nowrap;
+text-overflow:clip;
+transform:translateZ(0);
 }
 
 input,button{
@@ -414,11 +419,11 @@ display:none!important;
 
 @media(max-width:520px){
 .title{font-size:38px}
-.value{font-size:24px}
+.value{font-size:22px}
 .gauge{width:200px;height:200px}
 .gauge-value{font-size:48px}
-.grid .card{padding:10px;min-height:110px}
-.label{font-size:9px}
+.grid .card{padding:8px;height:100px}
+.label{font-size:8px}
 }
 </style>
 </head>
@@ -687,20 +692,18 @@ async function update(){
     if(r.status===401){ logout(); return; }
     const d = await r.json();
     
-    requestAnimationFrame(() => {
-      document.getElementById('bmsName').textContent = d.nome || d.code;
-      document.getElementById('soc').textContent = (d.soc?.toFixed(0)||0)+'%';
-      document.getElementById('voltage').textContent = (d.voltage?.toFixed(2)||0)+'V';
-      document.getElementById('current').textContent = (d.current?.toFixed(1)||0)+'A';
-      document.getElementById('temp').textContent = (d.temp?.toFixed(1)||0)+'°C';
-      
-      const connEl = document.getElementById('connStatus');
-      connEl.textContent = d.online ? 'Online' : 'Offline';
-      connEl.className = 'status ' + (d.online ? 'on' : 'off');
-      
-      renderCells(d.cells);
-      updateGauge(parseInt(d.soc || 0));
-    });
+    document.getElementById('bmsName').textContent = d.nome || d.code;
+    document.getElementById('soc').textContent = (d.soc?.toFixed(0)||0)+'%';
+    document.getElementById('voltage').textContent = (d.voltage?.toFixed(2)||0)+'V';
+    document.getElementById('current').textContent = (d.current?.toFixed(1)||0)+'A';
+    document.getElementById('temp').textContent = (d.temp?.toFixed(1)||0)+'°C';
+    
+    const connEl = document.getElementById('connStatus');
+    connEl.textContent = d.online ? 'Online' : 'Offline';
+    connEl.className = 'status ' + (d.online ? 'on' : 'off');
+    
+    renderCells(d.cells);
+    updateGauge(parseInt(d.soc || 0));
     
     const now = new Date().toLocaleTimeString('pt-BR', {hour:'2-digit', minute:'2-digit', second:'2-digit'});
     labelsHistory.push(now);
