@@ -1,184 +1,1334 @@
 <!DOCTYPE html>
-<html>
+<html lang="pt-BR">
 <head>
+
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Admin BMS</title>
+
+<title>SMART BMS ADMIN</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
+
 <style>
-*{margin:0;padding:0;box-sizing:border-box}
-body{background:#0a0a0f;color:#fff;font-family:system-ui;padding:0;text-align:center}
-h1{text-align:center;font-size:42px;font-weight:900;padding:30px 20px;background:linear-gradient(90deg,#00ffff,#0080ff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-shadow:0 0 30px rgba(0,255,255,.3)}
-.card{background:rgba(255,255,255,.03);border:1px solid rgba(0,255,255,.3);border-radius:16px;padding:30px;margin:16px;text-align:center;box-shadow:0 0 20px rgba(0,255,255,.1),inset 0 0 20px rgba(0,255,255,.05)}
-input,button{width:100%;max-width:600px;padding:18px;margin:12px auto;border-radius:12px;border:1px solid rgba(0,255,255,.3);background:rgba(0,0,0,.4);color:#fff;font-size:18px;text-align:center;display:block;box-shadow:0 0 15px rgba(0,255,255,.1)}
-button{background:linear-gradient(90deg,#0080ff,#00ffff);cursor:pointer;font-weight:700;border:none;font-family:system-ui;letter-spacing:0;box-shadow:0 0 25px rgba(0,255,255,.4)}
-button.del{background:rgba(255,68,68,.1);border:1px solid rgba(255,68,68,.4);padding:10px;margin-top:12px;box-shadow:0 0 15px rgba(255,68,68,.2)}
-button.logout{background:rgba(255,68,68,.1);border:1px solid rgba(255,68,68,.4);max-width:500px;margin:60px auto 40px;box-shadow:0 0 20px rgba(255,68,68,.2)}
-button.view{background:rgba(0,255,255,.1);border:1px solid rgba(0,255,255,.4);padding:10px;margin-top:12px;box-shadow:0 0 15px rgba(0,255,255,.2)}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(350px,1fr));gap:16px;padding:0 16px}
-.grid.card{margin:0;border-radius:16px}
-.status{display:inline-block;padding:6px 16px;border-radius:12px;font-size:13px;font-weight:700}
-.on{background:rgba(0,255,136,.15);color:#00ff88;border:1px solid rgba(0,255,136,.4);box-shadow:0 0 15px rgba(0,255,136,.3)}
-.off{background:rgba(255,68,68,.15);color:#ff4444;border:1px solid rgba(255,68,68,.4);box-shadow:0 0 15px rgba(255,68,68,.3)}
-.hidden{display:none}
-.label{opacity:.7;font-size:13px;text-transform:uppercase;text-align:center;letter-spacing:2px;margin-bottom:8px}
-.cells{display:grid;grid-template-columns:repeat(auto-fill,minmax(85px,1fr));gap:10px;margin-top:16px;justify-content:center}
-.cell{background:rgba(0,0,0,.4);border:1px solid rgba(0,255,255,.2);border-radius:12px;padding:12px;text-align:center;box-shadow:0 0 10px rgba(0,255,255,.1)}
-.cell-num{opacity:.5;font-size:10px;text-align:center}
-.cell-val{font-weight:700;font-size:14px;margin-top:4px;text-align:center}
-.cell.ok{border-color:rgba(0,255,136,.5);background:rgba(0,255,136,.08);box-shadow:0 0 15px rgba(0,255,136,.2)}
-.cell.warn{border-color:rgba(255,170,0,.5);background:rgba(255,170,0,.08);box-shadow:0 0 15px rgba(255,170,0,.2)}
-.cell.crit{border-color:rgba(255,68,68,.5);background:rgba(255,68,68,.08);box-shadow:0 0 15px rgba(255,68,68,.2)}
-.modal{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.95);z-index:999;overflow-y:auto;padding:20px}
-.modal.active{display:block}
-.modal-content{max-width:1200px;margin:40px auto;background:#0a0a0f;border:1px solid rgba(0,255,255,.3);border-radius:20px;padding:30px;text-align:center;box-shadow:0 0 40px rgba(0,255,255,.2)}
-.modal-close{float:right;background:rgba(255,68,68,.1);border:1px solid rgba(255,68,68,.4);color:#fff;padding:10px 20px;border-radius:8px;cursor:pointer;box-shadow:0 0 15px rgba(255,68,68,.2)}
-#login{padding:40px 20px}
-#login.card{border-radius:20px;margin:40px auto;max-width:500px}
-.data-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:12px 0}
-.data-item{text-align:center}
-.data-item.label{margin-bottom:4px;font-size:11px}
-.data-item.value{font-size:24px;font-weight:700;text-shadow:0 0 15px currentColor}
+
+/* =========================
+RESET
+========================= */
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+}
+
+:root{
+
+--bg:#05070d;
+
+--cyan:#00ffff;
+--blue:#0080ff;
+--green:#00ff88;
+--red:#ff4444;
+--orange:#ffaa00;
+
+}
+
+/* =========================
+BODY
+========================= */
+
+body{
+
+font-family:'Inter',sans-serif;
+
+background:
+
+radial-gradient(circle at top,
+rgba(0,255,255,.12),
+transparent 40%),
+
+radial-gradient(circle at bottom,
+rgba(0,128,255,.08),
+transparent 40%),
+
+var(--bg);
+
+color:#fff;
+
+overflow-x:hidden;
+
+min-height:100vh;
+
+position:relative;
+
+}
+
+/* =========================
+GRID BG
+========================= */
+
+body::before{
+
+content:'';
+
+position:fixed;
+
+inset:0;
+
+background-image:
+
+linear-gradient(
+rgba(255,255,255,.03) 1px,
+transparent 1px),
+
+linear-gradient(
+90deg,
+rgba(255,255,255,.03) 1px,
+transparent 1px);
+
+background-size:40px 40px;
+
+mask-image:
+radial-gradient(circle at center,
+black,
+transparent 90%);
+
+pointer-events:none;
+
+z-index:0;
+
+}
+
+/* =========================
+PARTICLES
+========================= */
+
+#particles{
+
+position:fixed;
+
+inset:0;
+
+overflow:hidden;
+
+pointer-events:none;
+
+z-index:0;
+
+}
+
+.particle{
+
+position:absolute;
+
+background:var(--cyan);
+
+border-radius:50%;
+
+opacity:.25;
+
+animation:float linear infinite;
+
+box-shadow:
+0 0 12px var(--cyan),
+0 0 24px var(--cyan);
+
+}
+
+@keyframes float{
+
+0%{
+transform:
+translateY(100vh)
+scale(0);
+opacity:0;
+}
+
+10%{
+opacity:.3;
+}
+
+100%{
+transform:
+translateY(-100px)
+scale(1.3);
+opacity:0;
+}
+
+}
+
+/* =========================
+MAIN
+========================= */
+
+#login,
+#painel{
+
+position:relative;
+
+z-index:1;
+
+width:100%;
+
+min-height:100vh;
+
+display:flex;
+
+flex-direction:column;
+
+justify-content:center;
+
+align-items:center;
+
+padding:20px;
+
+}
+
+/* =========================
+TITLE
+========================= */
+
+h1{
+
+font-size:clamp(42px,8vw,72px);
+
+font-weight:900;
+
+margin-bottom:30px;
+
+letter-spacing:3px;
+
+background:
+linear-gradient(
+90deg,
+var(--cyan),
+var(--blue));
+
+-webkit-background-clip:text;
+-webkit-text-fill-color:transparent;
+
+text-shadow:
+0 0 30px rgba(0,255,255,.4);
+
+}
+
+/* =========================
+CARD
+========================= */
+
+.card{
+
+background:
+rgba(255,255,255,.04);
+
+backdrop-filter:blur(24px);
+
+border:
+1px solid rgba(255,255,255,.08);
+
+border-radius:28px;
+
+padding:24px;
+
+width:100%;
+
+position:relative;
+
+overflow:hidden;
+
+box-shadow:
+
+0 0 30px rgba(0,255,255,.08),
+
+inset 0 0 40px rgba(255,255,255,.02);
+
+transition:.35s ease;
+
+}
+
+.card:hover{
+
+transform:
+translateY(-4px)
+scale(1.01);
+
+box-shadow:
+
+0 0 40px rgba(0,255,255,.15),
+
+0 0 80px rgba(0,255,255,.08);
+
+}
+
+.card::before{
+
+content:'';
+
+position:absolute;
+
+top:-100%;
+left:-100%;
+
+width:200%;
+height:200%;
+
+background:
+linear-gradient(
+45deg,
+transparent,
+rgba(255,255,255,.05),
+transparent);
+
+transform:rotate(25deg);
+
+animation:shine 7s linear infinite;
+
+}
+
+@keyframes shine{
+
+100%{
+transform:
+translateX(100%)
+translateY(100%)
+rotate(25deg);
+}
+
+}
+
+/* =========================
+LOGIN CARD
+========================= */
+
+#login .card{
+
+max-width:520px;
+
+}
+
+/* =========================
+INPUT
+========================= */
+
+input,
+button{
+
+width:100%;
+
+max-width:600px;
+
+padding:18px;
+
+margin-top:16px;
+
+border-radius:18px;
+
+border:none;
+
+outline:none;
+
+font-size:18px;
+
+transition:.25s;
+
+}
+
+input{
+
+background:
+rgba(0,0,0,.35);
+
+color:#fff;
+
+font-family:monospace;
+
+letter-spacing:2px;
+
+border:
+1px solid rgba(0,255,255,.2);
+
+box-shadow:
+0 0 20px rgba(0,255,255,.05);
+
+text-align:center;
+
+}
+
+input:focus{
+
+border-color:var(--cyan);
+
+box-shadow:
+0 0 25px rgba(0,255,255,.2);
+
+}
+
+/* =========================
+BUTTON
+========================= */
+
+button{
+
+background:
+linear-gradient(
+90deg,
+var(--blue),
+var(--cyan));
+
+color:#fff;
+
+font-weight:700;
+
+cursor:pointer;
+
+box-shadow:
+0 0 30px rgba(0,255,255,.25);
+
+}
+
+button:hover{
+
+transform:
+translateY(-2px)
+scale(1.02);
+
+box-shadow:
+0 0 45px rgba(0,255,255,.4);
+
+}
+
+button.del{
+
+background:
+rgba(255,68,68,.08);
+
+border:
+1px solid rgba(255,68,68,.2);
+
+}
+
+button.view{
+
+background:
+rgba(0,255,255,.08);
+
+border:
+1px solid rgba(0,255,255,.2);
+
+}
+
+button.logout{
+
+margin-top:40px;
+
+background:
+rgba(255,68,68,.08);
+
+border:
+1px solid rgba(255,68,68,.2);
+
+max-width:500px;
+
+}
+
+/* =========================
+GRID
+========================= */
+
+.grid{
+
+display:grid;
+
+grid-template-columns:
+repeat(auto-fit,minmax(360px,1fr));
+
+gap:20px;
+
+width:100%;
+
+max-width:1400px;
+
+margin-top:30px;
+
+}
+
+/* =========================
+LABEL
+========================= */
+
+.label{
+
+font-size:12px;
+
+letter-spacing:2px;
+
+opacity:.6;
+
+text-transform:uppercase;
+
+margin-bottom:8px;
+
+}
+
+/* =========================
+STATUS
+========================= */
+
+.status{
+
+display:inline-flex;
+
+align-items:center;
+
+padding:10px 18px;
+
+border-radius:999px;
+
+font-size:13px;
+
+font-weight:700;
+
+}
+
+.on{
+
+background:
+rgba(0,255,136,.12);
+
+color:var(--green);
+
+border:
+1px solid rgba(0,255,136,.3);
+
+box-shadow:
+0 0 20px rgba(0,255,136,.2);
+
+}
+
+.off{
+
+background:
+rgba(255,68,68,.12);
+
+color:var(--red);
+
+border:
+1px solid rgba(255,68,68,.3);
+
+box-shadow:
+0 0 20px rgba(255,68,68,.2);
+
+}
+
+/* =========================
+VALUES
+========================= */
+
+.data-row{
+
+display:grid;
+
+grid-template-columns:1fr 1fr;
+
+gap:18px;
+
+margin-top:18px;
+
+}
+
+.data-item{
+
+background:
+rgba(255,255,255,.03);
+
+padding:18px;
+
+border-radius:18px;
+
+}
+
+.data-value{
+
+font-size:30px;
+
+font-weight:800;
+
+margin-top:8px;
+
+text-shadow:
+0 0 20px currentColor;
+
+}
+
+/* =========================
+CELLS
+========================= */
+
+.cells{
+
+display:grid;
+
+grid-template-columns:
+repeat(auto-fill,minmax(90px,1fr));
+
+gap:12px;
+
+margin-top:24px;
+
+}
+
+.cell{
+
+background:
+rgba(0,0,0,.28);
+
+border-radius:18px;
+
+padding:14px;
+
+transition:.3s;
+
+border:
+1px solid rgba(255,255,255,.05);
+
+backdrop-filter:blur(8px);
+
+}
+
+.cell:hover{
+
+transform:scale(1.05);
+
+}
+
+.cell-num{
+
+font-size:11px;
+
+opacity:.5;
+
+margin-bottom:6px;
+
+}
+
+.cell-val{
+
+font-size:18px;
+
+font-weight:700;
+
+}
+
+.cell.ok{
+
+border-color:
+rgba(0,255,136,.25);
+
+box-shadow:
+0 0 20px rgba(0,255,136,.08);
+
+}
+
+.cell.warn{
+
+border-color:
+rgba(255,170,0,.25);
+
+box-shadow:
+0 0 20px rgba(255,170,0,.08);
+
+}
+
+.cell.crit{
+
+border-color:
+rgba(255,68,68,.25);
+
+box-shadow:
+0 0 20px rgba(255,68,68,.08);
+
+}
+
+/* =========================
+MODAL
+========================= */
+
+.modal{
+
+display:none;
+
+position:fixed;
+
+inset:0;
+
+background:
+rgba(0,0,0,.92);
+
+z-index:999;
+
+overflow-y:auto;
+
+padding:30px;
+
+backdrop-filter:blur(10px);
+
+}
+
+.modal.active{
+display:block;
+}
+
+.modal-content{
+
+max-width:1200px;
+
+margin:40px auto;
+
+background:
+rgba(10,10,15,.95);
+
+border:
+1px solid rgba(0,255,255,.2);
+
+border-radius:28px;
+
+padding:30px;
+
+box-shadow:
+0 0 50px rgba(0,255,255,.2);
+
+}
+
+.modal-close{
+
+float:right;
+
+padding:12px 20px;
+
+border-radius:14px;
+
+background:
+rgba(255,68,68,.08);
+
+border:
+1px solid rgba(255,68,68,.2);
+
+cursor:pointer;
+
+}
+
+/* =========================
+HIDDEN
+========================= */
+
+.hidden{
+display:none!important;
+}
+
+/* =========================
+RESPONSIVE
+========================= */
+
+@media(max-width:768px){
+
+.grid{
+grid-template-columns:1fr;
+}
+
+.data-row{
+grid-template-columns:1fr;
+}
+
+}
+
 </style>
 </head>
+
 <body>
+
+<div id="particles"></div>
+
+<!-- LOGIN -->
+
 <div id="login">
-  <h1>BMS SMART</h1>
-  <div class="card">
-    <div class="label">Acesso Administrativo</div>
-    <input id="user" placeholder="Usuário" autocomplete="username">
-    <input id="password" type="password" placeholder="Senha" autocomplete="current-password">
-    <button onclick="adminLogin()">Entrar no Painel</button>
-    <p id="loginError" style="color:#ff4444;margin-top:12px;display:none;text-align:center"></p>
-  </div>
+
+<h1>SMART BMS</h1>
+
+<div class="card">
+
+<div class="label">
+Acesso Administrativo
 </div>
+
+<input
+id="user"
+placeholder="Usuário"
+autocomplete="username"
+>
+
+<input
+id="password"
+type="password"
+placeholder="Senha"
+autocomplete="current-password"
+>
+
+<button onclick="adminLogin()">
+Entrar no Painel
+</button>
+
+<p
+id="loginError"
+style="
+color:#ff4444;
+margin-top:12px;
+display:none;
+">
+</p>
+
+</div>
+
+</div>
+
+<!-- PAINEL -->
+
 <div id="painel" class="hidden">
-  <h1>BMS SMART</h1>
-  <div class="card" style="max-width:600px">
-    <div class="label">Cadastrar BMS</div>
-    <input id="code" placeholder="SL82576655" maxlength="10">
-    <input id="nome" placeholder="Nome do Cliente">
-    <button onclick="cad()">Cadastrar BMS</button>
-    <p id="msg" style="text-align:center;margin-top:8px"></p>
-  </div>
-  <div id="lista" class="grid"></div>
-  <button class="logout" onclick="adminLogout()">Sair do Painel Admin</button>
+
+<h1>SMART BMS</h1>
+
+<div class="card" style="max-width:700px">
+
+<div class="label">
+Cadastrar BMS
 </div>
+
+<input
+id="code"
+placeholder="SL82576655"
+maxlength="10"
+>
+
+<input
+id="nome"
+placeholder="Nome do Cliente"
+>
+
+<button onclick="cad()">
+Cadastrar BMS
+</button>
+
+<p id="msg" style="margin-top:10px"></p>
+
+</div>
+
+<div id="lista" class="grid"></div>
+
+<button class="logout" onclick="adminLogout()">
+Sair do Painel Admin
+</button>
+
+</div>
+
+<!-- MODAL -->
+
 <div id="modal" class="modal">
-  <div class="modal-content">
-    <button class="modal-close" onclick="closeModal()">Fechar</button>
-    <h2 id="modalTitle" style="text-align:center;margin-bottom:20px"></h2>
-    <div id="modalCells" class="cells" style="margin-top:20px"></div>
-  </div>
+
+<div class="modal-content">
+
+<button
+class="modal-close"
+onclick="closeModal()"
+>
+Fechar
+</button>
+
+<h2
+id="modalTitle"
+style="
+margin-bottom:30px;
+text-align:center;
+"
+></h2>
+
+<div
+id="modalCells"
+class="cells"
+></div>
+
 </div>
+
+</div>
+
 <script>
+
+/* =========================
+PARTICLES
+========================= */
+
+function createParticles(){
+
+const container =
+document.getElementById('particles');
+
+setInterval(() => {
+
+const p =
+document.createElement('div');
+
+p.className = 'particle';
+
+const size =
+Math.random() * 4 + 1;
+
+p.style.width = size + 'px';
+p.style.height = size + 'px';
+
+p.style.left =
+Math.random() * 100 + '%';
+
+p.style.animationDuration =
+(Math.random() * 10 + 10) + 's';
+
+container.appendChild(p);
+
+setTimeout(() => p.remove(),20000);
+
+},300);
+
+}
+
+createParticles();
+
+/* =========================
+API
+========================= */
+
 const API = '/api/bms';
-let adminToken = sessionStorage.getItem('admin_token');
+
+let adminToken =
+sessionStorage.getItem('admin_token');
+
 let bmsList = [];
-if(adminToken === 'admin_ok') showPainel();
+
+if(adminToken === 'admin_ok'){
+showPainel();
+}
+
+/* =========================
+LOGIN
+========================= */
+
 async function adminLogin(){
-  const user = document.getElementById('user').value;
-  const password = document.getElementById('password').value;
-  const errorEl = document.getElementById('loginError');
-  errorEl.style.display='none';
-  const r = await fetch(API+'?action=admin_login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({user,password})});
-  const d = await r.json();
-  if(d.ok){
-    adminToken = d.token;
-    sessionStorage.setItem('admin_token', adminToken);
-    showPainel();
-  }else{
-    errorEl.textContent = d.error;
-    errorEl.style.display='block';
-  }
+
+const user =
+document.getElementById('user').value;
+
+const password =
+document.getElementById('password').value;
+
+const errorEl =
+document.getElementById('loginError');
+
+errorEl.style.display='none';
+
+const r = await fetch(
+API+'?action=admin_login',
+{
+method:'POST',
+headers:{
+'Content-Type':'application/json'
+},
+body:JSON.stringify({
+user,
+password
+})
 }
+);
+
+const d = await r.json();
+
+if(d.ok){
+
+adminToken = d.token;
+
+sessionStorage.setItem(
+'admin_token',
+adminToken
+);
+
+showPainel();
+
+}else{
+
+errorEl.textContent = d.error;
+
+errorEl.style.display='block';
+
+}
+
+}
+
+/* =========================
+SHOW PANEL
+========================= */
+
 function showPainel(){
-  document.getElementById('login').classList.add('hidden');
-  document.getElementById('painel').classList.remove('hidden');
-  listar();
+
+document
+.getElementById('login')
+.classList
+.add('hidden');
+
+document
+.getElementById('painel')
+.classList
+.remove('hidden');
+
+listar();
+
 }
+
+/* =========================
+LOGOUT
+========================= */
+
 function adminLogout(){
-  sessionStorage.removeItem('admin_token');
-  location.reload();
+
+sessionStorage.removeItem(
+'admin_token'
+);
+
+location.reload();
+
 }
+
+/* =========================
+AUTH
+========================= */
+
 function authHeaders(){
-  return {'Content-Type':'application/json','Authorization':'Bearer '+adminToken};
-}
-document.getElementById('code').oninput = e => {
-  if(!e.target.value.startsWith('SL')) e.target.value = 'SL';
-  e.target.value = 'SL' + e.target.value.slice(2).replace(/[^0-9]/g,'').slice(0,8);
+
+return {
+
+'Content-Type':'application/json',
+
+'Authorization':
+'Bearer '+adminToken
+
 };
+
+}
+
+/* =========================
+MASK
+========================= */
+
+document
+.getElementById('code')
+.oninput = e => {
+
+if(!e.target.value.startsWith('SL')){
+e.target.value = 'SL';
+}
+
+e.target.value =
+'SL' +
+e.target.value
+.slice(2)
+.replace(/[^0-9]/g,'')
+.slice(0,8);
+
+};
+
+/* =========================
+REGISTER
+========================= */
+
 async function cad(){
-  const code = document.getElementById('code').value;
-  const nome = document.getElementById('nome').value;
-  const r = await fetch(API+'?action=cadastrar',{method:'POST',headers:authHeaders(),body:JSON.stringify({code,nome})});
-  const d = await r.json();
-  document.getElementById('msg').textContent = d.ok?'Cadastrada!':d.error;
-  document.getElementById('msg').style.color = d.ok?'#00ff88':'#ff4444';
-  if(d.ok){document.getElementById('code').value='';document.getElementById('nome').value='';listar();}
+
+const code =
+document.getElementById('code').value;
+
+const nome =
+document.getElementById('nome').value;
+
+const r = await fetch(
+API+'?action=cadastrar',
+{
+method:'POST',
+headers:authHeaders(),
+body:JSON.stringify({code,nome})
 }
+);
+
+const d = await r.json();
+
+const msg =
+document.getElementById('msg');
+
+msg.textContent =
+d.ok ? 'Cadastrada!' : d.error;
+
+msg.style.color =
+d.ok ? '#00ff88' : '#ff4444';
+
+if(d.ok){
+
+document.getElementById('code').value='';
+document.getElementById('nome').value='';
+
+listar();
+
+}
+
+}
+
+/* =========================
+DELETE
+========================= */
+
 async function del(code){
-  if(!confirm(`Deletar ${code}?`))return;
-  await fetch(API+`?action=deletar&code=${code}`,{method:'DELETE',headers:authHeaders()});
-  listar();
+
+if(!confirm(`Excluir ${code}?`))
+return;
+
+await fetch(
+API+`?action=deletar&code=${code}`,
+{
+method:'DELETE',
+headers:authHeaders()
 }
+);
+
+listar();
+
+}
+
+/* =========================
+MODAL
+========================= */
+
 function viewCells(code){
-  const bms = bmsList.find(b => b.code === code);
-  if(!bms ||!bms.cells) return;
-  document.getElementById('modalTitle').textContent = `${bms.code} - ${bms.cells.length} Células`;
-  document.getElementById('modalCells').innerHTML = bms.cells.map((v,i)=>{
-    const val = parseFloat(v);
-    let cls = 'ok';
-    if(val < 3.2 || val > 4.2) cls = 'crit';
-    else if(val < 3.4 || val > 4.15) cls = 'warn';
-    return `<div class="cell ${cls}"><div class="cell-num">Célula ${i+1}</div><div class="cell-val">${val.toFixed(3)}V</div></div>`;
-  }).join('');
-  document.getElementById('modal').classList.add('active');
+
+const bms =
+bmsList.find(b => b.code === code);
+
+if(!bms || !bms.cells)
+return;
+
+document.getElementById('modalTitle').textContent =
+`${bms.code} - ${bms.cells.length} Células`;
+
+document.getElementById('modalCells').innerHTML =
+
+bms.cells.map((v,i)=>{
+
+const val = parseFloat(v);
+
+let cls = 'ok';
+
+if(val < 3.2 || val > 4.2){
+cls = 'crit';
 }
+else if(val < 3.4 || val > 4.15){
+cls = 'warn';
+}
+
+return `
+<div class="cell ${cls}">
+<div class="cell-num">C${i+1}</div>
+<div class="cell-val">${val.toFixed(3)}V</div>
+</div>
+`;
+
+}).join('');
+
+document
+.getElementById('modal')
+.classList
+.add('active');
+
+}
+
 function closeModal(){
-  document.getElementById('modal').classList.remove('active');
+
+document
+.getElementById('modal')
+.classList
+.remove('active');
+
 }
+
+/* =========================
+LIST
+========================= */
+
 async function listar(){
-  const r = await fetch(API+'?action=listar',{headers:authHeaders()});
-  if(r.status===401){adminLogout();return;}
-  const d = await r.json();
-  bmsList = d;
-  document.getElementById('lista').innerHTML = d.map(b=>{
-    const cellsCount = b.cells? b.cells.length : 0;
-    const cellsHtml = cellsCount > 0? 
-      `<button class="view" onclick="viewCells('${b.code}')">Ver ${cellsCount} Células</button>` : 
-      '<div style="opacity:.4;font-size:13px;margin-top:12px;text-align:center">Sem dados de células</div>';
-    return `
-    <div class="card">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
-        <div style="text-align:left"><b style="font-size:18px">${b.code}</b><div style="opacity:.6;font-size:13px;margin-top:4px">${b.nome||''}</div></div>
-        <span class="status ${b.online?'on':'off'}">${b.online?'Online':'Offline'}</span>
-      </div>
-      <div class="data-row">
-        <div class="data-item">
-          <div class="label">SOC</div>
-          <div class="value" style="color:#00ff88">${b.soc?.toFixed(0)||0}%</div>
-        </div>
-        <div class="data-item">
-          <div class="label">Tensão</div>
-          <div class="value" style="color:#00ffff">${b.voltage?.toFixed(2)||0}V</div>
-        </div>
-      </div>
-      <div class="data-row">
-        <div class="data-item">
-          <div class="label">Corrente</div>
-          <div class="value" style="color:#ffaa00">${b.current?.toFixed(1)||0}A</div>
-        </div>
-        <div class="data-item">
-          <div class="label">Temperatura</div>
-          <div class="value" style="color:#ff4444">${b.temp?.toFixed(1)||0}°C</div>
-        </div>
-      </div>
-      ${cellsHtml}
-      <button class="del" onclick="del('${b.code}')">Excluir</button>
-    </div>
-  `}).join('') || '<div class="card" style="text-align:center;opacity:.4;padding:60px 20px">Nenhuma BMS cadastrada</div>';
+
+const r = await fetch(
+API+'?action=listar',
+{
+headers:authHeaders()
 }
-setInterval(()=>{if(adminToken)listar()},5000);
+);
+
+if(r.status===401){
+
+adminLogout();
+return;
+
+}
+
+const d = await r.json();
+
+bmsList = d;
+
+document.getElementById('lista').innerHTML =
+
+d.map(b => {
+
+const cellsCount =
+b.cells ? b.cells.length : 0;
+
+const cellsHtml = cellsCount > 0
+
+? `<button class="view" onclick="viewCells('${b.code}')">
+Ver ${cellsCount} Células
+</button>`
+
+: `<div style="
+opacity:.4;
+margin-top:16px;
+font-size:13px;
+">
+Sem dados de células
+</div>`;
+
+return `
+
+<div class="card">
+
+<div style="
+display:flex;
+justify-content:space-between;
+align-items:center;
+margin-bottom:20px;
+">
+
+<div style="text-align:left">
+
+<div style="
+font-size:22px;
+font-weight:800;
+">
+${b.code}
+</div>
+
+<div style="
+opacity:.5;
+margin-top:6px;
+font-size:13px;
+">
+${b.nome || ''}
+</div>
+
+</div>
+
+<span class="status ${b.online?'on':'off'}">
+${b.online?'Online':'Offline'}
+</span>
+
+</div>
+
+<div class="data-row">
+
+<div class="data-item">
+
+<div class="label">
+SOC
+</div>
+
+<div class="data-value" style="color:#00ff88">
+${b.soc?.toFixed(0)||0}%
+</div>
+
+</div>
+
+<div class="data-item">
+
+<div class="label">
+Tensão
+</div>
+
+<div class="data-value" style="color:#00ffff">
+${b.voltage?.toFixed(2)||0}V
+</div>
+
+</div>
+
+</div>
+
+<div class="data-row">
+
+<div class="data-item">
+
+<div class="label">
+Corrente
+</div>
+
+<div class="data-value" style="color:#ffaa00">
+${b.current?.toFixed(1)||0}A
+</div>
+
+</div>
+
+<div class="data-item">
+
+<div class="label">
+Temperatura
+</div>
+
+<div class="data-value" style="color:#ff4444">
+${b.temp?.toFixed(1)||0}°C
+</div>
+
+</div>
+
+</div>
+
+${cellsHtml}
+
+<button
+class="del"
+onclick="del('${b.code}')"
+>
+Excluir
+</button>
+
+</div>
+
+`;
+
+}).join('')
+
+||
+
+'<div class="card" style="opacity:.4;text-align:center;padding:80px 20px">Nenhuma BMS cadastrada</div>';
+
+}
+
+/* =========================
+AUTO UPDATE
+========================= */
+
+setInterval(() => {
+
+if(adminToken)
+listar();
+
+},5000);
+
 </script>
+
 </body>
 </html>
