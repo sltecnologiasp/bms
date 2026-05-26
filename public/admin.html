@@ -9,19 +9,17 @@
 body{background:#0a0a0f;color:#fff;font-family:system-ui;padding:0;text-align:center}
 h1{text-align:center;font-size:42px;font-weight:900;padding:30px 20px;background:linear-gradient(90deg,#00ffff,#0080ff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-shadow:0 0 30px rgba(0,255,255,.3)}
 .card{background:rgba(255,255,255,.03);border:1px solid rgba(0,255,255,.3);border-radius:16px;padding:30px;margin:16px;text-align:center;box-shadow:0 0 20px rgba(0,255,255,.1),inset 0 0 20px rgba(0,255,255,.05)}
-
-.card-cadastro{
-  max-width:600px;
-  margin:16px auto 32px auto;
-}
-
-input,button{width:100%;max-width:600px;padding:18px;margin:12px auto;border-radius:12px;border:1px solid rgba(0,255,255,.3);background:rgba(0,0,0,.4);color:#fff;font-size:18px;text-align:center;display:block;box-shadow:0 0 15px rgba(0,255,255,.1)}
+.card-cadastro{max-width:600px;margin:16px auto 32px auto}
+input,button,select{width:100%;max-width:600px;padding:18px;margin:12px auto;border-radius:12px;border:1px solid rgba(0,255,255,.3);background:rgba(0,0,0,.4);color:#fff;font-size:18px;text-align:center;display:block;box-shadow:0 0 15px rgba(0,255,255,.1)}
 button{background:linear-gradient(90deg,#0080ff,#00ffff);cursor:pointer;font-weight:700;border:none;font-family:system-ui;letter-spacing:0;box-shadow:0 0 25px rgba(0,255,255,.4)}
 button.del{background:rgba(255,68,68,.1);border:1px solid rgba(255,68,68,.4);padding:10px;margin-top:12px;box-shadow:0 0 15px rgba(255,68,68,.2)}
 button.logout{background:rgba(255,68,68,.1);border:1px solid rgba(255,68,68,.4);max-width:500px;margin:60px auto 40px;box-shadow:0 0 20px rgba(255,68,68,.2)}
 button.view{background:rgba(0,255,255,.1);border:1px solid rgba(0,255,255,.4);padding:10px;margin-top:12px;box-shadow:0 0 15px rgba(0,255,255,.2)}
+button.tab{background:rgba(0,255,255,.05);border:1px solid rgba(0,255,255,.2);padding:14px 24px;margin:0 8px;width:auto;display:inline-block}
+button.tab.active{background:linear-gradient(90deg,#0080ff,#00ffff);border:none}
+button.edit{background:rgba(255,170,0,.1);border:1px solid rgba(255,170,0,.4);padding:10px;margin-top:12px;box-shadow:0 0 15px rgba(255,170,0,.2)}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(350px,1fr));gap:16px;padding:0 16px}
-.grid .card{margin:0;border-radius:16px}
+.grid.card{margin:0;border-radius:16px}
 .status{display:inline-block;padding:6px 16px;border-radius:12px;font-size:13px;font-weight:700}
 .on{background:rgba(0,255,136,.15);color:#00ff88;border:1px solid rgba(0,255,136,.4);box-shadow:0 0 15px rgba(0,255,136,.3)}
 .off{background:rgba(255,68,68,.15);color:#ff4444;border:1px solid rgba(255,68,68,.4);box-shadow:0 0 15px rgba(255,68,68,.3)}
@@ -37,41 +35,18 @@ button.view{background:rgba(0,255,255,.1);border:1px solid rgba(0,255,255,.4);pa
 .modal.active{display:block}
 .modal-content{max-width:1200px;margin:40px auto;background:#0a0a0f;border:1px solid rgba(0,255,255,.3);border-radius:20px;padding:30px;text-align:center;box-shadow:0 0 40px rgba(0,255,255,.2)}
 .modal-close{float:right;background:rgba(255,68,68,.1);border:1px solid rgba(255,68,68,.4);color:#fff;padding:10px 20px;border-radius:8px;cursor:pointer;box-shadow:0 0 15px rgba(255,68,68,.2)}
-
-/* =========================
-   TELAS - CORRIGIDO
-========================= */
-#login,#painel{
-position:relative;
-z-index:1;
-width:100%;
-min-height:100dvh;
-padding:20px;
-}
-
-.tela-ativa{
-display:flex!important;
-flex-direction:column;
-justify-content:center;
-align-items:center;
-}
-
-#login .card{
-border-radius:20px;
-margin:0 auto;
-max-width:500px;
-width:100%;
-}
-
+#login,#painel{position:relative;z-index:1;width:100%;min-height:100dvh;padding:20px}
+.tela-ativa{display:flex!important;flex-direction:column;justify-content:center;align-items:center}
+#login.card{border-radius:20px;margin:0 auto;max-width:500px;width:100%}
 .data-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:12px 0}
 .data-item{text-align:center}
-.data-item .label{margin-bottom:4px;font-size:11px}
-.data-item .value{font-size:24px;font-weight:700;text-shadow:0 0 15px currentColor}
-
+.data-item.label{margin-bottom:4px;font-size:11px}
+.data-item.value{font-size:24px;font-weight:700;text-shadow:0 0 15px currentColor}
 .bms-card.offline{opacity:.4;border-color:rgba(255,68,68,.2)}
 .bms-card{transition:.2s}
-
-/* HIDDEN TEM QUE FICAR NO FINAL */
+.user-card{background:rgba(0,255,255,.05);border:1px solid rgba(0,255,255,.3);border-radius:12px;padding:16px;margin:8px 0;text-align:left;cursor:pointer}
+.user-card:hover{background:rgba(0,255,255,.1)}
+.tabs{text-align:center;margin:20px 0}
 .hidden{display:none!important}
 </style>
 </head>
@@ -86,18 +61,41 @@ width:100%;
     <p id="loginError" style="color:#ff4444;margin-top:12px;display:none;text-align:center"></p>
   </div>
 </div>
+
 <div id="painel" class="hidden">
   <h1>BMS SMART</h1>
-  <div class="card card-cadastro">
-    <div class="label">Cadastrar BMS</div>
-    <input id="code" placeholder="SL82576655" maxlength="10">
-    <input id="nome" placeholder="Nome do Cliente">
-    <button onclick="cad()">Cadastrar BMS</button>
-    <p id="msg" style="text-align:center;margin-top:8px"></p>
+
+  <div class="tabs">
+    <button class="tab active" onclick="showTab('bms')">Dispositivos</button>
+    <button class="tab" onclick="showTab('users')">Clientes</button>
   </div>
-  <div id="lista" class="grid"></div>
+
+  <div id="tab-bms">
+    <div class="card card-cadastro">
+      <div class="label">Cadastrar BMS</div>
+      <input id="code" placeholder="SL82576655" maxlength="10">
+      <input id="nome" placeholder="Nome do Cliente">
+      <button onclick="cad()">Cadastrar BMS</button>
+      <p id="msg" style="text-align:center;margin-top:8px"></p>
+    </div>
+    <div id="lista" class="grid"></div>
+  </div>
+
+  <div id="tab-users" class="hidden">
+    <div class="card card-cadastro">
+      <div class="label">Vincular BMS a Cliente</div>
+      <select id="userSelect"></select>
+      <input id="vincularCode" placeholder="SL82576655" maxlength="10">
+      <input id="vincularNome" placeholder="Nome da BMS (ex: Casa)">
+      <button onclick="vincularBMS()">Vincular BMS</button>
+      <p id="vincularMsg" style="text-align:center;margin-top:8px"></p>
+    </div>
+    <div id="usersList" class="card card-cadastro" style="text-align:left"></div>
+  </div>
+
   <button class="logout" onclick="adminLogout()">Sair do Painel Admin</button>
 </div>
+
 <div id="modal" class="modal">
   <div class="modal-content">
     <button class="modal-close" onclick="closeModal()">Fechar</button>
@@ -105,13 +103,24 @@ width:100%;
     <div id="modalCells" class="cells" style="margin-top:20px"></div>
   </div>
 </div>
+
 <script>
 const API = '/api/bms';
 let adminToken = sessionStorage.getItem('admin_token');
 let bmsList = [];
+let usersList = [];
 let updateInterval;
 
 if(adminToken === 'admin_ok') showPainel();
+
+function showTab(tab){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.querySelector(`.tab[onclick="showTab('${tab}')"]`).classList.add('active');
+  document.getElementById('tab-bms').classList.add('hidden');
+  document.getElementById('tab-users').classList.add('hidden');
+  document.getElementById(`tab-${tab}`).classList.remove('hidden');
+  if(tab==='users') loadUsers();
+}
 
 async function adminLogin(){
   const user = document.getElementById('user').value;
@@ -153,6 +162,10 @@ document.getElementById('code').oninput = e => {
   if(!e.target.value.startsWith('SL')) e.target.value = 'SL';
   e.target.value = 'SL' + e.target.value.slice(2).replace(/[^0-9]/g,'').slice(0,8);
 };
+document.getElementById('vincularCode').oninput = e => {
+  if(!e.target.value.startsWith('SL')) e.target.value = 'SL';
+  e.target.value = 'SL' + e.target.value.slice(2).replace(/[^0-9]/g,'').slice(0,8);
+};
 
 async function cad(){
   const code = document.getElementById('code').value;
@@ -167,8 +180,6 @@ async function cad(){
 async function del(code){
   if(!confirm(`Deletar ${code}?`))return;
   await fetch(API+`?action=deletar&code=${code}`,{method:'DELETE',headers:authHeaders()});
-  localStorage.removeItem('bms_hash_' + code);
-  localStorage.removeItem('bms_time_' + code);
   listar();
 }
 
@@ -196,30 +207,13 @@ async function listar(){
     if(r.status===401){adminLogout();return;}
     const d = await r.json();
     bmsList = d;
-    
     document.getElementById('lista').innerHTML = d.map(b=>{
-      const lastHash = localStorage.getItem('bms_hash_' + b.code) || '';
-      const currentHash = `${b.soc?.toFixed(0)}-${b.voltage?.toFixed(1)}-${b.current?.toFixed(1)}-${b.temp?.toFixed(1)}`;
-      const lastTime = parseInt(localStorage.getItem('bms_time_' + b.code) || '0');
-      const isStale = Date.now() - lastTime > 10000;
-      
-      // Se o dado mudou e não é zerado, atualiza timestamp
-      if(currentHash !== lastHash && currentHash !== '0-0.0-0.0'){
-        localStorage.setItem('bms_hash_' + b.code, currentHash);
-        localStorage.setItem('bms_time_' + b.code, Date.now().toString());
-      }
-      
-      // Online = tem hash salvo E não tá stale
-      const savedHash = localStorage.getItem('bms_hash_' + b.code);
-      const savedTime = parseInt(localStorage.getItem('bms_time_' + b.code) || '0');
-      const isOnline = savedHash && (Date.now() - savedTime < 10000);
-      const cardClass = isOnline ? '' : 'offline bms-card';
-      
+      const isOnline = b.online && (Date.now() - new Date(b.updated_at).getTime() < 10000);
+      const cardClass = isOnline? '' : 'offline bms-card';
       const cellsCount = b.cells? b.cells.length : 0;
-      const cellsHtml = cellsCount > 0? 
-        `<button class="view" onclick="viewCells('${b.code}')">Ver ${cellsCount} Células</button>` : 
+      const cellsHtml = cellsCount > 0?
+        `<button class="view" onclick="viewCells('${b.code}')">Ver ${cellsCount} Células</button>` :
         '<div style="opacity:.4;font-size:13px;margin-top:12px;text-align:center">Sem dados de células</div>';
-      
       return `
       <div class="card ${cardClass}">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
@@ -227,31 +221,120 @@ async function listar(){
           <span class="status ${isOnline?'on':'off'}">${isOnline?'Online':'Offline'}</span>
         </div>
         <div class="data-row">
-          <div class="data-item">
-            <div class="label">SOC</div>
-            <div class="value" style="color:#00ff88">${isOnline ? (b.soc?.toFixed(0)||0)+'%' : '--'}</div>
-          </div>
-          <div class="data-item">
-            <div class="label">Tensão</div>
-            <div class="value" style="color:#00ffff">${isOnline ? (b.voltage?.toFixed(2)||0)+'V' : '--'}</div>
-          </div>
+          <div class="data-item"><div class="label">SOC</div><div class="value" style="color:#00ff88">${isOnline? (b.soc?.toFixed(0)||0)+'%' : '--'}</div></div>
+          <div class="data-item"><div class="label">Tensão</div><div class="value" style="color:#00ffff">${isOnline? (b.voltage?.toFixed(2)||0)+'V' : '--'}</div></div>
         </div>
         <div class="data-row">
-          <div class="data-item">
-            <div class="label">Corrente</div>
-            <div class="value" style="color:#ffaa00">${isOnline ? (b.current?.toFixed(1)||0)+'A' : '--'}</div>
-          </div>
-          <div class="data-item">
-            <div class="label">Temperatura</div>
-            <div class="value" style="color:#ff4444">${isOnline ? (b.temp?.toFixed(1)||0)+'°C' : '--'}</div>
-          </div>
+          <div class="data-item"><div class="label">Corrente</div><div class="value" style="color:#ffaa00">${isOnline? (b.current?.toFixed(1)||0)+'A' : '--'}</div></div>
+          <div class="data-item"><div class="label">Temperatura</div><div class="value" style="color:#ff4444">${isOnline? (b.temp?.toFixed(1)||0)+'°C' : '--'}</div></div>
         </div>
         ${cellsHtml}
         <button class="del" onclick="del('${b.code}')">Excluir</button>
       </div>
     `}).join('') || '<div class="card" style="text-align:center;opacity:.4;padding:60px 20px">Nenhuma BMS cadastrada</div>';
+  }catch(e){console.error(e);}
+}
+
+async function loadUsers(){
+  try{
+    const r = await fetch(API+'?action=listar_users',{headers:authHeaders()});
+    if(r.status===401){adminLogout();return;}
+    usersList = await r.json();
+    const select = document.getElementById('userSelect');
+    select.innerHTML = '<option value="">Selecione um cliente</option>' +
+      usersList.map(u => `<option value="${u.id}">${u.nome} - ${u.email} (${u.total_bms} BMS)</option>`).join('');
+    const list = document.getElementById('usersList');
+    list.innerHTML = '<div class="label" style="margin-bottom:16px">Clientes Cadastrados</div>' +
+      usersList.map(u => `
+        <div class="user-card" onclick="verBMSUsuario(${u.id},'${u.nome}')">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <div>
+              <div style="font-weight:700;font-size:16px">${u.nome}</div>
+              <div style="opacity:.6;font-size:13px;margin-top:4px">${u.email}</div>
+            </div>
+            <div style="text-align:right">
+              <div style="font-size:20px;font-weight:800;color:#00ffff">${u.total_bms}</div>
+              <div style="opacity:.6;font-size:11px">BMS</div>
+            </div>
+          </div>
+        </div>
+      `).join('') || '<div style="opacity:.4;text-align:center;padding:40px">Nenhum cliente cadastrado</div>';
+  }catch(e){console.error(e);}
+}
+
+async function vincularBMS(){
+  const user_id = document.getElementById('userSelect').value;
+  const code = document.getElementById('vincularCode').value;
+  const nome = document.getElementById('vincularNome').value;
+  const msg = document.getElementById('vincularMsg');
+  if(!user_id){msg.textContent='Selecione um cliente';msg.className='error';msg.style.display='block';return}
+  if(!code||code.length!==10){msg.textContent='Código inválido';msg.className='error';msg.style.display='block';return}
+  if(!nome){msg.textContent='Dê um nome';msg.className='error';msg.style.display='block';return}
+  try{
+    const r = await fetch(API+'?action=vincular_bms',{method:'POST',headers:authHeaders(),body:JSON.stringify({user_id:parseInt(user_id),code,nome})});
+    const d = await r.json();
+    if(d.ok){msg.textContent='BMS vinculada!';msg.className='success';msg.style.display='block';document.getElementById('vincularCode').value='';document.getElementById('vincularNome').value='';setTimeout(()=>msg.style.display='none',2000);loadUsers()}
+    else{msg.textContent=d.error||'Erro';msg.className='error';msg.style.display='block'}
+  }catch(e){msg.textContent='Erro de conexão';msg.className='error';msg.style.display='block'}
+}
+
+async function verBMSUsuario(userId, nome){
+  const r = await fetch(API+`?action=user_bms_admin&user_id=${userId}`,{headers:authHeaders()});
+  const bms = await r.json();
+  if(bms.length === 0){
+    alert(`${nome}\n\nNenhuma BMS vinculada`);
+    return;
+  }
+  const lista = bms.map((b,i)=>`${i+1}. ${b.code} - ${b.nome}`).join('\n');
+  const opcao = prompt(`${nome}\n\nBMS vinculadas: ${bms.length}\n\n${lista}\n\nDigite o número da BMS para EDITAR/DESVINCULAR ou deixe vazio para cancelar:`);
+  if(opcao &&!isNaN(opcao)){
+    const idx = parseInt(opcao) - 1;
+    if(bms[idx]){
+      const acao = confirm(`BMS: ${bms[idx].code} - ${bms[idx].nome}\n\nOK = Editar nome\nCancelar = Desvincular`);
+      if(acao){
+        editarNomeBMS(userId, bms[idx].code, bms[idx].nome);
+      }else{
+        if(confirm(`Desvincular ${bms[idx].code} - ${bms[idx].nome} de ${nome}?`)){
+          await desvincularBMS(userId, bms[idx].code);
+        }
+      }
+    }
+  }
+}
+
+async function editarNomeBMS(userId, code, nomeAtual){
+  const novoNome = prompt(`Editar nome da BMS ${code}:`, nomeAtual);
+  if(novoNome && novoNome!== nomeAtual){
+    try{
+      const r = await fetch(API+'?action=editar_nome_bms',{method:'PUT',headers:authHeaders(),body:JSON.stringify({user_id:userId,code,nome:novoNome})});
+      const d = await r.json();
+      if(d.ok){
+        alert('Nome atualizado!');
+        loadUsers();
+      }else{
+        alert('Erro ao atualizar nome');
+      }
+    }catch(e){
+      alert('Erro de conexão');
+    }
+  }
+}
+
+async function desvincularBMS(userId, code){
+  try{
+    const r = await fetch(API+`?action=desvincular_bms&user_id=${userId}&code=${code}`,{
+      method:'DELETE',
+      headers:authHeaders()
+    });
+    const d = await r.json();
+    if(d.ok){
+      alert('BMS desvinculada com sucesso!');
+      loadUsers();
+    }else{
+      alert('Erro ao desvincular');
+    }
   }catch(e){
-    console.error(e);
+    alert('Erro de conexão');
   }
 }
 </script>
