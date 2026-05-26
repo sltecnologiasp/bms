@@ -87,20 +87,13 @@ export async function onRequest({ request, env }) {
       const { code, nome } = await request.json();
       if (!code?.startsWith('SL') || code.length!== 10) return json({ ok: false, error: 'Código inválido. Use SL + 8 números' }, 400);
 
-      // 1. Verifica se a BMS existe no sistema
       const bms = await env.DB.prepare("SELECT id, user_id FROM bms_master WHERE code =?").bind(code).first();
       if (!bms) return json({ ok: false, error: 'BMS não encontrada no sistema' });
 
-      // 2. Verifica se já tem dono
       if (bms.user_id && bms.user_id!== userId) return json({ ok: false, error: 'Essa BMS já está vinculada a outra conta' });
 
-      // 3. Vincula pra mim no master
       await env.DB.prepare("UPDATE bms_master SET user_id =? WHERE id =?").bind(userId, bms.id).run();
-
-      // 4. Cria na tabela bms se não existir
       await env.DB.prepare('INSERT OR IGNORE INTO bms (code, nome) VALUES (?,?)').bind(code, nome || code).run();
-
-      // 5. Vincula na user_bms
       await env.DB.prepare('INSERT OR IGNORE INTO user_bms (user_id, bms_code, bms_nome) VALUES (?,?,?)').bind(userId, code, nome || code).run();
 
       return json({ ok: true });
@@ -116,6 +109,30 @@ export async function onRequest({ request, env }) {
         WHERE m.user_id =? ORDER BY m.id DESC
       `).bind(userId).all();
       return json(results || []);
+    }
+
+    if (action === 'admin_add_master' && request.method === 'POST') {
+      if (!isAdmin) return json({ ok: false, error: 'Admin only' }, 403);
+      const { code } = await request.json();
+      if (!code?.startsWith('SL') || code.length!== 10) return json({ ok: false, error: 'Código inválido' }, 400);
+      try {
+        await env.DB.prepare('INSERT INTO bms_master (code) VALUES (?)').bind(code).run();
+        return json({ ok: true });
+      } catch(e) {
+        return json({ ok: false, error: 'BMS já existe no sistema' });
+      }
+    }
+
+    if (action === 'admin_list_master' && request.method === 'GET') {
+      if (!isAdmin) return json({ ok: false, error: 'Admin only' }, 403);
+      const { results } = await env.DB.prepare(`
+        SELECT m.code, m.user_id, u.nome as dono_nome, u.email as dono_email, b.online, b.soc, b.voltage, b.current, b.temp, b.cells
+        FROM bms_master m
+        LEFT JOIN users u ON u.id = m.user_id
+        LEFT JOIN bms b ON b.code = m.code
+        ORDER BY m.id DESC
+      `).all();
+      return json((results || []).map(r=>({...r,cells:JSON.parse(r.cells||'[]')})));
     }
 
     if (action === 'all_bms' && request.method === 'GET') {
@@ -148,6 +165,7 @@ export async function onRequest({ request, env }) {
       if (!id) return json({ ok: false, error: 'ID obrigatório' }, 400);
       await env.DB.prepare('DELETE FROM users WHERE id =?').bind(id).run();
       await env.DB.prepare('DELETE FROM user_bms WHERE user_id =?').bind(id).run();
+      await env.DB.prepare('UPDATE bms_master SET user_id = NULL WHERE user_id =?').bind(id).run();
       return json({ ok: true });
     }
 
@@ -168,6 +186,7 @@ export async function onRequest({ request, env }) {
       if (!isAdmin) return json({ ok: false, error: 'Admin only' }, 403);
       const code = url.searchParams.get('code');
       if (!code) return json({ ok: false, error: 'Code obrigatório' }, 400);
+      await env.DB.prepare('DELETE FROM bms_master WHERE code =?').bind(code).run();
       await env.DB.prepare('DELETE FROM bms WHERE code =?').bind(code).run();
       await env.DB.prepare('DELETE FROM user_bms WHERE bms_code =?').bind(code).run();
       return json({ ok: true });
