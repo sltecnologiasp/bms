@@ -5,8 +5,6 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <title>SMART BMS</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
-<!-- GRÁFICO DESATIVADO - Para ativar descomente a linha abaixo -->
-<!-- <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script> -->
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 :root{--bg:#05070d;--cyan:#00ffff;--blue:#0080ff;--green:#00ff88;--red:#ff4444;--orange:#ffaa00}
@@ -52,9 +50,6 @@ button{background:linear-gradient(90deg,var(--blue),var(--cyan));color:#fff;font
 .cell.ok{border-color:rgba(0,255,136,.25)}
 .cell.warn{border-color:rgba(255,170,0,.25)}
 .cell.crit{border-color:rgba(255,68,68,.25)}
-.chart-card{width:100%;padding:20px;min-height:340px;margin:0 0 4px 0}
-.chart-title{margin-bottom:16px;font-size:14px;letter-spacing:2px;opacity:.7;text-transform:uppercase;text-align:center}
-canvas{width:100%!important;height:280px!important}
 .logout{margin-top:24px;background:rgba(255,68,68,.08);border:1px solid rgba(255,68,68,.2)}
 .hidden{display:none!important}
 .bms-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:4px;margin-top:20px}
@@ -72,7 +67,7 @@ canvas{width:100%!important;height:280px!important}
 </head>
 <body>
 
-<div id="login" class="hidden">
+<div id="login">
 <div class="title">SMART BMS</div>
 <div class="card">
 <div class="label">E-mail</div>
@@ -144,15 +139,6 @@ canvas{width:100%!important;height:280px!important}
 <div class="card"><div class="label">Corrente</div><div class="value" id="corr" style="color:#ffaa00">0A</div></div>
 <div class="card"><div class="label">Temperatura</div><div class="value" id="temp" style="color:#ff4444">0°C</div></div>
 </div>
-
-<!-- GRÁFICO DESATIVADO - Para ativar descomente o bloco abaixo -->
-<!--
-<div class="card chart-card">
-<div class="chart-title">Realtime Monitor</div>
-<canvas id="grafico"></canvas>
-</div>
--->
-
 <div class="card">
 <div class="label">Células - Tensão Individual</div>
 <div class="diff">
@@ -174,10 +160,6 @@ var TOKEN = localStorage.getItem('bms_token');
 var USER = null;
 var CODIGO = localStorage.getItem('bms_codigo_ativo');
 var INT = null;
-var CHART = null;
-var VOLT_H = [];
-var CORR_H = [];
-var LABEL_H = [];
 
 try{USER = JSON.parse(localStorage.getItem('bms_user')||'null');}catch(e){}
 
@@ -188,20 +170,25 @@ function esconderTudo(){
   document.getElementById('dash').classList.add('hidden');
 }
 
-if(TOKEN && USER){
-  if(CODIGO){
-    abrirDash(CODIGO);
+window.onload = function(){
+  if(TOKEN && USER){
+    if(CODIGO){
+      abrirDash(CODIGO);
+    }else{
+      mostrarLista();
+    }
   }else{
-    mostrarLista();
+    esconderTudo();
+    document.getElementById('login').classList.remove('hidden');
   }
-}else{
-  esconderTudo();
-  document.getElementById('login').classList.remove('hidden');
-}
 
-document.getElementById('bms-code').oninput = function(e){
-  if(!e.target.value.startsWith('SL')) e.target.value = 'SL';
-  e.target.value = 'SL' + e.target.value.slice(2).replace(/[^0-9]/g,'').slice(0,8);
+  var bmsInput = document.getElementById('bms-code');
+  if(bmsInput){
+    bmsInput.oninput = function(e){
+      if(!e.target.value.startsWith('SL')) e.target.value = 'SL';
+      e.target.value = 'SL' + e.target.value.slice(2).replace(/[^0-9]/g,'').slice(0,8);
+    };
+  }
 };
 
 function mostrarLogin(){
@@ -330,7 +317,6 @@ function addBms(){
     return;
   }
 
-  // Verifica se já existe na lista antes de adicionar
   fetch(API + '?action=user_bms', {
     headers:{'Authorization':'Bearer '+TOKEN}
   })
@@ -344,14 +330,13 @@ function addBms(){
       return;
     }
 
-    // Se não existe, adiciona normal
     fetch(API + '?action=add_bms', {
       method:'POST',
       headers:{'Content-Type':'application/json','Authorization':'Bearer '+TOKEN},
       body:JSON.stringify({code:code,nome:nome || code})
     })
- .then(function(r){return r.json();})
- .then(function(d){
+.then(function(r){return r.json();})
+.then(function(d){
       if(d.ok){
         alert('BMS adicionada!');
         document.getElementById('bms-code').value = '';
@@ -370,8 +355,6 @@ function abrirDash(code){
   esconderTudo();
   document.getElementById('dash').classList.remove('hidden');
   document.getElementById('bms-titulo').textContent = code;
-  // GRÁFICO DESATIVADO - Para ativar descomente a linha abaixo
-  // initChart();
   atualizar();
   INT = setInterval(atualizar, 3000);
 }
@@ -411,35 +394,6 @@ function renderCelulas(cels){
   document.getElementById('celulas').innerHTML = html;
 }
 
-/* GRÁFICO DESATIVADO - Para ativar descomente a função abaixo
-function initChart(){
-  if(CHART) CHART.destroy();
-  var ctx = document.getElementById('grafico').getContext('2d');
-  CHART = new Chart(ctx, {
-    type:'line',
-    data:{
-      labels:LABEL_H,
-      datasets:[
-        {label:'Tensão',data:VOLT_H,borderColor:'#00ffff',backgroundColor:'rgba(0,255,255,.08)',tension:.4,fill:true,borderWidth:2},
-        {label:'Corrente',data:CORR_H,borderColor:'#ffaa00',backgroundColor:'rgba(255,170,0,.08)',tension:.4,fill:true,borderWidth:2}
-      ]
-    },
-    options:{
-      responsive:true,
-      maintainAspectRatio:false,
-      animation:false,
-      elements:{point:{radius:0},line:{tension:.4}},
-      interaction:{intersect:false,mode:'index'},
-      plugins:{legend:{labels:{color:'#ffffff'}}},
-      scales:{
-        x:{ticks:{color:'#aaa'},grid:{color:'rgba(255,255,255,.05)'}},
-        y:{ticks:{color:'#aaa'},grid:{color:'rgba(255,255,255,.05)'}}
-      }
-    }
-  });
-}
-*/
-
 function atualizarGauge(soc){
   var gauge = document.getElementById('socGauge');
   var valor = document.getElementById('socValor');
@@ -473,6 +427,16 @@ function atualizar(){
     st.className = 'status ' + (d.online?'on':'off');
     renderCelulas(d.cells);
     atualizarGauge(parseInt(d.soc || 0));
+  });
+}
 
-    /* GRÁFICO DESATIVADO - Para ativar descomente o bloco abaixo
-    var agora = new Date().toLocaleTimeString('pt-BR', {hour:'2
+function sair(){
+  clearInterval(INT);
+  localStorage.removeItem('bms_token');
+  localStorage.removeItem('bms_user');
+  localStorage.removeItem('bms_codigo_ativo');
+  location.reload();
+}
+</script>
+</body>
+</html>
