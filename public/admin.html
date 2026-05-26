@@ -9,12 +9,13 @@
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 :root{--bg:#05070d;--cyan:#00ffff;--blue:#0080ff;--green:#00ff88;--red:#ff4444;--orange:#ffaa00}
 body{font-family:'Inter',sans-serif;background:var(--bg);color:#fff;min-height:100vh;width:100%;overflow-x:hidden}
-#login,#painel,#clientesPage{position:relative;z-index:1;width:100%;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:8px}
-#painel,#clientesPage{justify-content:flex-start;padding-top:12px}
-#login{justify-content:center}
+#login,#painel,#clientesPage{position:relative;z-index:1;width:100%;min-height:100vh;padding:8px}
+#login{display:flex;flex-direction:column;justify-content:center;align-items:center}
+#painel,#clientesPage{display:none;flex-direction:column;align-items:center;padding-top:12px}
+#painel.active,#clientesPage.active{display:flex}
 .title{font-size:clamp(32px,8vw,74px);font-weight:900;margin-bottom:16px;letter-spacing:3px;background:linear-gradient(90deg,var(--cyan),var(--blue));-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-align:center;width:100%}
 .card{background:rgba(10,15,25,.92);border:1px solid rgba(0,255,255,.12);border-radius:16px;padding:12px;width:100%;margin-bottom:4px}
-#login.card{max-width:520px}
+#login .card{max-width:520px}
 .card-cadastro{margin:0 0 20px 0;width:100%;max-width:520px}
 input,button{width:100%;padding:18px;border-radius:18px;border:none;outline:none;margin-top:16px;font-size:18px}
 input{background:rgba(0,0,0,.5);color:#fff;font-family:monospace;letter-spacing:2px;border:1px solid rgba(0,255,255,.2)}
@@ -54,7 +55,7 @@ button.voltar{background:rgba(0,255,136,.1);border:1px solid rgba(0,255,136,.4);
 .modal.active{display:block}
 .modal-content{max-width:1200px;margin:40px auto;background:var(--bg);border:1px solid rgba(0,255,255,.12);border-radius:20px;padding:30px;text-align:center;box-shadow:0 0 40px rgba(0,255,255,.2)}
 .modal-content.small{max-width:520px}
-.modal-close{float:right;background:rgba(255,68,68,.1);border:1px solid rgba(255,68,68,.4);color:#fff;padding:10px 20px;border-radius:8px;cursor:pointer;box-shadow:0 0 15px rgba(255,68,68,.2)}
+.modal-close{float:right;background:rgba(255,68,68,.1);border:1px solid rgba(255,68,.4);color:#fff;padding:10px 20px;border-radius:8px;cursor:pointer;box-shadow:0 0 15px rgba(255,68,68,.2)}
 .data-row{display:grid;grid-template-columns:1fr 1fr;gap:4px;margin:12px 0}
 .data-item{text-align:center}
 .data-item .label{margin-bottom:4px;font-size:11px}
@@ -102,8 +103,9 @@ input,button{font-size:16px;padding:16px}
 <button onclick="adminLogin()">ENTRAR NO PAINEL</button>
 <div id="loginError" class="erro hidden"></div>
 </div>
+</div>
 
-<div id="painel" class="hidden">
+<div id="painel">
 <div class="title" style="font-size:clamp(28px,6vw,32px);margin-bottom:8px">SMART BMS</div>
 <div class="user-info">Painel Administrativo</div>
 
@@ -123,7 +125,7 @@ input,button{font-size:16px;padding:16px}
 <button class="logout" onclick="adminLogout()">SAIR DO PAINEL ADMIN</button>
 </div>
 
-<div id="clientesPage" class="hidden">
+<div id="clientesPage">
 <div class="title" style="font-size:clamp(28px,6vw,32px);margin-bottom:8px">SMART BMS</div>
 <div class="user-info">Clientes Cadastrados</div>
 <div id="listaUsers" class="grid"></div>
@@ -143,6 +145,7 @@ input,button{font-size:16px;padding:16px}
 <button class="modal-close" onclick="closeModal()">Fechar</button>
 <h2 id="modalTitle" style="text-align:center;margin-bottom:20px"></h2>
 <div id="modalCellsContent" class="cells" style="margin-top:20px"></div>
+</div>
 </div>
 
 <div id="modalEditUser" class="modal">
@@ -183,21 +186,26 @@ async function adminLogin(){
 }
 
 function showPainel(){
-  document.getElementById('login').classList.add('hidden');
-  document.getElementById('clientesPage').classList.add('hidden');
-  document.getElementById('painel').classList.remove('hidden');
+  document.getElementById('login').style.display = 'none';
+  document.getElementById('clientesPage').style.display = 'none';
+  document.getElementById('painel').classList.add('active');
+  document.getElementById('painel').style.display = 'flex';
   carregarTudo();
 }
 
 function mostrarClientes(){
-  document.getElementById('painel').classList.add('hidden');
-  document.getElementById('clientesPage').classList.remove('hidden');
+  document.getElementById('painel').classList.remove('active');
+  document.getElementById('painel').style.display = 'none';
+  document.getElementById('clientesPage').classList.add('active');
+  document.getElementById('clientesPage').style.display = 'flex';
   listarUsers();
 }
 
 function voltarPainel(){
-  document.getElementById('clientesPage').classList.add('hidden');
-  document.getElementById('painel').classList.remove('hidden');
+  document.getElementById('clientesPage').classList.remove('active');
+  document.getElementById('clientesPage').style.display = 'none';
+  document.getElementById('painel').classList.add('active');
+  document.getElementById('painel').style.display = 'flex';
 }
 
 function adminLogout(){
@@ -389,7 +397,7 @@ async function listarBms(){
     </div>
   `}).join('') || '<div class="card card-empty"><div style="opacity:.4">Nenhuma BMS cadastrada no sistema</div></div>';
 }
-setInterval(()=>{if(adminToken && !document.getElementById('clientesPage').classList.contains('hidden'))carregarTudo()},5000);
+setInterval(()=>{if(adminToken && document.getElementById('painel').classList.contains('active'))carregarTudo()},5000);
 </script>
 </body>
 </html>
