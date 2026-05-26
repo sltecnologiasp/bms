@@ -118,7 +118,6 @@ input,button{font-size:16px;padding:16px}
 <button onclick="adminLogin()">ENTRAR NO PAINEL</button>
 <div id="loginError" class="erro hidden"></div>
 </div>
-</div>
 
 <div id="painel">
 <div class="title" style="font-size:clamp(28px,6vw,32px);margin-bottom:8px">SMART BMS</div>
@@ -152,7 +151,6 @@ input,button{font-size:16px;padding:16px}
 <button class="modal-close" onclick="closeBmsModal()">Fechar</button>
 <div id="modalBmsContent"></div>
 </div>
-</div>
 
 <div id="modalEditUser" class="modal">
 <div class="modal-content">
@@ -163,10 +161,7 @@ input,button{font-size:16px;padding:16px}
 <input id="editUserEmail" placeholder="Email">
 <button onclick="salvarUser()">SALVAR</button>
 <p id="editMsg" style="text-align:center;margin-top:8px;font-size:14px"></p>
-</div>
-</div>
-
-<script>
+</div><script>
 const API = '/api/bms';
 let adminToken = sessionStorage.getItem('admin_token');
 let bmsList = [];
@@ -422,4 +417,36 @@ async function listarUsers(){
 }
 
 async function listarBms(){
-  const r = await fetch(API+'?acti
+  const r = await fetch(API+'?action=admin_list_master',{headers:authHeaders()});
+  const d = await r.json();
+  
+  bmsList = d.sort((a,b) => {
+    const aOnline = isOnline(a.updated_at);
+    const bOnline = isOnline(b.updated_at);
+    if (aOnline &&!bOnline) return -1;
+    if (!aOnline && bOnline) return 1;
+    const aTime = a.updated_at? new Date(a.updated_at).getTime() : 0;
+    const bTime = b.updated_at? new Date(b.updated_at).getTime() : 0;
+    return bTime - aTime;
+  });
+  
+  document.getElementById('lista').innerHTML = bmsList.map(b=>{
+    const online = isOnline(b.updated_at);
+    const dono = b.user_id? `<span class="badge badge-orange">Vinculada</span>` : `<span class="badge badge-green">Disponível</span>`;
+    return `
+    <div class="card" onclick="viewBmsDetails('${b.code}')">
+      <div class="card-top">
+        <div style="text-align:center">
+          <span class="status ${online?'on':'off'}">${online?'Online':'Offline'}</span>
+        </div>
+        <div class="card-code">${b.code}</div>
+        <div style="text-align:center">${dono}</div>
+      </div>
+      <button class="del" onclick="del('${b.code}')">EXCLUIR DO SISTEMA</button>
+    </div>
+  `}).join('') || '<div class="card card-empty"><div style="opacity:.4">Nenhuma BMS cadastrada no sistema</div></div>';
+}
+setInterval(()=>{if(adminToken && document.getElementById('painel').classList.contains('active'))carregarTudo()},5000);
+</script>
+</body>
+</html>
