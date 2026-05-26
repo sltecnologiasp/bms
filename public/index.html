@@ -10,16 +10,12 @@
 *{margin:0;padding:0;box-sizing:border-box}
 :root{--bg:#05070d;--cyan:#00ffff;--blue:#0080ff;--green:#00ff88;--red:#ff4444;--orange:#ffaa00}
 body{font-family:'Inter',sans-serif;background:var(--bg);color:#fff;min-height:100vh;width:100%;overflow-x:hidden}
-body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradient(0deg,rgba(255,255,255,.03) 0 1px,transparent 1px 40px),repeating-linear-gradient(90deg,rgba(255,255,255,.03) 0 1px,transparent 1px 40px);opacity:.4;pointer-events:none;z-index:0}
-#particles{position:fixed;inset:0;overflow:hidden;z-index:0;pointer-events:none}
-.particle{position:absolute;background:var(--cyan);border-radius:50%;opacity:.15;animation:float linear infinite}
-@keyframes float{0%{transform:translateY(100vh)}100%{transform:translateY(-100px)}}
-#login,#dash,#lista,#cadastro{position:relative;z-index:1;width:100%;min-height:100vh;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:8px}
+#login,#dash,#lista,#cadastro{position:relative;z-index:1;width:100%;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:8px}
 #dash,#lista{justify-content:flex-start;padding-top:12px}
+#login,#cadastro{justify-content:center}
 .title{font-size:clamp(32px,8vw,74px);font-weight:900;margin-bottom:16px;letter-spacing:3px;background:linear-gradient(90deg,var(--cyan),var(--blue));-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-align:center;width:100%}
 .card{background:rgba(10,15,25,.92);border:1px solid rgba(0,255,255,.12);border-radius:16px;padding:16px;width:100%;margin-bottom:12px}
 #login.card,#cadastro.card{max-width:520px}
-#dash,#lista{width:100%;max-width:100%}
 .gauge-wrap{width:100%;margin:0 0 12px 0}
 .gauge-card{padding:20px 20px 30px;min-height:280px}
 .gauge{width:min(240px,60vw);height:min(240px,60vw);margin:auto;border-radius:50%;background:conic-gradient(#00ff88 0deg,#00ffff 180deg,rgba(255,255,255,.08) 180deg);position:relative;box-shadow:0 0 30px rgba(0,255,255,.15)}
@@ -62,8 +58,7 @@ canvas{width:100%!important;height:280px!important}
 .bms-item:active{transform:scale(0.98)}
 .bms-item h3{color:var(--cyan);font-size:20px;margin-bottom:8px}
 .bms-item p{color:#888;font-size:13px;margin:4px 0}
-.header-bar{width:100%;display:flex;justify-content:center;align-items:center;margin-bottom:20px}
-.user-info{color:#888;font-size:14px;text-align:center}
+.user-info{color:#888;font-size:14px;text-align:center;margin-bottom:20px}
 .erro{background:rgba(255,0,0,.1);border:2px solid #ff4444;border-radius:12px;padding:16px;margin-top:16px;color:#ff4444;font-size:14px}
 .link-cadastro{margin-top:20px;text-align:center;color:#fff;cursor:pointer;opacity:.8}
 .link-cadastro span{color:#00ffff;text-decoration:underline}
@@ -72,7 +67,6 @@ canvas{width:100%!important;height:280px!important}
 </style>
 </head>
 <body>
-<div id="particles"></div>
 
 <div id="login">
 <div class="title">SMART BMS</div>
@@ -103,12 +97,8 @@ canvas{width:100%!important;height:280px!important}
 </div>
 
 <div id="lista" class="hidden">
-<div class="header-bar">
-<div class="title" style="font-size:clamp(28px,6vw,32px);margin:0">SMART BMS</div>
-</div>
-<div style="width:100%;text-align:center;margin-bottom:20px">
+<div class="title" style="font-size:clamp(28px,6vw,32px);margin-bottom:8px">SMART BMS</div>
 <div class="user-info">Olá, <span id="user-nome">--</span></div>
-</div>
 <div class="card">
 <div class="label">Adicionar BMS</div>
 <input id="bms-code" placeholder="SL00000000" maxlength="10" style="margin-top:8px">
@@ -123,9 +113,7 @@ canvas{width:100%!important;height:280px!important}
 </div>
 
 <div id="dash" class="hidden">
-<div class="header-bar">
 <div class="title" id="bms-titulo">--</div>
-</div>
 <div class="gauge-wrap">
 <div class="card gauge-card">
 <div class="gauge" id="socGauge">
@@ -181,25 +169,6 @@ var CORR_H = [];
 var LABEL_H = [];
 
 try{USER = JSON.parse(localStorage.getItem('bms_user')||'null');}catch(e){}
-
-function criarParticulas(){
-  if(window.innerWidth < 768) return;
-  var c = document.getElementById('particles');
-  var m = 6;
-  setInterval(function(){
-    if(c.children.length >= m) return;
-    var p = document.createElement('div');
-    p.className = 'particle';
-    var s = Math.random() * 2 + 1;
-    p.style.width = s + 'px';
-    p.style.height = s + 'px';
-    p.style.left = Math.random() * 100 + '%';
-    p.style.animationDuration = (Math.random() * 8 + 12) + 's';
-    c.appendChild(p);
-    setTimeout(function(){p.remove();}, 20000);
-  }, 2500);
-}
-criarParticulas();
 
 if(TOKEN && USER){
   mostrarLista();
@@ -470,3 +439,8 @@ function sair(){
   clearInterval(INT);
   localStorage.removeItem('bms_token');
   localStorage.removeItem('bms_user');
+  location.reload();
+}
+</script>
+</body>
+</html>
