@@ -19,7 +19,7 @@ button.edit{background:rgba(255,170,0,.1);border:1px solid rgba(255,170,0,.4);pa
 button.logout{background:rgba(255,68,68,.1);border:1px solid rgba(255,68,68,.4);max-width:500px;margin:60px auto 40px;box-shadow:0 0 20px rgba(255,68,68,.2)}
 button.view{background:rgba(0,255,255,.1);border:1px solid rgba(0,255,255,.4);padding:10px;margin-top:12px;box-shadow:0 0 15px rgba(0,255,255,.2)}
 .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:16px;padding:0 16px;max-width:1800px;margin:0 auto}
-.grid.card{margin:0;min-width:0}
+.grid .card{margin:0;min-width:0}
 .status{display:inline-block;padding:6px 12px;border-radius:12px;font-size:12px;font-weight:700;white-space:nowrap}
 .on{background:rgba(0,255,136,.15);color:#00ff88;border:1px solid rgba(0,255,136,.4);box-shadow:0 0 15px rgba(0,255,136,.3)}
 .off{background:rgba(255,68,68,.15);color:#ff4444;border:1px solid rgba(255,68,68,.4);box-shadow:0 0 15px rgba(255,68,68,.3)}
@@ -38,11 +38,11 @@ button.view{background:rgba(0,255,255,.1);border:1px solid rgba(0,255,255,.4);pa
 .modal-close{float:right;background:rgba(255,68,68,.1);border:1px solid rgba(255,68,68,.4);color:#fff;padding:10px 20px;border-radius:8px;cursor:pointer;box-shadow:0 0 15px rgba(255,68,68,.2)}
 #login,#painel{position:relative;z-index:1;width:100%;min-height:100dvh;padding:20px}
 .tela-ativa{display:flex!important;flex-direction:column;justify-content:center;align-items:center}
-#login.card{border-radius:20px;margin:0 auto;max-width:500px;width:100%}
+#login .card{border-radius:20px;margin:0 auto;max-width:500px;width:100%}
 .data-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:12px 0}
 .data-item{text-align:center}
-.data-item.label{margin-bottom:4px;font-size:11px}
-.data-item.value{font-size:24px;font-weight:700;text-shadow:0 0 15px currentColor}
+.data-item .label{margin-bottom:4px;font-size:11px}
+.data-item .value{font-size:24px;font-weight:700;text-shadow:0 0 15px currentColor}
 .btn-group{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
 .section-title{font-size:24px;font-weight:900;margin:40px 0 20px;color:#00ffff;text-shadow:0 0 20px rgba(0,255,255,.4)}
 .hidden{display:none!important}
@@ -59,8 +59,8 @@ button.view{background:rgba(0,255,255,.1);border:1px solid rgba(0,255,255,.4);pa
 @media(max-width:768px){
  .grid{grid-template-columns:repeat(2,1fr);gap:10px;padding:0 10px}
  .card{padding:14px}
- .data-item.value{font-size:18px}
- .data-item.label{font-size:9px}
+ .data-item .value{font-size:18px}
+ .data-item .label{font-size:9px}
   h1{font-size:26px;padding:16px 12px}
  .section-title{font-size:18px;margin:24px 0 12px}
   input,button{font-size:15px;padding:14px}
@@ -74,7 +74,7 @@ button.view{background:rgba(0,255,255,.1);border:1px solid rgba(0,255,255,.4);pa
 @media(max-width:380px){
  .grid{gap:8px;padding:0 8px}
  .card{padding:12px}
- .data-item.value{font-size:16px}
+ .data-item .value{font-size:16px}
  .card-code{font-size:13px}
 }
 </style>
