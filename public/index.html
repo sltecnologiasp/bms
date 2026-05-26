@@ -305,7 +305,7 @@ function carregarLista(){
       html += '<p style="margin-top:0"><span class="status '+(b.online?'on':'off')+'" style="padding:6px 12px;font-size:12px">'+(b.online?'Online':'Offline')+'</span></p>';
       if(b.voltage) html += '<p style="margin-top:0;color:#00ffff">'+b.voltage.toFixed(1)+'V</p>';
       html += '</div>';
-      html += '<button class="del" onclick="event.stopPropagation();removerBms(\''+b.code+'\',\''+b.nome+'\')">Remover</button>';
+      html += '<button class="del" onclick="event.stopPropagation();removerBms(\''+b.code+'\',\''+b.nome+'\')">Remover dispositivo</button>';
       html += '</div>';
     }
     el.innerHTML = html;
