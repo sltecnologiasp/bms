@@ -14,9 +14,9 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:#fff;min-height:1
 #dash,#lista{justify-content:flex-start;padding-top:12px}
 #login,#cadastro{justify-content:center}
 .title{font-size:clamp(32px,8vw,74px);font-weight:900;margin-bottom:16px;letter-spacing:3px;background:linear-gradient(90deg,var(--cyan),var(--blue));-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-align:center;width:100%}
-.card{background:rgba(10,15,25,.92);border:1px solid rgba(0,255,255,.12);border-radius:16px;padding:16px;width:100%;margin-bottom:12px}
+.card{background:rgba(10,15,25,.92);border:1px solid rgba(0,255,255,.12);border-radius:16px;padding:14px;width:100%;margin-bottom:6px}
 #login.card,#cadastro.card{max-width:520px}
-.gauge-wrap{width:100%;margin:0 0 12px 0}
+.gauge-wrap{width:100%;margin:0 0 6px 0}
 .gauge-card{padding:20px 20px 30px;min-height:280px}
 .gauge{width:min(240px,60vw);height:min(240px,60vw);margin:auto;border-radius:50%;background:conic-gradient(#00ff88 0deg,#00ffff 180deg,rgba(255,255,255,.08) 180deg);position:relative;box-shadow:0 0 30px rgba(0,255,255,.15)}
 .gauge::before{content:'';position:absolute;inset:18px;border-radius:50%;background:#05070d}
@@ -27,7 +27,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:#fff;min-height:1
 .bar-label{display:flex;justify-content:space-between;margin-bottom:8px;font-size:14px;opacity:.7}
 .bar{height:16px;background:rgba(255,255,255,.06);border-radius:999px;overflow:hidden}
 .bar-fill{height:100%;width:0%;border-radius:999px;background:linear-gradient(90deg,#00ff88,#00ffff);transition:width.8s ease}
-.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px;width:100%;margin:0 0 12px 0}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:6px;width:100%;margin:0 0 6px 0}
 .grid.card{width:100%;height:110px;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:12px;margin:0}
 .label{font-size:10px;letter-spacing:1.5px;opacity:.6;text-transform:uppercase;text-align:center}
 .value{font-size:clamp(22px,6vw,30px);font-weight:800;margin-top:8px;line-height:1;width:100%;text-align:center;font-variant-numeric:tabular-nums}
@@ -40,7 +40,7 @@ button{background:linear-gradient(90deg,var(--blue),var(--cyan));color:#fff;font
 .off{background:rgba(255,68,68,.12);color:var(--red);border:1px solid rgba(255,68,68,.3)}
 .status-wrap{display:flex;justify-content:center;align-items:center;flex-direction:column;margin-top:14px}
 .bms-code{font-size:clamp(18px,4.5vw,24px);font-weight:700;margin-top:12px;letter-spacing:1.5px;color:#fff;text-align:center;opacity:.95}
-.diff{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:18px}
+.diff{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:18px}
 .diff-item{padding:12px 8px;border-radius:14px;background:rgba(255,255,255,.03);text-align:center}
 .diff-item span{display:block;margin-top:6px;font-size:clamp(18px,5vw,22px);font-weight:800;width:6ch;margin:auto;text-align:center;font-variant-numeric:tabular-nums}
 .cells{display:grid;grid-template-columns:repeat(auto-fill,minmax(85px,1fr));gap:10px;margin-top:20px}
@@ -50,12 +50,12 @@ button{background:linear-gradient(90deg,var(--blue),var(--cyan));color:#fff;font
 .cell.ok{border-color:rgba(0,255,136,.25)}
 .cell.warn{border-color:rgba(255,170,0,.25)}
 .cell.crit{border-color:rgba(255,68,68,.25)}
-.chart-card{width:100%;padding:20px;min-height:340px;margin:0 0 12px 0}
+.chart-card{width:100%;padding:20px;min-height:340px;margin:0 0 6px 0}
 .chart-title{margin-bottom:16px;font-size:14px;letter-spacing:2px;opacity:.7;text-transform:uppercase;text-align:center}
 canvas{width:100%!important;height:280px!important}
 .logout{margin-top:24px;background:rgba(255,68,68,.08);border:1px solid rgba(255,68,68,.2)}
 .hidden{display:none!important}
-.bms-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px;margin-top:20px}
+.bms-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:8px;margin-top:20px}
 .bms-item{background:rgba(0,255,255,.05);border:1px solid rgba(0,255,255,.2);border-radius:16px;padding:20px;cursor:pointer;text-align:center;display:flex;flex-direction:column;align-items:center;gap:8px}
 .bms-item:active{transform:scale(0.98)}
 .bms-item h3{color:var(--cyan);font-size:20px;margin-bottom:0}
@@ -96,7 +96,6 @@ canvas{width:100%!important;height:280px!important}
 <button class="btn-sec" onclick="mostrarLogin()">VOLTAR</button>
 <div id="erro-cad" class="erro hidden"></div>
 </div>
-</div>
 
 <div id="lista" class="hidden">
 <div class="title" style="font-size:clamp(28px,6vw,32px);margin-bottom:8px">SMART BMS</div>
@@ -133,7 +132,6 @@ canvas{width:100%!important;height:280px!important}
 <div class="status-wrap">
 <span id="status" class="status off">Offline</span>
 <div class="bms-code" id="bms-titulo">--</div>
-</div>
 </div>
 <div class="grid">
 <div class="card"><div class="label">SOC</div><div class="value" id="soc" style="color:#00ff88">0%</div></div>
@@ -416,7 +414,7 @@ function atualizarGauge(soc){
   valor.textContent = soc + '%';
   txt.textContent = soc + '%';
   bar.style.width = soc + '%';
-  gauge.style.background = 'conic-gradient(#00ff88 0deg,#00ffff '+deg+'deg,rgba(255,255,.08) '+deg+'deg)';
+  gauge.style.background = 'conic-gradient(#00ff88 0deg,#00ffff '+deg+'deg,rgba(255,255,255,.08) '+deg+'deg)';
 }
 
 function atualizar(){
