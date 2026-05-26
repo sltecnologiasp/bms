@@ -77,7 +77,7 @@ canvas{width:100%!important;height:320px!important}
 <div class="label" style="margin-top:16px">Senha</div>
 <input id="senha" type="password" value="123456">
 <button onclick="login()">ENTRAR</button>
-<button class="btn-sec" onclick="mostrarCadastro()">CRIAR CONTA</button>
+<button class="btn-sec" onclick="mostrarCadastro()">Ainda não tem conta? Cadastre-se</button>
 <div id="erro" class="erro hidden"></div>
 </div>
 </div>
@@ -226,8 +226,8 @@ function login(){
     headers:{'Content-Type':'application/json'},
     body:JSON.stringify({email:email,senha:senha})
   })
- .then(function(r){return r.json();})
- .then(function(d){
+.then(function(r){return r.json();})
+.then(function(d){
     if(d.ok && d.token){
       TOKEN = d.token;
       USER = {nome:d.nome,email:d.email};
@@ -240,7 +240,7 @@ function login(){
       e.classList.remove('hidden');
     }
   })
- .catch(function(e){
+.catch(function(e){
     var er = document.getElementById('erro');
     er.textContent = 'Erro: ' + e.message;
     er.classList.remove('hidden');
@@ -263,8 +263,8 @@ function cadastrar(){
     headers:{'Content-Type':'application/json'},
     body:JSON.stringify({nome:nome,email:email,senha:senha})
   })
- .then(function(r){return r.json();})
- .then(function(d){
+.then(function(r){return r.json();})
+.then(function(d){
     if(d.ok){
       alert('Conta criada! Faz login');
       mostrarLogin();
@@ -275,7 +275,7 @@ function cadastrar(){
       e.classList.remove('hidden');
     }
   })
- .catch(function(e2){
+.catch(function(e2){
     e.textContent = 'Erro: ' + e2.message;
     e.classList.remove('hidden');
   });
@@ -294,11 +294,11 @@ function carregarLista(){
   fetch(API + '?action=user_bms', {
     headers:{'Authorization':'Bearer '+TOKEN}
   })
- .then(function(r){
+.then(function(r){
     if(r.status === 401){sair();return;}
     return r.json();
   })
- .then(function(lista){
+.then(function(lista){
     var el = document.getElementById('bms-list');
     if(!lista ||!lista.length){
       el.innerHTML = '<p style="grid-column:1/-1;text-align:center;color:#666;padding:40px">Nenhuma BMS adicionada ainda</p>';
@@ -330,8 +330,8 @@ function addBms(){
     headers:{'Content-Type':'application/json','Authorization':'Bearer '+TOKEN},
     body:JSON.stringify({code:code,nome:nome || code})
   })
- .then(function(r){return r.json();})
- .then(function(d){
+.then(function(r){return r.json();})
+.then(function(d){
     if(d.ok){
       alert('BMS adicionada!');
       document.getElementById('bms-code').value = '';
@@ -428,12 +428,12 @@ function atualizar(){
   fetch(API+'?action=data&code='+CODIGO, {
     headers:{'Authorization':'Bearer '+TOKEN}
   })
- .then(function(r){
+.then(function(r){
     if(r.status === 401){sair();return;}
     if(!r.ok) return;
     return r.json();
   })
- .then(function(d){
+.then(function(d){
     if(!d) return;
     document.getElementById('soc').textContent = (d.soc?d.soc.toFixed(0):0)+'%';
     document.getElementById('volt').textContent = (d.voltage?d.voltage.toFixed(2):0)+'V';
