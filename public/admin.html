@@ -11,7 +11,7 @@ body{background:#0a0a0f;color:#fff;font-family:system-ui;padding:0;text-align:ce
 h1{text-align:center;font-size:42px;font-weight:900;padding:30px 20px;background:linear-gradient(90deg,#00ffff,#0080ff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-shadow:0 0 30px rgba(0,255,255,.3)}
 .card{background:rgba(255,255,255,.03);border:1px solid rgba(0,255,255,.3);border-radius:16px;padding:24px;text-align:center;box-shadow:0 0 20px rgba(0,255,255,.1),inset 0 0 20px rgba(0,255,255,.05);min-width:0;overflow:hidden;display:flex;flex-direction:column}
 .card-cadastro{margin:0 0 32px 0;width:100%}
-#lista .card{aspect-ratio:1/1;justify-content:space-between;cursor:pointer;padding:16px;transition:.2s}
+#lista .card{aspect-ratio:1/1;justify-content:space-between;cursor:pointer;padding:14px;transition:.2s}
 #lista .card:active{transform:scale(.97)}
 #lista .card:hover{border-color:rgba(0,255,255,.6);box-shadow:0 0 30px rgba(0,255,255,.3)}
 input,button{width:100%;padding:18px;margin:12px 0;border-radius:12px;border:1px solid rgba(0,255,255,.3);background:rgba(0,0,0,.4);color:#fff;font-size:18px;text-align:center;display:block;box-shadow:0 0 15px rgba(0,255,255,.1)}
@@ -23,8 +23,7 @@ button.edit{background:rgba(255,170,0,.1);border:1px solid rgba(255,170,0,.4);pa
 button.logout{background:rgba(255,68,68,.1);border:1px solid rgba(255,68,68,.4);max-width:500px;margin:60px auto 40px;box-shadow:0 0 20px rgba(255,68,68,.2)}
 button.view{background:rgba(0,255,255,.1);border:1px solid rgba(0,255,255,.4);padding:10px;margin-top:12px;box-shadow:0 0 15px rgba(0,255,255,.2)}
 button.voltar{background:rgba(0,255,136,.1);border:1px solid rgba(0,255,136,.4);max-width:500px;margin:40px auto;box-shadow:0 0 20px rgba(0,255,136,.2)}
-.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;padding:0 16px;max-width:1800px;margin:0 auto}
-@media(min-width:1024px){.grid{grid-template-columns:repeat(4,1fr)}}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;padding:0 10px;max-width:1800px;margin:0 auto}
 .grid .card{margin:0}
 .grid .card-empty{grid-column:1/-1;min-height:200px;display:flex;align-items:center;justify-content:center}
 .status{display:inline-block;padding:6px 12px;border-radius:12px;font-size:12px;font-weight:700;white-space:nowrap}
@@ -56,12 +55,31 @@ button.voltar{background:rgba(0,255,136,.1);border:1px solid rgba(0,255,136,.4);
 .badge{display:inline-block;padding:4px 12px;border-radius:8px;font-size:11px;font-weight:700;margin-top:8px}
 .badge-green{background:rgba(0,255,136,.15);color:#00ff88;border:1px solid rgba(0,255,136,.4)}
 .badge-orange{background:rgba(255,170,0,.15);color:#ffaa00;border:1px solid rgba(255,170,0,.4)}
-.card-code{font-size:15px;font-weight:700;word-break:break-all;margin:8px 0;flex:1;display:flex;align-items:center;justify-content:center}
+.card-code{font-size:clamp(11px,3.5vw,15px);font-weight:700;word-break:break-all;margin:8px 0;flex:1;display:flex;align-items:center;justify-content:center;line-height:1.2}
 .card-top{flex:1;display:flex;flex-direction:column;justify-content:space-between;overflow:hidden}
+
+@media(max-width:380px){
+.grid{grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:6px;padding:0 6px}
+.card{padding:12px}
+#lista .card{padding:10px}
+.data-item .value{font-size:16px}
+.status{padding:2px 6px;font-size:9px}
+.badge{padding:2px 6px;font-size:8px}
+.card-code{font-size:11px}
+#lista .card-code{font-size:11px}
+  button.del{font-size:11px;padding:5px}
+}
+
+@media(min-width:768px){
+.grid{grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;padding:0 16px}
+}
+
+@media(min-width:1024px){
+.grid{grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:20px}
+}
 
 @media(max-width:768px){
 #login,#painel,#clientesPage{padding:0}
-.grid{gap:8px;padding:0 8px}
 .card{padding:14px;border-radius:12px}
 .card-cadastro{padding:20px 16px;margin:0 0 16px 0;border-radius:0;border-left:0;border-right:0}
 #lista .card{padding:12px}
@@ -75,15 +93,6 @@ button.voltar{background:rgba(0,255,136,.1);border:1px solid rgba(0,255,136,.4);
 .card-code{font-size:13px}
 #lista .card-code{font-size:12px}
   button.del{font-size:12px;padding:6px}
-}
-
-@media(max-width:380px){
-.grid{gap:6px;padding:0 6px}
-.card{padding:12px}
-#lista .card{padding:10px}
-.data-item .value{font-size:16px}
-.card-code{font-size:12px}
-#lista .card-code{font-size:11px}
 }
 </style>
 </head>
