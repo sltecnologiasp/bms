@@ -85,7 +85,7 @@ export async function onRequest({ request, env }) {
       if (!userId) return json({ ok: false, error: 'Login necessário' }, 401);
 
       const { code, nome } = await request.json();
-      if (!code?.startsWith('SL') || code.length!== 10) return json({ ok: false, error: 'Código inválido. Use SL + 8 números' }, 400);
+      if (!code?.startsWith('SL') || code.length!== 14) return json({ ok: false, error: 'Código inválido. Use SL + 12 números' }, 400);
 
       const bms = await env.DB.prepare("SELECT id, user_id FROM bms_master WHERE code =?").bind(code).first();
       if (!bms) return json({ ok: false, error: 'BMS não encontrada no sistema' });
@@ -130,7 +130,7 @@ export async function onRequest({ request, env }) {
     if (action === 'admin_add_master' && request.method === 'POST') {
       if (!isAdmin) return json({ ok: false, error: 'Admin only' }, 403);
       const { code } = await request.json();
-      if (!code?.startsWith('SL') || code.length!== 10) return json({ ok: false, error: 'Código inválido' }, 400);
+      if (!code?.startsWith('SL') || code.length!== 14) return json({ ok: false, error: 'Código inválido. Use SL + 12 números' }, 400);
       try {
         await env.DB.prepare('INSERT INTO bms_master (code) VALUES (?)').bind(code).run();
         return json({ ok: true });
