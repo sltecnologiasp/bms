@@ -153,13 +153,6 @@ input,button{font-size:16px;padding:16px}
 <div id="modalBmsContent"></div>
 </div>
 
-<div id="modalCells" class="modal">
-<div class="modal-content">
-<button class="modal-close" onclick="closeModal()">Fechar</button>
-<h2 id="modalTitle" style="text-align:center;margin-bottom:20px"></h2>
-<div id="modalCellsContent" class="cells" style="margin-top:20px"></div>
-</div>
-
 <div id="modalEditUser" class="modal">
 <div class="modal-content small">
 <button class="modal-close" onclick="closeEditUser()">Fechar</button>
@@ -169,6 +162,7 @@ input,button{font-size:16px;padding:16px}
 <input id="editUserEmail" placeholder="Email">
 <button onclick="salvarUser()">SALVAR</button>
 <p id="editMsg" style="text-align:center;margin-top:8px;font-size:14px"></p>
+</div>
 </div>
 
 <script>
@@ -356,10 +350,6 @@ function closeBmsModal(){
   document.getElementById('modalBms').classList.remove('active');
 }
 
-function closeModal(){
-  document.getElementById('modalCells').classList.remove('active');
-}
-
 function editarUser(id, nome, email){
   document.getElementById('editUserId').value = id;
   document.getElementById('editUserNome').value = nome;
@@ -419,4 +409,15 @@ async function listarUsers(){
       </div>
       <div class="btn-group">
         <button class="edit" onclick="editarUser(${u.id},'${u.nome}','${u.email}')">EDITAR</button>
-        <button class="del" onclick="deletarUser(${u.i
+        <button class="del" onclick="deletarUser(${u.id},'${u.nome}')">EXCLUIR</button>
+      </div>
+    </div>
+  `).join('') || '<div class="card card-empty"><div style="opacity:.4">Nenhum cliente cadastrado</div></div>';
+}
+
+async function listarBms(){
+  const r = await fetch(API+'?action=admin_list_master',{headers:authHeaders()});
+  const d = await r.json();
+  
+  bmsList = d.sort((a,b) => {
+    const aOnline = isOnlin
