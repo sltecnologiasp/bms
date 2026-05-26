@@ -3,446 +3,763 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+
 <title>Admin BMS</title>
+
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
+
 <style>
-*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-:root{--bg:#05070d;--cyan:#00ffff;--blue:#0080ff;--green:#00ff88;--red:#ff4444;--orange:#ffaa00}
-body{font-family:'Inter',sans-serif;background:var(--bg);color:#fff;min-height:100vh;width:100%;overflow-x:hidden}
-#login,#painel,#clientesPage{position:relative;z-index:1;width:100%;min-height:100vh;padding:8px}
-#login{display:flex;flex-direction:column;justify-content:center;align-items:center}
-#painel,#clientesPage{display:none;flex-direction:column;align-items:center;padding-top:12px}
-.title{font-size:clamp(32px,8vw,74px);font-weight:900;margin-bottom:16px;letter-spacing:3px;background:linear-gradient(90deg,var(--cyan),var(--blue));-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-align:center;width:100%}
-.card{background:rgba(10,15,25,.92);border:1px solid rgba(0,255,255,.12);border-radius:16px;padding:12px;width:100%;margin-bottom:4px}
-#login.card{max-width:520px}
-.card-cadastro{margin:0 0 20px 0;width:100%;max-width:520px}
-.gauge-wrap{width:100%;margin:0 0 8px 0}
-.gauge-card{padding:20px 20px 30px;min-height:280px}
-.gauge{width:min(240px,60vw);height:min(240px,60vw);margin:auto;border-radius:50%;background:conic-gradient(#00ff88 0deg,#00ffff 180deg,rgba(255,255,255,.08) 180deg);position:relative;box-shadow:0 0 30px rgba(0,255,255,.15)}
-.gauge::before{content:'';position:absolute;inset:18px;border-radius:50%;background:#05070d}
-.gauge-inner{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;align-items:center;z-index:2}
-.gauge-value{font-size:clamp(36px,10vw,58px);font-weight:900;color:#00ff88;width:3ch;text-align:center;font-variant-numeric:tabular-nums}
-.gauge-label{opacity:.6;letter-spacing:2px;font-size:12px}
-.bar-wrap{margin-top:20px}
-.bar-label{display:flex;justify-content:space-between;margin-bottom:8px;font-size:14px;opacity:.7}
-.bar{height:16px;background:rgba(255,255,255,.06);border-radius:999px;overflow:hidden}
-.bar-fill{height:100%;width:0%;border-radius:999px;background:linear-gradient(90deg,#00ff88,#00ffff);transition:width.8s ease}
-.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:4px;width:100%;margin:0 0 4px 0}
-#lista.card{aspect-ratio:1/1;justify-content:space-between;cursor:pointer;padding:14px;transition:.2s}
-#lista.card:active{transform:scale(.98)}
-#lista.card:hover{border-color:rgba(0,255,255,.3);box-shadow:0 0 30px rgba(0,255,255,.15)}
-.grid.card{margin:0}
-.grid.card-empty{grid-column:1/-1;min-height:200px;display:flex;align-items:center;justify-content:center}
-.status{display:inline-flex;align-items:center;gap:10px;padding:14px 26px;border-radius:999px;font-weight:700;transition:.3s}
-.on{background:rgba(0,255,136,.12);color:var(--green);border:1px solid rgba(0,255,136,.3)}
-.off{background:rgba(255,68,68,.12);color:var(--red);border:1px solid rgba(255,68,68,.3)}
-.label{font-size:10px;letter-spacing:1.5px;opacity:.6;text-transform:uppercase;text-align:center}
-.value{font-size:clamp(22px,6vw,30px);font-weight:800;margin-top:8px;line-height:1;width:100%;text-align:center;font-variant-numeric:tabular-nums}
-.badge{display:inline-block;padding:4px 12px;border-radius:8px;font-size:11px;font-weight:700;margin-top:8px}
-.badge-green{background:rgba(0,255,136,.15);color:#00ff88;border:1px solid rgba(0,255,136,.4)}
-.badge-orange{background:rgba(255,170,0,.15);color:#ffaa00;border:1px solid rgba(255,170,0,.4)}
-.card-code{font-size:clamp(11px,3.5vw,15px);font-weight:700;word-break:break-all;margin:8px 0;flex:1;display:flex;align-items:center;justify-content:center;line-height:1.2}
-.card-top{flex:1;display:flex;flex-direction:column;justify-content:space-between;overflow:hidden}
-.cells{display:grid;grid-template-columns:repeat(auto-fill,minmax(85px,1fr));gap:10px;margin-top:20px}
-.cell{background:rgba(0,0,0,.4);border-radius:18px;padding:14px;border:1px solid rgba(255,255,255,.05)}
-.cell-num{font-size:11px;opacity:.5;margin-bottom:6px}
-.cell-val{font-size:clamp(16px,4vw,20px);font-weight:700;width:7ch;text-align:center;font-variant-numeric:tabular-nums}
-.cell.ok{border-color:rgba(0,255,136,.25)}
-.cell.warn{border-color:rgba(255,170,0,.25)}
-.cell.crit{border-color:rgba(255,68,68,.25)}
-.modal{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.95);z-index:999;overflow-y:auto;padding:8px}
-.modal.active{display:block}
-.modal-content{max-width:520px;margin:20px auto;background:transparent}
-.modal-close{width:100%;background:rgba(255,68,68,.1);border:1px solid rgba(255,68,68,.4);color:#fff;padding:18px;border-radius:18px;cursor:pointer;box-shadow:0 0 15px rgba(255,68,68,.2);margin-bottom:16px;font-weight:700;font-size:18px}
-.data-row{display:grid;grid-template-columns:1fr 1fr;gap:4px;margin:12px 0}
-.data-item{text-align:center}
-.data-item.label{margin-bottom:4px;font-size:11px}
-.data-item.value{font-size:24px;font-weight:700;text-shadow:0 0 15px currentColor}
-.btn-group{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:auto}
-.section-title{font-size:24px;font-weight:900;margin:40px 0 20px;color:var(--cyan);text-shadow:0 0 20px rgba(0,255,255,.4)}
-.hidden{display:none!important}
-.erro{background:rgba(255,0,0,.1);border:2px solid #ff4444;border-radius:12px;padding:16px;margin-top:16px;color:#ff4444;font-size:14px}
-.user-info{color:#888;font-size:14px;text-align:center;margin-bottom:20px}
-.bms-code-title{font-size:clamp(18px,4.5vw,24px);font-weight:700;margin-top:12px;letter-spacing:1.5px;color:#fff;text-align:center;opacity:.95}
-.diff{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;margin-top:18px}
-.diff-item{padding:12px 8px;border-radius:14px;background:rgba(255,255,255,.03);text-align:center}
-.diff-item span{display:block;margin-top:6px;font-size:clamp(18px,5vw,22px);font-weight:800;width:6ch;margin:auto;text-align:center;font-variant-numeric:tabular-nums}
-.status-wrap{display:flex;justify-content:center;align-items:center;flex-direction:column;margin-top:14px}
-input,button{width:100%;padding:18px;border-radius:18px;border:none;outline:none;margin-top:16px;font-size:18px}
-input{background:rgba(0,0,0,.5);color:#fff;font-family:monospace;letter-spacing:2px;border:1px solid rgba(0,255,255,.2)}
-input::placeholder{color:rgba(255,255,255,.3)}
-button{background:linear-gradient(90deg,var(--blue),var(--cyan));color:#fff;font-weight:700;cursor:pointer}
-.btn-sec{background:transparent;border:1px solid rgba(0,255,255,.3);color:var(--cyan)}
-.btn-clientes{background:transparent;border:1px solid rgba(0,255,136,.3);color:var(--green)}
-button.del{background:rgba(255,68,68,.1);border:1px solid rgba(255,68,68,.4);padding:8px;margin-top:8px;box-shadow:0 0 15px rgba(255,68,68,.2);font-size:14px}
-button.edit{background:rgba(255,170,0,.1);border:1px solid rgba(255,170,0,.4);padding:10px;margin-top:auto;box-shadow:0 0 15px rgba(255,170,0,.2)}
-button.logout{margin-top:24px;background:rgba(255,68,68,.08);border:1px solid rgba(255,68,68,.2)}
-button.view{background:rgba(0,255,255,.1);border:1px solid rgba(0,255,255,.4);padding:10px;margin-top:12px;box-shadow:0 0 15px rgba(0,255,255,.2)}
-button.voltar{background:rgba(0,255,136,.1);border:1px solid rgba(0,255,136,.4);max-width:520px;margin:40px auto}
-
-@media(max-width:380px){
-.grid{grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:4px}
-#lista.card{padding:10px}
-.status{padding:2px 6px;font-size:9px}
-.badge{padding:2px 6px;font-size:8px}
-.card-code{font-size:11px}
-button.del{font-size:11px;padding:5px}
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+-webkit-tap-highlight-color:transparent
 }
 
-@media(min-width:768px){
-.grid{grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:4px}
+:root{
+--bg:#05070d;
+--cyan:#00ffff;
+--blue:#0080ff;
+--green:#00ff88;
+--red:#ff4444;
+--orange:#ffaa00
 }
 
-@media(min-width:1024px){
-.grid{grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}
+body{
+font-family:'Inter',sans-serif;
+background:var(--bg);
+color:#fff;
+min-height:100vh;
+width:100%;
+overflow-x:hidden
 }
 
-@media(max-width:520px){
-.card{padding:12px}
-#lista.card{padding:12px}
-.section-title{font-size:18px;margin:20px 0 12px}
-input,button{font-size:16px;padding:16px}
+#login,
+#painel,
+#clientesPage{
+position:relative;
+z-index:1;
+width:100%;
+min-height:100vh;
+padding:8px
+}
+
+#login{
+display:flex;
+flex-direction:column;
+justify-content:center;
+align-items:center
+}
+
+#painel,
+#clientesPage{
+display:none;
+flex-direction:column;
+align-items:center;
+padding-top:12px
+}
+
+.title{
+font-size:clamp(32px,8vw,74px);
+font-weight:900;
+margin-bottom:16px;
+letter-spacing:3px;
+background:linear-gradient(90deg,var(--cyan),var(--blue));
+-webkit-background-clip:text;
+-webkit-text-fill-color:transparent;
+text-align:center;
+width:100%
+}
+
+.card{
+background:rgba(10,15,25,.92);
+border:1px solid rgba(0,255,255,.12);
+border-radius:16px;
+padding:12px;
+width:100%;
+margin-bottom:12px
+}
+
+#login .card{
+max-width:520px
+}
+
+.card-cadastro{
+margin:0 0 20px 0;
+width:100%;
+max-width:520px
+}
+
+.grid{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(160px,1fr));
+gap:12px;
+width:100%
+}
+
+#lista .card{
+aspect-ratio:1/1;
+justify-content:space-between;
+cursor:pointer;
+padding:14px;
+transition:.2s;
+display:flex;
+flex-direction:column
+}
+
+#lista .card:hover{
+border-color:rgba(0,255,255,.3);
+box-shadow:0 0 30px rgba(0,255,255,.15)
+}
+
+.label{
+font-size:10px;
+letter-spacing:1.5px;
+opacity:.6;
+text-transform:uppercase;
+text-align:center
+}
+
+.status{
+display:inline-flex;
+align-items:center;
+gap:10px;
+padding:10px 20px;
+border-radius:999px;
+font-weight:700
+}
+
+.on{
+background:rgba(0,255,136,.12);
+color:var(--green);
+border:1px solid rgba(0,255,136,.3)
+}
+
+.off{
+background:rgba(255,68,68,.12);
+color:var(--red);
+border:1px solid rgba(255,68,68,.3)
+}
+
+.badge{
+display:inline-block;
+padding:4px 12px;
+border-radius:8px;
+font-size:11px;
+font-weight:700;
+margin-top:8px
+}
+
+.badge-green{
+background:rgba(0,255,136,.15);
+color:#00ff88;
+border:1px solid rgba(0,255,136,.4)
+}
+
+.badge-orange{
+background:rgba(255,170,0,.15);
+color:#ffaa00;
+border:1px solid rgba(255,170,0,.4)
+}
+
+.card-code{
+font-size:15px;
+font-weight:700;
+word-break:break-all;
+margin:8px 0;
+text-align:center
+}
+
+.card-top{
+flex:1;
+display:flex;
+flex-direction:column;
+justify-content:space-between
+}
+
+.value{
+font-size:30px;
+font-weight:800;
+text-align:center
+}
+
+input,
+button{
+width:100%;
+padding:18px;
+border-radius:18px;
+border:none;
+outline:none;
+margin-top:16px;
+font-size:18px
+}
+
+input{
+background:rgba(0,0,0,.5);
+color:#fff;
+font-family:monospace;
+letter-spacing:2px;
+border:1px solid rgba(0,255,255,.2)
+}
+
+button{
+background:linear-gradient(90deg,var(--blue),var(--cyan));
+color:#fff;
+font-weight:700;
+cursor:pointer
+}
+
+.btn-sec{
+background:transparent;
+border:1px solid rgba(0,255,255,.3);
+color:var(--cyan)
+}
+
+.btn-clientes{
+background:transparent;
+border:1px solid rgba(0,255,136,.3);
+color:var(--green)
+}
+
+button.del{
+background:rgba(255,68,68,.1);
+border:1px solid rgba(255,68,68,.4)
+}
+
+button.logout{
+margin-top:24px;
+background:rgba(255,68,68,.08);
+border:1px solid rgba(255,68,68,.2)
+}
+
+button.voltar{
+background:rgba(0,255,136,.1);
+border:1px solid rgba(0,255,136,.4);
+max-width:520px;
+margin:40px auto
+}
+
+.hidden{
+display:none!important
+}
+
+.erro{
+background:rgba(255,0,0,.1);
+border:2px solid #ff4444;
+border-radius:12px;
+padding:16px;
+margin-top:16px;
+color:#ff4444;
+font-size:14px
+}
+
+.user-info{
+color:#888;
+font-size:14px;
+text-align:center;
+margin-bottom:20px
+}
+
+.modal{
+display:none;
+position:fixed;
+top:0;
+left:0;
+right:0;
+bottom:0;
+background:rgba(0,0,0,.95);
+z-index:999;
+overflow-y:auto;
+padding:8px
+}
+
+.modal.active{
+display:block
+}
+
+.modal-content{
+max-width:520px;
+margin:20px auto
+}
+
+.modal-close{
+width:100%;
+background:rgba(255,68,68,.1);
+border:1px solid rgba(255,68,68,.4);
+color:#fff;
+padding:18px;
+border-radius:18px;
+cursor:pointer;
+margin-bottom:16px
 }
 </style>
 </head>
+
 <body>
 
+<!-- LOGIN -->
+
 <div id="login">
+
 <div class="title">SMART BMS</div>
+
 <div class="card">
+
 <div class="label">Usuário</div>
-<input id="user" placeholder="administrador" autocomplete="username" value="administrador">
+
+<input
+id="user"
+placeholder="administrador"
+autocomplete="username"
+value="administrador">
+
 <div class="label" style="margin-top:16px">Senha</div>
-<input id="password" type="password" placeholder="••••••••" autocomplete="current-password">
-<button onclick="adminLogin()">ENTRAR NO PAINEL</button>
+
+<input
+id="password"
+type="password"
+placeholder="••••••••"
+autocomplete="current-password">
+
+<button onclick="adminLogin()">
+ENTRAR NO PAINEL
+</button>
+
 <div id="loginError" class="erro hidden"></div>
+
 </div>
+
+</div>
+
+<!-- PAINEL -->
 
 <div id="painel">
-<div class="title" style="font-size:clamp(28px,6vw,32px);margin-bottom:8px">SMART BMS</div>
-<div class="user-info">Painel Administrativo</div>
+
+<div class="title" style="font-size:32px;margin-bottom:8px">
+SMART BMS
+</div>
+
+<div class="user-info">
+Painel Administrativo
+</div>
 
 <div class="card card-cadastro">
-<div class="label">Cadastrar BMS no Sistema</div>
+
+<div class="label">
+Cadastrar BMS no Sistema
+</div>
+
 <input id="code" placeholder="SL000000" maxlength="14">
-<button class="btn-clientes" onclick="cad()">CADASTRAR BMS MASTER</button>
-<button class="btn-sec" onclick="gerarECadastrar()">GERAR CÓDIGO ALEATÓRIO</button>
-<button class="btn-clientes" onclick="mostrarClientes()">VER CLIENTES CADASTRADOS</button>
+
+<button class="btn-clientes" onclick="cad()">
+CADASTRAR BMS MASTER
+</button>
+
+<button class="btn-sec" onclick="gerarECadastrar()">
+GERAR CÓDIGO ALEATÓRIO
+</button>
+
+<button class="btn-clientes" onclick="mostrarClientes()">
+VER CLIENTES CADASTRADOS
+</button>
+
 <p id="msg" style="text-align:center;margin-top:8px;font-size:14px"></p>
+
 </div>
 
 <div class="card">
-<div class="label">Todas as BMS do Sistema</div>
+
+<div class="label">
+Todas as BMS do Sistema
+</div>
+
 <div id="lista" class="grid"></div>
+
 </div>
-<button class="logout" onclick="adminLogout()">SAIR DO PAINEL ADMIN</button>
+
+<button class="logout" onclick="adminLogout()">
+SAIR DO PAINEL ADMIN
+</button>
+
 </div>
+
+<!-- CLIENTES -->
 
 <div id="clientesPage">
-<div class="title" style="font-size:clamp(28px,6vw,32px);margin-bottom:8px">SMART BMS</div>
-<div class="user-info">Clientes Cadastrados</div>
-<div id="listaUsers" class="grid"></div>
-<button class="voltar" onclick="voltarPainel()">VOLTAR AO PAINEL</button>
+
+<div class="title" style="font-size:32px;margin-bottom:8px">
+SMART BMS
 </div>
+
+<div class="user-info">
+Clientes Cadastrados
+</div>
+
+<div id="listaUsers" class="grid"></div>
+
+<button class="voltar" onclick="voltarPainel()">
+VOLTAR AO PAINEL
+</button>
+
+</div>
+
+<!-- MODAL BMS -->
 
 <div id="modalBms" class="modal">
+
 <div class="modal-content">
-<button class="modal-close" onclick="closeBmsModal()">Fechar</button>
+
+<button class="modal-close" onclick="closeBmsModal()">
+Fechar
+</button>
+
 <div id="modalBmsContent"></div>
+
 </div>
+
 </div>
+
+<!-- MODAL EDITAR -->
 
 <div id="modalEditUser" class="modal">
+
 <div class="modal-content">
-<button class="modal-close" onclick="closeEditUser()">Fechar</button>
-<h2 style="text-align:center;margin-bottom:20px">Editar Cliente</h2>
+
+<button class="modal-close" onclick="closeEditUser()">
+Fechar
+</button>
+
+<h2 style="text-align:center;margin-bottom:20px">
+Editar Cliente
+</h2>
+
 <input id="editUserId" type="hidden">
+
 <input id="editUserNome" placeholder="Nome">
+
 <input id="editUserEmail" placeholder="Email">
-<button onclick="salvarUser()">SALVAR</button>
+
+<button onclick="salvarUser()">
+SALVAR
+</button>
+
 <p id="editMsg" style="text-align:center;margin-top:8px;font-size:14px"></p>
+
 </div>
+
+</div>
+
 <script>
+
 const API = '/api/bms';
+
 let adminToken = sessionStorage.getItem('admin_token');
+
 let bmsList = [];
 
-if(adminToken === 'admin_ok') showPainel();
+if(adminToken === 'admin_ok'){
+showPainel();
+}
 
-function isOnline(updated_at) {
-  if (!updated_at) return false;
-  const diff = Date.now() - new Date(updated_at).getTime();
-  return diff > 0 && diff < 5000;
+function isOnline(updated_at){
+if(!updated_at) return false;
+
+const diff = Date.now() - new Date(updated_at).getTime();
+
+return diff > 0 && diff < 5000;
 }
 
 async function adminLogin(){
-  const user = document.getElementById('user').value;
-  const password = document.getElementById('password').value;
-  const errorEl = document.getElementById('loginError');
-  errorEl.classList.add('hidden');
 
-  try {
-    const r = await fetch(API+'?action=login_admin',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({user,password})});
-    const d = await r.json();
-    if(d.ok){
-      adminToken = d.token;
-      sessionStorage.setItem('admin_token', adminToken);
-      showPainel();
-    }else{
-      errorEl.textContent = d.error;
-      errorEl.classList.remove('hidden');
-    }
-  } catch(e) {
-    errorEl.textContent = 'Erro: ' + e.message;
-    errorEl.classList.remove('hidden');
-  }
+const user = document.getElementById('user').value;
+
+const password = document.getElementById('password').value;
+
+const errorEl = document.getElementById('loginError');
+
+errorEl.classList.add('hidden');
+
+try{
+
+const r = await fetch(
+API + '?action=login_admin',
+{
+method:'POST',
+headers:{
+'Content-Type':'application/json'
+},
+body:JSON.stringify({
+user,
+password
+})
+}
+);
+
+const d = await r.json();
+
+if(d.ok){
+
+adminToken = d.token;
+
+sessionStorage.setItem(
+'admin_token',
+adminToken
+);
+
+showPainel();
+
+}else{
+
+errorEl.textContent = d.error || 'Login inválido';
+
+errorEl.classList.remove('hidden');
+
+}
+
+}catch(e){
+
+errorEl.textContent = 'Erro: ' + e.message;
+
+errorEl.classList.remove('hidden');
+
+}
+
 }
 
 function showPainel(){
-  document.getElementById('login').style.display = 'none';
-  document.getElementById('clientesPage').style.display = 'none';
-  document.getElementById('painel').style.display = 'flex';
-  carregarTudo();
+
+document.getElementById('login').style.display = 'none';
+
+document.getElementById('clientesPage').style.display = 'none';
+
+document.getElementById('painel').style.display = 'flex';
+
+carregarTudo();
+
 }
 
 function mostrarClientes(){
-  document.getElementById('painel').style.display = 'none';
-  document.getElementById('clientesPage').style.display = 'flex';
-  listarUsers();
+
+document.getElementById('painel').style.display = 'none';
+
+document.getElementById('clientesPage').style.display = 'flex';
+
+listarUsers();
+
 }
 
 function voltarPainel(){
-  document.getElementById('clientesPage').style.display = 'none';
-  document.getElementById('painel').style.display = 'flex';
+
+document.getElementById('clientesPage').style.display = 'none';
+
+document.getElementById('painel').style.display = 'flex';
+
 }
 
 function adminLogout(){
-  sessionStorage.removeItem('admin_token');
-  location.reload();
+
+sessionStorage.removeItem('admin_token');
+
+location.reload();
+
 }
 
 function authHeaders(){
-  return {'Content-Type':'application/json','Authorization':'Bearer '+adminToken};
+
+return {
+'Content-Type':'application/json',
+'Authorization':'Bearer ' + adminToken
+};
+
 }
 
 document.getElementById('code').oninput = e => {
-  if(!e.target.value.startsWith('SL')) e.target.value = 'SL';
-  e.target.value = 'SL' + e.target.value.slice(2).replace(/[^0-9]/g,'').slice(0,12);
+
+if(!e.target.value.startsWith('SL')){
+e.target.value = 'SL';
+}
+
+e.target.value =
+'SL' +
+e.target.value
+.slice(2)
+.replace(/[^0-9]/g,'')
+.slice(0,12);
+
 };
 
 function gerarCodigoAleatorio(){
-  const numeros = Math.floor(Math.random() * 1000000000000).toString().padStart(12, '0');
-  return 'SL' + numeros;
+
+const numeros = Math.floor(
+Math.random() * 1000000000000
+).toString().padStart(12,'0');
+
+return 'SL' + numeros;
+
 }
 
 async function gerarECadastrar(){
-  const code = gerarCodigoAleatorio();
-  document.getElementById('code').value = code;
-  await cad();
+
+const code = gerarCodigoAleatorio();
+
+document.getElementById('code').value = code;
+
+await cad();
+
 }
 
 async function cad(){
-  const code = document.getElementById('code').value;
-  const r = await fetch(API+'?action=admin_add_master',{method:'POST',headers:authHeaders(),body:JSON.stringify({code})});
-  const d = await r.json();
-  document.getElementById('msg').textContent = d.ok?'Cadastrada no sistema!':d.error;
-  document.getElementById('msg').style.color = d.ok?'#00ff88':'#ff4444';
-  if(d.ok){document.getElementById('code').value='';carregarTudo();}
+
+const code = document.getElementById('code').value;
+
+const r = await fetch(
+API + '?action=admin_add_master',
+{
+method:'POST',
+headers:authHeaders(),
+body:JSON.stringify({code})
+}
+);
+
+const d = await r.json();
+
+document.getElementById('msg').textContent =
+d.ok ? 'Cadastrada no sistema!' : d.error;
+
+document.getElementById('msg').style.color =
+d.ok ? '#00ff88' : '#ff4444';
+
+if(d.ok){
+
+document.getElementById('code').value='';
+
+carregarTudo();
+
 }
 
-async function del(code){
-  event.stopPropagation();
-  if(!confirm(`Deletar ${code} do sistema?`))return;
-  await fetch(API+`?action=deletar&code=${code}`,{method:'DELETE',headers:authHeaders()});
-  carregarTudo();
-}
-
-function renderCelulas(cels){
-  if(!cels || cels.length === 0){
-    return '<div style="grid-column:1/-1;opacity:.4;padding:20px">Sem dados das células</div>';
-  }
-  let vals = [];
-  for(let i=0;i<cels.length;i++){
-    let v = parseFloat(cels[i]);
-    if(v > 0) vals.push(v);
-  }
-  if(vals.length === 0) return '';
-  let min = Math.min.apply(null, vals);
-  let max = Math.max.apply(null, vals);
-  let dif = max - min;
-  
-  let html = `
-    <div class="diff">
-      <div class="diff-item">Min<div><span style="color:#00ff88">${min.toFixed(3)}V</span></div></div>
-      <div class="diff-item">Max<div><span style="color:#ffaa00">${max.toFixed(3)}V</span></div></div>
-      <div class="diff-item">Diferença<div><span style="color:#ff4444">${dif.toFixed(3)}V</span></div></div>
-      <div class="diff-item">Total<div><span style="color:#00ffff">${cels.length}</span></div></div>
-    </div>
-    <div class="cells">`;
-  
-  for(let i=0;i<cels.length;i++){
-    let val = parseFloat(cels[i]);
-    let cls = 'ok';
-    if(val < 3.2 || val > 4.2) cls = 'crit';
-    else if(val < 3.4 || val > 4.15) cls = 'warn';
-    html += `<div class="cell ${cls}"><div class="cell-num">C${i+1}</div><div class="cell-val">${val.toFixed(3)}</div></div>`;
-  }
-  html += '</div>';
-  return html;
-}
-
-function atualizarGauge(soc){
-  let deg = soc * 3.6;
-  return `conic-gradient(#00ff88 0deg,#00ffff ${deg}deg,rgba(255,255,255,.08) ${deg}deg)`;
-}
-
-function viewBmsDetails(code){
-  const bms = bmsList.find(b => b.code === code);
-  if(!bms) return;
-  
-  const online = isOnline(bms.updated_at);
-  const soc = bms.soc?.toFixed(0)||0;
-  
-  document.getElementById('modalBmsContent').innerHTML = `
-    <div class="gauge-wrap">
-      <div class="card gauge-card">
-        <div class="gauge" style="background:${atualizarGauge(soc)}">
-          <div class="gauge-inner">
-            <div class="gauge-value">${soc}%</div>
-            <div class="gauge-label">STATE OF CHARGE</div>
-          </div>
-        </div>
-        <div class="bar-wrap">
-          <div class="bar-label"><span>Bateria</span><span>${soc}%</span></div>
-          <div class="bar"><div class="bar-fill" style="width:${soc}%"></div></div>
-        </div>
-      </div>
-    </div>
-    
-    <div class="card">
-      <div class="label">Status</div>
-      <div class="status-wrap">
-        <span class="status ${online?'on':'off'}">${online?'Online':'Offline'}</span>
-        <div class="bms-code-title">${bms.code}</div>
-        <div style="margin-top:12px">${bms.user_id?`<span class="badge badge-orange">Vinculada: ${bms.dono_nome||bms.dono_email}</span>`:`<span class="badge badge-green">Disponível</span>`}</div>
-      </div>
-    </div>
-    
-    <div class="grid">
-      <div class="card"><div class="label">SOC</div><div class="value" style="color:#00ff88">${bms.soc?.toFixed(0)||0}%</div></div>
-      <div class="card"><div class="label">Tensão</div><div class="value" style="color:#00ffff">${bms.voltage?.toFixed(2)||0}V</div></div>
-      <div class="card"><div class="label">Corrente</div><div class="value" style="color:#ffaa00">${bms.current?.toFixed(1)||0}A</div></div>
-      <div class="card"><div class="label">Temperatura</div><div class="value" style="color:#ff4444">${bms.temp?.toFixed(1)||0}°C</div></div>
-    </div>
-    
-    <div class="card">
-      <div class="label">Células - Tensão Individual</div>
-      ${renderCelulas(bms.cells)}
-    </div>
-  `;
-  document.getElementById('modalBms').classList.add('active');
-}
-
-function closeBmsModal(){
-  document.getElementById('modalBms').classList.remove('active');
-}
-
-function editarUser(id, nome, email){
-  document.getElementById('editUserId').value = id;
-  document.getElementById('editUserNome').value = nome;
-  document.getElementById('editUserEmail').value = email;
-  document.getElementById('editMsg').textContent = '';
-  document.getElementById('modalEditUser').classList.add('active');
-}
-
-function closeEditUser(){
-  document.getElementById('modalEditUser').classList.remove('active');
-}
-
-async function salvarUser(){
-  const id = document.getElementById('editUserId').value;
-  const nome = document.getElementById('editUserNome').value;
-  const email = document.getElementById('editUserEmail').value;
-  const msg = document.getElementById('editMsg');
-
-  const r = await fetch(API+'?action=edit_user',{method:'POST',headers:authHeaders(),body:JSON.stringify({id:parseInt(id),nome,email})});
-  const d = await r.json();
-  if(d.ok){
-    msg.textContent = 'Salvo!';
-    msg.style.color = '#00ff88';
-    setTimeout(()=>{closeEditUser();listarUsers();},1000);
-  }else{
-    msg.textContent = d.error;
-    msg.style.color = '#ff4444';
-  }
-}
-
-async function deletarUser(id, nome){
-  if(!confirm(`Deletar cliente ${nome}? Todas as BMS dele serão removidas.`))return;
-  await fetch(API+`?action=delete_user&id=${id}`,{method:'DELETE',headers:authHeaders()});
-  listarUsers();
-}
-
-async function carregarTudo(){
-  await Promise.all([listarUsers(), listarBms()]);
 }
 
 async function listarUsers(){
-  const r = await fetch(API+'?action=all_users',{headers:authHeaders()});
-  if(r.status===401){adminLogout();return;}
-  const d = await r.json();
-  document.getElementById('listaUsers').innerHTML = d.map(u=>`
-    <div class="card">
-      <div class="card-top">
-        <div style="text-align:left;margin-bottom:16px">
-          <b style="font-size:18px">${u.nome}</b>
-          <div style="opacity:.6;font-size:13px;margin-top:4px;word-break:break-all">${u.email}</div>
-          <div style="opacity:.6;font-size:11px;margin-top:4px">Cadastro: ${new Date(u.created_at).toLocaleDateString('pt-BR')}</div>
-        </div>
-        <div class="data-item">
-          <div class="label">BMS Cadastradas</div>
-          <div class="value" style="color:#00ffff">${u.bms_count}</div>
-        </div>
-      </div>
-      <div class="btn-group">
-        <button class="edit" onclick="editarUser(${u.id},'${u.nome}','${u.email}')">EDITAR</button>
-        <button class="del" onclick="deletarUser(${u.id},'${u.nome}')">EXCLUIR</button>
-      </div>
-    </div>
-  `).join('') || '<div class="card card-empty"><div style="opacity:.4">Nenhum cliente cadastrado</div></div>';
+
+const r = await fetch(
+API + '?action=all_users',
+{
+headers:authHeaders()
+}
+);
+
+if(r.status === 401){
+
+adminLogout();
+
+return;
+
+}
+
+const d = await r.json();
+
+document.getElementById('listaUsers').innerHTML =
+d.map(u => `
+<div class="card">
+
+<b>${u.nome}</b>
+
+<div style="opacity:.6;margin-top:8px">
+${u.email}
+</div>
+
+<div class="value" style="color:#00ffff;margin-top:12px">
+${u.bms_count}
+</div>
+
+</div>
+`).join('');
+
 }
 
 async function listarBms(){
-  const r = await fetch(API+'?action=admin_list_master',{headers:authHeaders()});
-  const d = await r.json();
-  
-  bmsList = d.sort((a,b) => {
-    const aOnline = isOnline(a.updated_at);
-    const bOnline = isOnline(b.updated_at);
-    if (aOnline &&!bOnline) return -1;
-    if (!aOnline && bOnline) return 1;
-    const aTime = a.updated_at? new Date(a.updated_at).getTime() : 0;
-    const bTime = b.updated_at? new Date(b.updated_at).getTime() : 0;
-    return bTime - aTime;
-  });
-  
-  document.getElementById('lista').innerHTML = bmsList.map(b=>{
-    const online = isOnline(b.updated_at);
-    const dono = b.user_id? `<span class="badge badge-orange">Vinculada</span>` : `<span class="badge badge-green">Disponível</span>`;
-    return `
-    <div class="card" onclick="viewBmsDetails('${b.code}')">
-      <div class="card-top">
-        <div style="text-align:center">
-          <span class="status ${online?'on':'off'}">${online?'Online':'Offline'}</span>
-        </div>
-        <div class="card-code">${b.code}</div>
-        <div style="text-align:center">${dono}</div>
-      </div>
-      <button class="del" onclick="del('${b.code}')">EXCLUIR DO SISTEMA</button>
-    </div>
-  `}).join('') || '<div class="card card-empty"><div style="opacity:.4">Nenhuma BMS cadastrada no sistema</div></div>';
+
+const r = await fetch(
+API + '?action=admin_list_master',
+{
+headers:authHeaders()
 }
-setInterval(()=>{if(adminToken && document.getElementById('painel').style.display==='flex')carregarTudo()},5000);
+);
+
+const d = await r.json();
+
+bmsList = d;
+
+document.getElementById('lista').innerHTML =
+bmsList.map(b => {
+
+const online = isOnline(b.updated_at);
+
+return `
+<div class="card">
+
+<div class="card-top">
+
+<div style="text-align:center">
+
+<span class="status ${online ? 'on':'off'}">
+${online ? 'Online':'Offline'}
+</span>
+
+</div>
+
+<div class="card-code">
+${b.code}
+</div>
+
+</div>
+
+<button class="del">
+EXCLUIR
+</button>
+
+</div>
+`;
+
+}).join('');
+
+}
+
+async function carregarTudo(){
+
+await Promise.all([
+listarUsers(),
+listarBms()
+]);
+
+}
+
+function closeBmsModal(){
+
+document.getElementById('modalBms')
+.classList.remove('active');
+
+}
+
+function closeEditUser(){
+
+document.getElementById('modalEditUser')
+.classList.remove('active');
+
+}
+
+setInterval(() => {
+
+if(
+adminToken &&
+document.getElementById('painel').style.display === 'flex'
+){
+carregarTudo();
+}
+
+},5000);
+
 </script>
+
 </body>
 </html>
