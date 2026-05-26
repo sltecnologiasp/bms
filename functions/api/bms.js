@@ -22,9 +22,85 @@ export async function onRequest({ request, env }) {
       if (!nome ||!email ||!senha) return json({ ok: false, error: 'Dados inválidos' }, 400);
       const exists = await env.DB.prepare('SELECT id FROM users WHERE email =?').bind(email).first();
       if (exists) return json({ ok: false, error: 'E-mail já cadastrado' }, 400);
+
       const hash = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(senha));
       const senha_hash = Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2, '0')).join('');
-      await env.DB.prepare('INSERT INTO users (nome, email, senha_hash) VALUES (?,?,?)').bind(nome, email, senha_hash).run();
+
+      const code = Math.floor(100000 + Math.random() * 900000).toString();
+      const expires = new Date(Date.now() + 15*60*1000).toISOString();
+
+      await env.DB.prepare('INSERT INTO users (nome, email, senha_hash, email_code, code_expires, email_verified) VALUES (?,?,?,?,?,0)')
+       .bind(nome, email, senha_hash, code, expires).run();
+
+      // MailChannels - grátis no Cloudflare
+      await fetch('https://api.mailchannels.net/tx/v1/send', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          personalizations: [{ to: [{ email, name: nome }] }],
+          from: { email: 'noreply@smartbms.com.br', name: 'SMART BMS' },
+          subject: 'Código de confirmação - SMART BMS',
+          content: [{
+            type: 'text/html',
+            value: `<div style="font-family:system-ui;background:#0a0a0f;color:#fff;padding:40px;text-align:center">
+              <h1 style="color:#00ffff;font-size:42px;margin-bottom:20px">SMART BMS</h1>
+              <p style="font-size:16px">Olá ${nome},</p>
+              <p style="font-size:16px;margin:20px 0">Seu código de confirmação:</p>
+              <h2 style="font-size:48px;letter-spacing:12px;color:#00ff88;margin:30px 0">${code}</h2>
+              <p style="opacity:.6;font-size:14px">Válido por 15 minutos</p>
+            </div>`
+          }]
+        })
+      });
+
+      return json({ ok: true, need_verify: true, email });
+    }
+
+    if (action === 'verify_email' && request.method === 'POST') {
+      const { email, code } = await request.json();
+      const user = await env.DB.prepare('SELECT id, nome, email_code, code_expires FROM users WHERE email =?').bind(email).first();
+
+      if (!user) return json({ ok: false, error: 'Usuário não encontrado' });
+      if (user.email_code!== code) return json({ ok: false, error: 'Código inválido' });
+      if (new Date(user.code_expires) < new Date()) return json({ ok: false, error: 'Código expirado' });
+
+      await env.DB.prepare('UPDATE users SET email_verified = 1, email_code = NULL, code_expires = NULL WHERE email =?').bind(email).run();
+      const token = btoa(`user:${user.id}:${Date.now()}`);
+      return json({ ok: true, token, nome: user.nome, email });
+    }
+
+    if (action === 'resend_code' && request.method === 'POST') {
+      const { email } = await request.json();
+      const user = await env.DB.prepare('SELECT id, nome, email_verified FROM users WHERE email =?').bind(email).first();
+
+      if (!user) return json({ ok: false, error: 'Usuário não encontrado' });
+      if (user.email_verified) return json({ ok: false, error: 'Email já confirmado' });
+
+      const code = Math.floor(100000 + Math.random() * 900000).toString();
+      const expires = new Date(Date.now() + 15*60*1000).toISOString();
+
+      await env.DB.prepare('UPDATE users SET email_code =?, code_expires =? WHERE email =?')
+       .bind(code, expires, email).run();
+
+      await fetch('https://api.mailchannels.net/tx/v1/send', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          personalizations: [{ to: [{ email, name: user.nome }] }],
+          from: { email: 'noreply@smartbms.com.br', name: 'SMART BMS' },
+          subject: 'Novo código - SMART BMS',
+          content: [{
+            type: 'text/html',
+            value: `<div style="font-family:system-ui;background:#0a0a0f;color:#fff;padding:40px;text-align:center">
+              <h1 style="color:#00ffff;font-size:42px;margin-bottom:20px">SMART BMS</h1>
+              <p style="font-size:16px">Seu novo código:</p>
+              <h2 style="font-size:48px;letter-spacing:12px;color:#00ff88;margin:30px 0">${code}</h2>
+              <p style="opacity:.6;font-size:14px">Válido por 15 minutos</p>
+            </div>`
+          }]
+        })
+      });
+
       return json({ ok: true });
     }
 
@@ -32,8 +108,11 @@ export async function onRequest({ request, env }) {
       const { email, senha } = await request.json();
       const hash = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(senha));
       const senha_hash = Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2, '0')).join('');
-      const user = await env.DB.prepare('SELECT id, nome, email FROM users WHERE email =? AND senha_hash =?').bind(email, senha_hash).first();
+      const user = await env.DB.prepare('SELECT id, nome, email, email_verified FROM users WHERE email =? AND senha_hash =?').bind(email, senha_hash).first();
+
       if (!user) return json({ ok: false, error: 'E-mail ou senha incorretos' }, 401);
+      if (!user.email_verified) return json({ ok: false, error: 'Confirme seu email primeiro', need_verify: true, email }, 403);
+
       const token = btoa(`user:${user.id}:${Date.now()}`);
       return json({ ok: true, token, nome: user.nome, email: user.email });
     }
@@ -160,7 +239,7 @@ export async function onRequest({ request, env }) {
     if (action === 'all_users' && request.method === 'GET') {
       if (!isAdmin) return json({ ok: false, error: 'Admin only' }, 403);
       const { results } = await env.DB.prepare(`
-        SELECT u.id, u.nome, u.email, u.created_at, COUNT(ub.id) as bms_count
+        SELECT u.id, u.nome, u.email, u.created_at, u.email_verified, COUNT(ub.id) as bms_count
         FROM users u LEFT JOIN user_bms ub ON ub.user_id = u.id
         GROUP BY u.id ORDER BY u.created_at DESC
       `).all();
