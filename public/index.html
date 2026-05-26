@@ -55,7 +55,7 @@ button.danger{background:rgba(255,68,68,.1);border:1px solid rgba(255,68,68,.3);
 .value{font-size:30px;font-weight:800;margin-top:8px;line-height:1;white-space:nowrap;width:7ch;text-align:center;font-variant-numeric:tabular-nums}
 .status{display:inline-flex;align-items:center;gap:10px;padding:14px 26px;border-radius:999px;font-weight:700;margin-top:14px}
 .on{background:rgba(0,255,136,.12);color:var(--green);border:1px solid rgba(0,255,136,.3)}
-.off{background:rgba(255,68,68,.12);color:var(--red);border:1px solid rgba(255,68,68,.3)}
+.off{background:rgba(255,68,68,.12);color:var(--red);border:1px solid rgba(255,68,.3)}
 .diff{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:18px}
 .diff-item{padding:12px 8px;border-radius:14px;background:rgba(255,255,255,.03);min-width:0;text-align:center}
 .diff-item span{display:block;margin-top:6px;font-size:22px;font-weight:800;width:6ch;margin-left:auto;margin-right:auto;text-align:center;font-variant-numeric:tabular-nums}
@@ -174,7 +174,7 @@ canvas{width:100%!important;height:320px!important;touch-action:none}
   </div>
 </div>
 
-<script type="module">
+<script>
 function createParticles(){
   if(window.innerWidth<768)return;
   const c=document.getElementById('particles');
@@ -321,4 +321,58 @@ function renderCells(cells){
 const voltageHistory=[],currentHistory=[],labelsHistory=[];
 function initChart(){
   const ctx=document.getElementById('mainChart').getContext('2d');
-  chart=new window.Chart(ctx,{type:'line',data:{labels:labelsHistory,datasets:[{label:'Tensão',data:voltageHistory,borderColor:'#00ffff',backgroundColor:'rgba(0,255,255,.08)',tensio
+  chart=new window.Chart(ctx,{type:'line',data:{labels:labelsHistory,datasets:[{label:'Tensão',data:voltageHistory,borderColor:'#00ffff',backgroundColor:'rgba(0,255,255,.08)',tension:.4,fill:true,borderWidth:2},{label:'Corrente',data:currentHistory,borderColor:'#ffaa00',backgroundColor:'rgba(255,170,0,.08)',tension:.4,fill:true,borderWidth:2}]},options:{responsive:true,maintainAspectRatio:false,animation:false,elements:{point:{radius:0}},plugins:{legend:{labels:{color:'#ffffff'}}},scales:{x:{ticks:{color:'#aaa'},grid:{color:'rgba(255,255,255,.05)'}},y:{ticks:{color:'#aaa'},grid:{color:'rgba(255,255,255,.05)'}}}}});
+}
+
+function updateGauge(soc){
+  const gauge=document.getElementById('socGauge'),value=document.getElementById('socGaugeValue'),bar=document.getElementById('socBar'),text=document.getElementById('socBarText'),deg=soc*3.6;
+  value.textContent=soc+'%';text.textContent=soc+'%';bar.style.width=soc+'%';
+  gauge.style.background=`conic-gradient(#00ff88 0deg,#00ffff ${deg}deg,rgba(255,255,255,.08) ${deg}deg)`;
+}
+
+function setOffline(){
+  isOffline=true;clearTimeout(offlineTimer);
+  document.getElementById('connStatus').textContent='Offline';document.getElementById('connStatus').className='status off';
+  document.getElementById('soc').textContent='--%';document.getElementById('voltage').textContent='--V';document.getElementById('current').textContent='--A';document.getElementById('temp').textContent='--°C';
+  document.getElementById('socGaugeValue').textContent='--%';document.getElementById('socBarText').textContent='--%';document.getElementById('socBar').style.width='0%';updateGauge(0);
+}
+
+async function update(){
+  if(!currentBMS)return;
+  try{
+    const r=await fetch(API+'?action=data&code='+currentBMS.code,{headers:{'Authorization':'Bearer '+userToken}});
+    if(r.status===401){logout();return}
+    const d=await r.json();
+    const hash=`${d.soc?.toFixed(0)}-${d.voltage?.toFixed(1)}-${d.current?.toFixed(1)}-${d.temp?.toFixed(1)}`;
+    if(hash!==lastDataHash){
+      lastDataHash=hash;isOffline=false;clearTimeout(offlineTimer);
+      offlineTimer=setTimeout(()=>{setOffline()},10000);
+    }
+    if(isOffline)return;
+    document.getElementById('soc').textContent=(d.soc?.toFixed(0)||0)+'%';
+    document.getElementById('voltage').textContent=(d.voltage?.toFixed(2)||0)+'V';
+    document.getElementById('current').textContent=(d.current?.toFixed(1)||0)+'A';
+    document.getElementById('temp').textContent=(d.temp?.toFixed(1)||0)+'°C';
+    document.getElementById('connStatus').textContent=d.online?'Online':'Offline';
+    document.getElementById('connStatus').className='status '+(d.online?'on':'off');
+    renderCells(d.cells);updateGauge(parseInt(d.soc||0));
+    const now=new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+    labelsHistory.push(now);voltageHistory.push(d.voltage||0);currentHistory.push(d.current||0);
+    if(labelsHistory.length>15){labelsHistory.shift();voltageHistory.shift();currentHistory.shift()}
+    if(chart)chart.update('none');
+  }catch(e){setOffline()}
+}
+
+if('serviceWorker'in navigator){window.addEventListener('load',async()=>{try{await navigator.serviceWorker.register('/service-worker.js')}catch(e){}})}
+
+window.login = login;
+window.cadastrar = cadastrar;
+window.logout = logout;
+window.showLogin = showLogin;
+window.showCadastro = showCadastro;
+window.addBMS = addBMS;
+window.selectBMS = selectBMS;
+window.voltarLista = voltarLista;
+</script>
+</body>
+</html>
