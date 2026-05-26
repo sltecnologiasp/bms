@@ -17,7 +17,7 @@ button.del{background:rgba(255,68,68,.1);border:1px solid rgba(255,68,68,.4);pad
 button.edit{background:rgba(255,170,0,.1);border:1px solid rgba(255,170,0,.4);padding:10px;margin-top:12px;box-shadow:0 0 15px rgba(255,170,0,.2)}
 button.logout{background:rgba(255,68,68,.1);border:1px solid rgba(255,68,68,.4);max-width:500px;margin:60px auto 40px;box-shadow:0 0 20px rgba(255,68,68,.2)}
 button.view{background:rgba(0,255,255,.1);border:1px solid rgba(0,255,255,.4);padding:10px;margin-top:12px;box-shadow:0 0 15px rgba(0,255,255,.2)}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(350px,1fr));gap:16px;padding:0 16px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr));gap:16px;padding:0 16px;max-width:1600px;margin:0 auto}
 .grid .card{margin:0;border-radius:16px}
 .status{display:inline-block;padding:6px 16px;border-radius:12px;font-size:13px;font-weight:700}
 .on{background:rgba(0,255,136,.15);color:#00ff88;border:1px solid rgba(0,255,136,.4);box-shadow:0 0 15px rgba(0,255,136,.3)}
@@ -48,6 +48,14 @@ button.view{background:rgba(0,255,255,.1);border:1px solid rgba(0,255,255,.4);pa
 .badge{display:inline-block;padding:4px 12px;border-radius:8px;font-size:11px;font-weight:700;margin-top:8px}
 .badge-green{background:rgba(0,255,136,.15);color:#00ff88;border:1px solid rgba(0,255,136,.4)}
 .badge-orange{background:rgba(255,170,0,.15);color:#ffaa00;border:1px solid rgba(255,170,0,.4)}
+
+@media(max-width:768px){
+  .grid{grid-template-columns:1fr;padding:0 12px}
+  .card{margin:12px 0;padding:20px}
+  h1{font-size:32px;padding:20px 15px}
+  .section-title{font-size:20px;margin:30px 0 15px}
+  input,button{font-size:16px;padding:16px}
+}
 </style>
 </head>
 <body>
