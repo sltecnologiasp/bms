@@ -38,7 +38,7 @@ button{background:linear-gradient(90deg,var(--blue),var(--cyan));color:#fff;font
 .btn-sec{background:transparent;border:1px solid rgba(0,255,255,.3);color:var(--cyan)}
 .status{display:inline-flex;align-items:center;gap:10px;padding:14px 26px;border-radius:999px;font-weight:700}
 .on{background:rgba(0,255,136,.12);color:var(--green);border:1px solid rgba(0,255,136,.3)}
-.off{background:rgba(255,68,68,.12);color:var(--red);border:1px solid rgba(255,68,68,.3)}
+.off{background:rgba(255,68,.12);color:var(--red);border:1px solid rgba(255,68,68,.3)}
 .status-wrap{display:flex;justify-content:center;align-items:center;flex-direction:column;margin-top:14px}
 .bms-code{font-size:clamp(18px,4.5vw,24px);font-weight:700;margin-top:12px;letter-spacing:1.5px;color:#fff;text-align:center;opacity:.95}
 .diff{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;margin-top:18px}
@@ -96,6 +96,7 @@ button{background:linear-gradient(90deg,var(--blue),var(--cyan));color:#fff;font
 <button class="btn-sec" onclick="mostrarLogin()">VOLTAR</button>
 <div id="erro-cad" class="erro hidden"></div>
 </div>
+</div>
 
 <div id="verify" class="hidden">
 <div class="title">SMART BMS</div>
@@ -116,7 +117,7 @@ button{background:linear-gradient(90deg,var(--blue),var(--cyan));color:#fff;font
 <div class="user-info">Olá, <span id="user-nome">--</span></div>
 <div class="card">
 <div class="label">Adicionar BMS</div>
-<input id="bms-code" placeholder="SL000000" maxlength="14" style="margin-top:8px">
+<input id="bms-code" placeholder="SL000000000000" maxlength="14" style="margin-top:8px">
 <input id="bms-nome" placeholder="Nome da BMS" style="margin-top:12px">
 <button onclick="addBms()">ADICIONAR</button>
 </div>
@@ -135,10 +136,10 @@ button{background:linear-gradient(90deg,var(--blue),var(--cyan));color:#fff;font
 <div class="gauge-value" id="socValor">0%</div>
 <div class="gauge-label">STATE OF CHARGE</div>
 </div>
+</div>
 <div class="bar-wrap">
 <div class="bar-label"><span>Bateria</span><span id="socBarTxt">0%</span></div>
 <div class="bar"><div class="bar-fill" id="socBar"></div></div>
-</div>
 </div>
 <div class="card">
 <div class="label">Status</div>
@@ -164,7 +165,6 @@ button{background:linear-gradient(90deg,var(--blue),var(--cyan));color:#fff;font
 </div>
 <div class="footer-voltar">
 <button class="btn-sec" onclick="voltar()">← VOLTAR</button>
-</div>
 </div>
 
 <script>
