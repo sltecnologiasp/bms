@@ -83,7 +83,6 @@ canvas{width:100%!important;height:280px!important}
 <p class="link-cadastro" onclick="mostrarCadastro()">Ainda não tem conta? <span>Cadastre-se</span></p>
 <div id="erro" class="erro hidden"></div>
 </div>
-</div>
 
 <div id="cadastro" class="hidden">
 <div class="title">SMART BMS</div>
@@ -324,25 +323,43 @@ function carregarLista(){
 function addBms(){
   var code = document.getElementById('bms-code').value.trim();
   var nome = document.getElementById('bms-nome').value.trim();
+
   if(!code || code.length!== 10){
     alert('Código inválido. Use SL + 8 números');
     return;
   }
-  fetch(API + '?action=add_bms', {
-    method:'POST',
-    headers:{'Content-Type':'application/json','Authorization':'Bearer '+TOKEN},
-    body:JSON.stringify({code:code,nome:nome || code})
+
+  // Verifica se já existe na lista antes de adicionar
+  fetch(API + '?action=user_bms', {
+    headers:{'Authorization':'Bearer '+TOKEN}
   })
-.then(function(r){return r.json();})
-.then(function(d){
-    if(d.ok){
-      alert('BMS adicionada!');
+ .then(function(r){return r.json();})
+ .then(function(lista){
+    var jaExiste = lista && lista.some(function(b){return b.code === code});
+    if(jaExiste){
+      alert('Essa BMS já está adicionada na sua conta!');
       document.getElementById('bms-code').value = '';
       document.getElementById('bms-nome').value = '';
-      carregarLista();
-    }else{
-      alert('Erro: ' + d.error);
+      return;
     }
+
+    // Se não existe, adiciona normal
+    fetch(API + '?action=add_bms', {
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+TOKEN},
+      body:JSON.stringify({code:code,nome:nome || code})
+    })
+   .then(function(r){return r.json();})
+   .then(function(d){
+      if(d.ok){
+        alert('BMS adicionada!');
+        document.getElementById('bms-code').value = '';
+        document.getElementById('bms-nome').value = '';
+        carregarLista();
+      }else{
+        alert('Erro: ' + d.error);
+      }
+    });
   });
 }
 
@@ -457,27 +474,4 @@ function atualizar(){
     atualizarGauge(parseInt(d.soc || 0));
 
     /* GRÁFICO DESATIVADO - Para ativar descomente o bloco abaixo
-    var agora = new Date().toLocaleTimeString('pt-BR', {hour:'2-digit', minute:'2-digit', second:'2-digit'});
-    LABEL_H.push(agora);
-    VOLT_H.push(d.voltage || 0);
-    CORR_H.push(d.current || 0);
-    if(LABEL_H.length > 30){
-      LABEL_H.shift();
-      VOLT_H.shift();
-      CORR_H.shift();
-    }
-    if(CHART) CHART.update('none');
-    */
-  });
-}
-
-function sair(){
-  clearInterval(INT);
-  localStorage.removeItem('bms_token');
-  localStorage.removeItem('bms_user');
-  localStorage.removeItem('bms_codigo_ativo');
-  location.reload();
-}
-</script>
-</body>
-</html>
+    var agora = new Date().toLocaleTimeString('pt-BR', {hour:'2-
