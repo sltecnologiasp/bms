@@ -350,8 +350,8 @@ function addBms(){
       headers:{'Content-Type':'application/json','Authorization':'Bearer '+TOKEN},
       body:JSON.stringify({code:code,nome:nome || code})
     })
-  .then(function(r){return r.json();})
-  .then(function(d){
+ .then(function(r){return r.json();})
+ .then(function(d){
       if(d.ok){
         alert('BMS adicionada!');
         document.getElementById('bms-code').value = '';
@@ -475,4 +475,4 @@ function atualizar(){
     atualizarGauge(parseInt(d.soc || 0));
 
     /* GRÁFICO DESATIVADO - Para ativar descomente o bloco abaixo
-    var agora = new Date().toLocaleTimeString('pt-BR', {hour:
+    var agora = new Date().toLocaleTimeString('pt-BR', {hour:'2
