@@ -34,7 +34,7 @@ button.voltar{background:rgba(0,255,136,.1);border:1px solid rgba(0,255,136,.4);
 #lista .card:hover{border-color:rgba(0,255,255,.3);box-shadow:0 0 30px rgba(0,255,255,.15)}
 .grid .card{margin:0}
 .grid .card-empty{grid-column:1/-1;min-height:200px;display:flex;align-items:center;justify-content:center}
-.status{display:inline-flex;align-items:center;gap:10px;padding:14px 26px;border-radius:999px;font-weight:700}
+.status{display:inline-flex;align-items:center;gap:10px;padding:14px 26px;border-radius:999px;font-weight:700;transition:.3s}
 .on{background:rgba(0,255,136,.12);color:var(--green);border:1px solid rgba(0,255,136,.3)}
 .off{background:rgba(255,68,68,.12);color:var(--red);border:1px solid rgba(255,68,68,.3)}
 .label{font-size:10px;letter-spacing:1.5px;opacity:.6;text-transform:uppercase;text-align:center}
@@ -167,7 +167,7 @@ if(adminToken === 'admin_ok') showPainel();
 function isOnline(updated_at) {
   if (!updated_at) return false;
   const diff = Date.now() - new Date(updated_at).getTime();
-  return diff < 5000;
+  return diff > 0 && diff < 5000;
 }
 
 async function adminLogin(){
@@ -409,6 +409,7 @@ async function listarBms(){
     </div>
   `}).join('') || '<div class="card card-empty"><div style="opacity:.4">Nenhuma BMS cadastrada no sistema</div></div>';
 }
+// ATUALIZA AUTOMÁTICO A CADA 5 SEGUNDOS
 setInterval(()=>{if(adminToken && document.getElementById('painel').classList.contains('active'))carregarTudo()},5000);
 </script>
 </body>
