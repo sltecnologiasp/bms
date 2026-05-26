@@ -1,97 +1,352 @@
 <!DOCTYPE html>
-<html>
+<html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>SMART BMS - Teste</title>
+<title>SMART BMS</title>
 <style>
-body{background:#05070d;color:#fff;font-family:system-ui;padding:20px;text-align:center}
-h1{color:#00ffff;font-size:32px;margin-bottom:20px}
-.card{background:rgba(255,255,255,.05);border:1px solid #00ffff;padding:20px;border-radius:12px;max-width:500px;margin:20px auto}
-input,button{width:100%;padding:16px;margin:8px 0;border-radius:8px;border:1px solid #00ffff;background:#000;color:#fff;font-size:16px}
-button{background:#00ffff;color:#000;font-weight:700;cursor:pointer}
-#debug{background:#000;border:1px solid #00ff00;padding:12px;margin-top:20px;font-size:12px;text-align:left;white-space:pre-wrap;word-break:break-all}
+*{margin:0;padding:0;box-sizing:border-box}
+body{
+  font-family:system-ui,sans-serif;
+  background:#05070d;
+  color:#fff;
+  min-height:100vh;
+  padding:20px;
+  background-image:
+    radial-gradient(circle at 20% 50%, rgba(0,255,255,.05) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(0,255,255,.03) 0%, transparent 50%);
+}
+.container{max-width:600px;margin:0 auto}
+h1{
+  text-align:center;
+  font-size:42px;
+  font-weight:900;
+  margin:20px 0 30px;
+  color:#00ffff;
+  text-shadow:0 0 30px rgba(0,255,255,.6);
+}
+.card{
+  background:rgba(0,255,255,.05);
+  border:2px solid rgba(0,255,255,.3);
+  border-radius:20px;
+  padding:24px;
+  margin-bottom:20px;
+  backdrop-filter:blur(10px);
+  box-shadow:0 8px 32px rgba(0,255,255,.1);
+}
+.card h2{
+  color:#00ffff;
+  font-size:20px;
+  margin-bottom:16px;
+  text-align:center;
+}
+input{
+  width:100%;
+  padding:16px;
+  margin:8px 0;
+  background:rgba(0,0,0,.6);
+  border:2px solid rgba(0,255,255,.4);
+  border-radius:12px;
+  color:#fff;
+  font-size:16px;
+  outline:none;
+}
+input:focus{border-color:#00ffff;box-shadow:0 0 15px rgba(0,255,255,.4)}
+button{
+  width:100%;
+  padding:16px;
+  margin:8px 0;
+  background:linear-gradient(135deg,#00ffff,#00cccc);
+  color:#000;
+  border:none;
+  border-radius:12px;
+  font-size:16px;
+  font-weight:700;
+  cursor:pointer;
+  transition:.3s;
+}
+button:hover{transform:translateY(-2px);box-shadow:0 8px 25px rgba(0,255,255,.5)}
+button:disabled{opacity:.5;cursor:not-allowed}
+.btn-secondary{
+  background:transparent;
+  color:#00ffff;
+  border:2px solid #00ffff;
+}
+.bms-item{
+  background:rgba(0,0,0,.4);
+  border:1px solid rgba(0,255,255,.3);
+  border-radius:12px;
+  padding:16px;
+  margin:12px 0;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+.bms-info h3{color:#00ffff;font-size:18px;margin-bottom:4px}
+.bms-info p{color:#aaa;font-size:12px}
+.status{
+  padding:6px 12px;
+  border-radius:20px;
+  font-size:12px;
+  font-weight:700;
+}
+.status.online{background:rgba(0,255,0,.2);color:#0f0;border:1px solid #0f0}
+.status.offline{background:rgba(255,0,0,.2);color:#f44;border:1px solid #f44}
 .hidden{display:none}
+#debug{
+  background:#000;
+  border:1px solid #0f0;
+  border-radius:8px;
+  padding:12px;
+  margin-top:20px;
+  font-size:11px;
+  color:#0f0;
+  white-space:pre-wrap;
+  word-break:break-all;
+  max-height:150px;
+  overflow-y:auto;
+}
+.link-dash{
+  display:block;
+  text-align:center;
+  padding:12px;
+  margin-top:12px;
+  background:rgba(0,255,255,.1);
+  border:1px solid #00ffff;
+  border-radius:8px;
+  color:#00ffff;
+  text-decoration:none;
+  font-weight:600;
+}
 </style>
 </head>
 <body>
-<h1>SMART BMS</h1>
+<div class="container">
+  <h1>SMART BMS</h1>
 
-<div id="login" class="card">
-  <h2>Login</h2>
-  <input id="email" placeholder="E-mail" value="teste@teste.com">
-  <input id="senha" type="password" placeholder="Senha" value="123456">
-  <button onclick="login()">Entrar</button>
-  <button onclick="cadastrar()" style="background:#000;color:#00ffff;margin-top:8px">Criar Conta</button>
+  <div id="login-card" class="card">
+    <h2>Login do Cliente</h2>
+    <input id="email" type="email" placeholder="E-mail" value="teste@teste.com">
+    <input id="senha" type="password" placeholder="Senha" value="123456">
+    <button onclick="login()">Entrar</button>
+    <button class="btn-secondary" onclick="mostrarCadastro()">Criar Conta</button>
+  </div>
+
+  <div id="cadastro-card" class="card hidden">
+    <h2>Criar Conta</h2>
+    <input id="cad-nome" placeholder="Nome completo">
+    <input id="cad-email" type="email" placeholder="E-mail">
+    <input id="cad-senha" type="password" placeholder="Senha">
+    <button onclick="cadastrar()">Cadastrar</button>
+    <button class="btn-secondary" onclick="mostrarLogin()">Voltar</button>
+  </div>
+
+  <div id="painel" class="hidden">
+    <div class="card">
+      <h2 id="bem-vindo"></h2>
+      <button onclick="logout()" style="background:rgba(255,0,0,.3);border:1px solid #f44;color:#f44">Sair</button>
+    </div>
+
+    <div class="card">
+      <h2>Adicionar BMS</h2>
+      <input id="bms-code" placeholder="SL77777777" maxlength="10">
+      <input id="bms-nome" placeholder="Nome da BMS (opcional)">
+      <button onclick="addBms()">Adicionar BMS</button>
+    </div>
+
+    <div class="card">
+      <h2>Minhas BMS</h2>
+      <div id="lista-bms"></div>
+    </div>
+  </div>
+
+  <div id="debug">Console: Iniciando...</div>
 </div>
-
-<div id="painel" class="card hidden">
-  <h2 id="bemvindo"></h2>
-  <button onclick="logout()" style="background:#ff4444">Sair</button>
-  <h3 style="margin-top:20px">Minhas BMS</h3>
-  <div id="lista"></div>
-</div>
-
-<div id="debug">Console: Iniciando...</div>
 
 <script>
 const API = '/api/bms';
-let token = localStorage.getItem('token');
+let token = localStorage.getItem('bms_token');
+let userData = null;
 
-function log(t){
-  document.getElementById('debug').textContent += '\n' + t;
+function log(msg){
+  const d = document.getElementById('debug');
+  d.textContent += '\n' + msg;
+  d.scrollTop = d.scrollHeight;
 }
 
 log('JS carregado');
-if(token){ log('Token encontrado'); showPainel(); }
-
-async function cadastrar(){
-  const nome = prompt('Nome:');
-  const email = prompt('E-mail:');
-  const senha = prompt('Senha:');
-  if(!nome||!email||!senha)return;
-  log('Cadastrando: ' + email);
-  const r = await fetch(API+'?action=register',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({nome,email,senha})});
-  const d = await r.json();
-  log('Cadastro: ' + JSON.stringify(d));
-  alert(d.ok ? 'Criado! Faz login' : d.error);
+if(token){
+  log('Token encontrado, verificando...');
+  carregarPainel();
 }
 
-async function login(){
-  const email = document.getElementById('email').value;
-  const senha = document.getElementById('senha').value;
-  log('Login: ' + email);
-  const r = await fetch(API+'?action=login_user',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,senha})});
-  log('Status: ' + r.status);
-  const d = await r.json();
-  log('Resposta: ' + JSON.stringify(d));
-  if(d.ok){
-    token = d.token;
-    localStorage.setItem('token', token);
-    showPainel();
-  }else{
-    alert('Erro: ' + d.error);
+function mostrarCadastro(){
+  document.getElementById('login-card').classList.add('hidden');
+  document.getElementById('cadastro-card').classList.remove('hidden');
+}
+
+function mostrarLogin(){
+  document.getElementById('cadastro-card').classList.add('hidden');
+  document.getElementById('login-card').classList.remove('hidden');
+}
+
+async function cadastrar(){
+  const nome = document.getElementById('cad-nome').value.trim();
+  const email = document.getElementById('cad-email').value.trim();
+  const senha = document.getElementById('cad-senha').value;
+  
+  if(!nome || !email || !senha){
+    alert('Preenche tudo');
+    return;
+  }
+  
+  log('Cadastrando: ' + email);
+  try{
+    const r = await fetch(API + '?action=register', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({nome, email, senha})
+    });
+    const d = await r.json();
+    log('Cadastro: ' + JSON.stringify(d));
+    
+    if(d.ok){
+      alert('Conta criada! Faz login agora');
+      mostrarLogin();
+      document.getElementById('email').value = email;
+      document.getElementById('senha').value = senha;
+    }else{
+      alert('Erro: ' + d.error);
+    }
+  }catch(e){
+    log('Erro cadastro: ' + e.message);
+    alert('Erro: ' + e.message);
   }
 }
 
-function showPainel(){
-  document.getElementById('login').classList.add('hidden');
-  document.getElementById('painel').classList.remove('hidden');
-  log('Mostrando painel');
-  listar();
+async function login(){
+  const email = document.getElementById('email').value.trim();
+  const senha = document.getElementById('senha').value;
+  
+  log('Login: ' + email);
+  try{
+    const r = await fetch(API + '?action=login_user', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({email, senha})
+    });
+    log('Status: ' + r.status);
+    const d = await r.json();
+    log('Resposta: ' + JSON.stringify(d));
+    
+    if(d.ok){
+      token = d.token;
+      userData = {nome: d.nome, email: d.email};
+      localStorage.setItem('bms_token', token);
+      localStorage.setItem('bms_user', JSON.stringify(userData));
+      carregarPainel();
+    }else{
+      alert('Erro: ' + d.error);
+    }
+  }catch(e){
+    log('Erro login: ' + e.message);
+    alert('Erro de conexão: ' + e.message);
+  }
 }
 
-async function listar(){
-  log('Listando BMS...');
-  const r = await fetch(API+'?action=user_bms',{headers:{'Authorization':'Bearer '+token}});
-  log('Status lista: ' + r.status);
-  const d = await r.json();
-  log('BMS: ' + JSON.stringify(d));
-  document.getElementById('lista').innerHTML = d.length ? d.map(b=>`<div style="padding:12px;border:1px solid #00ffff;margin:8px 0;border-radius:8px">${b.code} - ${b.nome}</div>`).join('') : 'Nenhuma BMS';
+function carregarPainel(){
+  const saved = localStorage.getItem('bms_user');
+  if(saved) userData = JSON.parse(saved);
+  
+  document.getElementById('login-card').classList.add('hidden');
+  document.getElementById('cadastro-card').classList.add('hidden');
+  document.getElementById('painel').classList.remove('hidden');
+  document.getElementById('bem-vindo').textContent = `Olá, ${userData?.nome || 'Usuário'}`;
+  
+  log('Painel carregado');
+  listarBms();
+}
+
+async function listarBms(){
+  log('Carregando BMS...');
+  try{
+    const r = await fetch(API + '?action=user_bms', {
+      headers: {'Authorization': 'Bearer ' + token}
+    });
+    log('Status lista: ' + r.status);
+    
+    if(r.status === 401){
+      logout();
+      return;
+    }
+    
+    const d = await r.json();
+    log('BMS: ' + d.length + ' encontradas');
+    
+    const lista = document.getElementById('lista-bms');
+    if(!d.length){
+      lista.innerHTML = '<p style="text-align:center;color:#666">Nenhuma BMS adicionada ainda</p>';
+      return;
+    }
+    
+    lista.innerHTML = d.map(b => `
+      <div class="bms-item">
+        <div class="bms-info">
+          <h3>${b.nome}</h3>
+          <p>${b.code}</p>
+        </div>
+        <div>
+          <span class="status ${b.online ? 'online' : 'offline'}">
+            ${b.online ? 'Online' : 'Offline'}
+          </span>
+          <a href="/dash.html?code=${b.code}" class="link-dash">Ver Dashboard</a>
+        </div>
+      </div>
+    `).join('');
+  }catch(e){
+    log('Erro lista: ' + e.message);
+  }
+}
+
+async function addBms(){
+  const code = document.getElementById('bms-code').value.trim().toUpperCase();
+  const nome = document.getElementById('bms-nome').value.trim();
+  
+  if(!code || code.length !== 10 || !code.startsWith('SL')){
+    alert('Código inválido. Use SL + 8 números');
+    return;
+  }
+  
+  log('Adicionando BMS: ' + code);
+  try{
+    const r = await fetch(API + '?action=add_bms', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + token
+      },
+      body: JSON.stringify({code, nome: nome || code})
+    });
+    const d = await r.json();
+    log('Add BMS: ' + JSON.stringify(d));
+    
+    if(d.ok){
+      alert('BMS adicionada!');
+      document.getElementById('bms-code').value = '';
+      document.getElementById('bms-nome').value = '';
+      listarBms();
+    }else{
+      alert('Erro: ' + d.error);
+    }
+  }catch(e){
+    log('Erro add: ' + e.message);
+    alert('Erro: ' + e.message);
+  }
 }
 
 function logout(){
-  localStorage.removeItem('token');
+  localStorage.removeItem('bms_token');
+  localStorage.removeItem('bms_user');
   location.reload();
 }
 </script>
