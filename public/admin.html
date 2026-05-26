@@ -1,182 +1,201 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html>
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>BMS SMART - Admin</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Admin BMS</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-:root{--bg:#05070d;--cyan:#00ffff;--blue:#0080ff;--green:#00ff88;--red:#ff4444;--orange:#ffaa00}
-body{font-family:'Inter',sans-serif;background:var(--bg);color:#fff;min-height:100vh;padding:20px}
-body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradient(0deg,rgba(255,255,255,.03) 0 1px,transparent 1px 40px),repeating-linear-gradient(90deg,rgba(255,255,255,.03) 0 1px,transparent 1px 40px);opacity:.4;pointer-events:none;z-index:0}
-.tela{position:relative;z-index:1;width:100%;min-height:100vh;display:flex;flex-direction:column;justify-content:center;align-items:center}
-.title{font-size:clamp(42px,8vw,74px);font-weight:900;margin-bottom:16px;letter-spacing:3px;background:linear-gradient(90deg,var(--cyan),var(--blue));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-.card{background:rgba(10,15,25,.92);border:1px solid rgba(0,255,255,.12);border-radius:16px;padding:24px;width:100%;max-width:500px;box-shadow:0 4px 20px rgba(0,0,0,.4)}
-.card-wide{max-width:1200px}
-.label{font-size:11px;letter-spacing:1.5px;opacity:.6;text-transform:uppercase;margin-bottom:8px;text-align:center}
-input,button{width:100%;padding:18px;border-radius:18px;border:none;outline:none;margin-top:12px;font-size:16px}
-input{background:rgba(0,0,0,.5);color:#fff;border:1px solid rgba(0,255,255,.2)}
-input:focus{border-color:var(--cyan);box-shadow:0 0 15px rgba(0,255,255,.2)}
-button{background:linear-gradient(90deg,var(--blue),var(--cyan));color:#fff;font-weight:700;cursor:pointer;box-shadow:0 4px 20px rgba(0,255,255,.25)}
-button.danger{background:rgba(255,68,68,.1);border:1px solid rgba(255,68,68,.3);box-shadow:none}
-.error{color:#ff4444;margin-top:12px;text-align:center;font-size:14px}
-.success{color:#00ff88;margin-top:12px;text-align:center;font-size:14px}
+body{background:#0a0a0f;color:#fff;font-family:system-ui;padding:0;text-align:center}
+h1{text-align:center;font-size:42px;font-weight:900;padding:30px 20px;background:linear-gradient(90deg,#00ffff,#0080ff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-shadow:0 0 30px rgba(0,255,255,.3)}
+.card{background:rgba(255,255,255,.03);border:1px solid rgba(0,255,255,.3);border-radius:16px;padding:30px;margin:16px;text-align:center;box-shadow:0 0 20px rgba(0,255,255,.1),inset 0 0 20px rgba(0,255,255,.05)}
+.card-cadastro{max-width:600px;margin:16px auto 32px auto}
+input,button{width:100%;max-width:600px;padding:18px;margin:12px auto;border-radius:12px;border:1px solid rgba(0,255,255,.3);background:rgba(0,0,0,.4);color:#fff;font-size:18px;text-align:center;display:block;box-shadow:0 0 15px rgba(0,255,255,.1)}
+button{background:linear-gradient(90deg,#0080ff,#00ffff);cursor:pointer;font-weight:700;border:none;font-family:system-ui;letter-spacing:0;box-shadow:0 0 25px rgba(0,255,255,.4)}
+button.del{background:rgba(255,68,68,.1);border:1px solid rgba(255,68,68,.4);padding:10px;margin-top:12px;box-shadow:0 0 15px rgba(255,68,68,.2)}
+button.logout{background:rgba(255,68,68,.1);border:1px solid rgba(255,68,68,.4);max-width:500px;margin:60px auto 40px;box-shadow:0 0 20px rgba(255,68,68,.2)}
+button.view{background:rgba(0,255,255,.1);border:1px solid rgba(0,255,255,.4);padding:10px;margin-top:12px;box-shadow:0 0 15px rgba(0,255,255,.2)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(350px,1fr));gap:16px;padding:0 16px}
+.grid .card{margin:0;border-radius:16px}
+.status{display:inline-block;padding:6px 16px;border-radius:12px;font-size:13px;font-weight:700}
+.on{background:rgba(0,255,136,.15);color:#00ff88;border:1px solid rgba(0,255,136,.4);box-shadow:0 0 15px rgba(0,255,136,.3)}
+.off{background:rgba(255,68,68,.15);color:#ff4444;border:1px solid rgba(255,68,68,.4);box-shadow:0 0 15px rgba(255,68,68,.3)}
+.label{opacity:.7;font-size:13px;text-transform:uppercase;text-align:center;letter-spacing:2px;margin-bottom:8px}
+.cells{display:grid;grid-template-columns:repeat(auto-fill,minmax(85px,1fr));gap:10px;margin-top:16px;justify-content:center}
+.cell{background:rgba(0,0,0,.4);border:1px solid rgba(0,255,255,.2);border-radius:12px;padding:12px;text-align:center;box-shadow:0 0 10px rgba(0,255,255,.1)}
+.cell-num{opacity:.5;font-size:10px;text-align:center}
+.cell-val{font-weight:700;font-size:14px;margin-top:4px;text-align:center}
+.cell.ok{border-color:rgba(0,255,136,.5);background:rgba(0,255,136,.08);box-shadow:0 0 15px rgba(0,255,136,.2)}
+.cell.warn{border-color:rgba(255,170,0,.5);background:rgba(255,170,0,.08);box-shadow:0 0 15px rgba(255,170,0,.2)}
+.cell.crit{border-color:rgba(255,68,68,.5);background:rgba(255,68,68,.08);box-shadow:0 0 15px rgba(255,68,68,.2)}
+.modal{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.95);z-index:999;overflow-y:auto;padding:20px}
+.modal.active{display:block}
+.modal-content{max-width:1200px;margin:40px auto;background:#0a0a0f;border:1px solid rgba(0,255,255,.3);border-radius:20px;padding:30px;text-align:center;box-shadow:0 0 40px rgba(0,255,255,.2)}
+.modal-close{float:right;background:rgba(255,68,68,.1);border:1px solid rgba(255,68,68,.4);color:#fff;padding:10px 20px;border-radius:8px;cursor:pointer;box-shadow:0 0 15px rgba(255,68,68,.2)}
+#login,#painel{position:relative;z-index:1;width:100%;min-height:100dvh;padding:20px}
+.tela-ativa{display:flex!important;flex-direction:column;justify-content:center;align-items:center}
+#login .card{border-radius:20px;margin:0 auto;max-width:500px;width:100%}
+.data-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:12px 0}
+.data-item{text-align:center}
+.data-item .label{margin-bottom:4px;font-size:11px}
+.data-item .value{font-size:24px;font-weight:700;text-shadow:0 0 15px currentColor}
 .hidden{display:none!important}
-.header{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px}
-.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-bottom:24px}
-.stat-card{background:rgba(0,0,0,.4);border:1px solid rgba(0,255,255,.2);border-radius:12px;padding:20px;text-align:center}
-.stat-value{font-size:36px;font-weight:900;color:var(--cyan);margin-top:8px}
-.stat-label{font-size:12px;opacity:.6;text-transform:uppercase;letter-spacing:1px}
-table{width:100%;margin-top:20px;border-collapse:collapse;font-size:14px}
-th{padding:12px 8px;text-align:left;font-size:11px;letter-spacing:1px;opacity:.6;text-transform:uppercase;border-bottom:1px solid rgba(0,255,255,.2)}
-td{padding:12px 8px;border-bottom:1px solid rgba(255,255,255,.05)}
-tr:hover{background:rgba(0,255,255,.05)}
-.status{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:999px;font-weight:700;font-size:12px}
-.status.on{background:rgba(0,255,136,.12);color:var(--green);border:1px solid rgba(0,255,136,.3)}
-.status.off{background:rgba(255,68,68,.12);color:var(--red);border:1px solid rgba(255,68,68,.3)}
-.section-title{font-size:20px;font-weight:700;margin:32px 0 16px;color:var(--cyan)}
 </style>
 </head>
 <body>
-
-<div id="login" class="tela">
-  <div class="title">BMS SMART</div>
+<div id="login" class="tela-ativa">
+  <h1>BMS SMART</h1>
   <div class="card">
     <div class="label">Acesso Administrativo</div>
-    <input id="user" placeholder="Usuário" value="administrador">
-    <input id="pass" type="password" placeholder="Senha">
-    <button onclick="login()">Entrar no Painel</button>
-    <p id="msg" style="display:none;"></p>
+    <input id="user" placeholder="Usuário" autocomplete="username" value="administrador">
+    <input id="password" type="password" placeholder="Senha" autocomplete="current-password">
+    <button onclick="adminLogin()">Entrar no Painel</button>
+    <p id="loginError" style="color:#ff4444;margin-top:12px;display:none;text-align:center"></p>
   </div>
 </div>
-
-<div id="painel" class="tela hidden" style="justify-content:flex-start;padding-top:40px">
-  <div class="card card-wide">
-    <div class="header">
-      <div class="title" style="font-size:32px;margin:0">ADMIN</div>
-      <button class="danger" style="width:auto;padding:10px 20px" onclick="sair()">Sair</button>
-    </div>
-
-    <div class="stats">
-      <div class="stat-card">
-        <div class="stat-label">Clientes</div>
-        <div class="stat-value" id="totalUsers">0</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-label">BMS Cadastradas</div>
-        <div class="stat-value" id="totalBms">0</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-label">BMS Online</div>
-        <div class="stat-value" id="totalOnline" style="color:var(--green)">0</div>
-      </div>
-    </div>
-
-    <div class="section-title">Clientes Cadastrados</div>
-    <table id="tabelaUsers">
-      <tr><th>Nome</th><th>Email</th><th>BMS</th><th>Cadastro</th></tr>
-      <tr><td colspan="4" style="text-align:center;opacity:.4">Carregando...</td></tr>
-    </table>
-
-    <div class="section-title">Todas as BMS</div>
-    <table id="tabelaBms">
-      <tr><th>Código</th><th>Nome</th><th>Status</th><th>SOC</th><th>Tensão</th><th>Atualizado</th></tr>
-      <tr><td colspan="6" style="text-align:center;opacity:.4">Carregando...</td></tr>
-    </table>
+<div id="painel" class="hidden">
+  <h1>BMS SMART</h1>
+  <div class="card card-cadastro">
+    <div class="label">Cadastrar BMS</div>
+    <input id="code" placeholder="SL82576655" maxlength="10">
+    <input id="nome" placeholder="Nome do Cliente">
+    <button onclick="cad()">Cadastrar BMS</button>
+    <p id="msg" style="text-align:center;margin-top:8px"></p>
+  </div>
+  <div id="lista" class="grid"></div>
+  <button class="logout" onclick="adminLogout()">Sair do Painel Admin</button>
+</div>
+<div id="modal" class="modal">
+  <div class="modal-content">
+    <button class="modal-close" onclick="closeModal()">Fechar</button>
+    <h2 id="modalTitle" style="text-align:center;margin-bottom:20px"></h2>
+    <div id="modalCells" class="cells" style="margin-top:20px"></div>
   </div>
 </div>
-
 <script>
 const API = '/api/bms';
-let token = localStorage.getItem('admin_token');
+let adminToken = sessionStorage.getItem('admin_token');
+let bmsList = [];
 
-if(token) showPainel();
+if(adminToken === 'admin_ok') showPainel();
 
-async function login(){
+async function adminLogin(){
   const user = document.getElementById('user').value;
-  const password = document.getElementById('pass').value;
-  const msg = document.getElementById('msg');
-  msg.style.display = 'none';
+  const password = document.getElementById('password').value;
+  const errorEl = document.getElementById('loginError');
+  errorEl.style.display='none';
   
-  try{
-    const r = await fetch(API+'?action=login_admin',{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({user,password})
-    });
-    const d = await r.json();
-    if(d.ok){
-      token = d.token;
-      localStorage.setItem('admin_token', token);
-      showPainel();
-    } else {
-      msg.textContent = d.error||'Erro';
-      msg.className = 'error';
-      msg.style.display = 'block';
-    }
-  }catch(e){
-    msg.textContent = 'Erro de conexão';
-    msg.className = 'error';
-    msg.style.display = 'block';
+  const r = await fetch(API+'?action=login_admin',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({user,password})});
+  const d = await r.json();
+  if(d.ok){
+    adminToken = d.token;
+    sessionStorage.setItem('admin_token', adminToken);
+    showPainel();
+  }else{
+    errorEl.textContent = d.error;
+    errorEl.style.display='block';
   }
 }
 
 function showPainel(){
+  document.getElementById('login').classList.remove('tela-ativa');
   document.getElementById('login').classList.add('hidden');
   document.getElementById('painel').classList.remove('hidden');
-  loadData();
-  setInterval(loadData, 10000);
+  document.getElementById('painel').classList.add('tela-ativa');
+  listar();
 }
 
-async function loadData(){
-  await Promise.all([loadUsers(), loadBms()]);
-}
-
-async function loadUsers(){
-  try{
-    const r = await fetch(API+'?action=all_users',{headers:{'Authorization':'Bearer '+token}});
-    if(r.status===401){sair();return}
-    const d = await r.json();
-    document.getElementById('totalUsers').textContent = d.length;
-    const t = document.getElementById('tabelaUsers');
-    if(d.length===0){t.innerHTML='<tr><th>Nome</th><th>Email</th><th>BMS</th><th>Cadastro</th></tr><tr><td colspan="4" style="text-align:center;opacity:.4">Nenhum cliente</td></tr>';return}
-    t.innerHTML = '<tr><th>Nome</th><th>Email</th><th>BMS</th><th>Cadastro</th></tr>' + 
-      d.map(u=>`<tr><td>${u.nome}</td><td>${u.email}</td><td>${u.bms_count}</td><td>${new Date(u.created_at).toLocaleDateString('pt-BR')}</td></tr>`).join('');
-  }catch(e){console.error(e)}
-}
-
-async function loadBms(){
-  try{
-    const r = await fetch(API+'?action=all_bms',{headers:{'Authorization':'Bearer '+token}});
-    const d = await r.json();
-    document.getElementById('totalBms').textContent = d.length;
-    const online = d.filter(b=>b.online&&(Date.now()-new Date(b.updated_at).getTime()<10000)).length;
-    document.getElementById('totalOnline').textContent = online;
-    const t = document.getElementById('tabelaBms');
-    if(d.length===0){t.innerHTML='<tr><th>Código</th><th>Nome</th><th>Status</th><th>SOC</th><th>Tensão</th><th>Atualizado</th></tr><tr><td colspan="6" style="text-align:center;opacity:.4">Nenhuma BMS</td></tr>';return}
-    t.innerHTML = '<tr><th>Código</th><th>Nome</th><th>Status</th><th>SOC</th><th>Tensão</th><th>Atualizado</th></tr>' + 
-      d.map(b=>{
-        const on = b.online&&(Date.now()-new Date(b.updated_at).getTime()<10000);
-        const ago = Math.floor((Date.now()-new Date(b.updated_at).getTime())/1000);
-        const tempo = ago<60?ago+'s':ago<3600?Math.floor(ago/60)+'min':Math.floor(ago/3600)+'h';
-        return `<tr>
-          <td style="font-family:monospace">${b.code}</td>
-          <td>${b.nome||'Sem nome'}</td>
-          <td><span class="status ${on?'on':'off'}">${on?'Online':'Offline'}</span></td>
-          <td>${b.soc?.toFixed(1)||0}%</td>
-          <td>${b.voltage?.toFixed(2)||0}V</td>
-          <td style="opacity:.6">${tempo} atrás</td>
-        </tr>`
-      }).join('');
-  }catch(e){console.error(e)}
-}
-
-function sair(){
-  localStorage.removeItem('admin_token');
-  token=null;
+function adminLogout(){
+  sessionStorage.removeItem('admin_token');
   location.reload();
 }
+
+function authHeaders(){
+  return {'Content-Type':'application/json','Authorization':'Bearer '+adminToken};
+}
+
+document.getElementById('code').oninput = e => {
+  if(!e.target.value.startsWith('SL')) e.target.value = 'SL';
+  e.target.value = 'SL' + e.target.value.slice(2).replace(/[^0-9]/g,'').slice(0,8);
+};
+
+async function cad(){
+  const code = document.getElementById('code').value;
+  const nome = document.getElementById('nome').value;
+  const r = await fetch(API+'?action=add_bms',{method:'POST',headers:authHeaders(),body:JSON.stringify({code,nome})});
+  const d = await r.json();
+  document.getElementById('msg').textContent = d.ok?'Cadastrada!':d.error;
+  document.getElementById('msg').style.color = d.ok?'#00ff88':'#ff4444';
+  if(d.ok){document.getElementById('code').value='';document.getElementById('nome').value='';listar();}
+}
+
+async function del(code){
+  if(!confirm(`Deletar ${code}?`))return;
+  await fetch(API+`?action=deletar&code=${code}`,{method:'DELETE',headers:authHeaders()});
+  listar();
+}
+
+function viewCells(code){
+  const bms = bmsList.find(b => b.code === code);
+  if(!bms ||!bms.cells || bms.cells.length === 0) return;
+  document.getElementById('modalTitle').textContent = `${bms.code} - ${bms.cells.length} Células`;
+  document.getElementById('modalCells').innerHTML = bms.cells.map((v,i)=>{
+    const val = parseFloat(v);
+    let cls = 'ok';
+    if(val < 3.2 || val > 4.2) cls = 'crit';
+    else if(val < 3.4 || val > 4.15) cls = 'warn';
+    return `<div class="cell ${cls}"><div class="cell-num">Célula ${i+1}</div><div class="cell-val">${val.toFixed(3)}V</div></div>`;
+  }).join('');
+  document.getElementById('modal').classList.add('active');
+}
+
+function closeModal(){
+  document.getElementById('modal').classList.remove('active');
+}
+
+async function listar(){
+  const r = await fetch(API+'?action=all_bms',{headers:authHeaders()});
+  if(r.status===401){adminLogout();return;}
+  const d = await r.json();
+  bmsList = d;
+  document.getElementById('lista').innerHTML = d.map(b=>{
+    const online = b.online&&(Date.now()-new Date(b.updated_at).getTime()<10000);
+    const cellsCount = b.cells? b.cells.length : 0;
+    const cellsHtml = cellsCount > 0? 
+      `<button class="view" onclick="viewCells('${b.code}')">Ver ${cellsCount} Células</button>` : 
+      '<div style="opacity:.4;font-size:13px;margin-top:12px;text-align:center">Sem dados de células</div>';
+    return `
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+        <div style="text-align:left"><b style="font-size:18px">${b.code}</b><div style="opacity:.6;font-size:13px;margin-top:4px">${b.nome||''}</div></div>
+        <span class="status ${online?'on':'off'}">${online?'Online':'Offline'}</span>
+      </div>
+      <div class="data-row">
+        <div class="data-item">
+          <div class="label">SOC</div>
+          <div class="value" style="color:#00ff88">${b.soc?.toFixed(0)||0}%</div>
+        </div>
+        <div class="data-item">
+          <div class="label">Tensão</div>
+          <div class="value" style="color:#00ffff">${b.voltage?.toFixed(2)||0}V</div>
+        </div>
+      </div>
+      <div class="data-row">
+        <div class="data-item">
+          <div class="label">Corrente</div>
+          <div class="value" style="color:#ffaa00">${b.current?.toFixed(1)||0}A</div>
+        </div>
+        <div class="data-item">
+          <div class="label">Temperatura</div>
+          <div class="value" style="color:#ff4444">${b.temp?.toFixed(1)||0}°C</div>
+        </div>
+      </div>
+      ${cellsHtml}
+      <button class="del" onclick="del('${b.code}')">Excluir</button>
+    </div>
+  `}).join('') || '<div class="card" style="text-align:center;opacity:.4;padding:60px 20px">Nenhuma BMS cadastrada</div>';
+}
+setInterval(()=>{if(adminToken)listar()},5000);
 </script>
 </body>
 </html>
