@@ -53,10 +53,11 @@ button{background:linear-gradient(90deg,var(--blue),var(--cyan));color:#fff;font
 .logout{margin-top:24px;background:rgba(255,68,68,.08);border:1px solid rgba(255,68,68,.2)}
 .hidden{display:none!important}
 .bms-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:4px;margin-top:20px}
-.bms-item{background:rgba(0,255,255,.05);border:1px solid rgba(0,255,255,.2);border-radius:16px;padding:20px;cursor:pointer;text-align:center;display:flex;flex-direction:column;align-items:center;gap:8px}
+.bms-item{background:rgba(0,255,255,.05);border:1px solid rgba(0,255,255,.2);border-radius:16px;padding:20px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:8px}
 .bms-item:active{transform:scale(0.98)}
 .bms-item h3{color:var(--cyan);font-size:20px;margin-bottom:0}
 .bms-item p{color:#888;font-size:13px;margin:0;text-align:center}
+.bms-item button.del{background:rgba(255,68,68,.1);border:1px solid rgba(255,68,68,.4);padding:10px;margin-top:12px;width:100%;box-shadow:0 0 15px rgba(255,68,68,.2);border-radius:12px;color:#fff;font-weight:700;cursor:pointer}
 .user-info{color:#888;font-size:14px;text-align:center;margin-bottom:20px}
 .erro{background:rgba(255,0,0,.1);border:2px solid #ff4444;border-radius:12px;padding:16px;margin-top:16px;color:#ff4444;font-size:14px}
 .link-cadastro{margin-top:20px;text-align:center;color:#fff;cursor:pointer;opacity:.8}
@@ -297,14 +298,35 @@ function carregarLista(){
     var html = '';
     for(var i=0;i<lista.length;i++){
       var b = lista[i];
-      html += '<div class="bms-item" onclick="abrirDash(\''+b.code+'\')">';
+      html += '<div class="bms-item">';
+      html += '<div onclick="abrirDash(\''+b.code+'\')" style="cursor:pointer;width:100%">';
       html += '<h3>'+b.nome+'</h3>';
       html += '<p>Código: '+b.code+'</p>';
       html += '<p style="margin-top:0"><span class="status '+(b.online?'on':'off')+'" style="padding:6px 12px;font-size:12px">'+(b.online?'Online':'Offline')+'</span></p>';
       if(b.voltage) html += '<p style="margin-top:0;color:#00ffff">'+b.voltage.toFixed(1)+'V</p>';
       html += '</div>';
+      html += '<button class="del" onclick="event.stopPropagation();removerBms(\''+b.code+'\',\''+b.nome+'\')">Remover</button>';
+      html += '</div>';
     }
     el.innerHTML = html;
+  });
+}
+
+function removerBms(code, nome){
+  if(!confirm(`Remover ${nome || code} da sua conta?\n\nA BMS ficará disponível para outros usuários.`)) return;
+
+  fetch(API+`?action=remove_bms&code=${code}`,{
+    method:'DELETE',
+    headers:{'Authorization':'Bearer '+TOKEN}
+  })
+.then(function(r){return r.json();})
+.then(function(d){
+    if(d.ok){
+      alert('BMS removida da sua conta!');
+      carregarLista();
+    }else{
+      alert('Erro: ' + d.error);
+    }
   });
 }
 
