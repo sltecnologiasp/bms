@@ -5,7 +5,8 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <title>SMART BMS</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<!-- GRÁFICO DESATIVADO - Para ativar descomente a linha abaixo -->
+<!-- <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script> -->
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 :root{--bg:#05070d;--cyan:#00ffff;--blue:#0080ff;--green:#00ff88;--red:#ff4444;--orange:#ffaa00}
@@ -26,7 +27,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:#fff;min-height:1
 .bar-wrap{margin-top:20px}
 .bar-label{display:flex;justify-content:space-between;margin-bottom:8px;font-size:14px;opacity:.7}
 .bar{height:16px;background:rgba(255,255,255,.06);border-radius:999px;overflow:hidden}
-.bar-fill{height:100%;width:0%;border-radius:999px;background:linear-gradient(90deg,#00ff88,#00ffff);transition:width.3s linear}
+.bar-fill{height:100%;width:0%;border-radius:999px;background:linear-gradient(90deg,#00ff88,#00ffff);transition:width.8s ease}
 .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:4px;width:100%;margin:0 0 4px 0}
 .grid.card{width:100%;height:110px;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:12px;margin:0}
 .label{font-size:10px;letter-spacing:1.5px;opacity:.6;text-transform:uppercase;text-align:center}
@@ -143,10 +144,15 @@ canvas{width:100%!important;height:280px!important}
 <div class="card"><div class="label">Corrente</div><div class="value" id="corr" style="color:#ffaa00">0A</div></div>
 <div class="card"><div class="label">Temperatura</div><div class="value" id="temp" style="color:#ff4444">0°C</div></div>
 </div>
+
+<!-- GRÁFICO DESATIVADO - Para ativar descomente o bloco abaixo -->
+<!--
 <div class="card chart-card">
 <div class="chart-title">Realtime Monitor</div>
 <canvas id="grafico"></canvas>
 </div>
+-->
+
 <div class="card">
 <div class="label">Células - Tensão Individual</div>
 <div class="diff">
@@ -346,9 +352,10 @@ function abrirDash(code){
   esconderTudo();
   document.getElementById('dash').classList.remove('hidden');
   document.getElementById('bms-titulo').textContent = code;
-  initChart();
+  // GRÁFICO DESATIVADO - Para ativar descomente a linha abaixo
+  // initChart();
   atualizar();
-  INT = setInterval(atualizar, 1000);
+  INT = setInterval(atualizar, 3000);
 }
 
 function voltar(){
@@ -386,6 +393,7 @@ function renderCelulas(cels){
   document.getElementById('celulas').innerHTML = html;
 }
 
+/* GRÁFICO DESATIVADO - Para ativar descomente a função abaixo
 function initChart(){
   if(CHART) CHART.destroy();
   var ctx = document.getElementById('grafico').getContext('2d');
@@ -412,6 +420,7 @@ function initChart(){
     }
   });
 }
+*/
 
 function atualizarGauge(soc){
   var gauge = document.getElementById('socGauge');
@@ -446,6 +455,8 @@ function atualizar(){
     st.className = 'status ' + (d.online?'on':'off');
     renderCelulas(d.cells);
     atualizarGauge(parseInt(d.soc || 0));
+
+    /* GRÁFICO DESATIVADO - Para ativar descomente o bloco abaixo
     var agora = new Date().toLocaleTimeString('pt-BR', {hour:'2-digit', minute:'2-digit', second:'2-digit'});
     LABEL_H.push(agora);
     VOLT_H.push(d.voltage || 0);
@@ -456,6 +467,7 @@ function atualizar(){
       CORR_H.shift();
     }
     if(CHART) CHART.update('none');
+    */
   });
 }
 
