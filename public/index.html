@@ -37,7 +37,7 @@ button{background:linear-gradient(90deg,var(--blue),var(--cyan));color:#fff;font
 .btn-sec{background:transparent;border:1px solid rgba(0,255,255,.3);color:var(--cyan)}
 .status{display:inline-flex;align-items:center;gap:10px;padding:14px 26px;border-radius:999px;font-weight:700}
 .on{background:rgba(0,255,136,.12);color:var(--green);border:1px solid rgba(0,255,136,.3)}
-.off{background:rgba(255,68,68,.12);color:var(--red);border:1px solid rgba(255,68,68,.3)}
+.off{background:rgba(255,68,68,.12);color:var(--red);border:1px solid rgba(255,68,.3)}
 .status-wrap{display:flex;justify-content:center;align-items:center;flex-direction:column;margin-top:14px}
 .bms-code{font-size:clamp(24px,6vw,32px);font-weight:900;margin-top:16px;letter-spacing:2px;background:linear-gradient(90deg,var(--cyan),var(--blue));-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-align:center}
 .diff{display:grid;grid-template-columns:repeat(auto-fit,minmax(70px,1fr));gap:8px;margin-top:18px}
@@ -149,7 +149,7 @@ canvas{width:100%!important;height:280px!important}
 <div class="card">
 <div class="label">Células - Tensão Individual</div>
 <div class="diff">
-<div class="diff-item">Min<div><span id="celMin" style="color:#00ff88">0.00V</span></div></div>
+<div class="diff-item">Min<div><span id="celMin" style="color:#00ff88">0.00V</span></div>
 <div class="diff-item">Max<div><span id="celMax" style="color:#ffaa00">0.00V</span></div></div>
 <div class="diff-item">Diferença<div><span id="celDif" style="color:#ff4444">0.00V</span></div></div>
 <div class="diff-item">Total<div><span id="celTot" style="color:#00ffff">0</span></div></div>
@@ -165,7 +165,7 @@ canvas{width:100%!important;height:280px!important}
 var API = '/api/bms';
 var TOKEN = localStorage.getItem('bms_token');
 var USER = null;
-var CODIGO = null;
+var CODIGO = localStorage.getItem('bms_codigo_ativo');
 var INT = null;
 var CHART = null;
 var VOLT_H = [];
@@ -175,7 +175,11 @@ var LABEL_H = [];
 try{USER = JSON.parse(localStorage.getItem('bms_user')||'null');}catch(e){}
 
 if(TOKEN && USER){
-  mostrarLista();
+  if(CODIGO){
+    abrirDash(CODIGO);
+  }else{
+    mostrarLista();
+  }
 }
 
 document.getElementById('bms-code').oninput = function(e){
@@ -184,6 +188,7 @@ document.getElementById('bms-code').oninput = function(e){
 };
 
 function mostrarLogin(){
+  localStorage.removeItem('bms_codigo_ativo');
   document.getElementById('cadastro').classList.add('hidden');
   document.getElementById('login').classList.remove('hidden');
 }
@@ -264,6 +269,7 @@ function cadastrar(){
 }
 
 function mostrarLista(){
+  localStorage.removeItem('bms_codigo_ativo');
   document.getElementById('login').classList.add('hidden');
   document.getElementById('cadastro').classList.add('hidden');
   document.getElementById('dash').classList.add('hidden');
@@ -327,6 +333,7 @@ function addBms(){
 
 function abrirDash(code){
   CODIGO = code;
+  localStorage.setItem('bms_codigo_ativo', code);
   document.getElementById('lista').classList.add('hidden');
   document.getElementById('dash').classList.remove('hidden');
   document.getElementById('bms-titulo').textContent = code;
@@ -337,6 +344,7 @@ function abrirDash(code){
 
 function voltar(){
   clearInterval(INT);
+  localStorage.removeItem('bms_codigo_ativo');
   document.getElementById('dash').classList.add('hidden');
   mostrarLista();
 }
@@ -443,6 +451,7 @@ function sair(){
   clearInterval(INT);
   localStorage.removeItem('bms_token');
   localStorage.removeItem('bms_user');
+  localStorage.removeItem('bms_codigo_ativo');
   location.reload();
 }
 </script>
