@@ -2,26 +2,20 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <title>SMART BMS</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 :root{--bg:#05070d;--cyan:#00ffff;--blue:#0080ff;--green:#00ff88;--red:#ff4444;--orange:#ffaa00}
-body{font-family:'Inter',sans-serif;background:var(--bg);color:#fff;overflow-x:hidden;min-height:100vh;position:relative;touch-action:pan-y;overscroll-behavior:contain;-webkit-text-size-adjust:100%;-webkit-font-smoothing:antialiased}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:#fff;overflow-x:hidden;min-height:100vh;position:relative}
 body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradient(0deg,rgba(255,255,255,.03) 0 1px,transparent 1px 40px),repeating-linear-gradient(90deg,rgba(255,255,255,.03) 0 1px,transparent 1px 40px);opacity:.4;pointer-events:none;z-index:0}
-#particles{position:fixed;inset:0;overflow:hidden;z-index:0;pointer-events:none}
-.particle{position:absolute;background:var(--cyan);border-radius:50%;opacity:.15;animation:float linear infinite}
-@keyframes float{0%{transform:translateY(100vh)}100%{transform:translateY(-100px)}}
 #login,#dash,#lista{position:relative;z-index:1;width:100%;min-height:100vh;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:12px}
-.title{font-size:clamp(42px,8vw,74px);font-weight:900;margin-bottom:16px;padding-top:10px;letter-spacing:3px;background:linear-gradient(90deg,var(--cyan),var(--blue));-webkit-background-clip:text;-webkit-text-fill-color:transparent;position:relative}
-.title::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.1),transparent);animation:shine 4s linear infinite}
-@keyframes shine{0%{transform:translateX(-100%)}100%{transform:translateX(100%)}}
+.title{font-size:clamp(42px,8vw,74px);font-weight:900;margin-bottom:16px;padding-top:10px;letter-spacing:3px;background:linear-gradient(90deg,var(--cyan),var(--blue));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
 .card{background:rgba(10,15,25,.92);border:1px solid rgba(0,255,255,.12);border-radius:16px;padding:16px;width:100%;position:relative;box-shadow:0 4px 20px rgba(0,0,0,.4)}
-#login.card,#cadastro.card{max-width:520px}
-#lista.card,#dash.card{max-width:1450px}
+#login .card,#cadastro .card{max-width:520px}
+#lista .card,#dash .card{max-width:1450px}
 #dash{max-width:1450px;margin:auto;padding-top:8px}
 .gauge-wrap{width:100%;max-width:1200px;margin:12px auto}
 .gauge-card{padding:30px 30px 40px;min-height:340px}
@@ -34,26 +28,24 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
 .bar-label{display:flex;justify-content:space-between;margin-bottom:8px;font-size:14px;opacity:.7}
 .bar{height:16px;background:rgba(255,255,255,.06);border-radius:999px;overflow:hidden}
 .bar-fill{height:100%;width:0%;border-radius:999px;background:linear-gradient(90deg,#00ff88,#00ffff);transition:width.8s ease}
-.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;width:100%;max-width:1300px;margin:12px auto;transform:translateZ(0)}
-.grid.card{width:100%;height:120px;min-width:0;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:14px;overflow:hidden;transform:translateZ(0);backface-visibility:hidden}
-.label{font-size:10px;letter-spacing:1.5px;opacity:.6;text-transform:uppercase;white-space:nowrap}
-.value{font-size:30px;font-weight:800;margin-top:8px;line-height:1;white-space:nowrap;width:7ch;text-align:center;font-variant-numeric:tabular-nums}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;width:100%;max-width:1300px;margin:12px auto}
+.grid .card{width:100%;height:120px;min-width:0;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:14px}
+.label{font-size:10px;letter-spacing:1.5px;opacity:.6;text-transform:uppercase}
+.value{font-size:30px;font-weight:800;margin-top:8px;line-height:1;width:7ch;text-align:center;font-variant-numeric:tabular-nums}
 input,button{width:100%;max-width:500px;padding:18px;border-radius:18px;border:none;outline:none;margin-top:16px;font-size:18px;transition:.2s}
 input{background:rgba(0,0,0,.5);color:#fff;font-family:monospace;letter-spacing:2px;border:1px solid rgba(0,255,255,.2)}
 input:focus{border-color:var(--cyan);box-shadow:0 0 15px rgba(0,255,255,.2)}
 button{background:linear-gradient(90deg,var(--blue),var(--cyan));color:#fff;font-weight:700;cursor:pointer;box-shadow:0 4px 20px rgba(0,255,255,.25)}
-button:hover{transform:translateY(-1px);box-shadow:0 6px 25px rgba(0,255,255,.35)}
 button:active{transform:translateY(0)}
 .btn-sec{background:transparent;border:1px solid rgba(0,255,255,.3);color:var(--cyan)}
 .status{display:inline-flex;align-items:center;gap:10px;padding:14px 26px;border-radius:999px;font-weight:700;margin-top:14px}
 .on{background:rgba(0,255,136,.12);color:var(--green);border:1px solid rgba(0,255,136,.3)}
 .off{background:rgba(255,68,68,.12);color:var(--red);border:1px solid rgba(255,68,68,.3)}
 .diff{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:18px}
-.diff-item{padding:12px 8px;border-radius:14px;background:rgba(255,255,255,.03);min-width:0;text-align:center}
-.diff-item span{display:block;margin-top:6px;font-size:22px;font-weight:800;width:6ch;margin-left:auto;margin-right:auto;text-align:center;font-variant-numeric:tabular-nums}
+.diff-item{padding:12px 8px;border-radius:14px;background:rgba(255,255,255,.03);text-align:center}
+.diff-item span{display:block;margin-top:6px;font-size:22px;font-weight:800;width:6ch;margin:auto;text-align:center;font-variant-numeric:tabular-nums}
 .cells{display:grid;grid-template-columns:repeat(auto-fill,minmax(95px,1fr));gap:10px;margin-top:20px}
 .cell{background:rgba(0,0,0,.4);border-radius:18px;padding:14px;transition:.2s;border:1px solid rgba(255,255,255,.05)}
-.cell:hover{transform:scale(1.03)}
 .cell-num{font-size:11px;opacity:.5;margin-bottom:6px}
 .cell-val{font-size:20px;font-weight:700;width:7ch;text-align:center;font-variant-numeric:tabular-nums}
 .cell.ok{border-color:rgba(0,255,136,.25)}
@@ -61,24 +53,23 @@ button:active{transform:translateY(0)}
 .cell.crit{border-color:rgba(255,68,68,.25)}
 .chart-card{width:100%;max-width:1200px;margin:12px auto;padding:24px;min-height:380px}
 .chart-title{margin-bottom:16px;font-size:14px;letter-spacing:2px;opacity:.7;text-transform:uppercase}
-canvas{width:100%!important;height:320px!important;touch-action:none}
+canvas{width:100%!important;height:320px!important}
 .logout{margin-top:24px;background:rgba(255,68,68,.08);border:1px solid rgba(255,68,68,.2)}
 .hidden{display:none!important}
 .bms-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;margin-top:20px}
 .bms-item{background:rgba(0,255,255,.05);border:1px solid rgba(0,255,255,.2);border-radius:16px;padding:20px;cursor:pointer;transition:.2s}
-.bms-item:hover{border-color:var(--cyan);transform:translateY(-2px);box-shadow:0 8px 30px rgba(0,255,255,.2)}
+.bms-item:active{border-color:var(--cyan);transform:scale(0.98)}
 .bms-item h3{color:var(--cyan);font-size:20px;margin-bottom:8px}
 .bms-item p{color:#888;font-size:13px;margin:4px 0}
 .header-bar{width:100%;max-width:1450px;display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
 .user-info{color:#888;font-size:14px}
-@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
-@media(max-width:520px){.title{font-size:38px}.value{font-size:22px}.gauge{width:180px;height:180px}.gauge-value{font-size:44px}.gauge-card{min-height:280px;padding:20px 20px 30px}.grid.card{padding:8px;height:100px}.label{font-size:8px}.diff-item span{font-size:18px}}
+#error-box{background:rgba(255,0,0,.1);border:2px solid #ff4444;border-radius:12px;padding:16px;margin-top:16px;color:#ff4444;font-size:14px;word-break:break-word}
+#debug{background:#000;border:1px solid #0f0;border-radius:8px;padding:12px;margin-top:12px;font-size:11px;color:#0f0;white-space:pre-wrap;word-break:break-all;max-height:200px;overflow-y:auto}
+@media(max-width:520px){.title{font-size:38px}.value{font-size:22px}.gauge{width:180px;height:180px}.gauge-value{font-size:44px}.gauge-card{min-height:280px;padding:20px 20px 30px}.grid .card{padding:8px;height:100px}.label{font-size:8px}.diff-item span{font-size:18px}}
 </style>
 </head>
 
 <body>
-<div id="particles"></div>
-
 <div id="login">
 <div class="title">SMART BMS</div>
 <div class="card">
@@ -88,7 +79,8 @@ canvas{width:100%!important;height:320px!important;touch-action:none}
 <input id="senha" type="password" placeholder="******">
 <button onclick="login()">Entrar</button>
 <button class="btn-sec" onclick="showCadastro()">Criar Conta</button>
-<p id="error" style="color:#ff4444;margin-top:12px;display:none;"></p>
+<div id="error-box" class="hidden"></div>
+<div id="debug"></div>
 </div>
 </div>
 
@@ -103,6 +95,7 @@ canvas{width:100%!important;height:320px!important;touch-action:none}
 <input id="cad-senha" type="password" placeholder="******">
 <button onclick="cadastrar()">Cadastrar</button>
 <button class="btn-sec" onclick="showLogin()">Voltar</button>
+<div id="error-cad" class="hidden" style="background:rgba(255,0,0,.1);border:2px solid #ff4444;border-radius:12px;padding:16px;margin-top:16px;color:#ff4444;font-size:14px"></div>
 </div>
 </div>
 
@@ -111,19 +104,16 @@ canvas{width:100%!important;height:320px!important;touch-action:none}
   <div class="title" style="font-size:32px;margin:0">SMART BMS</div>
   <div class="user-info">Olá, <span id="user-name">--</span></div>
 </div>
-
 <div class="card" style="max-width:1450px">
   <div class="label">Adicionar BMS</div>
   <input id="bms-code" placeholder="SL00000000" maxlength="10" style="margin-top:8px">
   <input id="bms-nome" placeholder="Nome da BMS (opcional)" style="margin-top:12px">
   <button onclick="addBms()">Adicionar BMS</button>
 </div>
-
 <div class="card" style="max-width:1450px;margin-top:16px">
   <div class="label">Minhas BMS</div>
   <div id="bms-list" class="bms-list"></div>
 </div>
-
 <button class="logout" onclick="logout()">Sair</button>
 </div>
 
@@ -132,7 +122,6 @@ canvas{width:100%!important;height:320px!important;touch-action:none}
   <div class="title" style="font-size:32px;margin:0" id="bms-title">--</div>
   <button class="btn-sec" onclick="voltarLista()" style="max-width:150px;margin:0">← Voltar</button>
 </div>
-
 <div class="gauge-wrap">
 <div class="card gauge-card">
 <div class="gauge" id="socGauge">
@@ -150,14 +139,12 @@ canvas{width:100%!important;height:320px!important;touch-action:none}
 </div>
 </div>
 </div>
-
 <div class="card" style="max-width:1200px;margin:12px auto">
 <div class="label">Status</div>
 <div style="margin-top:12px">
 <span id="connStatus" class="status off">Offline</span>
 </div>
 </div>
-
 <div class="grid">
 <div class="card">
 <div class="label">SOC</div>
@@ -176,12 +163,10 @@ canvas{width:100%!important;height:320px!important;touch-action:none}
 <div class="value" id="temp" style="color:#ff4444">0°C</div>
 </div>
 </div>
-
 <div class="card chart-card">
 <div class="chart-title">Realtime Monitor</div>
 <canvas id="mainChart"></canvas>
 </div>
-
 <div class="card" style="max-width:1200px;margin:12px auto">
 <div class="label">Células - Tensão Individual</div>
 <div class="diff">
@@ -202,26 +187,22 @@ let currentCode = null;
 let token = localStorage.getItem('bms_token');
 let userData = JSON.parse(localStorage.getItem('bms_user')||'null');
 
-function createParticles(){
-  if(window.innerWidth < 768) return;
-  const container = document.getElementById('particles');
-  const maxParticles = 6;
-  setInterval(() => {
-    if(container.children.length >= maxParticles) return;
-    const p = document.createElement('div');
-    p.className = 'particle';
-    const size = Math.random() * 2 + 1;
-    p.style.width = size + 'px';
-    p.style.height = size + 'px';
-    p.style.left = Math.random() * 100 + '%';
-    p.style.animationDuration = (Math.random() * 8 + 12) + 's';
-    container.appendChild(p);
-    setTimeout(() => p.remove(), 20000);
-  }, 2500);
+function log(msg){
+  const d = document.getElementById('debug');
+  if(d) {
+    d.textContent += msg + '\n';
+    d.scrollTop = d.scrollHeight;
+  }
 }
-createParticles();
+
+function showError(msg){
+  const e = document.getElementById('error-box');
+  e.textContent = msg;
+  e.classList.remove('hidden');
+}
 
 if(token && userData){
+  log('Token encontrado, carregando lista...');
   showLista();
 }
 
@@ -243,35 +224,39 @@ function showCadastro(){
 async function login(){
   const email = document.getElementById('email').value.trim();
   const senha = document.getElementById('senha').value;
-  const errorEl = document.getElementById('error');
-  errorEl.style.display='none';
+  document.getElementById('error-box').classList.add('hidden');
+
+  log('Tentando login: ' + email);
 
   if(!email ||!senha){
-    errorEl.textContent = 'Preenche e-mail e senha';
-    errorEl.style.display='block';
+    showError('Preenche e-mail e senha');
     return;
   }
 
   try{
+    log('Chamando API: ' + API + '?action=login_user');
     const r = await fetch(API + '?action=login_user', {
       method:'POST',
       headers:{'Content-Type':'application/json'},
       body:JSON.stringify({email, senha})
     });
+    log('Status: ' + r.status);
     const d = await r.json();
+    log('Resposta: ' + JSON.stringify(d));
+    
     if(d.ok && d.token){
       token = d.token;
       userData = {nome: d.nome, email: d.email};
       localStorage.setItem('bms_token', token);
       localStorage.setItem('bms_user', JSON.stringify(userData));
+      log('Login OK, abrindo lista...');
       showLista();
     }else{
-      errorEl.textContent = d.error || 'Erro ao fazer login';
-      errorEl.style.display='block';
+      showError(d.error || 'Erro ao fazer login');
     }
   }catch(e){
-    errorEl.textContent = 'Erro de conexão: ' + e.message;
-    errorEl.style.display='block';
+    log('ERRO: ' + e.message);
+    showError('Erro de conexão: ' + e.message);
   }
 }
 
@@ -279,9 +264,12 @@ async function cadastrar(){
   const nome = document.getElementById('cad-nome').value.trim();
   const email = document.getElementById('cad-email').value.trim();
   const senha = document.getElementById('cad-senha').value;
+  const e = document.getElementById('error-cad');
+  e.classList.add('hidden');
 
   if(!nome ||!email ||!senha){
-    alert('Preenche todos os campos');
+    e.textContent = 'Preenche todos os campos';
+    e.classList.remove('hidden');
     return;
   }
 
@@ -298,10 +286,12 @@ async function cadastrar(){
       document.getElementById('email').value = email;
       document.getElementById('senha').value = senha;
     }else{
-      alert('Erro: ' + d.error);
+      e.textContent = 'Erro: ' + d.error;
+      e.classList.remove('hidden');
     }
-  }catch(e){
-    alert('Erro: ' + e.message);
+  }catch(e2){
+    e.textContent = 'Erro: ' + e2.message;
+    e.classList.remove('hidden');
   }
 }
 
@@ -321,13 +311,11 @@ async function carregarLista(){
     });
     if(r.status===401){ logout(); return; }
     const lista = await r.json();
-
     const el = document.getElementById('bms-list');
     if(!lista.length){
       el.innerHTML = '<p style="grid-column:1/-1;text-align:center;color:#666;padding:40px">Nenhuma BMS adicionada ainda</p>';
       return;
     }
-
     el.innerHTML = lista.map(b => `
       <div class="bms-item" onclick="abrirDash('${b.code}')">
         <h3>${b.nome}</h3>
@@ -348,19 +336,14 @@ async function carregarLista(){
 async function addBms(){
   const code = document.getElementById('bms-code').value.trim();
   const nome = document.getElementById('bms-nome').value.trim();
-
   if(!code || code.length!== 10){
     alert('Código inválido. Use SL + 8 números');
     return;
   }
-
   try{
     const r = await fetch(API + '?action=add_bms', {
       method:'POST',
-      headers:{
-        'Content-Type':'application/json',
-        'Authorization':'Bearer '+token
-      },
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},
       body:JSON.stringify({code, nome: nome || code})
     });
     const d = await r.json();
@@ -398,30 +381,21 @@ function renderCells(cells){
     document.getElementById('cells').innerHTML = '<div style="grid-column:1/-1;opacity:.4;padding:20px">Sem dados das células</div>';
     return;
   }
-
   const vals = cells.map(c => parseFloat(c)).filter(v => v > 0);
   if(vals.length === 0) return;
-
   const min = Math.min(...vals);
   const max = Math.max(...vals);
   const diff = max - min;
-
   document.getElementById('cellMin').textContent = min.toFixed(3)+'V';
   document.getElementById('cellMax').textContent = max.toFixed(3)+'V';
   document.getElementById('cellDiff').textContent = diff.toFixed(3)+'V';
   document.getElementById('cellCount').textContent = cells.length;
-
   document.getElementById('cells').innerHTML = cells.map((v,i)=>{
     const val = parseFloat(v);
     let cls = 'ok';
     if(val < 3.2 || val > 4.2) cls = 'crit';
     else if(val < 3.4 || val > 4.15) cls = 'warn';
-    return `
-      <div class="cell ${cls}">
-        <div class="cell-num">C${i+1}</div>
-        <div class="cell-val">${val.toFixed(3)}</div>
-      </div>
-    `;
+    return `<div class="cell ${cls}"><div class="cell-num">C${i+1}</div><div class="cell-val">${val.toFixed(3)}</div></div>`;
   }).join('');
 }
 
@@ -437,45 +411,16 @@ function initChart(){
     data:{
       labels:labelsHistory,
       datasets:[
-        {
-          label:'Tensão',
-          data:voltageHistory,
-          borderColor:'#00ffff',
-          backgroundColor:'rgba(0,255,255,.08)',
-          tension:.4,
-          fill:true,
-          borderWidth:2
-        },
-        {
-          label:'Corrente',
-          data:currentHistory,
-          borderColor:'#ffaa00',
-          backgroundColor:'rgba(255,170,0,.08)',
-          tension:.4,
-          fill:true,
-          borderWidth:2
-        }
+        {label:'Tensão',data:voltageHistory,borderColor:'#00ffff',backgroundColor:'rgba(0,255,255,.08)',tension:.4,fill:true,borderWidth:2},
+        {label:'Corrente',data:currentHistory,borderColor:'#ffaa00',backgroundColor:'rgba(255,170,0,.08)',tension:.4,fill:true,borderWidth:2}
       ]
     },
     options:{
-      responsive:true,
-      maintainAspectRatio:false,
-      animation:false,
-      elements:{
-        point:{radius:0}
-      },
-      plugins:{
-        legend:{labels:{color:'#ffffff'}}
-      },
+      responsive:true,maintainAspectRatio:false,animation:false,elements:{point:{radius:0}},
+      plugins:{legend:{labels:{color:'#ffffff'}}},
       scales:{
-        x:{
-          ticks:{color:'#aaa'},
-          grid:{color:'rgba(255,255,255,.05)'}
-        },
-        y:{
-          ticks:{color:'#aaa'},
-          grid:{color:'rgba(255,255,255,.05)'}
-        }
+        x:{ticks:{color:'#aaa'},grid:{color:'rgba(255,255,255,.05)'}},
+        y:{ticks:{color:'#aaa'},grid:{color:'rgba(255,255,255,.05)'}}
       }
     }
   });
@@ -495,12 +440,30 @@ function updateGauge(soc){
 
 async function update(){
   if(!currentCode) return;
-
   try{
     const r = await fetch(`${API}?action=data&code=${currentCode}`, {
       headers:{'Authorization':'Bearer '+token}
     });
     if(r.status===401){ logout(); return; }
     if(!r.ok) return;
-
-    const
+    const d = await r.json();
+    document.getElementById('soc').textContent = (d.soc?.toFixed(0)||0)+'%';
+    document.getElementById('voltage').textContent = (d.voltage?.toFixed(2)||0)+'V';
+    document.getElementById('current').textContent = (d.current?.toFixed(1)||0)+'A';
+    document.getElementById('temp').textContent = (d.temp?.toFixed(1)||0)+'°C';
+    const connEl = document.getElementById('connStatus');
+    connEl.textContent = d.online?'Online':'Offline';
+    connEl.className = 'status ' + (d.online?'on':'off');
+    renderCells(d.cells);
+    updateGauge(parseInt(d.soc || 0));
+    const now = new Date().toLocaleTimeString('pt-BR', {hour:'2-digit', minute:'2-digit', second:'2-digit'});
+    labelsHistory.push(now);
+    voltageHistory.push(d.voltage || 0);
+    currentHistory.push(d.current || 0);
+    if(labelsHistory.length > 15){
+      labelsHistory.shift();
+      voltageHistory.shift();
+      currentHistory.shift();
+    }
+    if(chart) chart.update('none');
+  }
