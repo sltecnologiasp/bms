@@ -317,6 +317,7 @@ function addBms(){
     return;
   }
 
+  // Verifica se já existe na conta do usuário
   fetch(API + '?action=user_bms', {
     headers:{'Authorization':'Bearer '+TOKEN}
   })
@@ -330,6 +331,7 @@ function addBms(){
       return;
     }
 
+    // Tenta adicionar - backend valida se BMS existe no sistema
     fetch(API + '?action=add_bms', {
       method:'POST',
       headers:{'Content-Type':'application/json','Authorization':'Bearer '+TOKEN},
@@ -343,7 +345,16 @@ function addBms(){
         document.getElementById('bms-nome').value = '';
         carregarLista();
       }else{
-        alert('Erro: ' + d.error);
+        // Mensagens específicas do backend
+        if(d.error === 'not_found'){
+          alert('BMS não encontrada no sistema. Verifique o código ou fale com o suporte.');
+        }else if(d.error === 'already_claimed'){
+          alert('Essa BMS já está vinculada a outra conta.');
+        }else{
+          alert('Erro: ' + d.error);
+        }
+        document.getElementById('bms-code').value = '';
+        document.getElementById('bms-nome').value = '';
       }
     });
   });
