@@ -1,1 +1,351 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 
+<title>ESP32 SIMULATOR</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
+
+<style>
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:'Inter',sans-serif;
+}
+
+body{
+background:#05070d;
+color:#fff;
+padding:20px;
+min-height:100vh;
+}
+
+.title{
+font-size:42px;
+font-weight:900;
+margin-bottom:20px;
+background:linear-gradient(90deg,#00ffff,#0080ff);
+-webkit-background-clip:text;
+-webkit-text-fill-color:transparent;
+}
+
+.card{
+background:rgba(255,255,255,.04);
+border:1px solid rgba(0,255,255,.15);
+border-radius:24px;
+padding:20px;
+margin-bottom:20px;
+}
+
+.grid{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+gap:15px;
+}
+
+.label{
+font-size:12px;
+opacity:.6;
+margin-bottom:8px;
+text-transform:uppercase;
+}
+
+.value{
+font-size:36px;
+font-weight:800;
+}
+
+input{
+width:100%;
+padding:16px;
+border:none;
+outline:none;
+border-radius:16px;
+background:#0b1220;
+color:#fff;
+font-size:18px;
+margin-top:8px;
+}
+
+button{
+width:100%;
+padding:16px;
+border:none;
+border-radius:16px;
+margin-top:15px;
+font-size:18px;
+font-weight:700;
+cursor:pointer;
+background:linear-gradient(90deg,#0080ff,#00ffff);
+color:#fff;
+}
+
+.cells{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(90px,1fr));
+gap:10px;
+margin-top:20px;
+}
+
+.cell{
+background:#0b1220;
+padding:12px;
+border-radius:16px;
+text-align:center;
+}
+
+.cell input{
+text-align:center;
+font-size:16px;
+padding:10px;
+margin-top:8px;
+}
+
+.status{
+padding:12px 18px;
+border-radius:999px;
+display:inline-block;
+font-weight:700;
+margin-top:10px;
+}
+
+.on{
+background:rgba(0,255,136,.1);
+border:1px solid rgba(0,255,136,.3);
+color:#00ff88;
+}
+
+.off{
+background:rgba(255,68,68,.1);
+border:1px solid rgba(255,68,68,.3);
+color:#ff4444;
+}
+
+</style>
+</head>
+<body>
+
+<div class="title">
+ESP32 WEB PREMIUM
+</div>
+
+<div class="card">
+
+<div class="label">
+Código BMS
+</div>
+
+<input id="code" value="SL000000000001">
+
+<div class="grid" style="margin-top:20px">
+
+<div>
+<div class="label">SOC</div>
+<input id="soc" type="number" value="85">
+</div>
+
+<div>
+<div class="label">Tensão</div>
+<input id="voltage" type="number" step="0.1" value="53.4">
+</div>
+
+<div>
+<div class="label">Corrente</div>
+<input id="current" type="number" step="0.1" value="12.5">
+</div>
+
+<div>
+<div class="label">Temperatura</div>
+<input id="temp" type="number" step="0.1" value="31.2">
+</div>
+
+</div>
+
+<div class="label" style="margin-top:25px">
+Células
+</div>
+
+<div id="cells" class="cells"></div>
+
+<button onclick="toggleSim()">
+START / STOP SIMULAÇÃO
+</button>
+
+<div id="status" class="status off">
+DESCONECTADO
+</div>
+
+</div>
+
+<script>
+
+const API = '/api/bms?action=update';
+
+let running = false;
+let interval;
+
+/* =========================
+   CREATE CELLS
+========================= */
+
+const cellsDiv =
+document.getElementById('cells');
+
+for(let i=0;i<16;i++){
+
+const div =
+document.createElement('div');
+
+div.className='cell';
+
+div.innerHTML=`
+<div>C${i+1}</div>
+<input
+type="number"
+step="0.001"
+value="${(3.320 + Math.random()*0.02).toFixed(3)}"
+id="cell${i}"
+>
+`;
+
+cellsDiv.appendChild(div);
+
+}
+
+/* =========================
+   SIMULATION
+========================= */
+
+function toggleSim(){
+
+running = !running;
+
+const status =
+document.getElementById('status');
+
+if(running){
+
+status.className='status on';
+status.textContent='ESP32 ONLINE';
+
+sendData();
+
+interval =
+setInterval(sendData,3000);
+
+}else{
+
+clearInterval(interval);
+
+status.className='status off';
+status.textContent='DESCONECTADO';
+
+}
+
+}
+
+/* =========================
+   SEND DATA
+========================= */
+
+async function sendData(){
+
+const cells = [];
+
+for(let i=0;i<16;i++){
+
+let val =
+parseFloat(
+document.getElementById('cell'+i).value
+);
+
+val += (Math.random()-0.5)*0.005;
+
+document.getElementById('cell'+i).value =
+val.toFixed(3);
+
+cells.push(val);
+
+}
+
+let soc =
+parseFloat(document.getElementById('soc').value);
+
+soc += (Math.random()-0.5)*0.3;
+
+soc = Math.max(0,Math.min(100,soc));
+
+document.getElementById('soc').value =
+soc.toFixed(0);
+
+let voltage =
+parseFloat(document.getElementById('voltage').value);
+
+voltage += (Math.random()-0.5)*0.2;
+
+document.getElementById('voltage').value =
+voltage.toFixed(2);
+
+let current =
+parseFloat(document.getElementById('current').value);
+
+current += (Math.random()-0.5)*2;
+
+document.getElementById('current').value =
+current.toFixed(1);
+
+let temp =
+parseFloat(document.getElementById('temp').value);
+
+temp += (Math.random()-0.5)*0.5;
+
+document.getElementById('temp').value =
+temp.toFixed(1);
+
+const payload = {
+
+code:
+document.getElementById('code').value,
+
+soc,
+voltage,
+current,
+temp,
+cells
+
+};
+
+try{
+
+const r = await fetch(API,{
+
+method:'POST',
+
+headers:{
+'Content-Type':'application/json'
+},
+
+body:JSON.stringify(payload)
+
+});
+
+const d = await r.json();
+
+console.log(d);
+
+}catch(e){
+
+console.log(e);
+
+}
+
+}
+
+</script>
+
+</body>
+</html>
