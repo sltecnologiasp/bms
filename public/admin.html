@@ -69,7 +69,7 @@ button.view{background:rgba(0,255,255,.1);border:1px solid rgba(0,255,255,.4);pa
   <div class="section-title">Todas as BMS do Sistema</div>
   <div class="card card-cadastro">
     <div class="label">Cadastrar BMS no Sistema</div>
-    <input id="code" placeholder="SL82576655" maxlength="10">
+    <input id="code" placeholder="SL000000000000" maxlength="14">
     <button onclick="cad()">Cadastrar BMS Master</button>
     <p id="msg" style="text-align:center;margin-top:8px"></p>
   </div>
@@ -142,7 +142,7 @@ function authHeaders(){
 
 document.getElementById('code').oninput = e => {
   if(!e.target.value.startsWith('SL')) e.target.value = 'SL';
-  e.target.value = 'SL' + e.target.value.slice(2).replace(/[^0-9]/g,'').slice(0,8);
+  e.target.value = 'SL' + e.target.value.slice(2).replace(/[^0-9]/g,'').slice(0,12);
 };
 
 async function cad(){
