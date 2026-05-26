@@ -3,7 +3,7 @@ export async function onRequest({ request, env }) {
   const url = new URL(request.url);
   const action = url.searchParams.get('action');
   const token = request.headers.get('Authorization')?.replace('Bearer ', '');
-  const headers = { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Headers': 'Authorization, Content-Type', 'Access-Control-Allow-Methods': 'GET, POST, DELETE, OPTIONS' };
+  const headers = { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Headers': 'Authorization, Content-Type', 'Access-Control-Allow-Methods': 'GET, POST, DELETE, OPTIONS, PUT' };
 
   if (request.method === 'OPTIONS') return new Response(null, { headers });
   const json = (data, status = 200) => new Response(JSON.stringify(data), { status, headers });
@@ -115,6 +115,64 @@ export async function onRequest({ request, env }) {
       const code = url.searchParams.get('code');
       await db.prepare('DELETE FROM bms WHERE code=?').bind(code).run();
       await db.prepare('DELETE FROM user_bms WHERE bms_code=?').bind(code).run();
+      return json({ ok: true });
+    }
+
+    // ========== ADMIN: LISTAR USUÁRIOS ==========
+    if (action === 'listar_users') {
+      if (token!== 'admin_ok') return json({ ok: false }, 401);
+      const { results } = await db.prepare(`
+        SELECT u.id, u.nome, u.email, u.created_at,
+               COUNT(ub.bms_code) as total_bms
+        FROM users u
+        LEFT JOIN user_bms ub ON u.id = ub.user_id
+        GROUP BY u.id
+        ORDER BY u.created_at DESC
+      `).all();
+      return json(results);
+    }
+
+    // ========== ADMIN: BMS DE UM USUÁRIO ==========
+    if (action === 'user_bms_admin') {
+      if (token!== 'admin_ok') return json({ ok: false }, 401);
+      const userId = url.searchParams.get('user_id');
+      const { results } = await db.prepare(`
+        SELECT ub.bms_code as code, ub.bms_nome as nome, b.online, b.updated_at
+        FROM user_bms ub
+        LEFT JOIN bms b ON ub.bms_code = b.code
+        WHERE ub.user_id =?
+      `).bind(userId).all();
+      return json(results);
+    }
+
+    // ========== ADMIN: VINCULAR BMS ==========
+    if (action === 'vincular_bms' && request.method === 'POST') {
+      if (token!== 'admin_ok') return json({ ok: false }, 401);
+      const { user_id, code, nome } = await request.json();
+      if (!/^SL\d{8}$/.test(code)) return json({ ok: false, error: 'Código inválido' });
+      try {
+        await db.prepare('INSERT INTO user_bms (user_id,bms_code,bms_nome) VALUES (?,?,?)').bind(user_id, code, nome).run();
+        await db.prepare('INSERT OR IGNORE INTO bms (code,nome) VALUES (?,?)').bind(code, nome).run();
+        return json({ ok: true });
+      } catch (e) {
+        return json({ ok: false, error: 'BMS já vinculada a este usuário' }, 400);
+      }
+    }
+
+    // ========== ADMIN: DESVINCULAR BMS ==========
+    if (action === 'desvincular_bms' && request.method === 'DELETE') {
+      if (token!== 'admin_ok') return json({ ok: false }, 401);
+      const user_id = url.searchParams.get('user_id');
+      const code = url.searchParams.get('code');
+      await db.prepare('DELETE FROM user_bms WHERE user_id=? AND bms_code=?').bind(user_id, code).run();
+      return json({ ok: true });
+    }
+
+    // ========== ADMIN: EDITAR NOME BMS ==========
+    if (action === 'editar_nome_bms' && request.method === 'PUT') {
+      if (token!== 'admin_ok') return json({ ok: false }, 401);
+      const { user_id, code, nome } = await request.json();
+      await db.prepare('UPDATE user_bms SET bms_nome=? WHERE user_id=? AND bms_code=?').bind(nome, user_id, code).run();
       return json({ ok: true });
     }
 
