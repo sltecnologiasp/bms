@@ -11,7 +11,6 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
-
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 :root{--bg:#05070d;--cyan:#00ffff;--blue:#0080ff;--green:#00ff88;--red:#ff4444;--orange:#ffaa00}
@@ -51,11 +50,11 @@ button.danger{background:rgba(255,68,68,.1);border:1px solid rgba(255,68,68,.3);
 .bar{height:16px;background:rgba(255,255,255,.06);border-radius:999px;overflow:hidden}
 .bar-fill{height:100%;width:0%;border-radius:999px;background:linear-gradient(90deg,#00ff88,#00ffff);transition:width.8s ease}
 .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;width:100%;max-width:1300px;margin:12px auto;transform:translateZ(0)}
-.grid .card{width:100%;height:120px;min-width:0;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:14px;overflow:hidden;transform:translateZ(0);backface-visibility:hidden}
+.grid.card{width:100%;height:120px;min-width:0;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:14px;overflow:hidden;transform:translateZ(0);backface-visibility:hidden}
 .value{font-size:30px;font-weight:800;margin-top:8px;line-height:1;white-space:nowrap;width:7ch;text-align:center;font-variant-numeric:tabular-nums}
 .status{display:inline-flex;align-items:center;gap:10px;padding:14px 26px;border-radius:999px;font-weight:700;margin-top:14px}
 .on{background:rgba(0,255,136,.12);color:var(--green);border:1px solid rgba(0,255,136,.3)}
-.off{background:rgba(255,68,68,.12);color:var(--red);border:1px solid rgba(255,68,.3)}
+.off{background:rgba(255,68,68,.12);color:var(--red);border:1px solid rgba(255,68,68,.3)}
 .diff{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:18px}
 .diff-item{padding:12px 8px;border-radius:14px;background:rgba(255,255,255,.03);min-width:0;text-align:center}
 .diff-item span{display:block;margin-top:6px;font-size:22px;font-weight:800;width:6ch;margin-left:auto;margin-right:auto;text-align:center;font-variant-numeric:tabular-nums}
@@ -77,14 +76,11 @@ canvas{width:100%!important;height:320px!important;touch-action:none}
 .bms-item.active{border-color:var(--cyan);background:rgba(0,255,255,.05)}
 .bms-item.offline{opacity:.4;border-color:rgba(255,68,68,.2)}
 .hidden{display:none!important}
-@media(max-width:520px){.title{font-size:38px}.value{font-size:22px}.gauge{width:180px;height:180px}.gauge-value{font-size:44px}.gauge-card{min-height:280px;padding:20px 20px 30px}.grid .card{padding:8px;height:100px}.label{font-size:8px}.diff-item span{font-size:18px}.grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:520px){.title{font-size:38px}.value{font-size:22px}.gauge{width:180px;height:180px}.gauge-value{font-size:44px}.gauge-card{min-height:280px;padding:20px 20px 30px}.grid.card{padding:8px;height:100px}.label{font-size:8px}.diff-item span{font-size:18px}.grid{grid-template-columns:repeat(2,1fr)}}
 </style>
 </head>
-
 <body>
 <div id="particles"></div>
-
-<!-- TELA LOGIN -->
 <div id="login" class="tela">
   <div class="title">SMART BMS</div>
   <div class="card">
@@ -96,8 +92,6 @@ canvas{width:100%!important;height:320px!important;touch-action:none}
     <p id="loginError" class="error" style="display:none;"></p>
   </div>
 </div>
-
-<!-- TELA CADASTRO -->
 <div id="cadastro" class="tela hidden">
   <div class="title">SMART BMS</div>
   <div class="card">
@@ -111,8 +105,6 @@ canvas{width:100%!important;height:320px!important;touch-action:none}
     <p id="cadMsg" style="display:none;"></p>
   </div>
 </div>
-
-<!-- TELA SELEÇÃO BMS -->
 <div id="selectBMS" class="tela hidden">
   <div class="title">SMART BMS</div>
   <div class="card card-wide">
@@ -129,8 +121,6 @@ canvas{width:100%!important;height:320px!important;touch-action:none}
     <div id="bmsList" class="bms-list"></div>
   </div>
 </div>
-
-<!-- TELA DASHBOARD -->
 <div id="dash" class="tela hidden">
   <div class="title">SMART BMS</div>
   <button class="secondary" style="max-width:300px;margin:0 auto 20px;" onclick="voltarLista()">← Voltar para Lista</button>
@@ -173,7 +163,6 @@ canvas{width:100%!important;height:320px!important;touch-action:none}
     <div id="cells" class="cells"></div>
   </div>
 </div>
-
 <script>
 function createParticles(){
   if(window.innerWidth<768)return;
@@ -181,14 +170,11 @@ function createParticles(){
   setInterval(()=>{if(c.children.length>=6)return;const p=document.createElement('div');p.className='particle';const s=Math.random()*2+1;p.style.width=s+'px';p.style.height=s+'px';p.style.left=Math.random()*100+'%';p.style.animationDuration=(Math.random()*8+12)+'s';c.appendChild(p);setTimeout(()=>p.remove(),20000)},2500);
 }
 createParticles();
-
 const API = '/api/bms';
 let userToken = localStorage.getItem('bms_token');
 let currentBMS = null;
 let interval, chart, lastDataHash = '', offlineTimer, isOffline = false;
-
 if(userToken) checkSession();
-
 async function checkSession(){
   try{
     const r = await fetch(API+'?action=user_bms', {headers:{'Authorization':'Bearer '+userToken}});
@@ -198,19 +184,16 @@ async function checkSession(){
     }else logout();
   }catch(e){logout()}
 }
-
 function showLogin(){
   document.getElementById('cadastro').classList.add('hidden');
   document.getElementById('selectBMS').classList.add('hidden');
   document.getElementById('dash').classList.add('hidden');
   document.getElementById('login').classList.remove('hidden');
 }
-
 function showCadastro(){
   document.getElementById('login').classList.add('hidden');
   document.getElementById('cadastro').classList.remove('hidden');
 }
-
 async function cadastrar(){
   const nome=document.getElementById('cadNome').value.trim();
   const email=document.getElementById('cadEmail').value.trim();
@@ -227,7 +210,6 @@ async function cadastrar(){
     else{msg.textContent=d.error||'Erro';msg.className='error';msg.style.display='block'}
   }catch(e){msg.textContent='Erro de conexão';msg.className='error';msg.style.display='block'}
 }
-
 async function login(){
   const email=document.getElementById('loginEmail').value.trim();
   const senha=document.getElementById('loginSenha').value;
@@ -240,13 +222,11 @@ async function login(){
     else{err.textContent=d.error||'Erro';err.style.display='block'}
   }catch(e){err.textContent='Erro de conexão';err.style.display='block'}
 }
-
 function logout(){
   clearInterval(interval);clearTimeout(offlineTimer);
   localStorage.removeItem('bms_token');localStorage.removeItem('bms_user_data');
   userToken=null;currentBMS=null;location.reload();
 }
-
 function showSelectBMS(nome){
   document.getElementById('login').classList.add('hidden');
   document.getElementById('cadastro').classList.add('hidden');
@@ -255,9 +235,7 @@ function showSelectBMS(nome){
   if(nome)document.getElementById('userName').textContent=nome;
   loadBMSList();
 }
-
 document.getElementById('bmsCode').oninput=e=>{if(!e.target.value.startsWith('SL'))e.target.value='SL';e.target.value='SL'+e.target.value.slice(2).replace(/[^0-9]/g,'').slice(0,8)};
-
 async function addBMS(){
   const code=document.getElementById('bmsCode').value.trim();
   const nome=document.getElementById('bmsNome').value.trim();
@@ -271,108 +249,10 @@ async function addBMS(){
     else{msg.textContent=d.error||'Erro';msg.className='error';msg.style.display='block'}
   }catch(e){msg.textContent='Erro de conexão';msg.className='error';msg.style.display='block'}
 }
-
 async function loadBMSList(){
   try{
     const r=await fetch(API+'?action=user_bms',{headers:{'Authorization':'Bearer '+userToken}});
     if(r.status===401){logout();return}
     const data=await r.json();
     const list=document.getElementById('bmsList');
-    if(data.length===0){list.innerHTML='<div style="grid-column:1/-1;opacity:.4;text-align:center;padding:40px">Nenhuma BMS cadastrada</div>';return}
-    list.innerHTML=data.map(b=>{
-      const online=b.online&&(Date.now()-new Date(b.updated_at).getTime()<10000);
-      return`<div class="bms-item ${online?'':'offline'} ${currentBMS?.code===b.code?'active':''}" onclick="selectBMS('${b.code}','${b.nome}')">
-        <div style="font-weight:700;font-size:18px;margin-bottom:8px">${b.nome}</div>
-        <div style="opacity:.6;font-size:13px;margin-bottom:12px;font-family:monospace">${b.code}</div>
-        <span class="status ${online?'on':'off'}">${online?'Online':'Offline'}</span>
-      </div>`
-    }).join('');
-  }catch(e){console.error(e)}
-}
-
-async function selectBMS(code,nome){
-  currentBMS={code,nome};
-  document.getElementById('selectBMS').classList.add('hidden');
-  document.getElementById('dash').classList.remove('hidden');
-  document.getElementById('bmsName').textContent=nome;
-  if(!window.Chart){const{Chart,registerables}=await import('https://cdn.jsdelivr.net/npm/chart.js@4.4.1/+esm');Chart.register(...registerables);window.Chart=Chart}
-  initChart();update();clearInterval(interval);interval=setInterval(update,5000);
-}
-
-function voltarLista(){
-  clearInterval(interval);clearTimeout(offlineTimer);
-  currentBMS=null;lastDataHash='';isOffline=false;
-  document.getElementById('dash').classList.add('hidden');
-  document.getElementById('selectBMS').classList.remove('hidden');
-  loadBMSList();
-}
-
-function renderCells(cells){
-  if(!cells||cells.length===0){document.getElementById('cells').innerHTML='<div style="grid-column:1/-1;opacity:.4;padding:20px">Sem dados das células</div>';return}
-  const vals=cells.map(c=>parseFloat(c)).filter(v=>v>0);if(vals.length===0)return;
-  const min=Math.min(...vals),max=Math.max(...vals),diff=max-min;
-  document.getElementById('cellMin').textContent=min.toFixed(3)+'V';
-  document.getElementById('cellMax').textContent=max.toFixed(3)+'V';
-  document.getElementById('cellDiff').textContent=diff.toFixed(3)+'V';
-  document.getElementById('cellCount').textContent=cells.length;
-  document.getElementById('cells').innerHTML=cells.map((v,i)=>{const val=parseFloat(v);let cls='ok';if(val<3.2||val>4.2)cls='crit';else if(val<3.4||val>4.15)cls='warn';return`<div class="cell ${cls}"><div class="cell-num">C${i+1}</div><div class="cell-val">${val.toFixed(3)}</div></div>`}).join('');
-}
-
-const voltageHistory=[],currentHistory=[],labelsHistory=[];
-function initChart(){
-  const ctx=document.getElementById('mainChart').getContext('2d');
-  chart=new window.Chart(ctx,{type:'line',data:{labels:labelsHistory,datasets:[{label:'Tensão',data:voltageHistory,borderColor:'#00ffff',backgroundColor:'rgba(0,255,255,.08)',tension:.4,fill:true,borderWidth:2},{label:'Corrente',data:currentHistory,borderColor:'#ffaa00',backgroundColor:'rgba(255,170,0,.08)',tension:.4,fill:true,borderWidth:2}]},options:{responsive:true,maintainAspectRatio:false,animation:false,elements:{point:{radius:0}},plugins:{legend:{labels:{color:'#ffffff'}}},scales:{x:{ticks:{color:'#aaa'},grid:{color:'rgba(255,255,255,.05)'}},y:{ticks:{color:'#aaa'},grid:{color:'rgba(255,255,255,.05)'}}}}});
-}
-
-function updateGauge(soc){
-  const gauge=document.getElementById('socGauge'),value=document.getElementById('socGaugeValue'),bar=document.getElementById('socBar'),text=document.getElementById('socBarText'),deg=soc*3.6;
-  value.textContent=soc+'%';text.textContent=soc+'%';bar.style.width=soc+'%';
-  gauge.style.background=`conic-gradient(#00ff88 0deg,#00ffff ${deg}deg,rgba(255,255,255,.08) ${deg}deg)`;
-}
-
-function setOffline(){
-  isOffline=true;clearTimeout(offlineTimer);
-  document.getElementById('connStatus').textContent='Offline';document.getElementById('connStatus').className='status off';
-  document.getElementById('soc').textContent='--%';document.getElementById('voltage').textContent='--V';document.getElementById('current').textContent='--A';document.getElementById('temp').textContent='--°C';
-  document.getElementById('socGaugeValue').textContent='--%';document.getElementById('socBarText').textContent='--%';document.getElementById('socBar').style.width='0%';updateGauge(0);
-}
-
-async function update(){
-  if(!currentBMS)return;
-  try{
-    const r=await fetch(API+'?action=data&code='+currentBMS.code,{headers:{'Authorization':'Bearer '+userToken}});
-    if(r.status===401){logout();return}
-    const d=await r.json();
-    const hash=`${d.soc?.toFixed(0)}-${d.voltage?.toFixed(1)}-${d.current?.toFixed(1)}-${d.temp?.toFixed(1)}`;
-    if(hash!==lastDataHash){
-      lastDataHash=hash;isOffline=false;clearTimeout(offlineTimer);
-      offlineTimer=setTimeout(()=>{setOffline()},10000);
-    }
-    if(isOffline)return;
-    document.getElementById('soc').textContent=(d.soc?.toFixed(0)||0)+'%';
-    document.getElementById('voltage').textContent=(d.voltage?.toFixed(2)||0)+'V';
-    document.getElementById('current').textContent=(d.current?.toFixed(1)||0)+'A';
-    document.getElementById('temp').textContent=(d.temp?.toFixed(1)||0)+'°C';
-    document.getElementById('connStatus').textContent=d.online?'Online':'Offline';
-    document.getElementById('connStatus').className='status '+(d.online?'on':'off');
-    renderCells(d.cells);updateGauge(parseInt(d.soc||0));
-    const now=new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
-    labelsHistory.push(now);voltageHistory.push(d.voltage||0);currentHistory.push(d.current||0);
-    if(labelsHistory.length>15){labelsHistory.shift();voltageHistory.shift();currentHistory.shift()}
-    if(chart)chart.update('none');
-  }catch(e){setOffline()}
-}
-
-if('serviceWorker'in navigator){window.addEventListener('load',async()=>{try{await navigator.serviceWorker.register('/service-worker.js')}catch(e){}})}
-
-window.login = login;
-window.cadastrar = cadastrar;
-window.logout = logout;
-window.showLogin = showLogin;
-window.showCadastro = showCadastro;
-window.addBMS = addBMS;
-window.selectBMS = selectBMS;
-window.voltarLista = voltarLista;
-</script>
-</body>
-</html>
+    if(data.length===0){list.innerHTML='<div style="grid-column:1/-1;opacity:.4;text-align:center;padding
