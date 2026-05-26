@@ -10,6 +10,7 @@ html,body{overscroll-behavior:none;touch-action:manipulation}
 body{background:#0a0a0f;color:#fff;font-family:system-ui;padding:0;text-align:center}
 h1{text-align:center;font-size:42px;font-weight:900;padding:30px 20px;background:linear-gradient(90deg,#00ffff,#0080ff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-shadow:0 0 30px rgba(0,255,255,.3)}
 .card{background:rgba(255,255,255,.03);border:1px solid rgba(0,255,255,.3);border-radius:16px;padding:24px;text-align:center;box-shadow:0 0 20px rgba(0,255,255,.1),inset 0 0 20px rgba(0,255,255,.05);min-width:0;overflow:hidden;display:flex;flex-direction:column}
+.card-cadastro{max-width:600px;margin:0 auto 32px auto;width:calc(100% - 32px)}
 input,button{width:100%;max-width:600px;padding:18px;margin:12px auto;border-radius:12px;border:1px solid rgba(0,255,255,.3);background:rgba(0,0,0,.4);color:#fff;font-size:18px;text-align:center;display:block;box-shadow:0 0 15px rgba(0,255,255,.1)}
 button{background:linear-gradient(90deg,#0080ff,#00ffff);cursor:pointer;font-weight:700;border:none;font-family:system-ui;letter-spacing:0;box-shadow:0 0 25px rgba(0,255,255,.4)}
 button.btn-secondary{background:rgba(255,170,0,.1);border:1px solid rgba(255,170,0,.4);box-shadow:0 0 15px rgba(255,170,0,.2)}
@@ -21,8 +22,8 @@ button.view{background:rgba(0,255,255,.1);border:1px solid rgba(0,255,255,.4);pa
 button.voltar{background:rgba(0,255,136,.1);border:1px solid rgba(0,255,136,.4);max-width:500px;margin:40px auto;box-shadow:0 0 20px rgba(0,255,136,.2)}
 .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;padding:0 16px;max-width:1800px;margin:0 auto}
 @media(min-width:1024px){.grid{grid-template-columns:repeat(4,1fr)}}
-.grid.card{margin:0}
-.grid.card-empty{grid-column:1/-1;min-height:200px;display:flex;align-items:center;justify-content:center}
+.grid .card{margin:0}
+.grid .card-empty{grid-column:1/-1;min-height:200px;display:flex;align-items:center;justify-content:center}
 .status{display:inline-block;padding:6px 12px;border-radius:12px;font-size:12px;font-weight:700;white-space:nowrap}
 .on{background:rgba(0,255,136,.15);color:#00ff88;border:1px solid rgba(0,255,136,.4);box-shadow:0 0 15px rgba(0,255,136,.3)}
 .off{background:rgba(255,68,68,.15);color:#ff4444;border:1px solid rgba(255,68,68,.4);box-shadow:0 0 15px rgba(255,68,68,.3)}
@@ -41,11 +42,11 @@ button.voltar{background:rgba(0,255,136,.1);border:1px solid rgba(0,255,136,.4);
 .modal-close{float:right;background:rgba(255,68,68,.1);border:1px solid rgba(255,68,68,.4);color:#fff;padding:10px 20px;border-radius:8px;cursor:pointer;box-shadow:0 0 15px rgba(255,68,68,.2)}
 #login,#painel,#clientesPage{position:relative;z-index:1;width:100%;min-height:100dvh;padding:20px}
 .tela-ativa{display:flex!important;flex-direction:column;justify-content:center;align-items:center}
-#login.card{border-radius:20px;margin:0 auto;max-width:500px;width:100%}
+#login .card{border-radius:20px;margin:0 auto;max-width:500px;width:100%}
 .data-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:12px 0;flex:1}
 .data-item{text-align:center}
-.data-item.label{margin-bottom:4px;font-size:11px}
-.data-item.value{font-size:24px;font-weight:700;text-shadow:0 0 15px currentColor}
+.data-item .label{margin-bottom:4px;font-size:11px}
+.data-item .value{font-size:24px;font-weight:700;text-shadow:0 0 15px currentColor}
 .btn-group{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:auto}
 .section-title{font-size:24px;font-weight:900;margin:40px 0 20px;color:#00ffff;text-shadow:0 0 20px rgba(0,255,255,.4)}
 .hidden{display:none!important}
@@ -55,13 +56,12 @@ button.voltar{background:rgba(0,255,136,.1);border:1px solid rgba(0,255,136,.4);
 .card-header{text-align:center;margin-bottom:12px}
 .card-code{font-size:16px;font-weight:700;word-break:break-all;margin-top:8px}
 .card-top{flex:1;display:flex;flex-direction:column}
-.cadastro-full{grid-column:1/-1}
 
 @media(max-width:768px){
 .grid{gap:10px;padding:0 10px}
 .card{padding:14px}
-.data-item.value{font-size:18px}
-.data-item.label{font-size:9px}
+.data-item .value{font-size:18px}
+.data-item .label{font-size:9px}
   h1{font-size:26px;padding:16px 12px}
 .section-title{font-size:18px;margin:24px 0 12px}
   input,button{font-size:15px;padding:14px}
@@ -74,7 +74,7 @@ button.voltar{background:rgba(0,255,136,.1);border:1px solid rgba(0,255,136,.4);
 @media(max-width:380px){
 .grid{gap:8px;padding:0 8px}
 .card{padding:12px}
-.data-item.value{font-size:16px}
+.data-item .value{font-size:16px}
 .card-code{font-size:13px}
 }
 </style>
@@ -94,16 +94,16 @@ button.voltar{background:rgba(0,255,136,.1);border:1px solid rgba(0,255,136,.4);
 <div id="painel" class="hidden">
   <h1>BMS SMART</h1>
   <div class="section-title">Todas as BMS do Sistema</div>
-  <div class="grid">
-    <div class="card cadastro-full">
-      <div class="label">Cadastrar BMS no Sistema</div>
-      <input id="code" placeholder="SL000000000000" maxlength="14">
-      <button onclick="cad()">Cadastrar BMS Master</button>
-      <button class="btn-secondary" onclick="gerarECadastrar()">Gerar Código Aleatório</button>
-      <button class="btn-clientes" onclick="mostrarClientes()">Ver Clientes Cadastrados</button>
-      <p id="msg" style="text-align:center;margin-top:8px"></p>
-    </div>
+  
+  <div class="card card-cadastro">
+    <div class="label">Cadastrar BMS no Sistema</div>
+    <input id="code" placeholder="SL000000000000" maxlength="14">
+    <button onclick="cad()">Cadastrar BMS Master</button>
+    <button class="btn-secondary" onclick="gerarECadastrar()">Gerar Código Aleatório</button>
+    <button class="btn-clientes" onclick="mostrarClientes()">Ver Clientes Cadastrados</button>
+    <p id="msg" style="text-align:center;margin-top:8px"></p>
   </div>
+  
   <div id="lista" class="grid"></div>
   <button class="logout" onclick="adminLogout()">Sair do Painel Admin</button>
 </div>
