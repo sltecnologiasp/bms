@@ -9,7 +9,6 @@ export async function onRequest({ request, env }) {
   const json = (data, status = 200) => new Response(JSON.stringify(data), { status, headers });
 
   try {
-    // ========== ADMIN LOGIN ==========
     if (action === 'admin_login' && request.method === 'POST') {
       const { user, password } = await request.json();
       if (user === 'administrador' && password === '426240637') {
@@ -18,7 +17,6 @@ export async function onRequest({ request, env }) {
       return json({ ok: false, error: 'Credenciais inválidas' }, 401);
     }
 
-    // ========== CADASTRO USUÁRIO ==========
     if (action === 'register' && request.method === 'POST') {
       const { nome, email, senha } = await request.json();
       if (!nome ||!email || senha.length < 6) return json({ ok: false, error: 'Dados inválidos' });
@@ -32,7 +30,6 @@ export async function onRequest({ request, env }) {
       }
     }
 
-    // ========== LOGIN USUÁRIO ==========
     if (action === 'login_user' && request.method === 'POST') {
       const { email, senha } = await request.json();
       const { results } = await db.prepare('SELECT * FROM users WHERE email=?').bind(email).all();
@@ -41,55 +38,69 @@ export async function onRequest({ request, env }) {
       const hash = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(senha));
       const hashHex = Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2, '0')).join('');
       if (user.senha_hash!== hashHex) return json({ ok: false, error: 'E-mail ou senha incorretos' }, 401);
-      const token = btoa(`user:${user.id}`);
+      const token = Buffer.from(`user:${user.id}`).toString('base64');
       return json({ ok: true, token, nome: user.nome, email: user.email });
     }
 
-    // ========== LISTAR BMS DO USUÁRIO ==========
     if (action === 'user_bms') {
-      if (!token ||!token.startsWith('dXNlcjo')) return json({ ok: false }, 401);
-      const userId = parseInt(atob(token).split(':')[1]);
-      const { results } = await db.prepare(`
-        SELECT ub.bms_code as code, ub.bms_nome as nome, b.online, b.updated_at 
-        FROM user_bms ub 
-        LEFT JOIN bms b ON ub.bms_code = b.code 
-        WHERE ub.user_id =?
-      `).bind(userId).all();
-      return json(results);
-    }
-
-    // ========== ADICIONAR BMS AO USUÁRIO ==========
-    if (action === 'add_bms' && request.method === 'POST') {
-      if (!token ||!token.startsWith('dXNlcjo')) return json({ ok: false }, 401);
-      const userId = parseInt(atob(token).split(':')[1]);
-      const { code, nome } = await request.json();
-      if (!/^SL\d{8}$/.test(code)) return json({ ok: false, error: 'Código inválido' });
-      if (!nome) return json({ ok: false, error: 'Nome obrigatório' });
+      if (!token) return json({ ok: false }, 401);
       try {
-        await db.prepare('INSERT INTO user_bms (user_id,bms_code,bms_nome) VALUES (?,?,?)').bind(userId, code, nome).run();
-        await db.prepare('INSERT OR IGNORE INTO bms (code,nome) VALUES (?,?)').bind(code, nome).run();
-        return json({ ok: true });
-      } catch (e) {
-        return json({ ok: false, error: 'BMS já adicionada' }, 400);
+        const decoded = Buffer.from(token, 'base64').toString();
+        if (!decoded.startsWith('user:')) return json({ ok: false }, 401);
+        const userId = parseInt(decoded.split(':')[1]);
+        const { results } = await db.prepare(`
+          SELECT ub.bms_code as code, ub.bms_nome as nome, b.online, b.updated_at 
+          FROM user_bms ub 
+          LEFT JOIN bms b ON ub.bms_code = b.code 
+          WHERE ub.user_id =?
+        `).bind(userId).all();
+        return json(results);
+      } catch(e) {
+        return json({ ok: false }, 401);
       }
     }
 
-    // ========== DADOS BMS USUÁRIO ==========
-    if (action === 'data') {
-      if (!token ||!token.startsWith('dXNlcjo')) return json({ ok: false }, 401);
-      const userId = parseInt(atob(token).split(':')[1]);
-      const code = url.searchParams.get('code');
-      const { results: check } = await db.prepare('SELECT 1 FROM user_bms WHERE user_id=? AND bms_code=?').bind(userId, code).all();
-      if (!check.length) return json({ ok: false, error: 'BMS não encontrada' }, 404);
-      const { results } = await db.prepare('SELECT * FROM bms WHERE code=?').bind(code).all();
-      if (!results.length) return json({ ok: false, error: 'Sem dados' }, 404);
-      const bms = results[0];
-      bms.cells = JSON.parse(bms.cells || '[]');
-      bms.online = (Date.now() - new Date(bms.updated_at).getTime()) < 10000;
-      return json(bms);
+    if (action === 'add_bms' && request.method === 'POST') {
+      if (!token) return json({ ok: false }, 401);
+      try {
+        const decoded = Buffer.from(token, 'base64').toString();
+        if (!decoded.startsWith('user:')) return json({ ok: false }, 401);
+        const userId = parseInt(decoded.split(':')[1]);
+        const { code, nome } = await request.json();
+        if (!/^SL\d{8}$/.test(code)) return json({ ok: false, error: 'Código inválido' });
+        if (!nome) return json({ ok: false, error: 'Nome obrigatório' });
+        try {
+          await db.prepare('INSERT INTO user_bms (user_id,bms_code,bms_nome) VALUES (?,?,?)').bind(userId, code, nome).run();
+          await db.prepare('INSERT OR IGNORE INTO bms (code,nome) VALUES (?,?)').bind(code, nome).run();
+          return json({ ok: true });
+        } catch (e) {
+          return json({ ok: false, error: 'BMS já adicionada' }, 400);
+        }
+      } catch(e) {
+        return json({ ok: false }, 401);
+      }
     }
 
-    // ========== ADMIN: LISTAR TODAS ==========
+    if (action === 'data') {
+      if (!token) return json({ ok: false }, 401);
+      try {
+        const decoded = Buffer.from(token, 'base64').toString();
+        if (!decoded.startsWith('user:')) return json({ ok: false }, 401);
+        const userId = parseInt(decoded.split(':')[1]);
+        const code = url.searchParams.get('code');
+        const { results: check } = await db.prepare('SELECT 1 FROM user_bms WHERE user_id=? AND bms_code=?').bind(userId, code).all();
+        if (!check.length) return json({ ok: false, error: 'BMS não encontrada' }, 404);
+        const { results } = await db.prepare('SELECT * FROM bms WHERE code=?').bind(code).all();
+        if (!results.length) return json({ ok: false, error: 'Sem dados' }, 404);
+        const bms = results[0];
+        bms.cells = JSON.parse(bms.cells || '[]');
+        bms.online = (Date.now() - new Date(bms.updated_at).getTime()) < 10000;
+        return json(bms);
+      } catch(e) {
+        return json({ ok: false }, 401);
+      }
+    }
+
     if (action === 'listar') {
       if (token!== 'admin_ok') return json({ ok: false }, 401);
       const { results } = await db.prepare('SELECT * FROM bms ORDER BY code').all();
@@ -97,7 +108,6 @@ export async function onRequest({ request, env }) {
       return json(parsed);
     }
 
-    // ========== ADMIN: CADASTRAR BMS ==========
     if (action === 'cadastrar' && request.method === 'POST') {
       if (token!== 'admin_ok') return json({ ok: false }, 401);
       const { code, nome } = await request.json();
@@ -109,7 +119,6 @@ export async function onRequest({ request, env }) {
       }
     }
 
-    // ========== ADMIN: DELETAR BMS ==========
     if (action === 'deletar' && request.method === 'DELETE') {
       if (token!== 'admin_ok') return json({ ok: false }, 401);
       const code = url.searchParams.get('code');
@@ -118,7 +127,6 @@ export async function onRequest({ request, env }) {
       return json({ ok: true });
     }
 
-    // ========== ADMIN: LISTAR USUÁRIOS ==========
     if (action === 'listar_users') {
       if (token!== 'admin_ok') return json({ ok: false }, 401);
       const { results } = await db.prepare(`
@@ -132,7 +140,6 @@ export async function onRequest({ request, env }) {
       return json(results);
     }
 
-    // ========== ADMIN: BMS DE UM USUÁRIO ==========
     if (action === 'user_bms_admin') {
       if (token!== 'admin_ok') return json({ ok: false }, 401);
       const userId = url.searchParams.get('user_id');
@@ -145,7 +152,6 @@ export async function onRequest({ request, env }) {
       return json(results);
     }
 
-    // ========== ADMIN: VINCULAR BMS ==========
     if (action === 'vincular_bms' && request.method === 'POST') {
       if (token!== 'admin_ok') return json({ ok: false }, 401);
       const { user_id, code, nome } = await request.json();
@@ -159,7 +165,6 @@ export async function onRequest({ request, env }) {
       }
     }
 
-    // ========== ADMIN: DESVINCULAR BMS ==========
     if (action === 'desvincular_bms' && request.method === 'DELETE') {
       if (token!== 'admin_ok') return json({ ok: false }, 401);
       const user_id = url.searchParams.get('user_id');
@@ -168,7 +173,6 @@ export async function onRequest({ request, env }) {
       return json({ ok: true });
     }
 
-    // ========== ADMIN: EDITAR NOME BMS ==========
     if (action === 'editar_nome_bms' && request.method === 'PUT') {
       if (token!== 'admin_ok') return json({ ok: false }, 401);
       const { user_id, code, nome } = await request.json();
@@ -176,7 +180,6 @@ export async function onRequest({ request, env }) {
       return json({ ok: true });
     }
 
-    // ========== UPDATE DO ESP32 ==========
     if (action === 'update' && request.method === 'POST') {
       if (token!== 'bms_admin_token_426240637') return json({ ok: false, error: 'Nao autorizado' }, 401);
       const data = await request.json();
@@ -187,14 +190,6 @@ export async function onRequest({ request, env }) {
       `).bind(soc||0, voltage||0, current||0, temp||0, JSON.stringify(cells||[]), code).run();
       if (result.changes === 0) return json({ ok: false, error: 'BMS nao cadastrada: ' + code }, 404);
       return json({ ok: true });
-    }
-
-    // ========== LOGIN DIRETO POR CÓDIGO - LEGADO ==========
-    if (action === 'login' && request.method === 'POST') {
-      const { code } = await request.json();
-      const { results } = await db.prepare('SELECT * FROM bms WHERE code=?').bind(code).all();
-      if (results.length === 0) return json({ ok: false, error: 'BMS não encontrada' }, 404);
-      return json({ ok: true, token: btoa(code) });
     }
 
     return json({ error: 'Not found' }, 404);
