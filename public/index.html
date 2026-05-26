@@ -40,7 +40,7 @@ button{background:linear-gradient(90deg,var(--blue),var(--cyan));color:#fff;font
 .off{background:rgba(255,68,68,.12);color:var(--red);border:1px solid rgba(255,68,68,.3)}
 .status-wrap{display:flex;justify-content:center;align-items:center;flex-direction:column;margin-top:14px}
 .bms-code{font-size:clamp(18px,4.5vw,24px);font-weight:700;margin-top:12px;letter-spacing:1.5px;color:#fff;text-align:center;opacity:.95}
-.diff{display:grid;grid-template-columns:repeat(auto-fit,minmax(70px,1fr));gap:8px;margin-top:18px}
+.diff{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:18px}
 .diff-item{padding:12px 8px;border-radius:14px;background:rgba(255,255,255,.03);text-align:center}
 .diff-item span{display:block;margin-top:6px;font-size:clamp(18px,5vw,22px);font-weight:800;width:6ch;margin:auto;text-align:center;font-variant-numeric:tabular-nums}
 .cells{display:grid;grid-template-columns:repeat(auto-fill,minmax(85px,1fr));gap:10px;margin-top:20px}
@@ -65,7 +65,7 @@ canvas{width:100%!important;height:280px!important}
 .link-cadastro{margin-top:20px;text-align:center;color:#fff;cursor:pointer;opacity:.8}
 .link-cadastro span{color:#00ffff;text-decoration:underline}
 .footer-voltar{width:100%;margin-top:24px;margin-bottom:12px}
-@media(max-width:520px){.card{padding:12px}.gauge-card{padding:16px;min-height:240px}.grid{grid-template-columns:repeat(2,1fr)}.bms-list{grid-template-columns:1fr}}
+@media(max-width:520px){.card{padding:12px}.gauge-card{padding:16px;min-height:240px}.grid{grid-template-columns:repeat(2,1fr)}.bms-list{grid-template-columns:1fr}.diff{grid-template-columns:repeat(2,1fr)}}
 </style>
 </head>
 <body>
@@ -128,6 +128,7 @@ canvas{width:100%!important;height:280px!important}
 <div class="bar"><div class="bar-fill" id="socBar"></div></div>
 </div>
 </div>
+</div>
 <div class="card">
 <div class="label">Status</div>
 <div class="status-wrap">
@@ -150,7 +151,7 @@ canvas{width:100%!important;height:280px!important}
 <div class="diff">
 <div class="diff-item">Min<div><span id="celMin" style="color:#00ff88">0.00V</span></div></div>
 <div class="diff-item">Max<div><span id="celMax" style="color:#ffaa00">0.00V</span></div></div>
-<div class="diff-item">Diferença<div><span id="celDif" style="color:#ff4444">0.00V</span></div>
+<div class="diff-item">Diferença<div><span id="celDif" style="color:#ff4444">0.00V</span></div></div>
 <div class="diff-item">Total<div><span id="celTot" style="color:#00ffff">0</span></div></div>
 </div>
 <div id="celulas" class="cells"></div>
