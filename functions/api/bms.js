@@ -192,3 +192,24 @@ export async function onRequest({ request, env }) {
     return json({ ok: false, error: 'Erro interno: ' + e.message }, 500);
   }
 }
+    // EDITAR USER - ADMIN
+    if (action === 'edit_user' && request.method === 'POST') {
+      if (!isAdmin) return json({ ok: false, error: 'Admin only' }, 403);
+      const { id, nome, email } = await request.json();
+      if (!id || !nome || !email) return json({ ok: false, error: 'Dados inválidos' }, 400);
+      
+      await env.DB.prepare('UPDATE users SET nome = ?, email = ? WHERE id = ?')
+        .bind(nome, email, id).run();
+      return json({ ok: true });
+    }
+
+    // DELETAR USER - ADMIN
+    if (action === 'delete_user' && request.method === 'DELETE') {
+      if (!isAdmin) return json({ ok: false, error: 'Admin only' }, 403);
+      const id = url.searchParams.get('id');
+      if (!id) return json({ ok: false, error: 'ID obrigatório' }, 400);
+      
+      await env.DB.prepare('DELETE FROM users WHERE id = ?').bind(id).run();
+      await env.DB.prepare('DELETE FROM user_bms WHERE user_id = ?').bind(id).run();
+      return json({ ok: true });
+    }
