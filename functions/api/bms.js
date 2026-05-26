@@ -15,19 +15,20 @@ export async function onRequest({ request, env }) {
     headers: { ...cors, 'Content-Type': 'application/json' }
   });
 
-  // Token sem Buffer - compatível Cloudflare Workers
+  // Token user: base64, admin: fixo
   const genToken = (id) => btoa(`user:${id}:${Date.now()}`);
   
   const parseToken = (auth) => {
     if (!auth?.startsWith('Bearer ')) return null;
+    const token = auth.slice(7);
+    if (token === 'admin_ok') return { type: 'admin' };
     try {
-      const decoded = atob(auth.slice(7));
+      const decoded = atob(token);
       const [type, id] = decoded.split(':');
-      return type === 'user' ? parseInt(id) : null;
+      return type === 'user' ? { type: 'user', id: parseInt(id) } : null;
     } catch { return null; }
   };
 
-  // Hash SHA-256 nativo
   const hashPassword = async (senha) => {
     const hash = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(senha));
     return Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2, '0')).join('');
@@ -43,7 +44,6 @@ export async function onRequest({ request, env }) {
       if (exists) return json({ ok: false, error: 'E-mail já cadastrado' }, 400);
       
       const senha_hash = await hashPassword(senha);
-      
       await env.DB.prepare('INSERT INTO users (nome, email, senha_hash) VALUES (?, ?, ?)')
         .bind(nome, email, senha_hash).run();
       
@@ -63,7 +63,7 @@ export async function onRequest({ request, env }) {
       return json({ ok: true, token: genToken(user.id), nome: user.nome, email: user.email });
     }
 
-    // LOGIN ADMIN
+    // LOGIN ADMIN - VOLTOU A FUNCIONAR
     if (action === 'login_admin' && request.method === 'POST') {
       const { user, password } = await request.json();
       if (user === 'administrador' && password === '426240637') {
@@ -74,12 +74,14 @@ export async function onRequest({ request, env }) {
 
     // AUTH CHECK
     const auth = request.headers.get('Authorization');
-    const userId = parseToken(auth);
-    const isAdmin = auth === 'Bearer admin_ok';
+    const authData = parseToken(auth);
     
-    if (!userId && !isAdmin && !['login_user', 'register', 'login_admin'].includes(action)) {
+    if (!authData && !['login_user', 'register', 'login_admin', 'update'].includes(action)) {
       return json({ ok: false, error: 'Não autorizado' }, 401);
     }
+
+    const userId = authData?.type === 'user' ? authData.id : null;
+    const isAdmin = authData?.type === 'admin';
 
     // ADD BMS
     if (action === 'add_bms' && request.method === 'POST') {
@@ -134,10 +136,10 @@ export async function onRequest({ request, env }) {
       const code = url.searchParams.get('code');
       if (!code) return json({ ok: false, error: 'Code obrigatório' }, 400);
       
-      if (userId) {
+      if (userId && !isAdmin) {
         const check = await env.DB.prepare('SELECT id FROM user_bms WHERE user_id = ? AND bms_code = ?')
           .bind(userId, code).first();
-        if (!check && !isAdmin) return json({ ok: false, error: 'Acesso negado' }, 403);
+        if (!check) return json({ ok: false, error: 'Acesso negado' }, 403);
       }
       
       const data = await env.DB.prepare('SELECT * FROM bms WHERE code = ?').bind(code).first();
@@ -151,20 +153,25 @@ export async function onRequest({ request, env }) {
       });
     }
 
-    // UPDATE BMS DATA - Para o ESP32 mandar dados
+    // UPDATE BMS DATA - ESP32 - SEM AUTH PRA FACILITAR
     if (action === 'update' && request.method === 'POST') {
       const { code, soc, voltage, current, temp, cells } = await request.json();
       if (!code) return json({ ok: false, error: 'Code obrigatório' }, 400);
       
       await env.DB.prepare(`
-        UPDATE bms SET 
-          soc = ?, voltage = ?, current = ?, temp = ?, 
-          cells = ?, online = 1, updated_at = CURRENT_TIMESTAMP 
-        WHERE code = ?
+        INSERT INTO bms (code, soc, voltage, current, temp, cells, online, updated_at)
+        VALUES (?, ?, ?, ?, ?, ?, 1, CURRENT_TIMESTAMP)
+        ON CONFLICT(code) DO UPDATE SET
+          soc = excluded.soc,
+          voltage = excluded.voltage,
+          current = excluded.current,
+          temp = excluded.temp,
+          cells = excluded.cells,
+          online = 1,
+          updated_at = CURRENT_TIMESTAMP
       `).bind(
-        soc || 0, voltage || 0, current || 0, temp || 0,
-        JSON.stringify(cells || []),
-        code
+        code, soc || 0, voltage || 0, current || 0, temp || 0,
+        JSON.stringify(cells || [])
       ).run();
       
       return json({ ok: true });
