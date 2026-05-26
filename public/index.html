@@ -140,8 +140,6 @@ button{background:linear-gradient(90deg,var(--blue),var(--cyan));color:#fff;font
 <div class="bar-label"><span>Bateria</span><span id="socBarTxt">0%</span></div>
 <div class="bar"><div class="bar-fill" id="socBar"></div></div>
 </div>
-</div>
-</div>
 <div class="card">
 <div class="label">Status</div>
 <div class="status-wrap">
@@ -480,4 +478,5 @@ function voltar(){
 }
 
 function renderCelulas(cels){
-  if(!cels || cels.le
+  if(!cels || cels.length === 0){
+ 
