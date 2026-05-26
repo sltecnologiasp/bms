@@ -16,7 +16,7 @@ export async function onRequest({ request, env }) {
   });
 
   try {
-    // ROTAS SEM TOKEN
+    // ROTAS PÚBLICAS
     if (action === 'register' && request.method === 'POST') {
       const { nome, email, senha } = await request.json();
       if (!nome ||!email ||!senha) return json({ ok: false, error: 'Dados inválidos' }, 400);
@@ -82,9 +82,15 @@ export async function onRequest({ request, env }) {
 
     // ROTAS COM TOKEN
     if (action === 'add_bms' && request.method === 'POST') {
-      if (!userId) return json({ ok: false, error: 'Login necessário' }, 401);
       const { code, nome } = await request.json();
-      if (!code?.startsWith('SL') || code.length!== 10) return json({ ok: false, error: 'Código inválido' }, 400);
+      if (!code?.startsWith('SL') || code.length!== 10) return json({ ok: false, error: 'Código inválido. Use SL + 8 números' }, 400);
+
+      if (isAdmin) {
+        await env.DB.prepare('INSERT OR IGNORE INTO bms (code, nome) VALUES (?,?)').bind(code, nome || code).run();
+        return json({ ok: true });
+      }
+
+      if (!userId) return json({ ok: false, error: 'Login necessário' }, 401);
       await env.DB.prepare('INSERT OR IGNORE INTO user_bms (user_id, bms_code, bms_nome) VALUES (?,?,?)').bind(userId, code, nome || code).run();
       await env.DB.prepare('INSERT OR IGNORE INTO bms (code, nome) VALUES (?,?)').bind(code, nome || code).run();
       return json({ ok: true });
