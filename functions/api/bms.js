@@ -4,7 +4,7 @@ export async function onRequest({ request, env }) {
   
   const cors = {
     'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+    'Access-Control-Allow-Methods': 'GET, POST, DELETE, OPTIONS',
     'Access-Control-Allow-Headers': 'Content-Type, Authorization'
   };
   
@@ -15,7 +15,6 @@ export async function onRequest({ request, env }) {
     headers: { ...cors, 'Content-Type': 'application/json' }
   });
 
-  // Token user: base64, admin: fixo
   const genToken = (id) => btoa(`user:${id}:${Date.now()}`);
   
   const parseToken = (auth) => {
@@ -63,7 +62,7 @@ export async function onRequest({ request, env }) {
       return json({ ok: true, token: genToken(user.id), nome: user.nome, email: user.email });
     }
 
-    // LOGIN ADMIN - VOLTOU A FUNCIONAR
+    // LOGIN ADMIN
     if (action === 'login_admin' && request.method === 'POST') {
       const { user, password } = await request.json();
       if (user === 'administrador' && password === '426240637') {
@@ -83,7 +82,7 @@ export async function onRequest({ request, env }) {
     const userId = authData?.type === 'user' ? authData.id : null;
     const isAdmin = authData?.type === 'admin';
 
-    // ADD BMS
+    // ADD BMS - USER
     if (action === 'add_bms' && request.method === 'POST') {
       if (!userId) return json({ ok: false, error: 'Login necessário' }, 401);
       const { code, nome } = await request.json();
@@ -101,20 +100,20 @@ export async function onRequest({ request, env }) {
     if (action === 'user_bms' && request.method === 'GET') {
       if (!userId) return json({ ok: false, error: 'Login necessário' }, 401);
       const { results } = await env.DB.prepare(`
-        SELECT ub.bms_code as code, ub.bms_nome as nome, b.online, b.updated_at, b.soc, b.voltage
+        SELECT ub.bms_code as code, ub.bms_nome as nome, b.online, b.updated_at, b.soc, b.voltage, b.current, b.temp, b.cells
         FROM user_bms ub
         LEFT JOIN bms b ON b.code = ub.bms_code
         WHERE ub.user_id = ?
         ORDER BY ub.created_at DESC
       `).bind(userId).all();
-      return json(results || []);
+      return json((results || []).map(r=>({...r,cells:JSON.parse(r.cells||'[]')})));
     }
 
     // LIST ALL BMS - ADMIN
     if (action === 'all_bms' && request.method === 'GET') {
       if (!isAdmin) return json({ ok: false, error: 'Admin only' }, 403);
-      const { results } = await env.DB.prepare('SELECT code, nome, online, updated_at, soc, voltage FROM bms ORDER BY updated_at DESC').all();
-      return json(results || []);
+      const { results } = await env.DB.prepare('SELECT * FROM bms ORDER BY updated_at DESC').all();
+      return json((results || []).map(r=>({...r,cells:JSON.parse(r.cells||'[]')})));
     }
 
     // LIST ALL USERS - ADMIN
@@ -153,7 +152,7 @@ export async function onRequest({ request, env }) {
       });
     }
 
-    // UPDATE BMS DATA - ESP32 - SEM AUTH PRA FACILITAR
+    // UPDATE BMS DATA - ESP32
     if (action === 'update' && request.method === 'POST') {
       const { code, soc, voltage, current, temp, cells } = await request.json();
       if (!code) return json({ ok: false, error: 'Code obrigatório' }, 400);
@@ -174,6 +173,16 @@ export async function onRequest({ request, env }) {
         JSON.stringify(cells || [])
       ).run();
       
+      return json({ ok: true });
+    }
+
+    // DELETAR BMS - ADMIN
+    if (action === 'deletar' && request.method === 'DELETE') {
+      if (!isAdmin) return json({ ok: false, error: 'Admin only' }, 403);
+      const code = url.searchParams.get('code');
+      if (!code) return json({ ok: false, error: 'Code obrigatório' }, 400);
+      await env.DB.prepare('DELETE FROM bms WHERE code = ?').bind(code).run();
+      await env.DB.prepare('DELETE FROM user_bms WHERE bms_code = ?').bind(code).run();
       return json({ ok: true });
     }
 
