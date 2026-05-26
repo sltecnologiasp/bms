@@ -9,8 +9,7 @@
 html,body{overscroll-behavior:none;touch-action:manipulation}
 body{background:#0a0a0f;color:#fff;font-family:system-ui;padding:0;text-align:center}
 h1{text-align:center;font-size:42px;font-weight:900;padding:30px 20px;background:linear-gradient(90deg,#00ffff,#0080ff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-shadow:0 0 30px rgba(0,255,255,.3)}
-.card{background:rgba(255,255,255,.03);border:1px solid rgba(0,255,255,.3);border-radius:16px;padding:30px;text-align:center;box-shadow:0 0 20px rgba(0,255,255,.1),inset 0 0 20px rgba(0,255,255,.05)}
-.card-cadastro{max-width:600px;margin:0 auto 32px auto;padding:30px}
+.card{background:rgba(255,255,255,.03);border:1px solid rgba(0,255,255,.3);border-radius:16px;padding:30px;text-align:center;box-shadow:0 0 20px rgba(0,255,255,.1),inset 0 0 20px rgba(0,255,255,.05);min-width:0;overflow:hidden}
 input,button{width:100%;max-width:600px;padding:18px;margin:12px auto;border-radius:12px;border:1px solid rgba(0,255,255,.3);background:rgba(0,0,0,.4);color:#fff;font-size:18px;text-align:center;display:block;box-shadow:0 0 15px rgba(0,255,255,.1)}
 button{background:linear-gradient(90deg,#0080ff,#00ffff);cursor:pointer;font-weight:700;border:none;font-family:system-ui;letter-spacing:0;box-shadow:0 0 25px rgba(0,255,255,.4)}
 button.btn-secondary{background:rgba(255,170,0,.1);border:1px solid rgba(255,170,0,.4);box-shadow:0 0 15px rgba(255,170,0,.2)}
@@ -18,8 +17,8 @@ button.del{background:rgba(255,68,68,.1);border:1px solid rgba(255,68,68,.4);pad
 button.edit{background:rgba(255,170,0,.1);border:1px solid rgba(255,170,0,.4);padding:10px;margin-top:12px;box-shadow:0 0 15px rgba(255,170,0,.2)}
 button.logout{background:rgba(255,68,68,.1);border:1px solid rgba(255,68,68,.4);max-width:500px;margin:60px auto 40px;box-shadow:0 0 20px rgba(255,68,68,.2)}
 button.view{background:rgba(0,255,255,.1);border:1px solid rgba(0,255,255,.4);padding:10px;margin-top:12px;box-shadow:0 0 15px rgba(0,255,255,.2)}
-.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:16px;padding:0 16px;max-width:1800px;margin:0 auto}
-.grid .card{margin:0;min-width:0}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;padding:0 16px;max-width:1800px;margin:0 auto}
+@media(min-width:1024px){.grid{grid-template-columns:repeat(4,1fr)}}
 .status{display:inline-block;padding:6px 12px;border-radius:12px;font-size:12px;font-weight:700;white-space:nowrap}
 .on{background:rgba(0,255,136,.15);color:#00ff88;border:1px solid rgba(0,255,136,.4);box-shadow:0 0 15px rgba(0,255,136,.3)}
 .off{background:rgba(255,68,68,.15);color:#ff4444;border:1px solid rgba(255,68,68,.4);box-shadow:0 0 15px rgba(255,68,68,.3)}
@@ -51,13 +50,10 @@ button.view{background:rgba(0,255,255,.1);border:1px solid rgba(0,255,255,.4);pa
 .badge-orange{background:rgba(255,170,0,.15);color:#ffaa00;border:1px solid rgba(255,170,0,.4)}
 .card-header{text-align:center;margin-bottom:12px}
 .card-code{font-size:16px;font-weight:700;word-break:break-all;margin-top:8px}
-
-@media(max-width:900px){
- .grid{grid-template-columns:repeat(auto-fit,minmax(min(100%,280px),1fr));gap:12px}
-}
+.cadastro-wrapper{max-width:600px;margin:0 auto 32px auto;padding:0 16px}
 
 @media(max-width:768px){
- .grid{grid-template-columns:repeat(2,1fr);gap:10px;padding:0 10px}
+ .grid{gap:10px;padding:0 10px}
  .card{padding:14px}
  .data-item .value{font-size:18px}
  .data-item .label{font-size:9px}
@@ -66,7 +62,6 @@ button.view{background:rgba(0,255,255,.1);border:1px solid rgba(0,255,255,.4);pa
   input,button{font-size:15px;padding:14px}
  .status{padding:3px 8px;font-size:10px}
  .badge{padding:3px 8px;font-size:9px}
- .card-cadastro{padding:20px}
  .card-code{font-size:14px}
   button.del,button.view{font-size:14px;padding:8px}
 }
@@ -97,12 +92,14 @@ button.view{background:rgba(0,255,255,.1);border:1px solid rgba(0,255,255,.4);pa
   <div id="listaUsers" class="grid"></div>
 
   <div class="section-title">Todas as BMS do Sistema</div>
-  <div class="card card-cadastro">
-    <div class="label">Cadastrar BMS no Sistema</div>
-    <input id="code" placeholder="SL000000000000" maxlength="14">
-    <button onclick="cad()">Cadastrar BMS Master</button>
-    <button class="btn-secondary" onclick="gerarECadastrar()">Gerar Código Aleatório</button>
-    <p id="msg" style="text-align:center;margin-top:8px"></p>
+  <div class="cadastro-wrapper">
+    <div class="card">
+      <div class="label">Cadastrar BMS no Sistema</div>
+      <input id="code" placeholder="SL000000000000" maxlength="14">
+      <button onclick="cad()">Cadastrar BMS Master</button>
+      <button class="btn-secondary" onclick="gerarECadastrar()">Gerar Código Aleatório</button>
+      <p id="msg" style="text-align:center;margin-top:8px"></p>
+    </div>
   </div>
   <div id="lista" class="grid"></div>
 
