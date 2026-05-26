@@ -37,7 +37,7 @@ button{background:linear-gradient(90deg,var(--blue),var(--cyan));color:#fff;font
 .btn-sec{background:transparent;border:1px solid rgba(0,255,255,.3);color:var(--cyan)}
 .status{display:inline-flex;align-items:center;gap:10px;padding:14px 26px;border-radius:999px;font-weight:700}
 .on{background:rgba(0,255,136,.12);color:var(--green);border:1px solid rgba(0,255,136,.3)}
-.off{background:rgba(255,68,68,.12);color:var(--red);border:1px solid rgba(255,68,68,.3)}
+.off{background:rgba(255,68,.12);color:var(--red);border:1px solid rgba(255,68,68,.3)}
 .status-wrap{display:flex;justify-content:center;align-items:center;flex-direction:column;margin-top:14px}
 .bms-code{font-size:clamp(18px,4.5vw,24px);font-weight:700;margin-top:12px;letter-spacing:1.5px;color:#fff;text-align:center;opacity:.95}
 .diff{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;margin-top:18px}
@@ -49,7 +49,7 @@ button{background:linear-gradient(90deg,var(--blue),var(--cyan));color:#fff;font
 .cell-val{font-size:clamp(16px,4vw,20px);font-weight:700;width:7ch;text-align:center;font-variant-numeric:tabular-nums}
 .cell.ok{border-color:rgba(0,255,136,.25)}
 .cell.warn{border-color:rgba(255,170,0,.25)}
-.cell.crit{border-color:rgba(255,68,.25)}
+.cell.crit{border-color:rgba(255,68,68,.25)}
 .chart-card{width:100%;padding:20px;min-height:340px;margin:0 0 4px 0}
 .chart-title{margin-bottom:16px;font-size:14px;letter-spacing:2px;opacity:.7;text-transform:uppercase;text-align:center}
 canvas{width:100%!important;height:280px!important}
@@ -128,7 +128,6 @@ canvas{width:100%!important;height:280px!important}
 <div class="bar"><div class="bar-fill" id="socBar"></div></div>
 </div>
 </div>
-</div>
 <div class="card">
 <div class="label">Status</div>
 <div class="status-wrap">
@@ -158,7 +157,6 @@ canvas{width:100%!important;height:280px!important}
 </div>
 <div class="footer-voltar">
 <button class="btn-sec" onclick="voltar()">← VOLTAR</button>
-</div>
 </div>
 
 <script>
@@ -393,7 +391,7 @@ function initChart(){
     data:{
       labels:LABEL_H,
       datasets:[
-        {label:'Tensão',data:VOLT_H,borderColor:'#00ffff',backgroundColor:'rgba(0,255,.08)',tension:.4,fill:true,borderWidth:2},
+        {label:'Tensão',data:VOLT_H,borderColor:'#00ffff',backgroundColor:'rgba(0,255,255,.08)',tension:.4,fill:true,borderWidth:2},
         {label:'Corrente',data:CORR_H,borderColor:'#ffaa00',backgroundColor:'rgba(255,170,0,.08)',tension:.4,fill:true,borderWidth:2}
       ]
     },
