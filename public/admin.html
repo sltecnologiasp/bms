@@ -16,11 +16,11 @@ button{background:linear-gradient(90deg,#0080ff,#00ffff);cursor:pointer;font-wei
 button.btn-secondary{background:rgba(255,170,0,.1);border:1px solid rgba(255,170,0,.4);box-shadow:0 0 15px rgba(255,170,0,.2)}
 button.del{background:rgba(255,68,68,.1);border:1px solid rgba(255,68,68,.4);padding:10px;margin-top:12px;box-shadow:0 0 15px rgba(255,68,68,.2)}
 button.edit{background:rgba(255,170,0,.1);border:1px solid rgba(255,170,0,.4);padding:10px;margin-top:12px;box-shadow:0 0 15px rgba(255,170,0,.2)}
-button.logout{background:rgba(255,68,68,.1);border:1px solid rgba(255,68,68,.4);max-width:500px;margin:60px auto 40px;box-shadow:0 0 20px rgba(255,68,68,.2)}
+button.logout{background:rgba(255,68,.1);border:1px solid rgba(255,68,68,.4);max-width:500px;margin:60px auto 40px;box-shadow:0 0 20px rgba(255,68,68,.2)}
 button.view{background:rgba(0,255,255,.1);border:1px solid rgba(0,255,255,.4);padding:10px;margin-top:12px;box-shadow:0 0 15px rgba(0,255,255,.2)}
 .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;padding:0 16px;max-width:1600px;margin:0 auto}
-.grid .card{margin:0}
-.status{display:inline-block;padding:6px 16px;border-radius:12px;font-size:13px;font-weight:700}
+.grid.card{margin:0;min-width:0}
+.status{display:inline-block;padding:6px 12px;border-radius:12px;font-size:12px;font-weight:700;white-space:nowrap}
 .on{background:rgba(0,255,136,.15);color:#00ff88;border:1px solid rgba(0,255,136,.4);box-shadow:0 0 15px rgba(0,255,136,.3)}
 .off{background:rgba(255,68,68,.15);color:#ff4444;border:1px solid rgba(255,68,68,.4);box-shadow:0 0 15px rgba(255,68,68,.3)}
 .label{opacity:.7;font-size:13px;text-transform:uppercase;text-align:center;letter-spacing:2px;margin-bottom:8px}
@@ -38,45 +38,48 @@ button.view{background:rgba(0,255,255,.1);border:1px solid rgba(0,255,255,.4);pa
 .modal-close{float:right;background:rgba(255,68,68,.1);border:1px solid rgba(255,68,68,.4);color:#fff;padding:10px 20px;border-radius:8px;cursor:pointer;box-shadow:0 0 15px rgba(255,68,68,.2)}
 #login,#painel{position:relative;z-index:1;width:100%;min-height:100dvh;padding:20px}
 .tela-ativa{display:flex!important;flex-direction:column;justify-content:center;align-items:center}
-#login .card{border-radius:20px;margin:0 auto;max-width:500px;width:100%}
+#login.card{border-radius:20px;margin:0 auto;max-width:500px;width:100%}
 .data-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:12px 0}
 .data-item{text-align:center}
-.data-item .label{margin-bottom:4px;font-size:11px}
-.data-item .value{font-size:24px;font-weight:700;text-shadow:0 0 15px currentColor}
+.data-item.label{margin-bottom:4px;font-size:11px}
+.data-item.value{font-size:24px;font-weight:700;text-shadow:0 0 15px currentColor}
 .btn-group{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
 .section-title{font-size:24px;font-weight:900;margin:40px 0 20px;color:#00ffff;text-shadow:0 0 20px rgba(0,255,255,.4)}
 .hidden{display:none!important}
 .badge{display:inline-block;padding:4px 12px;border-radius:8px;font-size:11px;font-weight:700;margin-top:8px}
 .badge-green{background:rgba(0,255,136,.15);color:#00ff88;border:1px solid rgba(0,255,136,.4)}
 .badge-orange{background:rgba(255,170,0,.15);color:#ffaa00;border:1px solid rgba(255,170,0,.4)}
+.card-header{text-align:center;margin-bottom:12px}
+.card-code{font-size:16px;font-weight:700;word-break:break-all;margin-top:8px}
 
 @media(max-width:1200px){
-  .grid{grid-template-columns:repeat(3,1fr)}
+ .grid{grid-template-columns:repeat(3,1fr)}
 }
 
 @media(max-width:900px){
-  .grid{grid-template-columns:repeat(2,1fr);gap:12px}
+ .grid{grid-template-columns:repeat(2,1fr);gap:12px}
 }
 
 @media(max-width:768px){
-  .grid{grid-template-columns:repeat(2,1fr);gap:10px;padding:0 10px}
-  .card{padding:16px}
-  .data-item .value{font-size:20px}
-  .data-item .label{font-size:10px}
-  h1{font-size:28px;padding:20px 15px}
-  .section-title{font-size:20px;margin:30px 0 15px}
-  input,button{font-size:16px;padding:16px}
-  .status{padding:4px 10px;font-size:11px}
-  .badge{padding:3px 8px;font-size:10px}
-  .card-cadastro{padding:20px}
+ .grid{grid-template-columns:repeat(2,1fr);gap:10px;padding:0 10px}
+ .card{padding:14px}
+ .data-item.value{font-size:18px}
+ .data-item.label{font-size:9px}
+  h1{font-size:26px;padding:16px 12px}
+ .section-title{font-size:18px;margin:24px 0 12px}
+  input,button{font-size:15px;padding:14px}
+ .status{padding:3px 8px;font-size:10px}
+ .badge{padding:3px 8px;font-size:9px}
+ .card-cadastro{padding:20px}
+ .card-code{font-size:14px}
+  button.del,button.view{font-size:14px;padding:8px}
 }
 
-@media(max-width:400px){
-  .grid{gap:8px;padding:0 8px}
-  .card{padding:12px}
-  .data-item .value{font-size:18px}
-  h1{font-size:24px}
-  .card b{font-size:14px!important}
+@media(max-width:380px){
+ .grid{gap:8px;padding:0 8px}
+ .card{padding:12px}
+ .data-item.value{font-size:16px}
+ .card-code{font-size:13px}
 }
 </style>
 </head>
@@ -93,10 +96,10 @@ button.view{background:rgba(0,255,255,.1);border:1px solid rgba(0,255,255,.4);pa
 </div>
 <div id="painel" class="hidden">
   <h1>BMS SMART</h1>
-  
+
   <div class="section-title">Clientes Cadastrados</div>
   <div id="listaUsers" class="grid"></div>
-  
+
   <div class="section-title">Todas as BMS do Sistema</div>
   <div class="card card-cadastro">
     <div class="label">Cadastrar BMS no Sistema</div>
@@ -106,7 +109,7 @@ button.view{background:rgba(0,255,255,.1);border:1px solid rgba(0,255,255,.4);pa
     <p id="msg" style="text-align:center;margin-top:8px"></p>
   </div>
   <div id="lista" class="grid"></div>
-  
+
   <button class="logout" onclick="adminLogout()">Sair do Painel Admin</button>
 </div>
 
@@ -142,7 +145,7 @@ async function adminLogin(){
   const password = document.getElementById('password').value;
   const errorEl = document.getElementById('loginError');
   errorEl.style.display='none';
-  
+
   const r = await fetch(API+'?action=login_admin',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({user,password})});
   const d = await r.json();
   if(d.ok){
@@ -238,7 +241,7 @@ async function salvarUser(){
   const nome = document.getElementById('editUserNome').value;
   const email = document.getElementById('editUserEmail').value;
   const msg = document.getElementById('editMsg');
-  
+
   const r = await fetch(API+'?action=edit_user',{method:'POST',headers:authHeaders(),body:JSON.stringify({id:parseInt(id),nome,email})});
   const d = await r.json();
   if(d.ok){
@@ -291,15 +294,15 @@ async function listarBms(){
   document.getElementById('lista').innerHTML = d.map(b=>{
     const online = b.online&&(Date.now()-new Date(b.updated_at).getTime()<10000);
     const cellsCount = b.cells? b.cells.length : 0;
-    const cellsHtml = cellsCount > 0? 
-      `<button class="view" onclick="viewCells('${b.code}')">Ver ${cellsCount} Células</button>` : 
+    const cellsHtml = cellsCount > 0?
+      `<button class="view" onclick="viewCells('${b.code}')">Ver ${cellsCount} Células</button>` :
       '<div style="opacity:.4;font-size:13px;margin-top:12px;text-align:center">Sem dados de células</div>';
     const dono = b.user_id? `<span class="badge badge-orange">Vinculada: ${b.dono_nome||b.dono_email}</span>` : `<span class="badge badge-green">Disponível</span>`;
     return `
     <div class="card">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
-        <div style="text-align:left"><b style="font-size:18px">${b.code}</b></div>
+      <div class="card-header">
         <span class="status ${online?'on':'off'}">${online?'Online':'Offline'}</span>
+        <div class="card-code">${b.code}</div>
       </div>
       <div style="text-align:center;margin-bottom:12px">${dono}</div>
       <div class="data-row">
