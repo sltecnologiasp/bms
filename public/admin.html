@@ -44,6 +44,9 @@ button.view{background:rgba(0,255,255,.1);border:1px solid rgba(0,255,255,.4);pa
 .btn-group{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
 .section-title{font-size:24px;font-weight:900;margin:40px 0 20px;color:#00ffff;text-shadow:0 0 20px rgba(0,255,255,.4)}
 .hidden{display:none!important}
+.badge{display:inline-block;padding:4px 12px;border-radius:8px;font-size:11px;font-weight:700;margin-top:8px}
+.badge-green{background:rgba(0,255,136,.15);color:#00ff88;border:1px solid rgba(0,255,136,.4)}
+.badge-orange{background:rgba(255,170,0,.15);color:#ffaa00;border:1px solid rgba(255,170,0,.4)}
 </style>
 </head>
 <body>
@@ -63,12 +66,11 @@ button.view{background:rgba(0,255,255,.1);border:1px solid rgba(0,255,255,.4);pa
   <div class="section-title">Clientes Cadastrados</div>
   <div id="listaUsers" class="grid"></div>
   
-  <div class="section-title">Todas as BMS</div>
+  <div class="section-title">Todas as BMS do Sistema</div>
   <div class="card card-cadastro">
-    <div class="label">Cadastrar BMS</div>
+    <div class="label">Cadastrar BMS no Sistema</div>
     <input id="code" placeholder="SL82576655" maxlength="10">
-    <input id="nome" placeholder="Nome do Cliente">
-    <button onclick="cad()">Cadastrar BMS</button>
+    <button onclick="cad()">Cadastrar BMS Master</button>
     <p id="msg" style="text-align:center;margin-top:8px"></p>
   </div>
   <div id="lista" class="grid"></div>
@@ -145,16 +147,15 @@ document.getElementById('code').oninput = e => {
 
 async function cad(){
   const code = document.getElementById('code').value;
-  const nome = document.getElementById('nome').value;
-  const r = await fetch(API+'?action=add_bms',{method:'POST',headers:authHeaders(),body:JSON.stringify({code,nome})});
+  const r = await fetch(API+'?action=admin_add_master',{method:'POST',headers:authHeaders(),body:JSON.stringify({code})});
   const d = await r.json();
-  document.getElementById('msg').textContent = d.ok?'Cadastrada!':d.error;
+  document.getElementById('msg').textContent = d.ok?'Cadastrada no sistema!':d.error;
   document.getElementById('msg').style.color = d.ok?'#00ff88':'#ff4444';
-  if(d.ok){document.getElementById('code').value='';document.getElementById('nome').value='';carregarTudo();}
+  if(d.ok){document.getElementById('code').value='';carregarTudo();}
 }
 
 async function del(code){
-  if(!confirm(`Deletar ${code}?`))return;
+  if(!confirm(`Deletar ${code} do sistema?`))return;
   await fetch(API+`?action=deletar&code=${code}`,{method:'DELETE',headers:authHeaders()});
   carregarTudo();
 }
@@ -241,7 +242,7 @@ async function listarUsers(){
 }
 
 async function listarBms(){
-  const r = await fetch(API+'?action=all_bms',{headers:authHeaders()});
+  const r = await fetch(API+'?action=admin_list_master',{headers:authHeaders()});
   const d = await r.json();
   bmsList = d;
   document.getElementById('lista').innerHTML = d.map(b=>{
@@ -250,12 +251,14 @@ async function listarBms(){
     const cellsHtml = cellsCount > 0? 
       `<button class="view" onclick="viewCells('${b.code}')">Ver ${cellsCount} Células</button>` : 
       '<div style="opacity:.4;font-size:13px;margin-top:12px;text-align:center">Sem dados de células</div>';
+    const dono = b.user_id? `<span class="badge badge-orange">Vinculada: ${b.dono_nome||b.dono_email}</span>` : `<span class="badge badge-green">Disponível</span>`;
     return `
     <div class="card">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
-        <div style="text-align:left"><b style="font-size:18px">${b.code}</b><div style="opacity:.6;font-size:13px;margin-top:4px">${b.nome||''}</div></div>
+        <div style="text-align:left"><b style="font-size:18px">${b.code}</b></div>
         <span class="status ${online?'on':'off'}">${online?'Online':'Offline'}</span>
       </div>
+      <div style="text-align:center;margin-bottom:12px">${dono}</div>
       <div class="data-row">
         <div class="data-item">
           <div class="label">SOC</div>
@@ -277,9 +280,9 @@ async function listarBms(){
         </div>
       </div>
       ${cellsHtml}
-      <button class="del" onclick="del('${b.code}')">Excluir</button>
+      <button class="del" onclick="del('${b.code}')">Excluir do Sistema</button>
     </div>
-  `}).join('') || '<div class="card" style="text-align:center;opacity:.4;padding:60px 20px">Nenhuma BMS cadastrada</div>';
+  `}).join('') || '<div class="card" style="text-align:center;opacity:.4;padding:60px 20px">Nenhuma BMS cadastrada no sistema</div>';
 }
 setInterval(()=>{if(adminToken)carregarTudo()},5000);
 </script>
