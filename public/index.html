@@ -85,8 +85,8 @@ canvas{width:100%!important;height:320px!important;touch-action:none}
   <div class="title">SMART BMS</div>
   <div class="card">
     <div class="label">Login</div>
-    <input id="loginEmail" placeholder="E-mail">
-    <input id="loginSenha" type="password" placeholder="Senha">
+    <input id="loginEmail" placeholder="E-mail" autocomplete="email">
+    <input id="loginSenha" type="password" placeholder="Senha" autocomplete="current-password">
     <button onclick="login()">Entrar</button>
     <div class="link" onclick="showCadastro()">Não tem conta? Cadastre-se</div>
     <p id="loginError" class="error" style="display:none;"></p>
@@ -137,7 +137,6 @@ canvas{width:100%!important;height:320px!important;touch-action:none}
         <div class="bar"><div class="bar-fill" id="socBar"></div></div>
       </div>
     </div>
-  </div>
   <div class="card card-wide">
     <div class="label" id="bmsName">BMS</div>
     <div style="margin-top:12px"><span id="connStatus" class="status off">Offline</span></div>
@@ -164,17 +163,20 @@ canvas{width:100%!important;height:320px!important;touch-action:none}
   </div>
 </div>
 <script>
+const API = '/api/bms';
+let userToken = localStorage.getItem('bms_token');
+let currentBMS = null;
+let interval, chart, lastDataHash = '', offlineTimer, isOffline = false;
+
 function createParticles(){
   if(window.innerWidth<768)return;
   const c=document.getElementById('particles');
   setInterval(()=>{if(c.children.length>=6)return;const p=document.createElement('div');p.className='particle';const s=Math.random()*2+1;p.style.width=s+'px';p.style.height=s+'px';p.style.left=Math.random()*100+'%';p.style.animationDuration=(Math.random()*8+12)+'s';c.appendChild(p);setTimeout(()=>p.remove(),20000)},2500);
 }
 createParticles();
-const API = '/api/bms';
-let userToken = localStorage.getItem('bms_token');
-let currentBMS = null;
-let interval, chart, lastDataHash = '', offlineTimer, isOffline = false;
+
 if(userToken) checkSession();
+
 async function checkSession(){
   try{
     const r = await fetch(API+'?action=user_bms', {headers:{'Authorization':'Bearer '+userToken}});
@@ -184,16 +186,19 @@ async function checkSession(){
     }else logout();
   }catch(e){logout()}
 }
+
 function showLogin(){
   document.getElementById('cadastro').classList.add('hidden');
   document.getElementById('selectBMS').classList.add('hidden');
   document.getElementById('dash').classList.add('hidden');
   document.getElementById('login').classList.remove('hidden');
 }
+
 function showCadastro(){
   document.getElementById('login').classList.add('hidden');
   document.getElementById('cadastro').classList.remove('hidden');
 }
+
 async function cadastrar(){
   const nome=document.getElementById('cadNome').value.trim();
   const email=document.getElementById('cadEmail').value.trim();
@@ -210,10 +215,12 @@ async function cadastrar(){
     else{msg.textContent=d.error||'Erro';msg.className='error';msg.style.display='block'}
   }catch(e){msg.textContent='Erro de conexão';msg.className='error';msg.style.display='block'}
 }
+
 async function login(){
   const email=document.getElementById('loginEmail').value.trim();
   const senha=document.getElementById('loginSenha').value;
   const err=document.getElementById('loginError');
+  err.style.display='none';
   if(!email||!senha){err.textContent='Preencha e-mail e senha';err.style.display='block';return}
   try{
     const r=await fetch(API+'?action=login_user',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,senha})});
@@ -222,11 +229,13 @@ async function login(){
     else{err.textContent=d.error||'Erro';err.style.display='block'}
   }catch(e){err.textContent='Erro de conexão';err.style.display='block'}
 }
+
 function logout(){
   clearInterval(interval);clearTimeout(offlineTimer);
   localStorage.removeItem('bms_token');localStorage.removeItem('bms_user_data');
   userToken=null;currentBMS=null;location.reload();
 }
+
 function showSelectBMS(nome){
   document.getElementById('login').classList.add('hidden');
   document.getElementById('cadastro').classList.add('hidden');
@@ -235,7 +244,9 @@ function showSelectBMS(nome){
   if(nome)document.getElementById('userName').textContent=nome;
   loadBMSList();
 }
+
 document.getElementById('bmsCode').oninput=e=>{if(!e.target.value.startsWith('SL'))e.target.value='SL';e.target.value='SL'+e.target.value.slice(2).replace(/[^0-9]/g,'').slice(0,8)};
+
 async function addBMS(){
   const code=document.getElementById('bmsCode').value.trim();
   const nome=document.getElementById('bmsNome').value.trim();
@@ -249,6 +260,7 @@ async function addBMS(){
     else{msg.textContent=d.error||'Erro';msg.className='error';msg.style.display='block'}
   }catch(e){msg.textContent='Erro de conexão';msg.className='error';msg.style.display='block'}
 }
+
 async function loadBMSList(){
   try{
     const r=await fetch(API+'?action=user_bms',{headers:{'Authorization':'Bearer '+userToken}});
@@ -266,6 +278,7 @@ async function loadBMSList(){
     }).join('');
   }catch(e){console.error(e)}
 }
+
 async function selectBMS(code,nome){
   currentBMS={code,nome};
   document.getElementById('selectBMS').classList.add('hidden');
@@ -274,6 +287,7 @@ async function selectBMS(code,nome){
   if(!window.Chart){const{Chart,registerables}=await import('https://cdn.jsdelivr.net/npm/chart.js@4.4.1/+esm');Chart.register(...registerables);window.Chart=Chart}
   initChart();update();clearInterval(interval);interval=setInterval(update,5000);
 }
+
 function voltarLista(){
   clearInterval(interval);clearTimeout(offlineTimer);
   currentBMS=null;lastDataHash='';isOffline=false;
@@ -281,6 +295,7 @@ function voltarLista(){
   document.getElementById('selectBMS').classList.remove('hidden');
   loadBMSList();
 }
+
 function renderCells(cells){
   if(!cells||cells.length===0){document.getElementById('cells').innerHTML='<div style="grid-column:1/-1;opacity:.4;padding:20px">Sem dados das células</div>';return}
   const vals=cells.map(c=>parseFloat(c)).filter(v=>v>0);if(vals.length===0)return;
@@ -291,7 +306,8 @@ function renderCells(cells){
   document.getElementById('cellCount').textContent=cells.length;
   document.getElementById('cells').innerHTML=cells.map((v,i)=>{const val=parseFloat(v);let cls='ok';if(val<3.2||val>4.2)cls='crit';else if(val<3.4||val>4.15)cls='warn';return`<div class="cell ${cls}"><div class="cell-num">C${i+1}</div><div class="cell-val">${val.toFixed(3)}</div></div>`}).join('');
 }
+
 const voltageHistory=[],currentHistory=[],labelsHistory=[];
 function initChart(){
   const ctx=document.getElementById('mainChart').getContext('2d');
-  chart=new window.Chart(ctx,{type:'line',data:{labels:labelsHistory,datasets:[{label:'Tensão',data:voltageHistory,borderColor:'#00ffff',backgroundColor:'rgba(0,255,255,.08)',tension:.4,fill:true,borderWidth:2},{label:'Corrente',data:currentHistory,borderColor:'#ffaa00',backgroundColor:'rgba(255,170,0,.08)',te
+  chart=new window.Chart(ctx,{type:'line',data:{labels:labelsHistory,datasets:[{label:'Tensão',data:voltageHistory,borderColor:'#00ffff',backgroundColor:'rgba(0,255,255,.08)',tension:.4,fill:true,borderWidth:2},{label:'Corr
