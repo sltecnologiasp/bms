@@ -55,7 +55,7 @@ button.voltar{background:rgba(0,255,136,.1);border:1px solid rgba(0,255,136,.4);
 .modal.active{display:block}
 .modal-content{max-width:1200px;margin:40px auto;background:var(--bg);border:1px solid rgba(0,255,255,.12);border-radius:20px;padding:30px;text-align:center;box-shadow:0 0 40px rgba(0,255,255,.2)}
 .modal-content.small{max-width:520px}
-.modal-close{float:right;background:rgba(255,68,68,.1);border:1px solid rgba(255,68,.4);color:#fff;padding:10px 20px;border-radius:8px;cursor:pointer;box-shadow:0 0 15px rgba(255,68,68,.2)}
+.modal-close{float:right;background:rgba(255,68,68,.1);border:1px solid rgba(255,68,68,.4);color:#fff;padding:10px 20px;border-radius:8px;cursor:pointer;box-shadow:0 0 15px rgba(255,68,68,.2)}
 .data-row{display:grid;grid-template-columns:1fr 1fr;gap:4px;margin:12px 0}
 .data-item{text-align:center}
 .data-item .label{margin-bottom:4px;font-size:11px}
@@ -112,7 +112,7 @@ input,button{font-size:16px;padding:16px}
 <div class="card card-cadastro">
 <div class="label">Cadastrar BMS no Sistema</div>
 <input id="code" placeholder="SL000000000000" maxlength="14">
-<button onclick="cad()">CADASTRAR BMS MASTER</button>
+<button class="btn-clientes" onclick="cad()">CADASTRAR BMS MASTER</button>
 <button class="btn-sec" onclick="gerarECadastrar()">GERAR CÓDIGO ALEATÓRIO</button>
 <button class="btn-clientes" onclick="mostrarClientes()">VER CLIENTES CADASTRADOS</button>
 <p id="msg" style="text-align:center;margin-top:8px;font-size:14px"></p>
@@ -138,14 +138,12 @@ input,button{font-size:16px;padding:16px}
 <h2 id="modalBmsTitle" style="text-align:center;margin-bottom:20px;font-size:24px"></h2>
 <div id="modalBmsContent"></div>
 </div>
-</div>
 
 <div id="modalCells" class="modal">
 <div class="modal-content">
 <button class="modal-close" onclick="closeModal()">Fechar</button>
 <h2 id="modalTitle" style="text-align:center;margin-bottom:20px"></h2>
 <div id="modalCellsContent" class="cells" style="margin-top:20px"></div>
-</div>
 </div>
 
 <div id="modalEditUser" class="modal">
@@ -157,7 +155,6 @@ input,button{font-size:16px;padding:16px}
 <input id="editUserEmail" placeholder="Email">
 <button onclick="salvarUser()">SALVAR</button>
 <p id="editMsg" style="text-align:center;margin-top:8px;font-size:14px"></p>
-</div>
 </div>
 
 <script>
@@ -253,7 +250,7 @@ function viewBmsDetails(code){
   const bms = bmsList.find(b => b.code === code);
   if(!bms) return;
   
-  const online = bms.online&&(Date.now()-new Date(bms.updated_at).getTime()<10000);
+  const online = bms.updated_at && (Date.now() - new Date(bms.updated_at).getTime() < 10000);
   const cellsCount = bms.cells? bms.cells.length : 0;
   const cellsHtml = cellsCount > 0?
     `<button class="view" onclick="viewCells('${bms.code}')">Ver ${cellsCount} Células</button>` :
@@ -380,9 +377,22 @@ async function listarUsers(){
 async function listarBms(){
   const r = await fetch(API+'?action=admin_list_master',{headers:authHeaders()});
   const d = await r.json();
-  bmsList = d;
-  document.getElementById('lista').innerHTML = d.map(b=>{
-    const online = b.online&&(Date.now()-new Date(b.updated_at).getTime()<10000);
+  
+  // Ordena: online primeiro, depois por updated_at desc
+  bmsList = d.sort((a,b) => {
+    const aOnline = a.updated_at && (Date.now() - new Date(a.updated_at).getTime() < 10000);
+    const bOnline = b.updated_at && (Date.now() - new Date(b.updated_at).getTime() < 10000);
+    
+    if (aOnline && !bOnline) return -1;
+    if (!aOnline && bOnline) return 1;
+    
+    const aTime = a.updated_at ? new Date(a.updated_at).getTime() : 0;
+    const bTime = b.updated_at ? new Date(b.updated_at).getTime() : 0;
+    return bTime - aTime;
+  });
+  
+  document.getElementById('lista').innerHTML = bmsList.map(b=>{
+    const online = b.updated_at && (Date.now() - new Date(b.updated_at).getTime() < 10000);
     const dono = b.user_id? `<span class="badge badge-orange">Vinculada</span>` : `<span class="badge badge-green">Disponível</span>`;
     return `
     <div class="card" onclick="viewBmsDetails('${b.code}')">
