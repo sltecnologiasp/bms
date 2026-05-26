@@ -101,6 +101,20 @@ export async function onRequest({ request, env }) {
       return json({ ok: true });
     }
 
+    if (action === 'remove_bms' && request.method === 'DELETE') {
+      if (!userId) return json({ ok: false, error: 'Login necessário' }, 401);
+      const code = url.searchParams.get('code');
+      if (!code) return json({ ok: false, error: 'Code obrigatório' }, 400);
+
+      const check = await env.DB.prepare('SELECT id FROM bms_master WHERE code =? AND user_id =?').bind(code, userId).first();
+      if (!check) return json({ ok: false, error: 'BMS não encontrada na sua conta' }, 403);
+
+      await env.DB.prepare('UPDATE bms_master SET user_id = NULL WHERE code =?').bind(code).run();
+      await env.DB.prepare('DELETE FROM user_bms WHERE user_id =? AND bms_code =?').bind(userId, code).run();
+
+      return json({ ok: true });
+    }
+
     if (action === 'user_bms' && request.method === 'GET') {
       if (!userId) return json({ ok: false, error: 'Login necessário' }, 401);
       const { results } = await env.DB.prepare(`
