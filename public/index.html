@@ -9,12 +9,12 @@
 *{margin:0;padding:0;box-sizing:border-box}
 :root{--bg:#05070d;--cyan:#00ffff;--blue:#0080ff;--green:#00ff88;--red:#ff4444;--orange:#ffaa00}
 body{font-family:'Inter',sans-serif;background:var(--bg);color:#fff;min-height:100vh;width:100%;overflow-x:hidden}
-#login,#dash,#lista,#cadastro,#verify{position:relative;z-index:1;width:100%;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:8px}
+#login,#dash,#lista,#cadastro{position:relative;z-index:1;width:100%;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:8px}
 #dash,#lista{justify-content:flex-start;padding-top:12px}
-#login,#cadastro,#verify{justify-content:center}
+#login,#cadastro{justify-content:center}
 .title{font-size:clamp(32px,8vw,74px);font-weight:900;margin-bottom:16px;letter-spacing:3px;background:linear-gradient(90deg,var(--cyan),var(--blue));-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-align:center;width:100%}
 .card{background:rgba(10,15,25,.92);border:1px solid rgba(0,255,255,.12);border-radius:16px;padding:12px;width:100%;margin-bottom:4px}
-#login.card,#cadastro.card,#verify.card{max-width:520px}
+#login.card,#cadastro.card{max-width:520px}
 .gauge-wrap{width:100%;margin:0 0 4px 0}
 .gauge-card{padding:20px 20px 30px;min-height:280px}
 .gauge{width:min(240px,60vw);height:min(240px,60vw);margin:auto;border-radius:50%;background:conic-gradient(#00ff88 0deg,#00ffff 180deg,rgba(255,255,255,.08) 180deg);position:relative;box-shadow:0 0 30px rgba(0,255,255,.15)}
@@ -33,12 +33,11 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:#fff;min-height:1
 input,button{width:100%;padding:18px;border-radius:18px;border:none;outline:none;margin-top:16px;font-size:18px}
 input{background:rgba(0,0,0,.5);color:#fff;font-family:monospace;letter-spacing:2px;border:1px solid rgba(0,255,255,.2)}
 input::placeholder{color:rgba(255,255,255,.3)}
-#verify-code{font-size:32px;letter-spacing:12px;text-align:center;font-weight:700}
 button{background:linear-gradient(90deg,var(--blue),var(--cyan));color:#fff;font-weight:700;cursor:pointer}
 .btn-sec{background:transparent;border:1px solid rgba(0,255,255,.3);color:var(--cyan)}
 .status{display:inline-flex;align-items:center;gap:10px;padding:14px 26px;border-radius:999px;font-weight:700}
 .on{background:rgba(0,255,136,.12);color:var(--green);border:1px solid rgba(0,255,136,.3)}
-.off{background:rgba(255,68,.12);color:var(--red);border:1px solid rgba(255,68,68,.3)}
+.off{background:rgba(255,68,68,.12);color:var(--red);border:1px solid rgba(255,68,68,.3)}
 .status-wrap{display:flex;justify-content:center;align-items:center;flex-direction:column;margin-top:14px}
 .bms-code{font-size:clamp(18px,4.5vw,24px);font-weight:700;margin-top:12px;letter-spacing:1.5px;color:#fff;text-align:center;opacity:.95}
 .diff{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;margin-top:18px}
@@ -61,7 +60,6 @@ button{background:linear-gradient(90deg,var(--blue),var(--cyan));color:#fff;font
 .bms-item button.del{background:rgba(255,68,68,.1);border:1px solid rgba(255,68,68,.4);padding:6px 16px;margin-top:12px;width:auto;box-shadow:0 0 15px rgba(255,68,68,.2);border-radius:10px;color:#fff;font-weight:600;font-size:14px;cursor:pointer}
 .user-info{color:#888;font-size:14px;text-align:center;margin-bottom:20px}
 .erro{background:rgba(255,0,0,.1);border:2px solid #ff4444;border-radius:12px;padding:16px;margin-top:16px;color:#ff4444;font-size:14px}
-.sucesso{background:rgba(0,255,136,.1);border:2px solid #00ff88;border-radius:12px;padding:16px;margin-top:16px;color:#00ff88;font-size:14px}
 .link-cadastro{margin-top:20px;text-align:center;color:#fff;cursor:pointer;opacity:.8}
 .link-cadastro span{color:#00ffff;text-decoration:underline}
 .footer-voltar{width:100%;margin-top:24px;margin-bottom:12px}
@@ -98,20 +96,6 @@ button{background:linear-gradient(90deg,var(--blue),var(--cyan));color:#fff;font
 </div>
 </div>
 
-<div id="verify" class="hidden">
-<div class="title">SMART BMS</div>
-<div class="card">
-<div class="label">Confirme seu email</div>
-<p style="text-align:center;margin:16px 0;opacity:.8">Enviamos um código de 6 dígitos para<br><span id="verify-email" style="color:#00ffff"></span></p>
-<input id="verify-code" placeholder="000000" maxlength="6" pattern="[0-9]*" inputmode="numeric">
-<button onclick="verifyEmail()">CONFIRMAR EMAIL</button>
-<button class="btn-sec" onclick="reenviar()">REENVIAR CÓDIGO</button>
-<p class="link-cadastro" onclick="mostrarLogin()">Voltar pro <span>login</span></p>
-<div id="erro-verify" class="erro hidden"></div>
-<div id="sucesso-verify" class="sucesso hidden"></div>
-</div>
-</div>
-
 <div id="lista" class="hidden">
 <div class="title" style="font-size:clamp(28px,6vw,32px);margin-bottom:8px">SMART BMS</div>
 <div class="user-info">Olá, <span id="user-nome">--</span></div>
@@ -141,11 +125,14 @@ button{background:linear-gradient(90deg,var(--blue),var(--cyan));color:#fff;font
 <div class="bar-label"><span>Bateria</span><span id="socBarTxt">0%</span></div>
 <div class="bar"><div class="bar-fill" id="socBar"></div></div>
 </div>
+</div>
+</div>
 <div class="card">
 <div class="label">Status</div>
 <div class="status-wrap">
 <span id="status" class="status off">Offline</span>
 <div class="bms-code" id="bms-titulo">--</div>
+</div>
 </div>
 <div class="grid">
 <div class="card"><div class="label">SOC</div><div class="value" id="soc" style="color:#00ff88">0%</div></div>
@@ -166,6 +153,7 @@ button{background:linear-gradient(90deg,var(--blue),var(--cyan));color:#fff;font
 <div class="footer-voltar">
 <button class="btn-sec" onclick="voltar()">← VOLTAR</button>
 </div>
+</div>
 
 <script>
 var API = '/api/bms';
@@ -173,14 +161,12 @@ var TOKEN = localStorage.getItem('bms_token');
 var USER = null;
 var CODIGO = localStorage.getItem('bms_codigo_ativo');
 var INT = null;
-var PENDING_EMAIL = localStorage.getItem('pending_email');
 
 try{USER = JSON.parse(localStorage.getItem('bms_user')||'null');}catch(e){}
 
 function esconderTudo(){
   document.getElementById('login').classList.add('hidden');
   document.getElementById('cadastro').classList.add('hidden');
-  document.getElementById('verify').classList.add('hidden');
   document.getElementById('lista').classList.add('hidden');
   document.getElementById('dash').classList.add('hidden');
 }
@@ -192,8 +178,6 @@ window.onload = function(){
     }else{
       mostrarLista();
     }
-  }else if(PENDING_EMAIL){
-    mostrarVerify(PENDING_EMAIL);
   }else{
     esconderTudo();
     document.getElementById('login').classList.remove('hidden');
@@ -206,18 +190,10 @@ window.onload = function(){
       e.target.value = 'SL' + e.target.value.slice(2).replace(/[^0-9]/g,'').slice(0,12);
     };
   }
-
-  var codeInput = document.getElementById('verify-code');
-  if(codeInput){
-    codeInput.oninput = function(e){
-      e.target.value = e.target.value.replace(/[^0-9]/g,'').slice(0,6);
-    };
-  }
 };
 
 function mostrarLogin(){
   localStorage.removeItem('bms_codigo_ativo');
-  localStorage.removeItem('pending_email');
   esconderTudo();
   document.getElementById('login').classList.remove('hidden');
 }
@@ -225,14 +201,6 @@ function mostrarLogin(){
 function mostrarCadastro(){
   esconderTudo();
   document.getElementById('cadastro').classList.remove('hidden');
-}
-
-function mostrarVerify(email){
-  localStorage.setItem('pending_email', email);
-  esconderTudo();
-  document.getElementById('verify').classList.remove('hidden');
-  document.getElementById('verify-email').textContent = email;
-  document.getElementById('verify-code').value = '';
 }
 
 function login(){
@@ -257,10 +225,7 @@ function login(){
       USER = {nome:d.nome,email:d.email};
       localStorage.setItem('bms_token', TOKEN);
       localStorage.setItem('bms_user', JSON.stringify(USER));
-      localStorage.removeItem('pending_email');
       mostrarLista();
-    }else if(d.need_verify){
-      mostrarVerify(d.email);
     }else{
       var e = document.getElementById('erro');
       e.textContent = d.error || 'Erro ao fazer login';
@@ -292,9 +257,7 @@ function cadastrar(){
   })
 .then(function(r){return r.json();})
 .then(function(d){
-    if(d.ok && d.need_verify){
-      mostrarVerify(d.email);
-    }else if(d.ok){
+    if(d.ok){
       alert('Conta criada! Faz login');
       mostrarLogin();
       document.getElementById('email').value = email;
@@ -307,71 +270,6 @@ function cadastrar(){
 .catch(function(e2){
     e.textContent = 'Erro: ' + e2.message;
     e.classList.remove('hidden');
-  });
-}
-
-function verifyEmail(){
-  const code = document.getElementById('verify-code').value;
-  const email = localStorage.getItem('pending_email');
-  const e = document.getElementById('erro-verify');
-  const s = document.getElementById('sucesso-verify');
-  e.classList.add('hidden');
-  s.classList.add('hidden');
-  
-  if(!code || code.length!== 6){
-    e.textContent = 'Digite o código de 6 dígitos';
-    e.classList.remove('hidden');
-    return;
-  }
-  
-  fetch(API + '?action=verify_email', {
-    method:'POST',
-    headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({email: email, code: code})
-  })
-.then(function(r){return r.json();})
-.then(function(d){
-    if(d.ok){
-      TOKEN = d.token;
-      USER = {nome:d.nome,email:d.email};
-      localStorage.setItem('bms_token', TOKEN);
-      localStorage.setItem('bms_user', JSON.stringify(USER));
-      localStorage.removeItem('pending_email');
-      s.textContent = 'Email confirmado com sucesso!';
-      s.classList.remove('hidden');
-      setTimeout(mostrarLista, 1500);
-    }else{
-      e.textContent = d.error;
-      e.classList.remove('hidden');
-    }
-  })
-.catch(function(e2){
-    e.textContent = 'Erro: ' + e2.message;
-    e.classList.remove('hidden');
-  });
-}
-
-function reenviar(){
-  const email = localStorage.getItem('pending_email');
-  const e = document.getElementById('erro-verify');
-  const s = document.getElementById('sucesso-verify');
-  e.classList.add('hidden');
-  s.classList.add('hidden');
-  
-  fetch(API + '?action=resend_code', {
-    method:'POST',
-    headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({email: email})
-  })
-.then(function(r){return r.json();})
-.then(function(d){
-    if(d.ok){
-      s.textContent = 'Novo código enviado!';
-      s.classList.remove('hidden');
-    }else{
-      e.textContent = d.error;
-      e.classList.remove('hidden');
-    }
   });
 }
 
@@ -547,7 +445,6 @@ function sair(){
   localStorage.removeItem('bms_token');
   localStorage.removeItem('bms_user');
   localStorage.removeItem('bms_codigo_ativo');
-  localStorage.removeItem('pending_email');
   location.reload();
 }
 </script>
