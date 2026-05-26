@@ -85,21 +85,22 @@ export async function onRequest({ request, env }) {
       const { code, nome } = await request.json();
       if (!code?.startsWith('SL') || code.length!== 10) return json({ ok: false, error: 'Código inválido. Use SL + 8 números' }, 400);
 
-      if (isAdmin) {
-        await env.DB.prepare('INSERT OR IGNORE INTO bms (code, nome) VALUES (?,?)').bind(code, nome || code).run();
-        return json({ ok: true });
-      }
+      // Primeiro cria a BMS
+      await env.DB.prepare('INSERT OR IGNORE INTO bms (code, nome) VALUES (?,?)').bind(code, nome || code).run();
 
+      // Admin não vincula a usuário
+      if (isAdmin) return json({ ok: true });
+
+      // Cliente vincula
       if (!userId) return json({ ok: false, error: 'Login necessário' }, 401);
       await env.DB.prepare('INSERT OR IGNORE INTO user_bms (user_id, bms_code, bms_nome) VALUES (?,?,?)').bind(userId, code, nome || code).run();
-      await env.DB.prepare('INSERT OR IGNORE INTO bms (code, nome) VALUES (?,?)').bind(code, nome || code).run();
       return json({ ok: true });
     }
 
     if (action === 'user_bms' && request.method === 'GET') {
       if (!userId) return json({ ok: false, error: 'Login necessário' }, 401);
       const { results } = await env.DB.prepare(`
-        SELECT ub.bms_code as code, ub.bms_nome as nome, b.online, b.updated_at
+        SELECT ub.bms_code as code, ub.bms_nome as nome, b.online, b.updated_at, b.soc, b.voltage
         FROM user_bms ub LEFT JOIN bms b ON b.code = ub.bms_code
         WHERE ub.user_id =? ORDER BY ub.created_at DESC
       `).bind(userId).all();
