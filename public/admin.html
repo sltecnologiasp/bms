@@ -152,9 +152,10 @@ input,button{font-size:16px;padding:16px}
 <button class="modal-close" onclick="closeBmsModal()">Fechar</button>
 <div id="modalBmsContent"></div>
 </div>
+</div>
 
 <div id="modalEditUser" class="modal">
-<div class="modal-content small">
+<div class="modal-content">
 <button class="modal-close" onclick="closeEditUser()">Fechar</button>
 <h2 style="text-align:center;margin-bottom:20px">Editar Cliente</h2>
 <input id="editUserId" type="hidden">
@@ -184,14 +185,19 @@ async function adminLogin(){
   const errorEl = document.getElementById('loginError');
   errorEl.classList.add('hidden');
 
-  const r = await fetch(API+'?action=login_admin',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({user,password})});
-  const d = await r.json();
-  if(d.ok){
-    adminToken = d.token;
-    sessionStorage.setItem('admin_token', adminToken);
-    showPainel();
-  }else{
-    errorEl.textContent = d.error;
+  try {
+    const r = await fetch(API+'?action=login_admin',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({user,password})});
+    const d = await r.json();
+    if(d.ok){
+      adminToken = d.token;
+      sessionStorage.setItem('admin_token', adminToken);
+      showPainel();
+    }else{
+      errorEl.textContent = d.error;
+      errorEl.classList.remove('hidden');
+    }
+  } catch(e) {
+    errorEl.textContent = 'Erro: ' + e.message;
     errorEl.classList.remove('hidden');
   }
 }
@@ -416,8 +422,4 @@ async function listarUsers(){
 }
 
 async function listarBms(){
-  const r = await fetch(API+'?action=admin_list_master',{headers:authHeaders()});
-  const d = await r.json();
-  
-  bmsList = d.sort((a,b) => {
-    const aOnline = isOnlin
+  const r = await fetch(API+'?acti
