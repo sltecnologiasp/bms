@@ -96,7 +96,6 @@ button{background:linear-gradient(90deg,var(--blue),var(--cyan));color:#fff;font
 <button class="btn-sec" onclick="mostrarLogin()">VOLTAR</button>
 <div id="erro-cad" class="erro hidden"></div>
 </div>
-</div>
 
 <div id="verify" class="hidden">
 <div class="title">SMART BMS</div>
@@ -109,6 +108,7 @@ button{background:linear-gradient(90deg,var(--blue),var(--cyan));color:#fff;font
 <p class="link-cadastro" onclick="mostrarLogin()">Voltar pro <span>login</span></p>
 <div id="erro-verify" class="erro hidden"></div>
 <div id="sucesso-verify" class="sucesso hidden"></div>
+</div>
 </div>
 
 <div id="lista" class="hidden">
@@ -139,13 +139,12 @@ button{background:linear-gradient(90deg,var(--blue),var(--cyan));color:#fff;font
 <div class="bar-label"><span>Bateria</span><span id="socBarTxt">0%</span></div>
 <div class="bar"><div class="bar-fill" id="socBar"></div></div>
 </div>
-</div>
-</div>
 <div class="card">
 <div class="label">Status</div>
 <div class="status-wrap">
 <span id="status" class="status off">Offline</span>
 <div class="bms-code" id="bms-titulo">--</div>
+</div>
 </div>
 <div class="grid">
 <div class="card"><div class="label">SOC</div><div class="value" id="soc" style="color:#00ff88">0%</div></div>
@@ -167,7 +166,6 @@ button{background:linear-gradient(90deg,var(--blue),var(--cyan));color:#fff;font
 <button class="btn-sec" onclick="voltar()">← VOLTAR</button>
 </div>
 </div>
-
 <script>
 var API = '/api/bms';
 var TOKEN = localStorage.getItem('bms_token');
@@ -479,4 +477,78 @@ function voltar(){
 }
 
 function renderCelulas(cels){
-  if(!cels || cels.length ==
+  if(!cels || cels.length === 0){
+    document.getElementById('celulas').innerHTML = '<div style="grid-column:1/-1;opacity:.4;padding:20px">Sem dados das células</div>';
+    return;
+  }
+  var vals = [];
+  for(var i=0;i<cels.length;i++){
+    var v = parseFloat(cels[i]);
+    if(v > 0) vals.push(v);
+  }
+  if(vals.length === 0) return;
+  var min = Math.min.apply(null, vals);
+  var max = Math.max.apply(null, vals);
+  var dif = max - min;
+  document.getElementById('celMin').textContent = min.toFixed(3)+'V';
+  document.getElementById('celMax').textContent = max.toFixed(3)+'V';
+  document.getElementById('celDif').textContent = dif.toFixed(3)+'V';
+  document.getElementById('celTot').textContent = cels.length;
+  var html = '';
+  for(var i=0;i<cels.length;i++){
+    var val = parseFloat(cels[i]);
+    var cls = 'ok';
+    if(val < 3.2 || val > 4.2) cls = 'crit';
+    else if(val < 3.4 || val > 4.15) cls = 'warn';
+    html += '<div class="cell '+cls+'"><div class="cell-num">C'+(i+1)+'</div><div class="cell-val">'+val.toFixed(3)+'</div></div>';
+  }
+  document.getElementById('celulas').innerHTML = html;
+}
+
+function atualizarGauge(soc){
+  var gauge = document.getElementById('socGauge');
+  var valor = document.getElementById('socValor');
+  var bar = document.getElementById('socBar');
+  var txt = document.getElementById('socBarTxt');
+  var deg = soc * 3.6;
+  valor.textContent = soc + '%';
+  txt.textContent = soc + '%';
+  bar.style.width = soc + '%';
+  gauge.style.background = 'conic-gradient(#00ff88 0deg,#00ffff '+deg+'deg,rgba(255,255,255,.08) '+deg+'deg)';
+}
+
+function atualizar(){
+  if(!CODIGO) return;
+  fetch(API+'?action=data&code='+CODIGO, {
+    headers:{'Authorization':'Bearer '+TOKEN}
+  })
+.then(function(r){
+    if(r.status === 401){sair();return;}
+    if(!r.ok) return;
+    return r.json();
+  })
+.then(function(d){
+    if(!d) return;
+    document.getElementById('soc').textContent = (d.soc?d.soc.toFixed(0):0)+'%';
+    document.getElementById('volt').textContent = (d.voltage?d.voltage.toFixed(2):0)+'V';
+    document.getElementById('corr').textContent = (d.current?d.current.toFixed(1):0)+'A';
+    document.getElementById('temp').textContent = (d.temp?d.temp.toFixed(1):0)+'°C';
+    var st = document.getElementById('status');
+    st.textContent = d.online?'Online':'Offline';
+    st.className = 'status ' + (d.online?'on':'off');
+    renderCelulas(d.cells);
+    atualizarGauge(parseInt(d.soc || 0));
+  });
+}
+
+function sair(){
+  clearInterval(INT);
+  localStorage.removeItem('bms_token');
+  localStorage.removeItem('bms_user');
+  localStorage.removeItem('bms_codigo_ativo');
+  localStorage.removeItem('pending_email');
+  location.reload();
+}
+</script>
+</body>
+</html>
