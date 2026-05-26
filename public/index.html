@@ -50,7 +50,7 @@ button.danger{background:rgba(255,68,68,.1);border:1px solid rgba(255,68,68,.3);
 .bar{height:16px;background:rgba(255,255,255,.06);border-radius:999px;overflow:hidden}
 .bar-fill{height:100%;width:0%;border-radius:999px;background:linear-gradient(90deg,#00ff88,#00ffff);transition:width.8s ease}
 .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;width:100%;max-width:1300px;margin:12px auto;transform:translateZ(0)}
-.grid.card{width:100%;height:120px;min-width:0;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:14px;overflow:hidden;transform:translateZ(0);backface-visibility:hidden}
+.grid .card{width:100%;height:120px;min-width:0;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:14px;overflow:hidden;transform:translateZ(0);backface-visibility:hidden}
 .value{font-size:30px;font-weight:800;margin-top:8px;line-height:1;white-space:nowrap;width:7ch;text-align:center;font-variant-numeric:tabular-nums}
 .status{display:inline-flex;align-items:center;gap:10px;padding:14px 26px;border-radius:999px;font-weight:700;margin-top:14px}
 .on{background:rgba(0,255,136,.12);color:var(--green);border:1px solid rgba(0,255,136,.3)}
@@ -76,7 +76,7 @@ canvas{width:100%!important;height:320px!important;touch-action:none}
 .bms-item.active{border-color:var(--cyan);background:rgba(0,255,255,.05)}
 .bms-item.offline{opacity:.4;border-color:rgba(255,68,68,.2)}
 .hidden{display:none!important}
-@media(max-width:520px){.title{font-size:38px}.value{font-size:22px}.gauge{width:180px;height:180px}.gauge-value{font-size:44px}.gauge-card{min-height:280px;padding:20px 20px 30px}.grid.card{padding:8px;height:100px}.label{font-size:8px}.diff-item span{font-size:18px}.grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:520px){.title{font-size:38px}.value{font-size:22px}.gauge{width:180px;height:180px}.gauge-value{font-size:44px}.gauge-card{min-height:280px;padding:20px 20px 30px}.grid .card{padding:8px;height:100px}.label{font-size:8px}.diff-item span{font-size:18px}.grid{grid-template-columns:repeat(2,1fr)}}
 </style>
 </head>
 <body>
@@ -255,4 +255,43 @@ async function loadBMSList(){
     if(r.status===401){logout();return}
     const data=await r.json();
     const list=document.getElementById('bmsList');
-    if(data.length===0){list.innerHTML='<div style="grid-column:1/-1;opacity:.4;text-align:center;padding
+    if(data.length===0){list.innerHTML='<div style="grid-column:1/-1;opacity:.4;text-align:center;padding:40px">Nenhuma BMS cadastrada</div>';return}
+    list.innerHTML=data.map(b=>{
+      const online=b.online&&(Date.now()-new Date(b.updated_at).getTime()<10000);
+      return`<div class="bms-item ${online?'':'offline'} ${currentBMS?.code===b.code?'active':''}" onclick="selectBMS('${b.code}','${b.nome}')">
+        <div style="font-weight:700;font-size:18px;margin-bottom:8px">${b.nome}</div>
+        <div style="opacity:.6;font-size:13px;margin-bottom:12px;font-family:monospace">${b.code}</div>
+        <span class="status ${online?'on':'off'}">${online?'Online':'Offline'}</span>
+      </div>`
+    }).join('');
+  }catch(e){console.error(e)}
+}
+async function selectBMS(code,nome){
+  currentBMS={code,nome};
+  document.getElementById('selectBMS').classList.add('hidden');
+  document.getElementById('dash').classList.remove('hidden');
+  document.getElementById('bmsName').textContent=nome;
+  if(!window.Chart){const{Chart,registerables}=await import('https://cdn.jsdelivr.net/npm/chart.js@4.4.1/+esm');Chart.register(...registerables);window.Chart=Chart}
+  initChart();update();clearInterval(interval);interval=setInterval(update,5000);
+}
+function voltarLista(){
+  clearInterval(interval);clearTimeout(offlineTimer);
+  currentBMS=null;lastDataHash='';isOffline=false;
+  document.getElementById('dash').classList.add('hidden');
+  document.getElementById('selectBMS').classList.remove('hidden');
+  loadBMSList();
+}
+function renderCells(cells){
+  if(!cells||cells.length===0){document.getElementById('cells').innerHTML='<div style="grid-column:1/-1;opacity:.4;padding:20px">Sem dados das células</div>';return}
+  const vals=cells.map(c=>parseFloat(c)).filter(v=>v>0);if(vals.length===0)return;
+  const min=Math.min(...vals),max=Math.max(...vals),diff=max-min;
+  document.getElementById('cellMin').textContent=min.toFixed(3)+'V';
+  document.getElementById('cellMax').textContent=max.toFixed(3)+'V';
+  document.getElementById('cellDiff').textContent=diff.toFixed(3)+'V';
+  document.getElementById('cellCount').textContent=cells.length;
+  document.getElementById('cells').innerHTML=cells.map((v,i)=>{const val=parseFloat(v);let cls='ok';if(val<3.2||val>4.2)cls='crit';else if(val<3.4||val>4.15)cls='warn';return`<div class="cell ${cls}"><div class="cell-num">C${i+1}</div><div class="cell-val">${val.toFixed(3)}</div></div>`}).join('');
+}
+const voltageHistory=[],currentHistory=[],labelsHistory=[];
+function initChart(){
+  const ctx=document.getElementById('mainChart').getContext('2d');
+  chart=new window.Chart(ctx,{type:'line',data:{labels:labelsHistory,datasets:[{label:'Tensão',data:voltageHistory,borderColor:'#00ffff',backgroundColor:'rgba(0,255,255,.08)',tension:.4,fill:true,borderWidth:2},{label:'Corrente',data:currentHistory,borderColor:'#ffaa00',backgroundColor:'rgba(255,170,0,.08)',te
