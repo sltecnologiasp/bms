@@ -70,7 +70,7 @@ canvas{width:100%!important;height:280px!important}
 </head>
 <body>
 
-<div id="login">
+<div id="login" class="hidden">
 <div class="title">SMART BMS</div>
 <div class="card">
 <div class="label">E-mail</div>
@@ -128,7 +128,6 @@ canvas{width:100%!important;height:280px!important}
 <div class="bar"><div class="bar-fill" id="socBar"></div></div>
 </div>
 </div>
-</div>
 <div class="card">
 <div class="label">Status</div>
 <div class="status-wrap">
@@ -151,7 +150,7 @@ canvas{width:100%!important;height:280px!important}
 <div class="diff">
 <div class="diff-item">Min<div><span id="celMin" style="color:#00ff88">0.00V</span></div></div>
 <div class="diff-item">Max<div><span id="celMax" style="color:#ffaa00">0.00V</span></div></div>
-<div class="diff-item">Diferença<div><span id="celDif" style="color:#ff4444">0.00V</span></div></div>
+<div class="diff-item">Diferença<div><span id="celDif" style="color:#ff4444">0.00V</span></div>
 <div class="diff-item">Total<div><span id="celTot" style="color:#00ffff">0</span></div></div>
 </div>
 <div id="celulas" class="cells"></div>
@@ -174,12 +173,22 @@ var LABEL_H = [];
 
 try{USER = JSON.parse(localStorage.getItem('bms_user')||'null');}catch(e){}
 
+function esconderTudo(){
+  document.getElementById('login').classList.add('hidden');
+  document.getElementById('cadastro').classList.add('hidden');
+  document.getElementById('lista').classList.add('hidden');
+  document.getElementById('dash').classList.add('hidden');
+}
+
 if(TOKEN && USER){
   if(CODIGO){
     abrirDash(CODIGO);
   }else{
     mostrarLista();
   }
+}else{
+  esconderTudo();
+  document.getElementById('login').classList.remove('hidden');
 }
 
 document.getElementById('bms-code').oninput = function(e){
@@ -189,12 +198,12 @@ document.getElementById('bms-code').oninput = function(e){
 
 function mostrarLogin(){
   localStorage.removeItem('bms_codigo_ativo');
-  document.getElementById('cadastro').classList.add('hidden');
+  esconderTudo();
   document.getElementById('login').classList.remove('hidden');
 }
 
 function mostrarCadastro(){
-  document.getElementById('login').classList.add('hidden');
+  esconderTudo();
   document.getElementById('cadastro').classList.remove('hidden');
 }
 
@@ -270,9 +279,7 @@ function cadastrar(){
 
 function mostrarLista(){
   localStorage.removeItem('bms_codigo_ativo');
-  document.getElementById('login').classList.add('hidden');
-  document.getElementById('cadastro').classList.add('hidden');
-  document.getElementById('dash').classList.add('hidden');
+  esconderTudo();
   document.getElementById('lista').classList.remove('hidden');
   document.getElementById('user-nome').textContent = USER? USER.nome : 'Usuário';
   carregarLista();
@@ -334,7 +341,7 @@ function addBms(){
 function abrirDash(code){
   CODIGO = code;
   localStorage.setItem('bms_codigo_ativo', code);
-  document.getElementById('lista').classList.add('hidden');
+  esconderTudo();
   document.getElementById('dash').classList.remove('hidden');
   document.getElementById('bms-titulo').textContent = code;
   initChart();
@@ -345,7 +352,6 @@ function abrirDash(code){
 function voltar(){
   clearInterval(INT);
   localStorage.removeItem('bms_codigo_ativo');
-  document.getElementById('dash').classList.add('hidden');
   mostrarLista();
 }
 
