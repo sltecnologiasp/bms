@@ -2,318 +2,297 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>SMART BMS</title>
-<link rel="manifest" href="/manifest.json">
-<meta name="theme-color" content="#00ffff">
-<link rel="icon" href="/icon-192.png">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
 <style>
-*{margin:0;padding:0;box-sizing:border-box}
-:root{--bg:#05070d;--cyan:#00ffff;--blue:#0080ff;--green:#00ff88;--red:#ff4444;--orange:#ffaa00}
-body{font-family:'Inter',sans-serif;background:var(--bg);color:#fff;overflow-x:hidden;min-height:100vh}
-body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradient(0deg,rgba(255,255,255,.03) 0 1px,transparent 1px 40px),repeating-linear-gradient(90deg,rgba(255,255,255,.03) 0 1px,transparent 1px 40px);opacity:.4;pointer-events:none;z-index:0}
-#particles{position:fixed;inset:0;overflow:hidden;z-index:0;pointer-events:none}
-.particle{position:absolute;background:var(--cyan);border-radius:50%;opacity:.15;animation:float linear infinite}
-@keyframes float{0%{transform:translateY(100vh)}100%{transform:translateY(-100px)}}
-.tela{position:relative;z-index:1;width:100%;min-height:100vh;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:12px}
-.title{font-size:clamp(42px,8vw,74px);font-weight:900;margin-bottom:16px;letter-spacing:3px;background:linear-gradient(90deg,var(--cyan),var(--blue));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-.card{background:rgba(10,15,25,.92);border:1px solid rgba(0,255,255,.12);border-radius:16px;padding:20px;width:100%;max-width:520px;box-shadow:0 4px 20px rgba(0,0,0,.4)}
-.card-wide{max-width:1200px}
-.label{font-size:11px;letter-spacing:1.5px;opacity:.6;text-transform:uppercase;margin-bottom:8px}
-input,button{width:100%;padding:18px;border-radius:18px;border:none;outline:none;margin-top:12px;font-size:16px;transition:.2s}
-input{background:rgba(0,0,0,.5);color:#fff;border:1px solid rgba(0,255,255,.2)}
-input:focus{border-color:var(--cyan);box-shadow:0 0 15px rgba(0,255,255,.2)}
-button{background:linear-gradient(90deg,var(--blue),var(--cyan));color:#fff;font-weight:700;cursor:pointer;box-shadow:0 4px 20px rgba(0,255,255,.25)}
-button:hover{transform:translateY(-1px)}
-button.secondary{background:rgba(0,255,255,.1);border:1px solid rgba(0,255,255,.3)}
-button.danger{background:rgba(255,68,68,.1);border:1px solid rgba(255,68,68,.3)}
-.link{color:var(--cyan);text-align:center;margin-top:16px;cursor:pointer;font-size:14px}
-.error{color:#ff4444;margin-top:12px;text-align:center;font-size:14px}
-.success{color:#00ff88;margin-top:12px;text-align:center;font-size:14px}
-#dash{max-width:1450px;margin:auto}
-.gauge-wrap{width:100%;max-width:1200px;margin:12px auto}
-.gauge-card{padding:30px 30px 40px;min-height:340px}
-.gauge{width:240px;height:240px;margin:auto;border-radius:50%;background:conic-gradient(#00ff88 0deg,#00ffff 180deg,rgba(255,255,255,.08) 180deg);position:relative}
-.gauge::before{content:'';position:absolute;inset:18px;border-radius:50%;background:#05070d}
-.gauge-inner{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;align-items:center;z-index:2}
-.gauge-value{font-size:58px;font-weight:900;color:#00ff88;width:3ch;text-align:center;font-variant-numeric:tabular-nums}
-.gauge-label{opacity:.6;letter-spacing:2px;font-size:12px}
-.bar-wrap{margin-top:20px}
-.bar-label{display:flex;justify-content:space-between;margin-bottom:8px;font-size:14px;opacity:.7}
-.bar{height:16px;background:rgba(255,255,255,.06);border-radius:999px;overflow:hidden}
-.bar-fill{height:100%;width:0%;border-radius:999px;background:linear-gradient(90deg,#00ff88,#00ffff);transition:width.8s ease}
-.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;width:100%;max-width:1300px;margin:12px auto}
-.grid .card{height:120px;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:14px}
-.value{font-size:30px;font-weight:800;margin-top:8px;line-height:1;width:7ch;text-align:center;font-variant-numeric:tabular-nums}
-.status{display:inline-flex;align-items:center;gap:10px;padding:14px 26px;border-radius:999px;font-weight:700;margin-top:14px}
-.on{background:rgba(0,255,136,.12);color:var(--green);border:1px solid rgba(0,255,136,.3)}
-.off{background:rgba(255,68,68,.12);color:var(--red);border:1px solid rgba(255,68,68,.3)}
-.diff{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:18px}
-.diff-item{padding:12px 8px;border-radius:14px;background:rgba(255,255,255,.03);text-align:center}
-.diff-item span{display:block;margin-top:6px;font-size:22px;font-weight:800;width:6ch;margin:auto;text-align:center;font-variant-numeric:tabular-nums}
-.cells{display:grid;grid-template-columns:repeat(auto-fill,minmax(95px,1fr));gap:10px;margin-top:20px}
-.cell{background:rgba(0,0,0,.4);border-radius:18px;padding:14px;border:1px solid rgba(255,255,255,.05)}
-.cell-num{font-size:11px;opacity:.5;margin-bottom:6px}
-.cell-val{font-size:20px;font-weight:700;width:7ch;text-align:center;font-variant-numeric:tabular-nums}
-.cell.ok{border-color:rgba(0,255,136,.25)}
-.cell.warn{border-color:rgba(255,170,0,.25)}
-.cell.crit{border-color:rgba(255,68,68,.25)}
-.chart-card{width:100%;max-width:1200px;margin:12px auto;padding:24px;min-height:380px}
-.chart-title{margin-bottom:16px;font-size:14px;letter-spacing:2px;opacity:.7;text-transform:uppercase}
-canvas{width:100%!important;height:320px!important}
+body{background:#05070d;color:#fff;font-family:system-ui;padding:20px}
+.card{background:rgba(255,255,255,.05);border:1px solid #00ffff;padding:20px;border-radius:12px;max-width:500px;margin:20px auto}
+input,button{width:100%;padding:16px;margin:8px 0;border-radius:8px;border:1px solid #00ffff;background:#000;color:#fff;font-size:16px}
+button{background:#00ffff;color:#000;font-weight:700}
+#err{background:#ff0000;color:#fff;padding:12px;margin-top:12px;font-size:14px;white-space:pre-wrap;word-break:break-all;display:none}
+#log{background:#000;border:1px solid #00ff00;padding:12px;margin-top:12px;font-size:12px;white-space:pre-wrap;word-break:break-all;max-height:200px;overflow-y:auto}
+.error{color:#ff4444;margin-top:8px;text-align:center}
+.success{color:#00ff88;margin-top:8px;text-align:center}
+.hidden{display:none}
+.title{font-size:32px;font-weight:900;text-align:center;margin-bottom:20px;color:#00ffff}
+.bms-item{background:rgba(0,0,0,.4);border:1px solid #00ffff;padding:12px;margin:8px 0;border-radius:8px;cursor:pointer}
 .header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
-.bms-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px;margin:20px 0}
-.bms-item{background:rgba(0,0,0,.4);border:1px solid rgba(0,255,255,.2);border-radius:12px;padding:16px;cursor:pointer;transition:.2s}
-.bms-item:hover{border-color:rgba(0,255,255,.5);transform:translateY(-2px)}
-.bms-item.active{border-color:var(--cyan);background:rgba(0,255,255,.05)}
-.bms-item.offline{opacity:.4}
-.hidden{display:none!important}
-@media(max-width:520px){.title{font-size:38px}.value{font-size:22px}.gauge{width:180px;height:180px}.gauge-value{font-size:44px}.grid{grid-template-columns:repeat(2,1fr)}.grid .card{height:100px}}
 </style>
 </head>
 <body>
-<div id="particles"></div>
-<div id="login" class="tela">
+
+<div id="login" class="card">
   <div class="title">SMART BMS</div>
-  <div class="card">
-    <div class="label">Login</div>
-    <input id="loginEmail" placeholder="E-mail" autocomplete="email">
-    <input id="loginSenha" type="password" placeholder="Senha" autocomplete="current-password">
-    <button onclick="login()">Entrar</button>
-    <div class="link" onclick="showCadastro()">Não tem conta? Cadastre-se</div>
-    <p id="loginError" class="error" style="display:none;"></p>
-  </div>
+  <input id="email" placeholder="E-mail" value="teste@teste.com">
+  <input id="senha" type="password" placeholder="Senha" value="123456">
+  <button onclick="login()">Entrar</button>
+  <div class="link" onclick="showCad()" style="color:#00ffff;text-align:center;margin-top:12px;cursor:pointer">Cadastrar</div>
+  <div id="msg"></div>
 </div>
-<div id="cadastro" class="tela hidden">
+
+<div id="cadastro" class="card hidden">
   <div class="title">SMART BMS</div>
-  <div class="card">
-    <div class="label">Criar Conta</div>
-    <input id="cadNome" placeholder="Nome Completo">
-    <input id="cadEmail" placeholder="E-mail">
-    <input id="cadSenha" type="password" placeholder="Senha">
-    <input id="cadSenha2" type="password" placeholder="Confirmar Senha">
-    <button onclick="cadastrar()">Criar Conta</button>
-    <div class="link" onclick="showLogin()">Já tem conta? Fazer login</div>
-    <p id="cadMsg" style="display:none;"></p>
-  </div>
+  <input id="cnome" placeholder="Nome">
+  <input id="cemail" placeholder="E-mail">
+  <input id="csenha" type="password" placeholder="Senha">
+  <input id="csenha2" type="password" placeholder="Confirmar Senha">
+  <button onclick="cadastrar()">Criar Conta</button>
+  <div class="link" onclick="showLogin()" style="color:#00ffff;text-align:center;margin-top:12px;cursor:pointer">Voltar</div>
+  <div id="cmsg"></div>
 </div>
-<div id="selectBMS" class="tela hidden">
-  <div class="title">SMART BMS</div>
-  <div class="card card-wide">
-    <div class="header">
-      <div class="label">Olá, <span id="userName"></span></div>
-      <button class="danger" style="width:auto;padding:10px 20px;" onclick="logout()">Sair</button>
+
+<div id="painel" class="card hidden">
+  <div class="header">
+    <div>Olá, <span id="nome"></span></div>
+    <button onclick="sair()" style="width:auto;padding:8px 16px;background:#ff4444">Sair</button>
+  </div>
+  <div style="font-size:11px;opacity:.6;margin-bottom:8px">ADICIONAR BMS</div>
+  <input id="code" placeholder="SL82576655" maxlength="10">
+  <input id="bnome" placeholder="Nome da BMS">
+  <button onclick="add()">Adicionar</button>
+  <div id="amsg"></div>
+  <div style="font-size:11px;opacity:.6;margin:20px 0 8px">MINHAS BMS</div>
+  <div id="lista"></div>
+</div>
+
+<div id="dash" class="card hidden">
+  <button onclick="voltar()" style="background:rgba(0,255,255,.1);border:1px solid #00ffff;color:#fff">← Voltar</button>
+  <div class="title" style="font-size:24px" id="bname">BMS</div>
+  <div style="text-align:center;font-size:48px;font-weight:900;color:#00ff88" id="soc">0%</div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:20px">
+    <div style="background:rgba(0,0,0,.4);padding:12px;border-radius:8px;text-align:center">
+      <div style="font-size:10px;opacity:.6">TENSÃO</div>
+      <div style="font-size:24px;font-weight:700;color:#00ffff" id="v">0V</div>
     </div>
-    <div class="label">Adicionar Dispositivo</div>
-    <input id="bmsCode" placeholder="SL82576655" maxlength="10">
-    <input id="bmsNome" placeholder="Nome da BMS (ex: Casa, Sítio)">
-    <button onclick="addBMS()">Adicionar BMS</button>
-    <p id="addMsg" style="display:none;"></p>
-    <div class="label" style="margin-top:30px;">Meus Dispositivos</div>
-    <div id="bmsList" class="bms-list"></div>
-  </div>
-</div>
-<div id="dash" class="tela hidden">
-  <div class="title">SMART BMS</div>
-  <button class="secondary" style="max-width:300px;margin:0 auto 20px;" onclick="voltarLista()">← Voltar para Lista</button>
-  <div class="gauge-wrap">
-    <div class="card gauge-card">
-      <div class="gauge" id="socGauge">
-        <div class="gauge-inner">
-          <div class="gauge-value" id="socGaugeValue">0%</div>
-          <div class="gauge-label">STATE OF CHARGE</div>
-        </div>
-      </div>
-      <div class="bar-wrap">
-        <div class="bar-label"><span>Bateria</span><span id="socBarText">0%</span></div>
-        <div class="bar"><div class="bar-fill" id="socBar"></div></div>
-      </div>
+    <div style="background:rgba(0,0,0,.4);padding:12px;border-radius:8px;text-align:center">
+      <div style="font-size:10px;opacity:.6">CORRENTE</div>
+      <div style="font-size:24px;font-weight:700;color:#ffaa00" id="c">0A</div>
     </div>
   </div>
-  <div class="card card-wide">
-    <div class="label" id="bmsName">BMS</div>
-    <div style="margin-top:12px"><span id="connStatus" class="status off">Offline</span></div>
-  </div>
-  <div class="grid">
-    <div class="card"><div class="label">SOC</div><div class="value" id="soc" style="color:#00ff88">0%</div></div>
-    <div class="card"><div class="label">Tensão</div><div class="value" id="voltage" style="color:#00ffff">0V</div></div>
-    <div class="card"><div class="label">Corrente</div><div class="value" id="current" style="color:#ffaa00">0A</div></div>
-    <div class="card"><div class="label">Temperatura</div><div class="value" id="temp" style="color:#ff4444">0°C</div></div>
-  </div>
-  <div class="card chart-card">
-    <div class="chart-title">Realtime Monitor</div>
-    <canvas id="mainChart"></canvas>
-  </div>
-  <div class="card card-wide">
-    <div class="label">Células - Tensão Individual</div>
-    <div class="diff">
-      <div class="diff-item">Min<div><span id="cellMin" style="color:#00ff88">0.00V</span></div></div>
-      <div class="diff-item">Max<div><span id="cellMax" style="color:#ffaa00">0.00V</span></div></div>
-      <div class="diff-item">Diferença<div><span id="cellDiff" style="color:#ff4444">0.00V</span></div></div>
-      <div class="diff-item">Total<div><span id="cellCount" style="color:#00ffff">0</span></div></div>
-    </div>
-    <div id="cells" class="cells"></div>
-  </div>
 </div>
+
+<div id="err"></div>
+<div id="log">Console:</div>
+
 <script>
-const API = '/api/bms';
-let userToken = localStorage.getItem('bms_token');
-let currentBMS = null;
-let interval, chart, lastDataHash = '', offlineTimer, isOffline = false;
+// MOSTRA ERRO NA TELA
+window.onerror = function(msg, url, line, col, error) {
+  const e = document.getElementById('err');
+  e.style.display = 'block';
+  e.textContent = 'ERRO JS: ' + msg + '\nLinha: ' + line + '\n' + (error ? error.stack : '');
+  return false;
+};
 
-function createParticles(){
-  if(window.innerWidth<768)return;
-  const c=document.getElementById('particles');
-  setInterval(()=>{if(c.children.length>=6)return;const p=document.createElement('div');p.className='particle';const s=Math.random()*2+1;p.style.width=s+'px';p.style.height=s+'px';p.style.left=Math.random()*100+'%';p.style.animationDuration=(Math.random()*8+12)+'s';c.appendChild(p);setTimeout(()=>p.remove(),20000)},2500);
+function log(t){
+  const l = document.getElementById('log');
+  l.textContent += '\n' + (typeof t === 'string' ? t : JSON.stringify(t));
+  l.scrollTop = l.scrollHeight;
 }
-createParticles();
 
-if(userToken) checkSession();
+const API = '/api/bms';
+let token = localStorage.getItem('bms_token');
+let bmsAtual = null;
+let loop = null;
 
-async function checkSession(){
+log('JS Carregado. Token: ' + (token ? 'SIM' : 'NÃO'));
+
+if(token) checkToken();
+
+async function checkToken(){
+  log('Checando token...');
   try{
-    const r = await fetch(API+'?action=user_bms', {headers:{'Authorization':'Bearer '+userToken}});
+    const r = await fetch(API+'?action=user_bms', {headers:{'Authorization':'Bearer '+token}});
+    log('Check status: ' + r.status);
     if(r.ok){
-      const userData = JSON.parse(localStorage.getItem('bms_user_data')||'{}');
-      showSelectBMS(userData.nome);
-    }else logout();
-  }catch(e){logout()}
+      const u = JSON.parse(localStorage.getItem('bms_user')||'{}');
+      showPainel(u.nome);
+    } else {
+      sair();
+    }
+  }catch(e){
+    log('Erro check: ' + e.message);
+    sair();
+  }
 }
 
 function showLogin(){
   document.getElementById('cadastro').classList.add('hidden');
-  document.getElementById('selectBMS').classList.add('hidden');
+  document.getElementById('painel').classList.add('hidden');
   document.getElementById('dash').classList.add('hidden');
   document.getElementById('login').classList.remove('hidden');
 }
 
-function showCadastro(){
+function showCad(){
   document.getElementById('login').classList.add('hidden');
   document.getElementById('cadastro').classList.remove('hidden');
 }
 
 async function cadastrar(){
-  const nome=document.getElementById('cadNome').value.trim();
-  const email=document.getElementById('cadEmail').value.trim();
-  const senha=document.getElementById('cadSenha').value;
-  const senha2=document.getElementById('cadSenha2').value;
-  const msg=document.getElementById('cadMsg');
-  if(!nome||!email||!senha){msg.textContent='Preencha todos os campos';msg.className='error';msg.style.display='block';return}
-  if(senha!==senha2){msg.textContent='Senhas não conferem';msg.className='error';msg.style.display='block';return}
-  if(senha.length<6){msg.textContent='Senha mínimo 6 caracteres';msg.className='error';msg.style.display='block';return}
+  const nome = document.getElementById('cnome').value;
+  const email = document.getElementById('cemail').value;
+  const senha = document.getElementById('csenha').value;
+  const senha2 = document.getElementById('csenha2').value;
+  const m = document.getElementById('cmsg');
+  
+  if(!nome||!email||!senha){m.innerHTML='<div class="error">Preencha tudo</div>';return}
+  if(senha!==senha2){m.innerHTML='<div class="error">Senhas diferentes</div>';return}
+  if(senha.length<6){m.innerHTML='<div class="error">Senha min 6 chars</div>';return}
+  
+  log('Cadastrando: ' + email);
   try{
-    const r=await fetch(API+'?action=register',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({nome,email,senha})});
-    const d=await r.json();
-    if(d.ok){msg.textContent='Conta criada!';msg.className='success';msg.style.display='block';setTimeout(()=>{showLogin();msg.style.display='none';document.getElementById('cadNome').value='';document.getElementById('cadEmail').value='';document.getElementById('cadSenha').value='';document.getElementById('cadSenha2').value=''},1500)}
-    else{msg.textContent=d.error||'Erro';msg.className='error';msg.style.display='block'}
-  }catch(e){msg.textContent='Erro de conexão';msg.className='error';msg.style.display='block'}
+    const r = await fetch(API+'?action=register',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({nome,email,senha})});
+    const d = await r.json();
+    log('Resposta cad: ' + JSON.stringify(d));
+    if(d.ok){
+      m.innerHTML='<div class="success">Conta criada!</div>';
+      setTimeout(()=>{showLogin();m.innerHTML=''},1500);
+    } else {
+      m.innerHTML='<div class="error">'+(d.error||'Erro')+'</div>';
+    }
+  }catch(e){
+    log('Erro cad: ' + e.message);
+    m.innerHTML='<div class="error">Erro: '+e.message+'</div>';
+  }
 }
 
 async function login(){
-  const email=document.getElementById('loginEmail').value.trim();
-  const senha=document.getElementById('loginSenha').value;
-  const err=document.getElementById('loginError');
-  err.style.display='none';
-  if(!email||!senha){err.textContent='Preencha e-mail e senha';err.style.display='block';return}
+  const email = document.getElementById('email').value;
+  const senha = document.getElementById('senha').value;
+  const m = document.getElementById('msg');
+  m.innerHTML = '';
+  
+  log('Tentando login: ' + email);
+  
   try{
-    const r=await fetch(API+'?action=login_user',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,senha})});
-    const d=await r.json();
-    if(d.ok){userToken=d.token;localStorage.setItem('bms_token',userToken);localStorage.setItem('bms_user_data',JSON.stringify({nome:d.nome,email:d.email}));showSelectBMS(d.nome)}
-    else{err.textContent=d.error||'Erro';err.style.display='block'}
-  }catch(e){err.textContent='Erro de conexão';err.style.display='block'}
+    const r = await fetch(API+'?action=login_user',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({email,senha})
+    });
+    log('Login status: ' + r.status);
+    const d = await r.json();
+    log('Resposta login: ' + JSON.stringify(d));
+    
+    if(d.ok){
+      token = d.token;
+      localStorage.setItem('bms_token', token);
+      localStorage.setItem('bms_user', JSON.stringify({nome:d.nome,email:d.email}));
+      m.innerHTML='<div class="success">Logado!</div>';
+      setTimeout(()=>showPainel(d.nome),500);
+    } else {
+      m.innerHTML='<div class="error">'+(d.error||'Erro')+'</div>';
+    }
+  }catch(e){
+    log('ERRO LOGIN: ' + e.message);
+    m.innerHTML='<div class="error">Erro: '+e.message+'</div>';
+  }
 }
 
-function logout(){
-  clearInterval(interval);clearTimeout(offlineTimer);
-  localStorage.removeItem('bms_token');localStorage.removeItem('bms_user_data');
-  userToken=null;currentBMS=null;location.reload();
-}
-
-function showSelectBMS(nome){
+function showPainel(nome){
   document.getElementById('login').classList.add('hidden');
   document.getElementById('cadastro').classList.add('hidden');
   document.getElementById('dash').classList.add('hidden');
-  document.getElementById('selectBMS').classList.remove('hidden');
-  if(nome)document.getElementById('userName').textContent=nome;
-  loadBMSList();
+  document.getElementById('painel').classList.remove('hidden');
+  document.getElementById('nome').textContent = nome||'';
+  loadLista();
 }
 
-document.getElementById('bmsCode').oninput=e=>{if(!e.target.value.startsWith('SL'))e.target.value='SL';e.target.value='SL'+e.target.value.slice(2).replace(/[^0-9]/g,'').slice(0,8)};
+document.getElementById('code').oninput = e => {
+  if(!e.target.value.startsWith('SL')) e.target.value='SL';
+  e.target.value='SL'+e.target.value.slice(2).replace(/[^0-9]/g,'').slice(0,8);
+};
 
-async function addBMS(){
-  const code=document.getElementById('bmsCode').value.trim();
-  const nome=document.getElementById('bmsNome').value.trim();
-  const msg=document.getElementById('addMsg');
-  if(!code||code.length!==10){msg.textContent='Código inválido';msg.className='error';msg.style.display='block';return}
-  if(!nome){msg.textContent='Dê um nome';msg.className='error';msg.style.display='block';return}
+async function add(){
+  const code = document.getElementById('code').value;
+  const nome = document.getElementById('bnome').value;
+  const m = document.getElementById('amsg');
+  if(!code||code.length!==10){m.innerHTML='<div class="error">Código inválido</div>';return}
+  if(!nome){m.innerHTML='<div class="error">Dê um nome</div>';return}
+  
+  log('Add BMS: ' + code);
   try{
-    const r=await fetch(API+'?action=add_bms',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+userToken},body:JSON.stringify({code,nome})});
-    const d=await r.json();
-    if(d.ok){msg.textContent='BMS adicionada!';msg.className='success';msg.style.display='block';document.getElementById('bmsCode').value='';document.getElementById('bmsNome').value='';setTimeout(()=>msg.style.display='none',2000);loadBMSList()}
-    else{msg.textContent=d.error||'Erro';msg.className='error';msg.style.display='block'}
-  }catch(e){msg.textContent='Erro de conexão';msg.className='error';msg.style.display='block'}
+    const r = await fetch(API+'?action=add_bms',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},body:JSON.stringify({code,nome})});
+    const d = await r.json();
+    log('Resposta add: ' + JSON.stringify(d));
+    if(d.ok){
+      m.innerHTML='<div class="success">Adicionada!</div>';
+      document.getElementById('code').value='';
+      document.getElementById('bnome').value='';
+      setTimeout(()=>m.innerHTML='',2000);
+      loadLista();
+    } else {
+      m.innerHTML='<div class="error">'+(d.error||'Erro')+'</div>';
+    }
+  }catch(e){
+    log('Erro add: ' + e.message);
+    m.innerHTML='<div class="error">Erro: '+e.message+'</div>';
+  }
 }
 
-async function loadBMSList(){
+async function loadLista(){
+  log('Carregando lista BMS...');
   try{
-    const r=await fetch(API+'?action=user_bms',{headers:{'Authorization':'Bearer '+userToken}});
-    if(r.status===401){logout();return}
-    const data=await r.json();
-    const list=document.getElementById('bmsList');
-    if(data.length===0){list.innerHTML='<div style="grid-column:1/-1;opacity:.4;text-align:center;padding:40px">Nenhuma BMS cadastrada</div>';return}
-    list.innerHTML=data.map(b=>{
-      const online=b.online&&(Date.now()-new Date(b.updated_at).getTime()<10000);
-      return`<div class="bms-item ${online?'':'offline'} ${currentBMS?.code===b.code?'active':''}" onclick="selectBMS('${b.code}','${b.nome}')">
-        <div style="font-weight:700;font-size:18px;margin-bottom:8px">${b.nome}</div>
-        <div style="opacity:.6;font-size:13px;margin-bottom:12px;font-family:monospace">${b.code}</div>
-        <span class="status ${online?'on':'off'}">${online?'Online':'Offline'}</span>
-      </div>`
+    const r = await fetch(API+'?action=user_bms',{headers:{'Authorization':'Bearer '+token}});
+    log('Lista status: ' + r.status);
+    if(r.status===401){sair();return}
+    const d = await r.json();
+    log('Lista: ' + d.length + ' BMS');
+    const l = document.getElementById('lista');
+    if(d.length===0){l.innerHTML='<div style="opacity:.4;text-align:center;padding:20px">Nenhuma BMS</div>';return}
+    l.innerHTML = d.map(b=>{
+      const on = b.online&&(Date.now()-new Date(b.updated_at).getTime()<10000);
+      return `<div class="bms-item" onclick="ver('${b.code}','${b.nome}')">
+        <div style="font-weight:700">${b.nome}</div>
+        <div style="opacity:.6;font-size:12px;font-family:monospace">${b.code}</div>
+        <div style="color:${on?'#00ff88':'#ff4444'}">${on?'Online':'Offline'}</div>
+      </div>`;
     }).join('');
-  }catch(e){console.error(e)}
+  }catch(e){
+    log('Erro lista: ' + e.message);
+  }
 }
 
-async function selectBMS(code,nome){
-  currentBMS={code,nome};
-  document.getElementById('selectBMS').classList.add('hidden');
+function ver(code,nome){
+  bmsAtual = {code,nome};
+  document.getElementById('painel').classList.add('hidden');
   document.getElementById('dash').classList.remove('hidden');
-  document.getElementById('bmsName').textContent=nome;
-  if(!window.Chart){const{Chart,registerables}=await import('https://cdn.jsdelivr.net/npm/chart.js@4.4.1/+esm');Chart.register(...registerables);window.Chart=Chart}
-  initChart();update();clearInterval(interval);interval=setInterval(update,5000);
+  document.getElementById('bname').textContent = nome;
+  atualizar();
+  clearInterval(loop);
+  loop = setInterval(atualizar,5000);
 }
 
-function voltarLista(){
-  clearInterval(interval);clearTimeout(offlineTimer);
-  currentBMS=null;lastDataHash='';isOffline=false;
+function voltar(){
+  clearInterval(loop);
+  bmsAtual = null;
   document.getElementById('dash').classList.add('hidden');
-  document.getElementById('selectBMS').classList.remove('hidden');
-  loadBMSList();
+  document.getElementById('painel').classList.remove('hidden');
+  loadLista();
 }
 
-function renderCells(cells){
-  if(!cells||cells.length===0){document.getElementById('cells').innerHTML='<div style="grid-column:1/-1;opacity:.4;padding:20px">Sem dados das células</div>';return}
-  const vals=cells.map(c=>parseFloat(c)).filter(v=>v>0);if(vals.length===0)return;
-  const min=Math.min(...vals),max=Math.max(...vals),diff=max-min;
-  document.getElementById('cellMin').textContent=min.toFixed(3)+'V';
-  document.getElementById('cellMax').textContent=max.toFixed(3)+'V';
-  document.getElementById('cellDiff').textContent=diff.toFixed(3)+'V';
-  document.getElementById('cellCount').textContent=cells.length;
-  document.getElementById('cells').innerHTML=cells.map((v,i)=>{const val=parseFloat(v);let cls='ok';if(val<3.2||val>4.2)cls='crit';else if(val<3.4||val>4.15)cls='warn';return`<div class="cell ${cls}"><div class="cell-num">C${i+1}</div><div class="cell-val">${val.toFixed(3)}</div></div>`}).join('');
+async function atualizar(){
+  if(!bmsAtual) return;
+  log('Atualizando ' + bmsAtual.code);
+  try{
+    const r = await fetch(API+'?action=data&code='+bmsAtual.code,{headers:{'Authorization':'Bearer '+token}});
+    if(r.status===401){sair();return}
+    const d = await r.json();
+    log('Dados: SOC='+d.soc);
+    document.getElementById('soc').textContent=(d.soc?.toFixed(0)||0)+'%';
+    document.getElementById('v').textContent=(d.voltage?.toFixed(2)||0)+'V';
+    document.getElementById('c').textContent=(d.current?.toFixed(1)||0)+'A';
+  }catch(e){
+    log('Erro update: ' + e.message);
+  }
 }
 
-const voltageHistory=[],currentHistory=[],labelsHistory=[];
-function initChart(){
-  const ctx=document.getElementById('mainChart').getContext('2d');
-  chart=new window.Chart(ctx,{type:'line',data:{labels:labelsHistory,datasets:[{label:'Tensão',data:voltageHistory,borderColor:'#00ffff',backgroundColor:'rgba(0,255,255,.08)',tension:.4,fill:true,borderWidth:2},{label:'Corrente',data:currentHistory,borderColor:'#ffaa00',backgroundColor:'rgba(255,170,0,.08)',tension:.4,fill:true,borderWidth:2}]},options:{responsive:true,maintainAspectRatio:false,animation:false,elements:{point:{radius:0}},plugins:{legend:{labels:{color:'#ffffff'}}},scales:{x:{ticks:{color:'#aaa'},grid:{color:'rgba(255,255,255,.05)'}},y:{ticks:{color:'#aaa'},grid:{color:'rgba(255,255,255,.05)'}}}}});
+function sair(){
+  clearInterval(loop);
+  localStorage.removeItem('bms_token');
+  localStorage.removeItem('bms_user');
+  token=null;
+  location.reload();
 }
-
-function updateGauge(soc){
-  const gauge=document.getElementById('socGauge'),value=document.getElementById('socGaugeValue'),bar=document.getElementById('socBar'),text=document.getElementById('socBarText'),deg=soc*3.6;
-  value.textContent=soc+'%';text.textContent=soc+'%';bar.style.width=soc+'%';
-  gauge.style.background=`conic-gradient(#00ff88 0deg,#00ffff ${deg}deg,rgba(255,255,255,.08) ${deg}deg)`;
-}
-
-function setOffline(){
-  isOffline=true;clearTimeout(offlineTimer);
-  document.getElementById('connStatus').textContent='Offline';document.getElementById('connStatus').className='status off';
-  document.getElementById('soc').textContent='--%';document.getElementById('voltage').textContent='--V';document.getElementById('current').textContent='--A';document.getElementById('temp').textContent='--°C';
+</script>
+</body>
+</html>
