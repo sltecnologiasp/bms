@@ -142,7 +142,8 @@ export async function onRequest({ request, env }) {
     if (action === 'admin_list_master' && request.method === 'GET') {
       if (!isAdmin) return json({ ok: false, error: 'Admin only' }, 403);
       const { results } = await env.DB.prepare(`
-        SELECT m.code, m.user_id, u.nome as dono_nome, u.email as dono_email, b.online, b.soc, b.voltage, b.current, b.temp, b.cells
+        SELECT m.code, m.user_id, u.nome as dono_nome, u.email as dono_email,
+               b.online, b.soc, b.voltage, b.current, b.temp, b.cells, b.updated_at
         FROM bms_master m
         LEFT JOIN users u ON u.id = m.user_id
         LEFT JOIN bms b ON b.code = m.code
@@ -194,7 +195,7 @@ export async function onRequest({ request, env }) {
       }
       const data = await env.DB.prepare('SELECT * FROM bms WHERE code =?').bind(code).first();
       if (!data) return json({ ok: false, error: 'BMS não encontrada' }, 404);
-      const online = data.online && (Date.now() - new Date(data.updated_at).getTime() < 10000);
+      const online = data.updated_at && (Date.now() - new Date(data.updated_at).getTime() < 10000);
       return json({...data,online,cells:JSON.parse(data.cells || '[]')});
     }
 
