@@ -12,7 +12,6 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:#fff;min-height:1
 #login,#painel,#clientesPage{position:relative;z-index:1;width:100%;min-height:100vh;padding:8px}
 #login{display:flex;flex-direction:column;justify-content:center;align-items:center}
 #painel,#clientesPage{display:none;flex-direction:column;align-items:center;padding-top:12px}
-#painel.active,#clientesPage.active{display:flex}
 .title{font-size:clamp(32px,8vw,74px);font-weight:900;margin-bottom:16px;letter-spacing:3px;background:linear-gradient(90deg,var(--cyan),var(--blue));-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-align:center;width:100%}
 .card{background:rgba(10,15,25,.92);border:1px solid rgba(0,255,255,.12);border-radius:16px;padding:12px;width:100%;margin-bottom:4px}
 #login.card{max-width:520px}
@@ -125,7 +124,7 @@ input,button{font-size:16px;padding:16px}
 
 <div class="card card-cadastro">
 <div class="label">Cadastrar BMS no Sistema</div>
-<input id="code" placeholder="SL000000000000" maxlength="14">
+<input id="code" placeholder="SL000000" maxlength="14">
 <button class="btn-clientes" onclick="cad()">CADASTRAR BMS MASTER</button>
 <button class="btn-sec" onclick="gerarECadastrar()">GERAR CÓDIGO ALEATÓRIO</button>
 <button class="btn-clientes" onclick="mostrarClientes()">VER CLIENTES CADASTRADOS</button>
@@ -151,6 +150,7 @@ input,button{font-size:16px;padding:16px}
 <button class="modal-close" onclick="closeBmsModal()">Fechar</button>
 <div id="modalBmsContent"></div>
 </div>
+</div>
 
 <div id="modalEditUser" class="modal">
 <div class="modal-content">
@@ -161,7 +161,8 @@ input,button{font-size:16px;padding:16px}
 <input id="editUserEmail" placeholder="Email">
 <button onclick="salvarUser()">SALVAR</button>
 <p id="editMsg" style="text-align:center;margin-top:8px;font-size:14px"></p>
-</div><script>
+</div>
+<script>
 const API = '/api/bms';
 let adminToken = sessionStorage.getItem('admin_token');
 let bmsList = [];
@@ -200,23 +201,18 @@ async function adminLogin(){
 function showPainel(){
   document.getElementById('login').style.display = 'none';
   document.getElementById('clientesPage').style.display = 'none';
-  document.getElementById('painel').classList.add('active');
   document.getElementById('painel').style.display = 'flex';
   carregarTudo();
 }
 
 function mostrarClientes(){
-  document.getElementById('painel').classList.remove('active');
   document.getElementById('painel').style.display = 'none';
-  document.getElementById('clientesPage').classList.add('active');
   document.getElementById('clientesPage').style.display = 'flex';
   listarUsers();
 }
 
 function voltarPainel(){
-  document.getElementById('clientesPage').classList.remove('active');
   document.getElementById('clientesPage').style.display = 'none';
-  document.getElementById('painel').classList.add('active');
   document.getElementById('painel').style.display = 'flex';
 }
 
@@ -446,7 +442,7 @@ async function listarBms(){
     </div>
   `}).join('') || '<div class="card card-empty"><div style="opacity:.4">Nenhuma BMS cadastrada no sistema</div></div>';
 }
-setInterval(()=>{if(adminToken && document.getElementById('painel').classList.contains('active'))carregarTudo()},5000);
+setInterval(()=>{if(adminToken && document.getElementById('painel').style.display==='flex')carregarTudo()},5000);
 </script>
 </body>
 </html>
