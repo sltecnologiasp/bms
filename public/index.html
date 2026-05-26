@@ -83,6 +83,7 @@ canvas{width:100%!important;height:280px!important}
 <p class="link-cadastro" onclick="mostrarCadastro()">Ainda não tem conta? <span>Cadastre-se</span></p>
 <div id="erro" class="erro hidden"></div>
 </div>
+</div>
 
 <div id="cadastro" class="hidden">
 <div class="title">SMART BMS</div>
@@ -333,8 +334,8 @@ function addBms(){
   fetch(API + '?action=user_bms', {
     headers:{'Authorization':'Bearer '+TOKEN}
   })
- .then(function(r){return r.json();})
- .then(function(lista){
+.then(function(r){return r.json();})
+.then(function(lista){
     var jaExiste = lista && lista.some(function(b){return b.code === code});
     if(jaExiste){
       alert('Essa BMS já está adicionada na sua conta!');
@@ -349,8 +350,8 @@ function addBms(){
       headers:{'Content-Type':'application/json','Authorization':'Bearer '+TOKEN},
       body:JSON.stringify({code:code,nome:nome || code})
     })
-   .then(function(r){return r.json();})
-   .then(function(d){
+  .then(function(r){return r.json();})
+  .then(function(d){
       if(d.ok){
         alert('BMS adicionada!');
         document.getElementById('bms-code').value = '';
@@ -474,4 +475,4 @@ function atualizar(){
     atualizarGauge(parseInt(d.soc || 0));
 
     /* GRÁFICO DESATIVADO - Para ativar descomente o bloco abaixo
-    var agora = new Date().toLocaleTimeString('pt-BR', {hour:'2-
+    var agora = new Date().toLocaleTimeString('pt-BR', {hour:
