@@ -16,11 +16,11 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
 @keyframes float{0%{transform:translateY(100vh)}100%{transform:translateY(-100px)}}
 #login,#dash,#lista,#cadastro{position:relative;z-index:1;width:100%;min-height:100vh;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:8px}
 #dash,#lista{justify-content:flex-start;padding-top:12px}
-.title{font-size:clamp(32px,8vw,74px);font-weight:900;margin-bottom:16px;letter-spacing:3px;background:linear-gradient(90deg,var(--cyan),var(--blue));-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-align:center}
+.title{font-size:clamp(32px,8vw,74px);font-weight:900;margin-bottom:16px;letter-spacing:3px;background:linear-gradient(90deg,var(--cyan),var(--blue));-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-align:center;width:100%}
 .card{background:rgba(10,15,25,.92);border:1px solid rgba(0,255,255,.12);border-radius:16px;padding:16px;width:100%;margin-bottom:12px}
 #login.card,#cadastro.card{max-width:520px}
 #dash,#lista{width:100%;max-width:100%}
-.gauge-wrap{width:100%;margin:0 12px 0}
+.gauge-wrap{width:100%;margin:0 0 12px 0}
 .gauge-card{padding:20px 20px 30px;min-height:280px}
 .gauge{width:min(240px,60vw);height:min(240px,60vw);margin:auto;border-radius:50%;background:conic-gradient(#00ff88 0deg,#00ffff 180deg,rgba(255,255,255,.08) 180deg);position:relative;box-shadow:0 0 30px rgba(0,255,255,.15)}
 .gauge::before{content:'';position:absolute;inset:18px;border-radius:50%;background:#05070d}
@@ -62,11 +62,12 @@ canvas{width:100%!important;height:280px!important}
 .bms-item:active{transform:scale(0.98)}
 .bms-item h3{color:var(--cyan);font-size:20px;margin-bottom:8px}
 .bms-item p{color:#888;font-size:13px;margin:4px 0}
-.header-bar{width:100%;display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:12px}
-.user-info{color:#888;font-size:14px}
+.header-bar{width:100%;display:flex;justify-content:center;align-items:center;margin-bottom:20px}
+.user-info{color:#888;font-size:14px;text-align:center}
 .erro{background:rgba(255,0,0,.1);border:2px solid #ff4444;border-radius:12px;padding:16px;margin-top:16px;color:#ff4444;font-size:14px}
 .link-cadastro{margin-top:20px;text-align:center;color:#fff;cursor:pointer;opacity:.8}
 .link-cadastro span{color:#00ffff;text-decoration:underline}
+.footer-voltar{width:100%;margin-top:24px;margin-bottom:12px}
 @media(max-width:520px){.card{padding:12px}.gauge-card{padding:16px;min-height:240px}.grid{grid-template-columns:repeat(2,1fr)}.bms-list{grid-template-columns:1fr}}
 </style>
 </head>
@@ -104,6 +105,8 @@ canvas{width:100%!important;height:280px!important}
 <div id="lista" class="hidden">
 <div class="header-bar">
 <div class="title" style="font-size:clamp(28px,6vw,32px);margin:0">SMART BMS</div>
+</div>
+<div style="width:100%;text-align:center;margin-bottom:20px">
 <div class="user-info">Olá, <span id="user-nome">--</span></div>
 </div>
 <div class="card">
@@ -121,8 +124,7 @@ canvas{width:100%!important;height:280px!important}
 
 <div id="dash" class="hidden">
 <div class="header-bar">
-<div class="title" style="font-size:clamp(28px,6vw,32px);margin:0" id="bms-titulo">--</div>
-<button class="btn-sec" onclick="voltar()" style="max-width:150px;margin:0">← VOLTAR</button>
+<div class="title" id="bms-titulo">--</div>
 </div>
 <div class="gauge-wrap">
 <div class="card gauge-card">
@@ -161,6 +163,9 @@ canvas{width:100%!important;height:280px!important}
 <div class="diff-item">Total<div><span id="celTot" style="color:#00ffff">0</span></div></div>
 </div>
 <div id="celulas" class="cells"></div>
+</div>
+<div class="footer-voltar">
+<button class="btn-sec" onclick="voltar()">← VOLTAR</button>
 </div>
 </div>
 
@@ -465,8 +470,3 @@ function sair(){
   clearInterval(INT);
   localStorage.removeItem('bms_token');
   localStorage.removeItem('bms_user');
-  location.reload();
-}
-</script>
-</body>
-</html>
