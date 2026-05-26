@@ -9,8 +9,8 @@
 *{margin:0;padding:0;box-sizing:border-box}
 :root{--bg:#05070d;--cyan:#00ffff;--blue:#0080ff;--green:#00ff88;--red:#ff4444;--orange:#ffaa00}
 body{font-family:'Inter',sans-serif;background:var(--bg);color:#fff;min-height:100vh;width:100%;overflow-x:hidden}
-#login,#dash,#lista,#cadastro{position:relative;z-index:1;width:100%;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:8px}
-#dash,#lista{justify-content:flex-start;padding-top:12px}
+#login,#dash,#lista,#cadastro,#admin{position:relative;z-index:1;width:100%;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:8px}
+#dash,#lista,#admin{justify-content:flex-start;padding-top:12px}
 #login,#cadastro{justify-content:center}
 .title{font-size:clamp(32px,8vw,74px);font-weight:900;margin-bottom:16px;letter-spacing:3px;background:linear-gradient(90deg,var(--cyan),var(--blue));-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-align:center;width:100%}
 .card{background:rgba(10,15,25,.92);border:1px solid rgba(0,255,255,.12);border-radius:16px;padding:12px;width:100%;margin-bottom:4px}
@@ -35,6 +35,7 @@ input{background:rgba(0,0,0,.5);color:#fff;font-family:monospace;letter-spacing:
 input::placeholder{color:rgba(255,255,255,.3)}
 button{background:linear-gradient(90deg,var(--blue),var(--cyan));color:#fff;font-weight:700;cursor:pointer}
 .btn-sec{background:transparent;border:1px solid rgba(0,255,255,.3);color:var(--cyan)}
+.btn-danger{background:rgba(255,68,68,.2);border:1px solid rgba(255,68,68,.4);color:var(--red)}
 .status{display:inline-flex;align-items:center;gap:10px;padding:14px 26px;border-radius:999px;font-weight:700}
 .on{background:rgba(0,255,136,.12);color:var(--green);border:1px solid rgba(0,255,136,.3)}
 .off{background:rgba(255,68,68,.12);color:var(--red);border:1px solid rgba(255,68,68,.3)}
@@ -62,6 +63,10 @@ button{background:linear-gradient(90deg,var(--blue),var(--cyan));color:#fff;font
 .link-cadastro{margin-top:20px;text-align:center;color:#fff;cursor:pointer;opacity:.8}
 .link-cadastro span{color:#00ffff;text-decoration:underline}
 .footer-voltar{width:100%;margin-top:24px;margin-bottom:12px}
+.badge{padding:4px 10px;border-radius:8px;font-size:11px;font-weight:700;letter-spacing:1px}
+.badge-green{background:rgba(0,255,136,.15);color:var(--green)}
+.badge-orange{background:rgba(255,170,0,.15);color:var(--orange)}
+.badge-red{background:rgba(255,68,68,.15);color:var(--red)}
 @media(max-width:520px){.card{padding:12px}.gauge-card{padding:16px;min-height:240px}.grid{grid-template-columns:repeat(2,1fr)}.bms-list{grid-template-columns:1fr}.diff{grid-template-columns:repeat(2,1fr)}}
 </style>
 </head>
@@ -108,6 +113,29 @@ button{background:linear-gradient(90deg,var(--blue),var(--cyan));color:#fff;font
 <div class="label">Minhas BMS</div>
 <div id="bms-list" class="bms-list"></div>
 </div>
+<div id="admin-btn-wrap"></div>
+<button class="logout" onclick="sair()">SAIR</button>
+</div>
+
+<div id="admin" class="hidden">
+<div class="title" style="font-size:clamp(28px,6vw,32px);margin-bottom:8px">PAINEL ADMIN</div>
+<div class="user-info">Gerenciar BMS Master</div>
+
+<div class="card">
+<div class="label">Cadastrar Nova BMS</div>
+<input id="adm-code" placeholder="SL00000000" maxlength="10" style="margin-top:8px">
+<input id="adm-serial" placeholder="Serial - opcional" style="margin-top:12px">
+<input id="adm-modelo" placeholder="Modelo - ex: SmartBMS 48V" style="margin-top:12px">
+<button onclick="adminAddBms()">CADASTRAR NO SISTEMA</button>
+<div id="erro-adm" class="erro hidden"></div>
+</div>
+
+<div class="card">
+<div class="label">BMS Cadastradas</div>
+<div id="admin-list" class="bms-list"></div>
+</div>
+
+<button class="btn-sec" onclick="mostrarLista()">← VOLTAR</button>
 <button class="logout" onclick="sair()">SAIR</button>
 </div>
 
@@ -158,6 +186,7 @@ button{background:linear-gradient(90deg,var(--blue),var(--cyan));color:#fff;font
 var API = '/api/bms';
 var TOKEN = localStorage.getItem('bms_token');
 var USER = null;
+var IS_ADMIN = false;
 var CODIGO = localStorage.getItem('bms_codigo_ativo');
 var INT = null;
 
@@ -168,10 +197,12 @@ function esconderTudo(){
   document.getElementById('cadastro').classList.add('hidden');
   document.getElementById('lista').classList.add('hidden');
   document.getElementById('dash').classList.add('hidden');
+  document.getElementById('admin').classList.add('hidden');
 }
 
 window.onload = function(){
   if(TOKEN && USER){
+    IS_ADMIN = USER.is_admin || false;
     if(CODIGO){
       abrirDash(CODIGO);
     }else{
@@ -185,6 +216,14 @@ window.onload = function(){
   var bmsInput = document.getElementById('bms-code');
   if(bmsInput){
     bmsInput.oninput = function(e){
+      if(!e.target.value.startsWith('SL')) e.target.value = 'SL';
+      e.target.value = 'SL' + e.target.value.slice(2).replace(/[^0-9]/g,'').slice(0,8);
+    };
+  }
+
+  var admInput = document.getElementById('adm-code');
+  if(admInput){
+    admInput.oninput = function(e){
       if(!e.target.value.startsWith('SL')) e.target.value = 'SL';
       e.target.value = 'SL' + e.target.value.slice(2).replace(/[^0-9]/g,'').slice(0,8);
     };
@@ -221,7 +260,8 @@ function login(){
 .then(function(d){
     if(d.ok && d.token){
       TOKEN = d.token;
-      USER = {nome:d.nome,email:d.email};
+      USER = {nome:d.nome,email:d.email,is_admin:d.is_admin};
+      IS_ADMIN = d.is_admin || false;
       localStorage.setItem('bms_token', TOKEN);
       localStorage.setItem('bms_user', JSON.stringify(USER));
       mostrarLista();
@@ -278,6 +318,18 @@ function mostrarLista(){
   document.getElementById('lista').classList.remove('hidden');
   document.getElementById('user-nome').textContent = USER? USER.nome : 'Usuário';
   carregarLista();
+
+  // Botão admin
+  if(IS_ADMIN &&!document.getElementById('btn-admin')){
+    var wrap = document.getElementById('admin-btn-wrap');
+    var btn = document.createElement('button');
+    btn.id = 'btn-admin';
+    btn.className = 'btn-sec';
+    btn.textContent = '⚙ PAINEL ADMIN';
+    btn.onclick = mostrarAdmin;
+    btn.style.marginTop = '12px';
+    wrap.appendChild(btn);
+  }
 }
 
 function carregarLista(){
@@ -317,7 +369,6 @@ function addBms(){
     return;
   }
 
-  // Verifica se já existe na conta do usuário
   fetch(API + '?action=user_bms', {
     headers:{'Authorization':'Bearer '+TOKEN}
   })
@@ -331,7 +382,6 @@ function addBms(){
       return;
     }
 
-    // Tenta adicionar - backend valida se BMS existe no sistema
     fetch(API + '?action=add_bms', {
       method:'POST',
       headers:{'Content-Type':'application/json','Authorization':'Bearer '+TOKEN},
@@ -345,7 +395,6 @@ function addBms(){
         document.getElementById('bms-nome').value = '';
         carregarLista();
       }else{
-        // Mensagens específicas do backend
         if(d.error === 'not_found'){
           alert('BMS não encontrada no sistema. Verifique o código ou fale com o suporte.');
         }else if(d.error === 'already_claimed'){
@@ -376,78 +425,55 @@ function voltar(){
   mostrarLista();
 }
 
-function renderCelulas(cels){
-  if(!cels || cels.length === 0){
-    document.getElementById('celulas').innerHTML = '<div style="grid-column:1/-1;opacity:.4;padding:20px">Sem dados das células</div>';
-    return;
-  }
-  var vals = [];
-  for(var i=0;i<cels.length;i++){
-    var v = parseFloat(cels[i]);
-    if(v > 0) vals.push(v);
-  }
-  if(vals.length === 0) return;
-  var min = Math.min.apply(null, vals);
-  var max = Math.max.apply(null, vals);
-  var dif = max - min;
-  document.getElementById('celMin').textContent = min.toFixed(3)+'V';
-  document.getElementById('celMax').textContent = max.toFixed(3)+'V';
-  document.getElementById('celDif').textContent = dif.toFixed(3)+'V';
-  document.getElementById('celTot').textContent = cels.length;
-  var html = '';
-  for(var i=0;i<cels.length;i++){
-    var val = parseFloat(cels[i]);
-    var cls = 'ok';
-    if(val < 3.2 || val > 4.2) cls = 'crit';
-    else if(val < 3.4 || val > 4.15) cls = 'warn';
-    html += '<div class="cell '+cls+'"><div class="cell-num">C'+(i+1)+'</div><div class="cell-val">'+val.toFixed(3)+'</div></div>';
-  }
-  document.getElementById('celulas').innerHTML = html;
+// === PAINEL ADMIN ===
+
+function mostrarAdmin(){
+  esconderTudo();
+  document.getElementById('admin').classList.remove('hidden');
+  carregarAdminLista();
 }
 
-function atualizarGauge(soc){
-  var gauge = document.getElementById('socGauge');
-  var valor = document.getElementById('socValor');
-  var bar = document.getElementById('socBar');
-  var txt = document.getElementById('socBarTxt');
-  var deg = soc * 3.6;
-  valor.textContent = soc + '%';
-  txt.textContent = soc + '%';
-  bar.style.width = soc + '%';
-  gauge.style.background = 'conic-gradient(#00ff88 0deg,#00ffff '+deg+'deg,rgba(255,255,255,.08) '+deg+'deg)';
-}
-
-function atualizar(){
-  if(!CODIGO) return;
-  fetch(API+'?action=data&code='+CODIGO, {
+function carregarAdminLista(){
+  fetch(API + '?action=admin_list_master', {
     headers:{'Authorization':'Bearer '+TOKEN}
   })
-.then(function(r){
-    if(r.status === 401){sair();return;}
-    if(!r.ok) return;
-    return r.json();
-  })
-.then(function(d){
-    if(!d) return;
-    document.getElementById('soc').textContent = (d.soc?d.soc.toFixed(0):0)+'%';
-    document.getElementById('volt').textContent = (d.voltage?d.voltage.toFixed(2):0)+'V';
-    document.getElementById('corr').textContent = (d.current?d.current.toFixed(1):0)+'A';
-    document.getElementById('temp').textContent = (d.temp?d.temp.toFixed(1):0)+'°C';
-    var st = document.getElementById('status');
-    st.textContent = d.online?'Online':'Offline';
-    st.className = 'status ' + (d.online?'on':'off');
-    renderCelulas(d.cells);
-    atualizarGauge(parseInt(d.soc || 0));
+.then(r=>r.json())
+.then(lista=>{
+    var el = document.getElementById('admin-list');
+    if(!lista ||!lista.length){
+      el.innerHTML = '<p style="text-align:center;color:#666;padding:20px">Nenhuma BMS cadastrada</p>';
+      return;
+    }
+    var html = '';
+    for(var i=0;i<lista.length;i++){
+      var b = lista[i];
+      var status = b.user_id?
+        `<span class="badge badge-orange">Vinculada: ${b.dono_nome || b.dono_email}</span>` :
+        `<span class="badge badge-green">Disponível</span>`;
+
+      html += `<div class="bms-item" style="cursor:default">
+        <h3>${b.code}</h3>
+        <p>Modelo: ${b.modelo || '--'}</p>
+        <p>Serial: ${b.serial || '--'}</p>
+        <p>${status}</p>
+        <div style="display:flex;gap:8px;margin-top:12px;width:100%">
+          ${b.user_id? `<button style="padding:10px;font-size:14px;flex:1" onclick="adminUnlink('${b.code}')">Desvincular</button>` : ''}
+          <button class="btn-danger" style="padding:10px;font-size:14px;flex:1" onclick="adminDelete('${b.code}')">Excluir</button>
+        </div>
+      </div>`;
+    }
+    el.innerHTML = html;
   });
 }
 
-function sair(){
-  clearInterval(INT);
-  localStorage.removeItem('bms_token');
-  localStorage.removeItem('bms_user');
-  localStorage.removeItem('bms_codigo_ativo');
-  location.reload();
-}
-</script>
-</body>
-</html>
+function adminAddBms(){
+  var code = document.getElementById('adm-code').value.trim();
+  var serial = document.getElementById('adm-serial').value.trim();
+  var modelo = document.getElementById('adm-modelo').value.trim();
+  var e = document.getElementById('erro-adm');
+  e.classList.add('hidden');
+
+  if(!code || code.length!== 10){
+    e.textContent = 'Código inválido. Use SL + 8 números';
+    e.classList.remove('hidden');
+    r
