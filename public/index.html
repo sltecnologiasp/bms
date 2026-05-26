@@ -101,7 +101,7 @@ button{background:linear-gradient(90deg,var(--blue),var(--cyan));color:#fff;font
 <div class="user-info">Olá, <span id="user-nome">--</span></div>
 <div class="card">
 <div class="label">Adicionar BMS</div>
-<input id="bms-code" placeholder="SL00000000" maxlength="10" style="margin-top:8px">
+<input id="bms-code" placeholder="SL000000000000" maxlength="14" style="margin-top:8px">
 <input id="bms-nome" placeholder="Nome da BMS" style="margin-top:12px">
 <button onclick="addBms()">ADICIONAR</button>
 </div>
@@ -187,7 +187,7 @@ window.onload = function(){
   if(bmsInput){
     bmsInput.oninput = function(e){
       if(!e.target.value.startsWith('SL')) e.target.value = 'SL';
-      e.target.value = 'SL' + e.target.value.slice(2).replace(/[^0-9]/g,'').slice(0,8);
+      e.target.value = 'SL' + e.target.value.slice(2).replace(/[^0-9]/g,'').slice(0,12);
     };
   }
 };
@@ -334,8 +334,8 @@ function addBms(){
   var code = document.getElementById('bms-code').value.trim();
   var nome = document.getElementById('bms-nome').value.trim();
 
-  if(!code || code.length!== 10){
-    alert('Código inválido. Use SL + 8 números');
+  if(!code || code.length!== 14){
+    alert('Código inválido. Use SL + 12 números');
     return;
   }
 
