@@ -92,9 +92,11 @@ export async function onRequest({ request, env }) {
 
       if (bms.user_id && bms.user_id!== userId) return json({ ok: false, error: 'Essa BMS já está vinculada a outra conta' });
 
+      if (bms.user_id === userId) return json({ ok: false, error: 'Você já adicionou essa BMS' });
+
       await env.DB.prepare("UPDATE bms_master SET user_id =? WHERE id =?").bind(userId, bms.id).run();
       await env.DB.prepare('INSERT OR IGNORE INTO bms (code, nome) VALUES (?,?)').bind(code, nome || code).run();
-      await env.DB.prepare('INSERT OR IGNORE INTO user_bms (user_id, bms_code, bms_nome) VALUES (?,?,?)').bind(userId, code, nome || code).run();
+      await env.DB.prepare('INSERT INTO user_bms (user_id, bms_code, bms_nome) VALUES (?,?,?)').bind(userId, code, nome || code).run();
 
       return json({ ok: true });
     }
@@ -163,9 +165,9 @@ export async function onRequest({ request, env }) {
       if (!isAdmin) return json({ ok: false, error: 'Admin only' }, 403);
       const id = url.searchParams.get('id');
       if (!id) return json({ ok: false, error: 'ID obrigatório' }, 400);
+      await env.DB.prepare('UPDATE bms_master SET user_id = NULL WHERE user_id =?').bind(id).run();
       await env.DB.prepare('DELETE FROM users WHERE id =?').bind(id).run();
       await env.DB.prepare('DELETE FROM user_bms WHERE user_id =?').bind(id).run();
-      await env.DB.prepare('UPDATE bms_master SET user_id = NULL WHERE user_id =?').bind(id).run();
       return json({ ok: true });
     }
 
