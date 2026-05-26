@@ -2,35 +2,481 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>TESTE</title>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>SMART BMS</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
 <style>
-body{background:#05070d;color:#fff;font-family:sans-serif;padding:20px}
-button{width:100%;padding:20px;background:#00ffff;border:none;border-radius:10px;font-size:18px;margin:10px 0}
-.hidden{display:none}
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#05070d;--cyan:#00ffff;--blue:#0080ff;--green:#00ff88;--red:#ff4444;--orange:#ffaa00}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:#fff;min-height:100vh;width:100%;overflow-x:hidden}
+#login,#dash,#lista,#cadastro,#verify{position:relative;z-index:1;width:100%;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:8px}
+#dash,#lista{justify-content:flex-start;padding-top:12px}
+#login,#cadastro,#verify{justify-content:center}
+.title{font-size:clamp(32px,8vw,74px);font-weight:900;margin-bottom:16px;letter-spacing:3px;background:linear-gradient(90deg,var(--cyan),var(--blue));-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-align:center;width:100%}
+.card{background:rgba(10,15,25,.92);border:1px solid rgba(0,255,255,.12);border-radius:16px;padding:12px;width:100%;margin-bottom:4px}
+#login.card,#cadastro.card,#verify.card{max-width:520px}
+.gauge-wrap{width:100%;margin:0 0 4px 0}
+.gauge-card{padding:20px 20px 30px;min-height:280px}
+.gauge{width:min(240px,60vw);height:min(240px,60vw);margin:auto;border-radius:50%;background:conic-gradient(#00ff88 0deg,#00ffff 180deg,rgba(255,255,255,.08) 180deg);position:relative;box-shadow:0 0 30px rgba(0,255,255,.15)}
+.gauge::before{content:'';position:absolute;inset:18px;border-radius:50%;background:#05070d}
+.gauge-inner{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;align-items:center;z-index:2}
+.gauge-value{font-size:clamp(36px,10vw,58px);font-weight:900;color:#00ff88;width:3ch;text-align:center;font-variant-numeric:tabular-nums}
+.gauge-label{opacity:.6;letter-spacing:2px;font-size:12px}
+.bar-wrap{margin-top:20px}
+.bar-label{display:flex;justify-content:space-between;margin-bottom:8px;font-size:14px;opacity:.7}
+.bar{height:16px;background:rgba(255,255,255,.06);border-radius:999px;overflow:hidden}
+.bar-fill{height:100%;width:0%;border-radius:999px;background:linear-gradient(90deg,#00ff88,#00ffff);transition:width.8s ease}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:4px;width:100%;margin:0 0 4px 0}
+.grid.card{width:100%;height:110px;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:12px;margin:0}
+.label{font-size:10px;letter-spacing:1.5px;opacity:.6;text-transform:uppercase;text-align:center}
+.value{font-size:clamp(22px,6vw,30px);font-weight:800;margin-top:8px;line-height:1;width:100%;text-align:center;font-variant-numeric:tabular-nums}
+input,button{width:100%;padding:18px;border-radius:18px;border:none;outline:none;margin-top:16px;font-size:18px}
+input{background:rgba(0,0,0,.5);color:#fff;font-family:monospace;letter-spacing:2px;border:1px solid rgba(0,255,255,.2)}
+input::placeholder{color:rgba(255,255,255,.3)}
+#verify-code{font-size:32px;letter-spacing:12px;text-align:center;font-weight:700}
+button{background:linear-gradient(90deg,var(--blue),var(--cyan));color:#fff;font-weight:700;cursor:pointer}
+.btn-sec{background:transparent;border:1px solid rgba(0,255,255,.3);color:var(--cyan)}
+.status{display:inline-flex;align-items:center;gap:10px;padding:14px 26px;border-radius:999px;font-weight:700}
+.on{background:rgba(0,255,136,.12);color:var(--green);border:1px solid rgba(0,255,136,.3)}
+.off{background:rgba(255,68,68,.12);color:var(--red);border:1px solid rgba(255,68,68,.3)}
+.status-wrap{display:flex;justify-content:center;align-items:center;flex-direction:column;margin-top:14px}
+.bms-code{font-size:clamp(18px,4.5vw,24px);font-weight:700;margin-top:12px;letter-spacing:1.5px;color:#fff;text-align:center;opacity:.95}
+.diff{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;margin-top:18px}
+.diff-item{padding:12px 8px;border-radius:14px;background:rgba(255,255,255,.03);text-align:center}
+.diff-item span{display:block;margin-top:6px;font-size:clamp(18px,5vw,22px);font-weight:800;width:6ch;margin:auto;text-align:center;font-variant-numeric:tabular-nums}
+.cells{display:grid;grid-template-columns:repeat(auto-fill,minmax(85px,1fr));gap:10px;margin-top:20px}
+.cell{background:rgba(0,0,0,.4);border-radius:18px;padding:14px;border:1px solid rgba(255,255,255,.05)}
+.cell-num{font-size:11px;opacity:.5;margin-bottom:6px}
+.cell-val{font-size:clamp(16px,4vw,20px);font-weight:700;width:7ch;text-align:center;font-variant-numeric:tabular-nums}
+.cell.ok{border-color:rgba(0,255,136,.25)}
+.cell.warn{border-color:rgba(255,170,0,.25)}
+.cell.crit{border-color:rgba(255,68,68,.25)}
+.logout{margin-top:24px;background:rgba(255,68,68,.08);border:1px solid rgba(255,68,68,.2)}
+.hidden{display:none!important}
+.bms-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:4px;margin-top:20px}
+.bms-item{background:rgba(0,255,255,.05);border:1px solid rgba(0,255,255,.2);border-radius:16px;padding:20px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:8px}
+.bms-item:active{transform:scale(0.98)}
+.bms-item h3{color:var(--cyan);font-size:20px;margin-bottom:0}
+.bms-item p{color:#888;font-size:13px;margin:0;text-align:center}
+.bms-item button.del{background:rgba(255,68,68,.1);border:1px solid rgba(255,68,68,.4);padding:6px 16px;margin-top:12px;width:auto;box-shadow:0 0 15px rgba(255,68,68,.2);border-radius:10px;color:#fff;font-weight:600;font-size:14px;cursor:pointer}
+.user-info{color:#888;font-size:14px;text-align:center;margin-bottom:20px}
+.erro{background:rgba(255,0,0,.1);border:2px solid #ff4444;border-radius:12px;padding:16px;margin-top:16px;color:#ff4444;font-size:14px}
+.sucesso{background:rgba(0,255,136,.1);border:2px solid #00ff88;border-radius:12px;padding:16px;margin-top:16px;color:#00ff88;font-size:14px}
+.link-cadastro{margin-top:20px;text-align:center;color:#fff;cursor:pointer;opacity:.8}
+.link-cadastro span{color:#00ffff;text-decoration:underline}
+.footer-voltar{width:100%;margin-top:24px;margin-bottom:12px}
+@media(max-width:520px){.card{padding:12px}.gauge-card{padding:16px;min-height:240px}.grid{grid-template-columns:repeat(2,1fr)}.bms-list{grid-template-columns:1fr}.diff{grid-template-columns:repeat(2,1fr)}}
 </style>
 </head>
 <body>
 
 <div id="login">
-<h1>LOGIN</h1>
-<button onclick="mostrarCadastro()">CADASTRAR</button>
+<div class="title">SMART BMS</div>
+<div class="card">
+<div class="label">E-mail</div>
+<input id="email" type="email" placeholder="seu@email.com">
+<div class="label" style="margin-top:16px">Senha</div>
+<input id="senha" type="password" placeholder="••••••••">
+<button onclick="login()">ENTRAR</button>
+<p class="link-cadastro" onclick="mostrarCadastro()">Ainda não tem conta? <span>Cadastre-se</span></p>
+<div id="erro" class="erro hidden"></div>
+</div>
 </div>
 
 <div id="cadastro" class="hidden">
-<h1>CADASTRO</h1>
-<button onclick="mostrarLogin()">VOLTAR</button>
+<div class="title">SMART BMS</div>
+<div class="card">
+<div class="label">Nome</div>
+<input id="cad-nome" placeholder="Seu nome">
+<div class="label" style="margin-top:16px">E-mail</div>
+<input id="cad-email" type="email" placeholder="seu@email.com">
+<div class="label" style="margin-top:16px">Senha</div>
+<input id="cad-senha" type="password" placeholder="••••••••">
+<button onclick="cadastrar()">CADASTRAR</button>
+<button class="btn-sec" onclick="mostrarLogin()">VOLTAR</button>
+<div id="erro-cad" class="erro hidden"></div>
+</div>
+</div>
+
+<div id="verify" class="hidden">
+<div class="title">SMART BMS</div>
+<div class="card">
+<div class="label">Confirme seu email</div>
+<p style="text-align:center;margin:16px 0;opacity:.8">Enviamos um código de 6 dígitos para<br><span id="verify-email" style="color:#00ffff"></span></p>
+<input id="verify-code" placeholder="000000" maxlength="6" pattern="[0-9]*" inputmode="numeric">
+<button onclick="verifyEmail()">CONFIRMAR EMAIL</button>
+<button class="btn-sec" onclick="reenviar()">REENVIAR CÓDIGO</button>
+<p class="link-cadastro" onclick="mostrarLogin()">Voltar pro <span>login</span></p>
+<div id="erro-verify" class="erro hidden"></div>
+<div id="sucesso-verify" class="sucesso hidden"></div>
+</div>
+
+<div id="lista" class="hidden">
+<div class="title" style="font-size:clamp(28px,6vw,32px);margin-bottom:8px">SMART BMS</div>
+<div class="user-info">Olá, <span id="user-nome">--</span></div>
+<div class="card">
+<div class="label">Adicionar BMS</div>
+<input id="bms-code" placeholder="SL000000000000" maxlength="14" style="margin-top:8px">
+<input id="bms-nome" placeholder="Nome da BMS" style="margin-top:12px">
+<button onclick="addBms()">ADICIONAR</button>
+</div>
+<div class="card">
+<div class="label">Minhas BMS</div>
+<div id="bms-list" class="bms-list"></div>
+</div>
+<button class="logout" onclick="sair()">SAIR</button>
+</div>
+
+<div id="dash" class="hidden">
+<div class="gauge-wrap">
+<div class="card gauge-card">
+<div class="gauge" id="socGauge">
+<div class="gauge-inner">
+<div class="gauge-value" id="socValor">0%</div>
+<div class="gauge-label">STATE OF CHARGE</div>
+</div>
+<div class="bar-wrap">
+<div class="bar-label"><span>Bateria</span><span id="socBarTxt">0%</span></div>
+<div class="bar"><div class="bar-fill" id="socBar"></div></div>
+</div>
+</div>
+</div>
+<div class="card">
+<div class="label">Status</div>
+<div class="status-wrap">
+<span id="status" class="status off">Offline</span>
+<div class="bms-code" id="bms-titulo">--</div>
+</div>
+<div class="grid">
+<div class="card"><div class="label">SOC</div><div class="value" id="soc" style="color:#00ff88">0%</div></div>
+<div class="card"><div class="label">Tensão</div><div class="value" id="volt" style="color:#00ffff">0V</div></div>
+<div class="card"><div class="label">Corrente</div><div class="value" id="corr" style="color:#ffaa00">0A</div></div>
+<div class="card"><div class="label">Temperatura</div><div class="value" id="temp" style="color:#ff4444">0°C</div></div>
+</div>
+<div class="card">
+<div class="label">Células - Tensão Individual</div>
+<div class="diff">
+<div class="diff-item">Min<div><span id="celMin" style="color:#00ff88">0.00V</span></div></div>
+<div class="diff-item">Max<div><span id="celMax" style="color:#ffaa00">0.00V</span></div></div>
+<div class="diff-item">Diferença<div><span id="celDif" style="color:#ff4444">0.00V</span></div></div>
+<div class="diff-item">Total<div><span id="celTot" style="color:#00ffff">0</span></div></div>
+</div>
+<div id="celulas" class="cells"></div>
+</div>
+<div class="footer-voltar">
+<button class="btn-sec" onclick="voltar()">← VOLTAR</button>
+</div>
 </div>
 
 <script>
-function mostrarCadastro(){
+var API = '/api/bms';
+var TOKEN = localStorage.getItem('bms_token');
+var USER = null;
+var CODIGO = localStorage.getItem('bms_codigo_ativo');
+var INT = null;
+var PENDING_EMAIL = localStorage.getItem('pending_email');
+
+try{USER = JSON.parse(localStorage.getItem('bms_user')||'null');}catch(e){}
+
+function esconderTudo(){
   document.getElementById('login').classList.add('hidden');
-  document.getElementById('cadastro').classList.remove('hidden');
-}
-function mostrarLogin(){
   document.getElementById('cadastro').classList.add('hidden');
+  document.getElementById('verify').classList.add('hidden');
+  document.getElementById('lista').classList.add('hidden');
+  document.getElementById('dash').classList.add('hidden');
+}
+
+window.onload = function(){
+  if(TOKEN && USER){
+    if(CODIGO){
+      abrirDash(CODIGO);
+    }else{
+      mostrarLista();
+    }
+  }else if(PENDING_EMAIL){
+    mostrarVerify(PENDING_EMAIL);
+  }else{
+    esconderTudo();
+    document.getElementById('login').classList.remove('hidden');
+  }
+
+  var bmsInput = document.getElementById('bms-code');
+  if(bmsInput){
+    bmsInput.oninput = function(e){
+      if(!e.target.value.startsWith('SL')) e.target.value = 'SL';
+      e.target.value = 'SL' + e.target.value.slice(2).replace(/[^0-9]/g,'').slice(0,12);
+    };
+  }
+
+  var codeInput = document.getElementById('verify-code');
+  if(codeInput){
+    codeInput.oninput = function(e){
+      e.target.value = e.target.value.replace(/[^0-9]/g,'').slice(0,6);
+    };
+  }
+};
+
+function mostrarLogin(){
+  localStorage.removeItem('bms_codigo_ativo');
+  localStorage.removeItem('pending_email');
+  esconderTudo();
   document.getElementById('login').classList.remove('hidden');
 }
-</script>
-</body>
-</html>
+
+function mostrarCadastro(){
+  esconderTudo();
+  document.getElementById('cadastro').classList.remove('hidden');
+}
+
+function mostrarVerify(email){
+  localStorage.setItem('pending_email', email);
+  esconderTudo();
+  document.getElementById('verify').classList.remove('hidden');
+  document.getElementById('verify-email').textContent = email;
+  document.getElementById('verify-code').value = '';
+}
+
+function login(){
+  document.getElementById('erro').classList.add('hidden');
+  var email = document.getElementById('email').value.trim();
+  var senha = document.getElementById('senha').value;
+  if(!email ||!senha){
+    var e = document.getElementById('erro');
+    e.textContent = 'Preenche e-mail e senha';
+    e.classList.remove('hidden');
+    return;
+  }
+  fetch(API + '?action=login_user', {
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({email:email,senha:senha})
+  })
+.then(function(r){return r.json();})
+.then(function(d){
+    if(d.ok && d.token){
+      TOKEN = d.token;
+      USER = {nome:d.nome,email:d.email};
+      localStorage.setItem('bms_token', TOKEN);
+      localStorage.setItem('bms_user', JSON.stringify(USER));
+      localStorage.removeItem('pending_email');
+      mostrarLista();
+    }else if(d.need_verify){
+      mostrarVerify(d.email);
+    }else{
+      var e = document.getElementById('erro');
+      e.textContent = d.error || 'Erro ao fazer login';
+      e.classList.remove('hidden');
+    }
+  })
+.catch(function(e){
+    var er = document.getElementById('erro');
+    er.textContent = 'Erro: ' + e.message;
+    er.classList.remove('hidden');
+  });
+}
+
+function cadastrar(){
+  var nome = document.getElementById('cad-nome').value.trim();
+  var email = document.getElementById('cad-email').value.trim();
+  var senha = document.getElementById('cad-senha').value;
+  var e = document.getElementById('erro-cad');
+  e.classList.add('hidden');
+  if(!nome ||!email ||!senha){
+    e.textContent = 'Preenche todos os campos';
+    e.classList.remove('hidden');
+    return;
+  }
+  fetch(API + '?action=register', {
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({nome:nome,email:email,senha:senha})
+  })
+.then(function(r){return r.json();})
+.then(function(d){
+    if(d.ok && d.need_verify){
+      mostrarVerify(d.email);
+    }else if(d.ok){
+      alert('Conta criada! Faz login');
+      mostrarLogin();
+      document.getElementById('email').value = email;
+      document.getElementById('senha').value = senha;
+    }else{
+      e.textContent = 'Erro: ' + d.error;
+      e.classList.remove('hidden');
+    }
+  })
+.catch(function(e2){
+    e.textContent = 'Erro: ' + e2.message;
+    e.classList.remove('hidden');
+  });
+}
+
+function verifyEmail(){
+  const code = document.getElementById('verify-code').value;
+  const email = localStorage.getItem('pending_email');
+  const e = document.getElementById('erro-verify');
+  const s = document.getElementById('sucesso-verify');
+  e.classList.add('hidden');
+  s.classList.add('hidden');
+  
+  if(!code || code.length!== 6){
+    e.textContent = 'Digite o código de 6 dígitos';
+    e.classList.remove('hidden');
+    return;
+  }
+  
+  fetch(API + '?action=verify_email', {
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({email: email, code: code})
+  })
+.then(function(r){return r.json();})
+.then(function(d){
+    if(d.ok){
+      TOKEN = d.token;
+      USER = {nome:d.nome,email:d.email};
+      localStorage.setItem('bms_token', TOKEN);
+      localStorage.setItem('bms_user', JSON.stringify(USER));
+      localStorage.removeItem('pending_email');
+      s.textContent = 'Email confirmado com sucesso!';
+      s.classList.remove('hidden');
+      setTimeout(mostrarLista, 1500);
+    }else{
+      e.textContent = d.error;
+      e.classList.remove('hidden');
+    }
+  })
+.catch(function(e2){
+    e.textContent = 'Erro: ' + e2.message;
+    e.classList.remove('hidden');
+  });
+}
+
+function reenviar(){
+  const email = localStorage.getItem('pending_email');
+  const e = document.getElementById('erro-verify');
+  const s = document.getElementById('sucesso-verify');
+  e.classList.add('hidden');
+  s.classList.add('hidden');
+  
+  fetch(API + '?action=resend_code', {
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({email: email})
+  })
+.then(function(r){return r.json();})
+.then(function(d){
+    if(d.ok){
+      s.textContent = 'Novo código enviado!';
+      s.classList.remove('hidden');
+    }else{
+      e.textContent = d.error;
+      e.classList.remove('hidden');
+    }
+  });
+}
+
+function mostrarLista(){
+  localStorage.removeItem('bms_codigo_ativo');
+  esconderTudo();
+  document.getElementById('lista').classList.remove('hidden');
+  document.getElementById('user-nome').textContent = USER? USER.nome : 'Usuário';
+  carregarLista();
+}
+
+function carregarLista(){
+  fetch(API + '?action=user_bms', {
+    headers:{'Authorization':'Bearer '+TOKEN}
+  })
+.then(function(r){
+    if(r.status === 401){sair();return;}
+    return r.json();
+  })
+.then(function(lista){
+    var el = document.getElementById('bms-list');
+    if(!lista ||!lista.length){
+      el.innerHTML = '<p style="grid-column:1/-1;text-align:center;color:#666;padding:40px">Nenhuma BMS adicionada ainda</p>';
+      return;
+    }
+    var html = '';
+    for(var i=0;i<lista.length;i++){
+      var b = lista[i];
+      html += '<div class="bms-item">';
+      html += '<div onclick="abrirDash(\''+b.code+'\')" style="cursor:pointer;width:100%">';
+      html += '<h3>'+b.nome+'</h3>';
+      html += '<p>Código: '+b.code+'</p>';
+      html += '<p style="margin-top:0"><span class="status '+(b.online?'on':'off')+'" style="padding:6px 12px;font-size:12px">'+(b.online?'Online':'Offline')+'</span></p>';
+      if(b.voltage) html += '<p style="margin-top:0;color:#00ffff">'+b.voltage.toFixed(1)+'V</p>';
+      html += '</div>';
+      html += '<button class="del" onclick="event.stopPropagation();removerBms(\''+b.code+'\',\''+b.nome+'\')">Remover dispositivo</button>';
+      html += '</div>';
+    }
+    el.innerHTML = html;
+  });
+}
+
+function removerBms(code, nome){
+  if(!confirm(`Remover ${nome || code} da sua conta?\n\nA BMS ficará disponível para outros usuários.`)) return;
+
+  fetch(API+`?action=remove_bms&code=${code}`,{
+    method:'DELETE',
+    headers:{'Authorization':'Bearer '+TOKEN}
+  })
+.then(function(r){return r.json();})
+.then(function(d){
+    if(d.ok){
+      alert('BMS removida da sua conta!');
+      carregarLista();
+    }else{
+      alert('Erro: ' + d.error);
+    }
+  });
+}
+
+function addBms(){
+  var code = document.getElementById('bms-code').value.trim();
+  var nome = document.getElementById('bms-nome').value.trim();
+
+  if(!code || code.length!== 14){
+    alert('Código inválido. Use SL + 12 números');
+    return;
+  }
+
+  fetch(API + '?action=add_bms', {
+    method:'POST',
+    headers:{'Content-Type':'application/json','Authorization':'Bearer '+TOKEN},
+    body:JSON.stringify({code:code,nome:nome || code})
+  })
+.then(function(r){return r.json();})
+.then(function(d){
+    if(d.ok){
+      alert('BMS adicionada!');
+      document.getElementById('bms-code').value = '';
+      document.getElementById('bms-nome').value = '';
+      carregarLista();
+    }else{
+      alert('Erro: ' + d.error);
+      document.getElementById('bms-code').value = '';
+      document.getElementById('bms-nome').value = '';
+    }
+  });
+}
+
+function abrirDash(code){
+  CODIGO = code;
+  localStorage.setItem('bms_codigo_ativo', code);
+  esconderTudo();
+  document.getElementById('dash').classList.remove('hidden');
+  document.getElementById('bms-titulo').textContent = code;
+  atualizar();
+  INT = setInterval(atualizar, 3000);
+}
+
+function voltar(){
+  clearInterval(INT);
+  localStorage.removeItem('bms_codigo_ativo');
+  mostrarLista();
+}
+
+function renderCelulas(cels){
+  if(!cels || cels.length ==
