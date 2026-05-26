@@ -250,7 +250,7 @@ function viewBmsDetails(code){
   const bms = bmsList.find(b => b.code === code);
   if(!bms) return;
   
-  const online = bms.updated_at && (Date.now() - new Date(bms.updated_at).getTime() < 10000);
+  const online = bms.updated_at && (Date.now() - new Date(bms.updated_at).getTime() < 5000);
   const cellsCount = bms.cells? bms.cells.length : 0;
   const cellsHtml = cellsCount > 0?
     `<button class="view" onclick="viewCells('${bms.code}')">Ver ${cellsCount} Células</button>` :
@@ -380,8 +380,8 @@ async function listarBms(){
   
   // Ordena: online primeiro, depois por updated_at desc
   bmsList = d.sort((a,b) => {
-    const aOnline = a.updated_at && (Date.now() - new Date(a.updated_at).getTime() < 10000);
-    const bOnline = b.updated_at && (Date.now() - new Date(b.updated_at).getTime() < 10000);
+    const aOnline = a.updated_at && (Date.now() - new Date(a.updated_at).getTime() < 5000);
+    const bOnline = b.updated_at && (Date.now() - new Date(b.updated_at).getTime() < 5000);
     
     if (aOnline && !bOnline) return -1;
     if (!aOnline && bOnline) return 1;
@@ -392,7 +392,7 @@ async function listarBms(){
   });
   
   document.getElementById('lista').innerHTML = bmsList.map(b=>{
-    const online = b.updated_at && (Date.now() - new Date(b.updated_at).getTime() < 10000);
+    const online = b.updated_at && (Date.now() - new Date(b.updated_at).getTime() < 5000);
     const dono = b.user_id? `<span class="badge badge-orange">Vinculada</span>` : `<span class="badge badge-green">Disponível</span>`;
     return `
     <div class="card" onclick="viewBmsDetails('${b.code}')">
