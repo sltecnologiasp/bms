@@ -35,9 +35,11 @@ input,button{width:100%;padding:18px;border-radius:18px;border:none;outline:none
 input{background:rgba(0,0,0,.5);color:#fff;font-family:monospace;letter-spacing:2px;border:1px solid rgba(0,255,255,.2)}
 button{background:linear-gradient(90deg,var(--blue),var(--cyan));color:#fff;font-weight:700;cursor:pointer}
 .btn-sec{background:transparent;border:1px solid rgba(0,255,255,.3);color:var(--cyan)}
-.status{display:inline-flex;align-items:center;gap:10px;padding:14px 26px;border-radius:999px;font-weight:700;margin-top:14px}
+.status{display:inline-flex;align-items:center;gap:10px;padding:14px 26px;border-radius:999px;font-weight:700}
 .on{background:rgba(0,255,136,.12);color:var(--green);border:1px solid rgba(0,255,136,.3)}
 .off{background:rgba(255,68,68,.12);color:var(--red);border:1px solid rgba(255,68,68,.3)}
+.status-wrap{display:flex;justify-content:center;align-items:center;flex-direction:column;margin-top:14px}
+.bms-code{font-size:clamp(24px,6vw,32px);font-weight:900;margin-top:16px;letter-spacing:2px;background:linear-gradient(90deg,var(--cyan),var(--blue));-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-align:center}
 .diff{display:grid;grid-template-columns:repeat(auto-fit,minmax(70px,1fr));gap:8px;margin-top:18px}
 .diff-item{padding:12px 8px;border-radius:14px;background:rgba(255,255,255,.03);text-align:center}
 .diff-item span{display:block;margin-top:6px;font-size:clamp(18px,5vw,22px);font-weight:800;width:6ch;margin:auto;text-align:center;font-variant-numeric:tabular-nums}
@@ -113,7 +115,6 @@ canvas{width:100%!important;height:280px!important}
 </div>
 
 <div id="dash" class="hidden">
-<div class="title" id="bms-titulo">--</div>
 <div class="gauge-wrap">
 <div class="card gauge-card">
 <div class="gauge" id="socGauge">
@@ -130,7 +131,10 @@ canvas{width:100%!important;height:280px!important}
 </div>
 <div class="card">
 <div class="label">Status</div>
-<div style="margin-top:12px"><span id="status" class="status off">Offline</span></div>
+<div class="status-wrap">
+<span id="status" class="status off">Offline</span>
+<div class="bms-code" id="bms-titulo">--</div>
+</div>
 </div>
 <div class="grid">
 <div class="card"><div class="label">SOC</div><div class="value" id="soc" style="color:#00ff88">0%</div></div>
