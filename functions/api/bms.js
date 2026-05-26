@@ -16,7 +16,7 @@ export async function onRequest({ request, env }) {
   });
 
   try {
-    // ROTAS PÚBLICAS
+    // ROTAS PÚBLICAS - IGUAL
     if (action === 'register' && request.method === 'POST') {
       const { nome, email, senha } = await request.json();
       if (!nome ||!email ||!senha) return json({ ok: false, error: 'Dados inválidos' }, 400);
@@ -32,10 +32,10 @@ export async function onRequest({ request, env }) {
       const { email, senha } = await request.json();
       const hash = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(senha));
       const senha_hash = Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2, '0')).join('');
-      const user = await env.DB.prepare('SELECT id, nome, email FROM users WHERE email =? AND senha_hash =?').bind(email, senha_hash).first();
+      const user = await env.DB.prepare('SELECT id, nome, email, is_admin FROM users WHERE email =? AND senha_hash =?').bind(email, senha_hash).first();
       if (!user) return json({ ok: false, error: 'E-mail ou senha incorretos' }, 401);
       const token = btoa(`user:${user.id}:${Date.now()}`);
-      return json({ ok: true, token, nome: user.nome, email: user.email });
+      return json({ ok: true, token, nome: user.nome, email: user.email, is_admin: user.is_admin === 1 });
     }
 
     if (action === 'login_admin' && request.method === 'POST') {
@@ -75,38 +75,106 @@ export async function onRequest({ request, env }) {
         const parts = decoded.split(':');
         if (parts[0] === 'user') userId = parseInt(parts[1]);
         else return json({ ok: false, error: 'Token inválido' }, 401);
+        const user = await env.DB.prepare('SELECT is_admin FROM users WHERE id =?').bind(userId).first();
+        isAdmin = user?.is_admin === 1;
       } catch {
         return json({ ok: false, error: 'Token inválido' }, 401);
       }
     }
 
-    // ROTAS COM TOKEN
+    // CHECAR SE É ADMIN
+    if (action === 'check_admin' && request.method === 'GET') {
+      return json({ is_admin: isAdmin });
+    }
+
+    // ROTAS COM TOKEN - MODIFICADAS
+
+    // ADICIONAR BMS - AGORA VALIDA MASTER
     if (action === 'add_bms' && request.method === 'POST') {
+      if (!userId) return json({ ok: false, error: 'Login necessário' }, 401);
       const { code, nome } = await request.json();
       if (!code?.startsWith('SL') || code.length!== 10) return json({ ok: false, error: 'Código inválido. Use SL + 8 números' }, 400);
 
-      // Primeiro cria a BMS
-      await env.DB.prepare('INSERT OR IGNORE INTO bms (code, nome) VALUES (?,?)').bind(code, nome || code).run();
+      // 1. Busca no master
+      const bms = await env.DB.prepare("SELECT id, user_id FROM bms_master WHERE code =?").bind(code).first();
+      if (!bms) return json({ ok: false, error: 'not_found' });
 
-      // Admin não vincula a usuário
-      if (isAdmin) return json({ ok: true });
+      // 2. Já tem dono e não sou eu
+      if (bms.user_id && bms.user_id!== userId) return json({ ok: false, error: 'already_claimed' });
 
-      // Cliente vincula
-      if (!userId) return json({ ok: false, error: 'Login necessário' }, 401);
-      await env.DB.prepare('INSERT OR IGNORE INTO user_bms (user_id, bms_code, bms_nome) VALUES (?,?,?)').bind(userId, code, nome || code).run();
+      // 3. Vincula
+      await env.DB.prepare("UPDATE bms_master SET user_id =?, nome =? WHERE id =?").bind(userId, nome || code, bms.id).run();
       return json({ ok: true });
     }
 
+    // BMS DO USUÁRIO - AGORA VEM DO MASTER
     if (action === 'user_bms' && request.method === 'GET') {
       if (!userId) return json({ ok: false, error: 'Login necessário' }, 401);
       const { results } = await env.DB.prepare(`
-        SELECT ub.bms_code as code, ub.bms_nome as nome, b.online, b.updated_at, b.soc, b.voltage
-        FROM user_bms ub LEFT JOIN bms b ON b.code = ub.bms_code
-        WHERE ub.user_id =? ORDER BY ub.created_at DESC
+        SELECT m.code, m.nome, m.modelo, b.soc, b.voltage,
+        CASE WHEN b.updated_at > datetime('now', '-10 seconds') THEN 1 ELSE 0 END as online
+        FROM bms_master m
+        LEFT JOIN bms b ON b.code = m.code
+        WHERE m.user_id =? ORDER BY m.criado_em DESC
       `).bind(userId).all();
       return json(results || []);
     }
 
+    if (action === 'data' && request.method === 'GET') {
+      const code = url.searchParams.get('code');
+      if (!code) return json({ ok: false, error: 'Code obrigatório' }, 400);
+
+      // Checa se é minha no master
+      if (userId &&!isAdmin) {
+        const check = await env.DB.prepare('SELECT id FROM bms_master WHERE code =? AND user_id =?').bind(code, userId).first();
+        if (!check) return json({ ok: false, error: 'Acesso negado' }, 403);
+      }
+
+      const data = await env.DB.prepare('SELECT * FROM bms WHERE code =?').bind(code).first();
+      if (!data) return json({ ok: false, error: 'BMS não encontrada' }, 404);
+      const online = data.online && (Date.now() - new Date(data.updated_at).getTime() < 10000);
+      return json({...data,online,cells:JSON.parse(data.cells || '[]')});
+    }
+
+    // === ROTAS ADMIN ===
+    if (action === 'admin_list_master' && request.method === 'GET') {
+      if (!isAdmin) return json({ ok: false, error: 'Admin only' }, 403);
+      const { results } = await env.DB.prepare(`
+        SELECT m.id, m.code, m.serial, m.modelo, m.user_id, m.nome, u.nome as dono_nome, u.email as dono_email
+        FROM bms_master m LEFT JOIN users u ON m.user_id = u.id
+        ORDER BY m.criado_em DESC
+      `).all();
+      return json(results || []);
+    }
+
+    if (action === 'admin_add_master' && request.method === 'POST') {
+      if (!isAdmin) return json({ ok: false, error: 'Admin only' }, 403);
+      const { code, serial, modelo } = await request.json();
+      if (!code?.startsWith('SL') || code.length!== 10) return json({ ok: false, error: 'invalid_code' }, 400);
+      try {
+        await env.DB.prepare("INSERT INTO bms_master (code, serial, modelo) VALUES (?,?,?)")
+        .bind(code, serial || null, modelo || null).run();
+        return json({ok: true});
+      } catch (e) {
+        return json({ok: false, error: 'duplicate'});
+      }
+    }
+
+    if (action === 'admin_unlink_bms' && request.method === 'POST') {
+      if (!isAdmin) return json({ ok: false, error: 'Admin only' }, 403);
+      const { code } = await request.json();
+      await env.DB.prepare("UPDATE bms_master SET user_id = NULL, nome = NULL WHERE code =?").bind(code).run();
+      return json({ok: true});
+    }
+
+    if (action === 'admin_delete_master' && request.method === 'POST') {
+      if (!isAdmin) return json({ ok: false, error: 'Admin only' }, 403);
+      const { code } = await request.json();
+      await env.DB.prepare("DELETE FROM bms_master WHERE code =?").bind(code).run();
+      return json({ok: true});
+    }
+
+    // ROTAS ADMIN ANTIGAS - MANTÉM
     if (action === 'all_bms' && request.method === 'GET') {
       if (!isAdmin) return json({ ok: false, error: 'Admin only' }, 403);
       const { results } = await env.DB.prepare('SELECT * FROM bms ORDER BY updated_at DESC').all();
@@ -116,8 +184,8 @@ export async function onRequest({ request, env }) {
     if (action === 'all_users' && request.method === 'GET') {
       if (!isAdmin) return json({ ok: false, error: 'Admin only' }, 403);
       const { results } = await env.DB.prepare(`
-        SELECT u.id, u.nome, u.email, u.created_at, COUNT(ub.id) as bms_count
-        FROM users u LEFT JOIN user_bms ub ON ub.user_id = u.id
+        SELECT u.id, u.nome, u.email, u.is_admin, u.created_at, COUNT(m.id) as bms_count
+        FROM users u LEFT JOIN bms_master m ON m.user_id = u.id
         GROUP BY u.id ORDER BY u.created_at DESC
       `).all();
       return json(results || []);
@@ -136,21 +204,8 @@ export async function onRequest({ request, env }) {
       const id = url.searchParams.get('id');
       if (!id) return json({ ok: false, error: 'ID obrigatório' }, 400);
       await env.DB.prepare('DELETE FROM users WHERE id =?').bind(id).run();
-      await env.DB.prepare('DELETE FROM user_bms WHERE user_id =?').bind(id).run();
+      await env.DB.prepare('UPDATE bms_master SET user_id = NULL WHERE user_id =?').bind(id).run();
       return json({ ok: true });
-    }
-
-    if (action === 'data' && request.method === 'GET') {
-      const code = url.searchParams.get('code');
-      if (!code) return json({ ok: false, error: 'Code obrigatório' }, 400);
-      if (userId &&!isAdmin) {
-        const check = await env.DB.prepare('SELECT id FROM user_bms WHERE user_id =? AND bms_code =?').bind(userId, code).first();
-        if (!check) return json({ ok: false, error: 'Acesso negado' }, 403);
-      }
-      const data = await env.DB.prepare('SELECT * FROM bms WHERE code =?').bind(code).first();
-      if (!data) return json({ ok: false, error: 'BMS não encontrada' }, 404);
-      const online = data.online && (Date.now() - new Date(data.updated_at).getTime() < 10000);
-      return json({...data,online,cells:JSON.parse(data.cells || '[]')});
     }
 
     if (action === 'deletar' && request.method === 'DELETE') {
@@ -158,7 +213,7 @@ export async function onRequest({ request, env }) {
       const code = url.searchParams.get('code');
       if (!code) return json({ ok: false, error: 'Code obrigatório' }, 400);
       await env.DB.prepare('DELETE FROM bms WHERE code =?').bind(code).run();
-      await env.DB.prepare('DELETE FROM user_bms WHERE bms_code =?').bind(code).run();
+      await env.DB.prepare('DELETE FROM bms_master WHERE code =?').bind(code).run();
       return json({ ok: true });
     }
 
