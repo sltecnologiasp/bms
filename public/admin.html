@@ -467,8 +467,41 @@ async function deletarUser(id, nome){
 }
 
 async function carregarTudo(){
-  await Promise.all([listarUsers(), listarBms()]);
-  if(activeBmsCode) renderAdminDashboard();
+  const rBms = await fetch(API+'?action=admin_list_master',{headers:authHeaders()});
+  const dBms = await rBms.json();
+  
+  bmsList = dBms.sort((a,b) => {
+    const aOnline = a.updated_at && (Date.now() - new Date(a.updated_at).getTime() < 10000);
+    const bOnline = b.updated_at && (Date.now() - new Date(b.updated_at).getTime() < 10000);
+    if (aOnline && !bOnline) return -1;
+    if (!aOnline && bOnline) return 1;
+    return (b.updated_at ? new Date(b.updated_at).getTime() : 0) - (a.updated_at ? new Date(a.updated_at).getTime() : 0);
+  });
+
+  // CORREÇÃO VISUAL DEFINITIVA: Atualiza a lista só se o modal estiver fechado
+  if(!activeBmsCode) {
+    atualizarHTMLListaBms();
+  } else {
+    renderAdminDashboard(); // Atualiza apenas os números de dentro do modal fixado
+  }
+}
+
+function atualizarHTMLListaBms() {
+  document.getElementById('lista').innerHTML = bmsList.map(b=>{
+    const online = b.updated_at && (Date.now() - new Date(b.updated_at).getTime() < 10000);
+    const dono = b.user_id? `<span class="badge badge-orange">Vinculada</span>` : `<span class="badge badge-green">Disponível</span>`;
+    return `
+    <div class="card" onclick="viewBmsDetails('${b.code}')">
+      <div class="card-top">
+        <div style="text-align:center">
+          <span class="status ${online?'on':'off'}">${online?'Online':'Offline'}</span>
+        </div>
+        <div class="card-code">${b.code}</div>
+        <div style="text-align:center">${dono}</div>
+      </div>
+      <button class="del" onclick="del('${b.code}')">EXCLUIR</button>
+    </div>
+  `}).join('') || '<div class="card card-empty"><div>Nenhuma BMS cadastrada no sistema</div></div>';
 }
 
 async function listarUsers(){
@@ -496,38 +529,14 @@ async function listarUsers(){
   `).join('') || '<div class="card card-empty"><div>Nenhum cliente cadastrado</div></div>';
 }
 
-async function listarBms(){
+async function setupInicial() {
+  await listarUsers();
   const r = await fetch(API+'?action=admin_list_master',{headers:authHeaders()});
   const d = await r.json();
-  
-  bmsList = d.sort((a,b) => {
-    const aOnline = a.updated_at && (Date.now() - new Date(a.updated_at).getTime() < 10000);
-    const bOnline = b.updated_at && (Date.now() - new Date(b.updated_at).getTime() < 10000);
-    
-    if (aOnline && !bOnline) return -1;
-    if (!aOnline && bOnline) return 1;
-    
-    const aTime = a.updated_at ? new Date(a.updated_at).getTime() : 0;
-    const bTime = b.updated_at ? new Date(b.updated_at).getTime() : 0;
-    return bTime - aTime;
-  });
-  
-  document.getElementById('lista').innerHTML = bmsList.map(b=>{
-    const online = b.updated_at && (Date.now() - new Date(b.updated_at).getTime() < 10000);
-    const dono = b.user_id? `<span class="badge badge-orange">Vinculada</span>` : `<span class="badge badge-green">Disponível</span>`;
-    return `
-    <div class="card" onclick="viewBmsDetails('${b.code}')">
-      <div class="card-top">
-        <div style="text-align:center">
-          <span class="status ${online?'on':'off'}">${online?'Online':'Offline'}</span>
-        </div>
-        <div class="card-code">${b.code}</div>
-        <div style="text-align:center">${dono}</div>
-      </div>
-      <button class="del" onclick="del('${b.code}')">EXCLUIR</button>
-    </div>
-  `}).join('') || '<div class="card card-empty"><div>Nenhuma BMS cadastrada no sistema</div></div>';
+  bmsList = d;
+  atualizarHTMLListaBms();
 }
+if(adminToken === 'admin_ok') setupInicial();
 
 setInterval(()=>{if(adminToken && document.getElementById('painel').classList.contains('active'))carregarTudo()},5000);
 </script>
