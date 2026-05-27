@@ -8,7 +8,12 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
 
 <style>
-*{margin:0;padding:0;box-sizing:border-box}
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box
+}
 
 :root{
 --bg:#05070d;
@@ -28,10 +33,36 @@ width:100%;
 overflow-x:hidden
 }
 
-#dash{
+#login,#dash,#lista,#cadastro{
+position:relative;
+z-index:1;
 width:100%;
 min-height:100vh;
+display:flex;
+flex-direction:column;
+align-items:center;
 padding:8px
+}
+
+#dash,#lista{
+justify-content:flex-start;
+padding-top:12px
+}
+
+#login,#cadastro{
+justify-content:center
+}
+
+.title{
+font-size:clamp(32px,8vw,74px);
+font-weight:900;
+margin-bottom:16px;
+letter-spacing:3px;
+background:linear-gradient(90deg,var(--cyan),var(--blue));
+-webkit-background-clip:text;
+-webkit-text-fill-color:transparent;
+text-align:center;
+width:100%
 }
 
 .card{
@@ -40,11 +71,17 @@ border:1px solid rgba(0,255,255,.12);
 border-radius:16px;
 padding:12px;
 width:100%;
-margin-bottom:6px
+margin-bottom:4px
+}
+
+#login .card,
+#cadastro .card{
+max-width:520px
 }
 
 .gauge-wrap{
-width:100%
+width:100%;
+margin:0 0 4px 0
 }
 
 .gauge-card{
@@ -83,7 +120,9 @@ z-index:2
 .gauge-value{
 font-size:clamp(36px,10vw,58px);
 font-weight:900;
-color:#00ff88
+color:#00ff88;
+width:3ch;
+text-align:center
 }
 
 .gauge-label{
@@ -116,7 +155,23 @@ height:100%;
 width:0%;
 border-radius:999px;
 background:linear-gradient(90deg,#00ff88,#00ffff);
-transition:width.8s ease
+transition:width .8s ease
+}
+
+.grid{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(140px,1fr));
+gap:4px;
+width:100%;
+margin:0 0 4px 0
+}
+
+.grid .card{
+height:110px;
+display:flex;
+flex-direction:column;
+justify-content:center;
+align-items:center
 }
 
 .label{
@@ -127,14 +182,53 @@ text-transform:uppercase;
 text-align:center
 }
 
+.value{
+font-size:clamp(22px,6vw,30px);
+font-weight:800;
+margin-top:8px;
+line-height:1;
+width:100%;
+text-align:center
+}
+
+input,button{
+width:100%;
+padding:18px;
+border-radius:18px;
+border:none;
+outline:none;
+margin-top:16px;
+font-size:18px
+}
+
+input{
+background:rgba(0,0,0,.5);
+color:#fff;
+font-family:monospace;
+letter-spacing:2px;
+border:1px solid rgba(0,255,255,.2)
+}
+
+button{
+background:linear-gradient(90deg,var(--blue),var(--cyan));
+color:#fff;
+font-weight:700;
+cursor:pointer
+}
+
+.btn-sec{
+background:transparent;
+border:1px solid rgba(0,255,255,.3);
+color:var(--cyan)
+}
+
 .status{
 display:inline-flex;
 align-items:center;
-justify-content:center;
+gap:10px;
 padding:14px 26px;
 border-radius:999px;
-font-weight:700;
-width:160px
+font-weight:700
 }
 
 .on{
@@ -158,38 +252,18 @@ margin-top:14px
 }
 
 .bms-code{
-font-size:22px;
+font-size:clamp(18px,4.5vw,24px);
 font-weight:700;
 margin-top:12px;
 letter-spacing:1.5px;
+color:#fff;
 text-align:center
-}
-
-.grid{
-display:grid;
-grid-template-columns:repeat(auto-fit,minmax(140px,1fr));
-gap:6px;
-width:100%
-}
-
-.grid .card{
-height:110px;
-display:flex;
-flex-direction:column;
-justify-content:center;
-align-items:center
-}
-
-.value{
-font-size:30px;
-font-weight:800;
-margin-top:8px
 }
 
 .diff{
 display:grid;
 grid-template-columns:repeat(4,1fr);
-gap:6px;
+gap:4px;
 margin-top:18px
 }
 
@@ -198,13 +272,6 @@ padding:12px 8px;
 border-radius:14px;
 background:rgba(255,255,255,.03);
 text-align:center
-}
-
-.diff-item span{
-display:block;
-margin-top:6px;
-font-size:22px;
-font-weight:800
 }
 
 .cells{
@@ -218,8 +285,7 @@ margin-top:20px
 background:rgba(0,0,0,.4);
 border-radius:18px;
 padding:14px;
-border:1px solid rgba(255,255,255,.05);
-text-align:center
+border:1px solid rgba(255,255,255,.05)
 }
 
 .cell.ok{
@@ -234,18 +300,18 @@ border-color:rgba(255,170,0,.25)
 border-color:rgba(255,68,68,.25)
 }
 
-.cell-num{
-font-size:11px;
-opacity:.5;
-margin-bottom:6px
+.hidden{
+display:none!important
 }
 
-.cell-val{
-font-size:20px;
-font-weight:700
+.footer-voltar{
+width:100%;
+margin-top:24px;
+margin-bottom:12px
 }
 
 @media(max-width:520px){
+
 .grid{
 grid-template-columns:repeat(2,1fr)
 }
@@ -253,7 +319,9 @@ grid-template-columns:repeat(2,1fr)
 .diff{
 grid-template-columns:repeat(2,1fr)
 }
+
 }
+
 </style>
 </head>
 
@@ -265,10 +333,12 @@ grid-template-columns:repeat(2,1fr)
 <div class="card gauge-card">
 
 <div class="gauge" id="socGauge">
+
 <div class="gauge-inner">
 <div class="gauge-value" id="socValor">0%</div>
 <div class="gauge-label">STATE OF CHARGE</div>
 </div>
+
 </div>
 
 <div class="bar-wrap">
@@ -280,8 +350,8 @@ grid-template-columns:repeat(2,1fr)
 <div class="bar">
 <div class="bar-fill" id="socBar"></div>
 </div>
-</div>
 
+</div>
 </div>
 </div>
 
@@ -291,7 +361,7 @@ grid-template-columns:repeat(2,1fr)
 
 <div class="status-wrap">
 <span id="status" class="status off">Offline</span>
-<div class="bms-code" id="bms-titulo">SL000000000000</div>
+<div class="bms-code" id="bms-titulo">SMART BMS</div>
 </div>
 
 </div>
@@ -322,28 +392,36 @@ grid-template-columns:repeat(2,1fr)
 
 <div class="card">
 
-<div class="label">Células - Tensão Individual</div>
+<div class="label">Células</div>
 
 <div class="diff">
 
 <div class="diff-item">
 Min
-<div><span id="celMin" style="color:#00ff88">0.00V</span></div>
+<div>
+<span id="celMin" style="color:#00ff88">0.00V</span>
+</div>
 </div>
 
 <div class="diff-item">
 Max
-<div><span id="celMax" style="color:#ffaa00">0.00V</span></div>
+<div>
+<span id="celMax" style="color:#ffaa00">0.00V</span>
+</div>
 </div>
 
 <div class="diff-item">
-Diferença
-<div><span id="celDif" style="color:#ff4444">0.00V</span></div>
+Dif
+<div>
+<span id="celDif" style="color:#ff4444">0.00V</span>
+</div>
 </div>
 
 <div class="diff-item">
 Total
-<div><span id="celTot" style="color:#00ffff">0</span></div>
+<div>
+<span id="celTot" style="color:#00ffff">0</span>
+</div>
 </div>
 
 </div>
@@ -356,23 +434,9 @@ Total
 
 <script>
 
-function limparDashboard(){
-
-document.getElementById('soc').textContent='0%';
-document.getElementById('volt').textContent='0V';
-document.getElementById('corr').textContent='0A';
-document.getElementById('temp').textContent='0°C';
-
-document.getElementById('celMin').textContent='0.00V';
-document.getElementById('celMax').textContent='0.00V';
-document.getElementById('celDif').textContent='0.00V';
-document.getElementById('celTot').textContent='0';
-
-document.getElementById('celulas').innerHTML=
-'<div style="grid-column:1/-1;opacity:.4;padding:20px;text-align:center">ESP32 Offline</div>';
-
-atualizarGauge(0);
-}
+var API='/api/bms';
+var TOKEN='TOKEN';
+var CODIGO='SL000000000000';
 
 function atualizarGauge(soc){
 
@@ -390,16 +454,18 @@ bar.style.width=soc+'%';
 
 gauge.style.background=
 'conic-gradient(#00ff88 0deg,#00ffff '+deg+'deg,rgba(255,255,255,.08) '+deg+'deg)';
+
 }
 
 function renderCelulas(cels){
 
-if(!cels||cels.length===0){
+if(!cels || cels.length===0){
 
 document.getElementById('celulas').innerHTML=
-'<div style="grid-column:1/-1;opacity:.4;padding:20px;text-align:center">Sem dados das células</div>';
+'<div style="grid-column:1/-1;opacity:.4;padding:20px">SEM DADOS</div>';
 
 return;
+
 }
 
 var vals=[];
@@ -409,6 +475,7 @@ for(var i=0;i<cels.length;i++){
 var v=parseFloat(cels[i]);
 
 if(v>0) vals.push(v);
+
 }
 
 if(vals.length===0) return;
@@ -430,37 +497,68 @@ var val=parseFloat(cels[i]);
 
 var cls='ok';
 
-if(val<3.2||val>4.2) cls='crit';
-else if(val<3.4||val>4.15) cls='warn';
+if(val<3.2 || val>4.2) cls='crit';
+else if(val<3.4 || val>4.15) cls='warn';
 
 html+='<div class="cell '+cls+'">';
-html+='<div class="cell-num">C'+(i+1)+'</div>';
-html+='<div class="cell-val">'+val.toFixed(3)+'V</div>';
+html+='<div>C'+(i+1)+'</div>';
+html+='<div>'+val.toFixed(3)+'V</div>';
 html+='</div>';
+
 }
 
 document.getElementById('celulas').innerHTML=html;
+
 }
 
 function atualizar(){
 
-fetch('/api/bms?action=data&code=SL000000000000')
+fetch(API+'?action=data&code='+CODIGO,{
+headers:{'Authorization':'Bearer '+TOKEN}
+})
 
-.then(r=>r.json())
+.then(function(r){
+
+if(!r.ok) return;
+
+return r.json();
+
+})
 
 .then(function(d){
 
+if(!d) return;
+
 var st=document.getElementById('status');
+
+st.textContent=d.online?'Online':'Offline';
+
+st.className='status '+(d.online?'on':'off');
+
+
 
 if(!d.online){
 
-st.textContent='Offline';
-st.className='status off';
+document.getElementById('soc').textContent='0%';
+document.getElementById('volt').textContent='0V';
+document.getElementById('corr').textContent='0A';
+document.getElementById('temp').textContent='0°C';
 
-limparDashboard();
+document.getElementById('celMin').textContent='0.00V';
+document.getElementById('celMax').textContent='0.00V';
+document.getElementById('celDif').textContent='0.00V';
+document.getElementById('celTot').textContent='0';
+
+document.getElementById('celulas').innerHTML=
+'<div style="grid-column:1/-1;opacity:.4;padding:20px">BMS OFFLINE</div>';
+
+atualizarGauge(0);
 
 return;
+
 }
+
+
 
 document.getElementById('soc').textContent=
 (d.soc?d.soc.toFixed(0):0)+'%';
@@ -474,28 +572,37 @@ document.getElementById('corr').textContent=
 document.getElementById('temp').textContent=
 (d.temp?d.temp.toFixed(1):0)+'°C';
 
-st.textContent='Online';
-st.className='status on';
-
 renderCelulas(d.cells);
 
 atualizarGauge(parseInt(d.soc||0));
+
 })
 
 .catch(function(){
 
-var st=document.getElementById('status');
+document.getElementById('status').textContent='Offline';
+document.getElementById('status').className='status off';
 
-st.textContent='Offline';
-st.className='status off';
+document.getElementById('soc').textContent='0%';
+document.getElementById('volt').textContent='0V';
+document.getElementById('corr').textContent='0A';
+document.getElementById('temp').textContent='0°C';
 
-limparDashboard();
+document.getElementById('celMin').textContent='0.00V';
+document.getElementById('celMax').textContent='0.00V';
+document.getElementById('celDif').textContent='0.00V';
+document.getElementById('celTot').textContent='0';
+
+document.getElementById('celulas').innerHTML=
+'<div style="grid-column:1/-1;opacity:.4;padding:20px">SEM COMUNICAÇÃO</div>';
+
+atualizarGauge(0);
+
 });
+
 }
 
 setInterval(atualizar,3000);
-
-atualizar();
 
 </script>
 
