@@ -10,7 +10,7 @@
 :root{--bg:#05070d;--cyan:#00ffff;--blue:#0080ff;--green:#00ff88;--red:#ff4444;--orange:#ffaa00}
 body{font-family:'Inter',sans-serif;background:var(--bg);color:#fff;min-height:100vh;width:100%;overflow-x:hidden}
 
-/* Containers principais com alinhamento vertical idêntico ao do cliente */
+/* Containers principais com alinhamento vertical centralizado */
 #login,#painel,#clientesPage,#dashAdmin{
   position:relative;
   z-index:1;
@@ -73,8 +73,8 @@ button.logout{margin-top:4px;background:transparent;border:1px solid rgba(255,68
 
 /* Customização interna dos itens das listas */
 #lista .card, #listaUsers .card {
-  background:rgba(255,255,255,0.02);
-  border:1px solid rgba(255,255,255,0.05);
+  background:rgba(13,20,35,0.65);
+  border:1px solid rgba(0,255,255,.08);
   border-radius:16px;
   padding:16px;
   margin:0 !important;
@@ -341,7 +341,6 @@ async function del(code){
   carregarTudo();
 }
 
-// Muda de tela de forma nativa igual no app do cliente
 function viewBmsDetails(code){
   activeBmsCode = code;
   document.getElementById('painel').classList.remove('active');
@@ -521,10 +520,12 @@ async function listarUsers(){
   const r = await fetch(API+'?action=all_users',{headers:authHeaders()});
   if(r.status===401){adminLogout();return;}
   const d = await r.json();
+  
+  // ALINHAMENTO CENTRAL ATUALIZADO: text-align:center aplicado nos dados identificadores
   document.getElementById('listaUsers').innerHTML = d.map(u=>`
     <div class="card">
       <div class="card-top">
-        <div style="text-align:left;margin-bottom:12px">
+        <div style="text-align:center;margin-bottom:12px">
           <b style="font-size:18px;color:#fff">${u.nome}</b>
           <div style="opacity:.5;font-size:13px;margin-top:4px;word-break:break-all;font-family:monospace">${u.email}</div>
           <div style="opacity:.4;font-size:11px;margin-top:4px">Cadastro: ${new Date(u.created_at).toLocaleDateString('pt-BR')}</div>
