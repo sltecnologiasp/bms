@@ -9,6 +9,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
 
 <style>
+
 *{
 margin:0;
 padding:0;
@@ -18,7 +19,6 @@ box-sizing:border-box;
 
 :root{
 --bg:#05070d;
---card:#0b1220;
 --cyan:#00ffff;
 --blue:#0080ff;
 --green:#00ff88;
@@ -28,26 +28,32 @@ box-sizing:border-box;
 
 body{
 font-family:'Inter',sans-serif;
-background:var(--bg);
+background:
+radial-gradient(circle at top,#071426 0%,#04070d 45%,#02040a 100%);
 color:#fff;
 min-height:100vh;
+width:100%;
 overflow-x:hidden;
 }
 
-.hidden{
-display:none!important;
-}
-
 #login,
-#cadastro,
+#dash,
 #lista,
-#dash{
+#cadastro{
+position:relative;
+z-index:1;
 width:100%;
 min-height:100vh;
-padding:10px;
 display:flex;
 flex-direction:column;
 align-items:center;
+padding:12px;
+}
+
+#dash,
+#lista{
+justify-content:flex-start;
+padding-top:16px;
 }
 
 #login,
@@ -56,376 +62,243 @@ justify-content:center;
 }
 
 .title{
-font-size:clamp(32px,8vw,70px);
+font-size:clamp(40px,9vw,74px);
 font-weight:900;
-letter-spacing:3px;
-margin-bottom:20px;
-background:linear-gradient(90deg,var(--cyan),var(--blue));
+margin-bottom:18px;
+letter-spacing:4px;
+background:linear-gradient(90deg,#00ffff,#0080ff,#00ffff);
+background-size:200% auto;
+animation:shine 4s linear infinite;
 -webkit-background-clip:text;
 -webkit-text-fill-color:transparent;
 text-align:center;
+width:100%;
+filter:drop-shadow(0 0 20px rgba(0,255,255,.35));
+}
+
+@keyframes shine{
+0%{background-position:0% center}
+100%{background-position:200% center}
 }
 
 .card{
+background:
+linear-gradient(180deg,rgba(8,18,35,.96),rgba(5,10,20,.96));
+border:1px solid rgba(0,255,255,.18);
+border-radius:24px;
+padding:16px;
 width:100%;
-background:rgba(10,15,25,.92);
-border:1px solid rgba(0,255,255,.12);
-border-radius:18px;
-padding:14px;
-margin-bottom:6px;
-backdrop-filter:blur(12px);
-}
-
-#login .card,
-#cadastro .card{
-max-width:520px;
+margin-bottom:12px;
+box-shadow:
+0 0 25px rgba(0,255,255,.06),
+inset 0 0 30px rgba(0,180,255,.03);
+backdrop-filter:blur(10px);
 }
 
 .label{
 font-size:11px;
-letter-spacing:1.5px;
-opacity:.6;
+letter-spacing:2px;
+opacity:.7;
 text-transform:uppercase;
 text-align:center;
-margin-bottom:8px;
-}
-
-.value{
-font-size:clamp(22px,6vw,32px);
-font-weight:800;
-text-align:center;
-margin-top:8px;
-font-variant-numeric:tabular-nums;
+margin-bottom:10px;
 }
 
 input,
 button{
 width:100%;
+padding:18px;
+border-radius:20px;
 border:none;
 outline:none;
-border-radius:18px;
-padding:18px;
 margin-top:14px;
-font-size:17px;
+font-size:18px;
+font-weight:700;
 }
 
 input{
 background:rgba(0,0,0,.45);
-border:1px solid rgba(0,255,255,.18);
 color:#fff;
 font-family:monospace;
+letter-spacing:2px;
+border:1px solid rgba(0,255,255,.22);
+box-shadow:inset 0 0 18px rgba(0,255,255,.04);
+}
+
+input::placeholder{
+color:rgba(255,255,255,.35);
 }
 
 button{
-background:linear-gradient(90deg,var(--blue),var(--cyan));
+background:linear-gradient(90deg,#007bff,#00e5ff);
 color:#fff;
-font-weight:700;
 cursor:pointer;
+box-shadow:
+0 0 30px rgba(0,180,255,.25),
+inset 0 0 10px rgba(255,255,255,.08);
+transition:.25s;
+}
+
+button:hover{
+transform:translateY(-1px);
+filter:brightness(1.08);
 }
 
 .btn-sec{
 background:transparent;
-border:1px solid rgba(0,255,255,.25);
+border:1px solid rgba(0,255,255,.3);
 color:var(--cyan);
 }
 
 .logout{
-margin-top:20px;
-background:rgba(255,68,68,.08);
-border:1px solid rgba(255,68,68,.25);
+margin-top:28px;
+background:linear-gradient(180deg,#2a0012,#1a000a);
+border:1px solid rgba(255,0,80,.22);
+box-shadow:
+0 0 30px rgba(255,0,80,.12),
+inset 0 0 20px rgba(255,0,80,.04);
+font-size:20px;
+font-weight:900;
+letter-spacing:1px;
+}
+
+.hidden{
+display:none!important;
 }
 
 .user-info{
-color:#888;
-font-size:14px;
-margin-bottom:18px;
+color:#c6f7ff;
+font-size:16px;
 text-align:center;
-}
-
-.erro{
-background:rgba(255,0,0,.1);
-border:1px solid #ff4444;
-border-radius:14px;
-padding:14px;
-margin-top:16px;
-font-size:14px;
-color:#ff4444;
+margin-bottom:20px;
+opacity:.9;
 }
 
 .link-cadastro{
 margin-top:20px;
 text-align:center;
+color:#fff;
 cursor:pointer;
-opacity:.8;
+opacity:.85;
 }
 
 .link-cadastro span{
-color:var(--cyan);
+color:#00ffff;
 text-decoration:underline;
 }
 
+.erro{
+background:rgba(255,0,0,.12);
+border:1px solid rgba(255,80,80,.45);
+border-radius:18px;
+padding:16px;
+margin-top:16px;
+color:#ff6666;
+font-size:14px;
+}
+
 .bms-list{
-width:100%;
 display:grid;
-grid-template-columns:1fr;
-gap:6px;
-margin-top:14px;
+grid-template-columns:repeat(auto-fill,minmax(260px,1fr));
+gap:10px;
+margin-top:20px;
+width:100%;
 }
 
 .bms-item{
-background:rgba(0,255,255,.04);
-border:1px solid rgba(0,255,255,.18);
-border-radius:18px;
-padding:18px;
+background:
+linear-gradient(180deg,rgba(0,255,255,.06),rgba(0,120,255,.04));
+border:1px solid rgba(0,255,255,.25);
+border-radius:26px;
+padding:22px;
 text-align:center;
+display:flex;
+flex-direction:column;
+align-items:center;
+gap:10px;
+transition:.25s;
+box-shadow:
+0 0 30px rgba(0,255,255,.08),
+inset 0 0 20px rgba(0,255,255,.03);
+}
+
+.bms-item:hover{
+transform:translateY(-2px);
+border-color:rgba(0,255,255,.55);
+box-shadow:
+0 0 40px rgba(0,255,255,.18),
+0 0 80px rgba(0,120,255,.08);
 }
 
 .bms-item h3{
-color:var(--cyan);
-margin-bottom:10px;
+color:#00ffff;
+font-size:30px;
+font-weight:900;
+text-shadow:0 0 18px rgba(0,255,255,.8);
+letter-spacing:1px;
 }
 
 .bms-item p{
-opacity:.8;
+color:#d7faff;
 font-size:14px;
-margin-top:4px;
-}
-
-.bms-item button{
-margin-top:14px;
-background:rgba(255,68,68,.08);
-border:1px solid rgba(255,68,68,.25);
+opacity:.92;
 }
 
 .status{
 display:inline-flex;
 align-items:center;
 justify-content:center;
-padding:12px 20px;
+padding:12px 22px;
 border-radius:999px;
-font-weight:700;
+font-weight:800;
 font-size:14px;
-min-width:120px;
+letter-spacing:1px;
+min-width:150px;
 }
 
 .on{
-background:rgba(0,255,136,.12);
-color:var(--green);
-border:1px solid rgba(0,255,136,.3);
+background:rgba(0,255,136,.15);
+color:#00ff88;
+border:1px solid rgba(0,255,136,.45);
+box-shadow:
+0 0 25px rgba(0,255,136,.25),
+inset 0 0 15px rgba(0,255,136,.1);
 }
 
 .off{
-background:rgba(255,68,68,.12);
-color:var(--red);
-border:1px solid rgba(255,68,68,.3);
+background:rgba(255,60,60,.12);
+color:#ff5555;
+border:1px solid rgba(255,80,80,.35);
+box-shadow:
+0 0 25px rgba(255,0,0,.12),
+inset 0 0 15px rgba(255,0,0,.05);
 }
 
-.live-dot{
-width:10px;
-height:10px;
-border-radius:50%;
-background:#00ff88;
-box-shadow:0 0 12px #00ff88;
-animation:pulse 1s infinite;
-margin-right:8px;
-}
-
-@keyframes pulse{
-0%{opacity:1;transform:scale(1)}
-50%{opacity:.3;transform:scale(.7)}
-100%{opacity:1;transform:scale(1)}
-}
-
-.gauge-card{
-padding:20px;
-}
-
-.gauge{
-width:min(240px,60vw);
-height:min(240px,60vw);
-margin:auto;
-border-radius:50%;
-position:relative;
-background:conic-gradient(#00ff88 0deg,#00ffff 0deg,rgba(255,255,255,.08) 0deg);
-transition:all .8s ease;
-box-shadow:0 0 40px rgba(0,255,255,.15);
-}
-
-.gauge::before{
-content:'';
-position:absolute;
-inset:18px;
-background:#05070d;
-border-radius:50%;
-}
-
-.gauge-inner{
-position:absolute;
-inset:0;
-display:flex;
-flex-direction:column;
-justify-content:center;
-align-items:center;
-z-index:2;
-}
-
-.gauge-value{
-font-size:clamp(38px,10vw,60px);
-font-weight:900;
-color:#00ff88;
-}
-
-.gauge-label{
-opacity:.6;
-letter-spacing:2px;
-font-size:11px;
-margin-top:4px;
-}
-
-.bar-wrap{
-margin-top:24px;
-}
-
-.bar-label{
-display:flex;
-justify-content:space-between;
-font-size:14px;
-margin-bottom:8px;
-opacity:.7;
-}
-
-.bar{
-height:18px;
-border-radius:999px;
-background:rgba(255,255,255,.05);
-overflow:hidden;
-}
-
-.bar-fill{
-height:100%;
-width:0%;
-background:linear-gradient(90deg,#00ff88,#00ffff);
-border-radius:999px;
-transition:width .8s ease;
-}
-
-.status-wrap{
-display:flex;
-flex-direction:column;
-align-items:center;
-justify-content:center;
-}
-
-.bms-code{
-font-size:22px;
-font-weight:700;
-margin-top:14px;
-letter-spacing:2px;
-text-align:center;
-}
-
-.grid{
+.bms-item button{
 width:100%;
-display:grid;
-grid-template-columns:1fr 1fr;
-gap:6px;
-}
-
-.metric-card{
-background:rgba(255,255,255,.03);
 border-radius:18px;
-padding:18px 10px;
-text-align:center;
-border:1px solid rgba(255,255,255,.05);
-}
-
-.metric-card .value{
-margin-top:10px;
-}
-
-.cells{
-display:grid;
-grid-template-columns:repeat(4,1fr);
-gap:8px;
-margin-top:20px;
-}
-
-.cell{
-background:rgba(0,0,0,.4);
-border-radius:16px;
-padding:12px;
-text-align:center;
-border:1px solid rgba(255,255,255,.06);
-transition:.3s;
-}
-
-.cell.ok{
-border-color:rgba(0,255,136,.25);
-}
-
-.cell.warn{
-border-color:rgba(255,170,0,.25);
-}
-
-.cell.crit{
-border-color:rgba(255,68,68,.25);
-animation:alerta 1s infinite;
-}
-
-@keyframes alerta{
-0%{box-shadow:0 0 0 rgba(255,68,68,0)}
-50%{box-shadow:0 0 18px rgba(255,68,68,.35)}
-100%{box-shadow:0 0 0 rgba(255,68,68,0)}
-}
-
-.cell-num{
-font-size:11px;
-opacity:.5;
-margin-bottom:6px;
-}
-
-.cell-val{
-font-size:18px;
-font-weight:700;
-}
-
-.diff{
-display:grid;
-grid-template-columns:repeat(2,1fr);
-gap:8px;
-margin-top:18px;
-}
-
-.diff-item{
-background:rgba(255,255,255,.03);
-padding:12px;
-border-radius:16px;
-text-align:center;
-}
-
-.diff-item span{
-display:block;
+padding:18px;
+font-size:16px;
 margin-top:8px;
-font-size:20px;
-font-weight:800;
 }
 
-@media(min-width:768px){
-
-.grid{
-grid-template-columns:repeat(4,1fr);
+.bms-item button.del{
+background:linear-gradient(180deg,#2a1620,#1b1017);
+border:1px solid rgba(255,70,70,.25);
+color:#fff;
+box-shadow:
+0 0 20px rgba(255,0,0,.08),
+inset 0 0 10px rgba(255,0,0,.04);
 }
 
-.cells{
-grid-template-columns:repeat(6,1fr);
-}
-
-.diff{
-grid-template-columns:repeat(4,1fr);
-}
+@media(max-width:520px){
 
 .bms-list{
-grid-template-columns:repeat(2,1fr);
+grid-template-columns:1fr;
+}
+
+.card{
+padding:14px;
 }
 
 }
@@ -450,7 +323,7 @@ grid-template-columns:repeat(2,1fr);
 <button onclick="login()">ENTRAR</button>
 
 <p class="link-cadastro" onclick="mostrarCadastro()">
-Ainda não possui conta?
+Ainda não tem conta?
 <span>Cadastre-se</span>
 </p>
 
@@ -485,7 +358,7 @@ Ainda não possui conta?
 
 <div id="lista" class="hidden">
 
-<div class="title" style="font-size:32px">SMART BMS</div>
+<div class="title" style="font-size:clamp(30px,7vw,42px)">SMART BMS</div>
 
 <div class="user-info">
 Olá, <span id="user-nome">Usuário</span>
@@ -496,6 +369,7 @@ Olá, <span id="user-nome">Usuário</span>
 <div class="label">Adicionar BMS</div>
 
 <input id="bms-code" placeholder="SL000000000000" maxlength="14">
+
 <input id="bms-nome" placeholder="Nome da BMS">
 
 <button onclick="addBms()">ADICIONAR BMS</button>
@@ -514,130 +388,16 @@ Olá, <span id="user-nome">Usuário</span>
 
 </div>
 
-<div id="dash" class="hidden">
-
-<div class="card gauge-card">
-
-<div class="gauge" id="socGauge">
-
-<div class="gauge-inner">
-
-<div class="gauge-value" id="socValor">0%</div>
-
-<div class="gauge-label">
-STATE OF CHARGE
-</div>
-
-</div>
-</div>
-
-<div class="bar-wrap">
-
-<div class="bar-label">
-<span>Bateria</span>
-<span id="socBarTxt">0%</span>
-</div>
-
-<div class="bar">
-<div class="bar-fill" id="socBar"></div>
-</div>
-
-</div>
-</div>
-
-<div class="card">
-
-<div class="status-wrap">
-
-<span id="status" class="status off">
-Offline
-</span>
-
-<div class="bms-code" id="bms-titulo">
---
-</div>
-
-</div>
-</div>
-
-<div class="grid">
-
-<div class="metric-card">
-<div class="label">SOC</div>
-<div class="value" id="soc" style="color:#00ff88">0%</div>
-</div>
-
-<div class="metric-card">
-<div class="label">Tensão</div>
-<div class="value" id="volt" style="color:#00ffff">0V</div>
-</div>
-
-<div class="metric-card">
-<div class="label">Corrente</div>
-<div class="value" id="corr" style="color:#ffaa00">0A</div>
-</div>
-
-<div class="metric-card">
-<div class="label">Temperatura</div>
-<div class="value" id="temp" style="color:#ff4444">0°C</div>
-</div>
-
-</div>
-
-<div class="card">
-
-<div class="label">
-Células
-</div>
-
-<div class="diff">
-
-<div class="diff-item">
-Min
-<span id="celMin" style="color:#00ff88">0.000V</span>
-</div>
-
-<div class="diff-item">
-Max
-<span id="celMax" style="color:#ffaa00">0.000V</span>
-</div>
-
-<div class="diff-item">
-Dif
-<span id="celDif" style="color:#ff4444">0.000V</span>
-</div>
-
-<div class="diff-item">
-Total
-<span id="celTot" style="color:#00ffff">0</span>
-</div>
-
-</div>
-
-<div class="cells" id="celulas"></div>
-
-</div>
-
-<button class="btn-sec" onclick="voltar()">
-← VOLTAR
-</button>
-
-</div>
-
 <script>
 
-var API='/api/bms';
+var API = '/api/bms';
 
-var TOKEN=localStorage.getItem('bms_token');
+var TOKEN = localStorage.getItem('bms_token');
 
-var USER=null;
-
-var CODIGO=localStorage.getItem('bms_codigo_ativo');
-
-var INT=null;
+var USER = null;
 
 try{
-USER=JSON.parse(localStorage.getItem('bms_user')||'null');
+USER = JSON.parse(localStorage.getItem('bms_user') || 'null');
 }catch(e){}
 
 function esconderTudo(){
@@ -645,23 +405,14 @@ function esconderTudo(){
 document.getElementById('login').classList.add('hidden');
 document.getElementById('cadastro').classList.add('hidden');
 document.getElementById('lista').classList.add('hidden');
-document.getElementById('dash').classList.add('hidden');
 
 }
 
-window.onload=function(){
+window.onload = function(){
 
 if(TOKEN && USER){
 
-if(CODIGO){
-
-abrirDash(CODIGO);
-
-}else{
-
 mostrarLista();
-
-}
 
 }else{
 
@@ -669,13 +420,28 @@ mostrarLogin();
 
 }
 
-document.getElementById('bms-code').oninput=function(e){
+var bmsInput = document.getElementById('bms-code');
 
-if(!e.target.value.startsWith('SL')) e.target.value='SL';
+if(bmsInput){
 
-e.target.value='SL'+e.target.value.slice(2).replace(/[^0-9]/g,'').slice(0,12);
+bmsInput.oninput = function(e){
+
+if(!e.target.value.startsWith('SL')){
+
+e.target.value = 'SL';
+
+}
+
+e.target.value =
+'SL' +
+e.target.value
+.slice(2)
+.replace(/[^0-9]/g,'')
+.slice(0,12);
 
 };
+
+}
 
 };
 
@@ -697,11 +463,25 @@ document.getElementById('cadastro').classList.remove('hidden');
 
 function login(){
 
-var email=document.getElementById('email').value.trim();
+document.getElementById('erro').classList.add('hidden');
 
-var senha=document.getElementById('senha').value;
+var email = document.getElementById('email').value.trim();
 
-fetch(API+'?action=login_user',{
+var senha = document.getElementById('senha').value;
+
+if(!email || !senha){
+
+var e = document.getElementById('erro');
+
+e.textContent = 'Preencha e-mail e senha';
+
+e.classList.remove('hidden');
+
+return;
+
+}
+
+fetch(API + '?action=login_user',{
 
 method:'POST',
 
@@ -715,29 +495,31 @@ senha:senha
 })
 
 })
+
 .then(r=>r.json())
+
 .then(d=>{
 
 if(d.ok){
 
-TOKEN=d.token;
+TOKEN = d.token;
 
-USER={
+USER = {
 nome:d.nome,
 email:d.email
 };
 
-localStorage.setItem('bms_token',TOKEN);
+localStorage.setItem('bms_token', TOKEN);
 
-localStorage.setItem('bms_user',JSON.stringify(USER));
+localStorage.setItem('bms_user', JSON.stringify(USER));
 
 mostrarLista();
 
 }else{
 
-var e=document.getElementById('erro');
+var e = document.getElementById('erro');
 
-e.textContent=d.error;
+e.textContent = d.error || 'Erro no login';
 
 e.classList.remove('hidden');
 
@@ -749,13 +531,13 @@ e.classList.remove('hidden');
 
 function cadastrar(){
 
-var nome=document.getElementById('cad-nome').value.trim();
+var nome = document.getElementById('cad-nome').value.trim();
 
-var email=document.getElementById('cad-email').value.trim();
+var email = document.getElementById('cad-email').value.trim();
 
-var senha=document.getElementById('cad-senha').value;
+var senha = document.getElementById('cad-senha').value;
 
-fetch(API+'?action=register',{
+fetch(API + '?action=register',{
 
 method:'POST',
 
@@ -770,7 +552,9 @@ senha:senha
 })
 
 })
+
 .then(r=>r.json())
+
 .then(d=>{
 
 if(d.ok){
@@ -781,9 +565,9 @@ mostrarLogin();
 
 }else{
 
-var e=document.getElementById('erro-cad');
+var e = document.getElementById('erro-cad');
 
-e.textContent=d.error;
+e.textContent = d.error;
 
 e.classList.remove('hidden');
 
@@ -795,13 +579,12 @@ e.classList.remove('hidden');
 
 function mostrarLista(){
 
-localStorage.removeItem('bms_codigo_ativo');
-
 esconderTudo();
 
 document.getElementById('lista').classList.remove('hidden');
 
-document.getElementById('user-nome').textContent=USER.nome;
+document.getElementById('user-nome').textContent =
+USER ? USER.nome : 'Usuário';
 
 carregarLista();
 
@@ -809,56 +592,54 @@ carregarLista();
 
 function carregarLista(){
 
-fetch(API+'?action=user_bms',{
+fetch(API + '?action=user_bms',{
 
 headers:{
 'Authorization':'Bearer '+TOKEN
 }
 
 })
+
 .then(r=>r.json())
+
 .then(lista=>{
 
-var el=document.getElementById('bms-list');
+var el = document.getElementById('bms-list');
 
-if(!lista.length){
+if(!lista || !lista.length){
 
-el.innerHTML='<p style="padding:30px;color:#666;text-align:center">Nenhuma BMS adicionada</p>';
+el.innerHTML =
+'<p style="grid-column:1/-1;text-align:center;color:#888;padding:30px">Nenhuma BMS cadastrada</p>';
 
 return;
 
 }
 
-var html='';
+var html = '';
 
-lista.forEach(function(b){
+lista.forEach(b=>{
 
-html+=`
+html += `
 <div class="bms-item">
 
 <h3>${b.nome}</h3>
 
 <p>${b.code}</p>
 
-<p>
-
-<span class="status ${b.online?'on':'off'}">
-
-${b.online?'<span class="live-dot"></span>ONLINE':'OFFLINE'}
-
+<span class="status ${b.online ? 'on':'off'}">
+${b.online ? 'ONLINE':'OFFLINE'}
 </span>
 
-</p>
-
-<p style="color:#00ffff">
-${b.voltage?b.voltage.toFixed(2):0}V
+<p style="font-size:28px;color:#00ffff;font-weight:800">
+${b.voltage ? b.voltage.toFixed(2) : '0.00'}V
 </p>
 
 <button onclick="abrirDash('${b.code}')">
 ABRIR DASHBOARD
 </button>
 
-<button onclick="removerBms('${b.code}')">
+<button class="del"
+onclick="removerBms('${b.code}','${b.nome}')">
 REMOVER
 </button>
 
@@ -867,7 +648,57 @@ REMOVER
 
 });
 
-el.innerHTML=html;
+el.innerHTML = html;
+
+});
+
+}
+
+function removerBms(code,nome){
+
+const confirmar = confirm(
+
+`Remover ${nome || code} ?
+
+A BMS será desvinculada da sua conta e ficará disponível novamente.
+
+Deseja continuar?`
+
+);
+
+if(!confirmar) return;
+
+fetch(API+`?action=remove_bms&code=${code}`,{
+
+method:'DELETE',
+
+headers:{
+'Authorization':'Bearer '+TOKEN
+}
+
+})
+
+.then(r=>r.json())
+
+.then(d=>{
+
+if(d.ok){
+
+alert('BMS removida com sucesso!');
+
+carregarLista();
+
+}else{
+
+alert('Erro: '+d.error);
+
+}
+
+})
+
+.catch(()=>{
+
+alert('Erro de conexão');
 
 });
 
@@ -875,11 +706,19 @@ el.innerHTML=html;
 
 function addBms(){
 
-var code=document.getElementById('bms-code').value.trim();
+var code = document.getElementById('bms-code').value.trim();
 
-var nome=document.getElementById('bms-nome').value.trim();
+var nome = document.getElementById('bms-nome').value.trim();
 
-fetch(API+'?action=add_bms',{
+if(!code || code.length !== 14){
+
+alert('Código inválido');
+
+return;
+
+}
+
+fetch(API + '?action=add_bms',{
 
 method:'POST',
 
@@ -890,16 +729,22 @@ headers:{
 
 body:JSON.stringify({
 code:code,
-nome:nome||code
+nome:nome || code
 })
 
 })
+
 .then(r=>r.json())
+
 .then(d=>{
 
 if(d.ok){
 
 alert('BMS adicionada!');
+
+document.getElementById('bms-code').value = '';
+
+document.getElementById('bms-nome').value = '';
 
 carregarLista();
 
@@ -913,189 +758,21 @@ alert(d.error);
 
 }
 
-function removerBms(code){
-
-fetch(API+'?action=remove_bms&code='+code,{
-
-method:'DELETE',
-
-headers:{
-'Authorization':'Bearer '+TOKEN
-}
-
-})
-.then(r=>r.json())
-.then(()=>{
-
-carregarLista();
-
-});
-
-}
-
 function abrirDash(code){
 
-CODIGO=code;
+localStorage.setItem('bms_codigo_ativo', code);
 
-localStorage.setItem('bms_codigo_ativo',code);
-
-esconderTudo();
-
-document.getElementById('dash').classList.remove('hidden');
-
-document.getElementById('bms-titulo').textContent=code;
-
-atualizar();
-
-clearInterval(INT);
-
-INT=setInterval(atualizar,2000);
-
-}
-
-function voltar(){
-
-clearInterval(INT);
-
-mostrarLista();
-
-}
-
-function atualizarGauge(soc){
-
-var deg=soc*3.6;
-
-document.getElementById('socValor').textContent=soc+'%';
-
-document.getElementById('socBarTxt').textContent=soc+'%';
-
-document.getElementById('socBar').style.width=soc+'%';
-
-document.getElementById('socGauge').style.background=
-`conic-gradient(#00ff88 0deg,#00ffff ${deg}deg,rgba(255,255,255,.08) ${deg}deg)`;
-
-}
-
-function renderCelulas(cels){
-
-var wrap=document.getElementById('celulas');
-
-if(!cels || !cels.length){
-
-wrap.innerHTML='<div style="padding:20px;opacity:.5">Sem células</div>';
-
-return;
-
-}
-
-var vals=cels.map(v=>parseFloat(v));
-
-var min=Math.min(...vals);
-
-var max=Math.max(...vals);
-
-var dif=max-min;
-
-document.getElementById('celMin').textContent=min.toFixed(3)+'V';
-
-document.getElementById('celMax').textContent=max.toFixed(3)+'V';
-
-document.getElementById('celDif').textContent=dif.toFixed(3)+'V';
-
-document.getElementById('celTot').textContent=cels.length;
-
-if(wrap.children.length!==cels.length){
-
-wrap.innerHTML='';
-
-for(let i=0;i<cels.length;i++){
-
-var div=document.createElement('div');
-
-div.className='cell';
-
-div.innerHTML=`
-<div class="cell-num">C${i+1}</div>
-<div class="cell-val">0.000</div>
-`;
-
-wrap.appendChild(div);
-
-}
-
-}
-
-for(let i=0;i<cels.length;i++){
-
-let val=parseFloat(cels[i]);
-
-let cell=wrap.children[i];
-
-let txt=cell.querySelector('.cell-val');
-
-txt.textContent=val.toFixed(3);
-
-cell.className='cell';
-
-if(val<3.2 || val>4.2){
-
-cell.classList.add('crit');
-
-}else if(val<3.4 || val>4.15){
-
-cell.classList.add('warn');
-
-}else{
-
-cell.classList.add('ok');
-
-}
-
-}
-
-}
-
-function atualizar(){
-
-fetch(API+'?action=data&code='+CODIGO,{
-
-headers:{
-'Authorization':'Bearer '+TOKEN
-}
-
-})
-.then(r=>r.json())
-.then(d=>{
-
-document.getElementById('soc').textContent=(d.soc||0).toFixed(0)+'%';
-
-document.getElementById('volt').textContent=(d.voltage||0).toFixed(2)+'V';
-
-document.getElementById('corr').textContent=(d.current||0).toFixed(1)+'A';
-
-document.getElementById('temp').textContent=(d.temp||0).toFixed(1)+'°C';
-
-var st=document.getElementById('status');
-
-st.innerHTML=d.online?
-'<span class="live-dot"></span>ONLINE':
-'OFFLINE';
-
-st.className='status '+(d.online?'on':'off');
-
-atualizarGauge(parseInt(d.soc||0));
-
-renderCelulas(d.cells||[]);
-
-});
+location.href = 'dashboard.html';
 
 }
 
 function sair(){
 
-clearInterval(INT);
+localStorage.removeItem('bms_token');
 
-localStorage.clear();
+localStorage.removeItem('bms_user');
+
+localStorage.removeItem('bms_codigo_ativo');
 
 location.reload();
 
