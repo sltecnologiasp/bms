@@ -15,14 +15,18 @@
     input { width: 100%; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.05); padding: 14px; border-radius: 12px; color: #fff; font-size: 14px; margin-bottom: 16px; outline: none; transition: all 0.2s; }
     input:focus { border-color: #00ffff; box-shadow: 0 0 10px rgba(0,255,255,0.1); }
     
-    /* Container especial para alinhar o olho da senha */
+    /* Container para alinhar o olho da senha perfeitamente */
     .password-container { position: relative; width: 100%; }
     .password-container input { width: 100%; padding-right: 45px; }
     .toggle-password { position: absolute; right: 14px; top: 14px; cursor: pointer; opacity: 0.5; font-size: 16px; user-select: none; transition: opacity 0.2s; }
     .toggle-password:hover { opacity: 1; }
 
     button { width: 100%; background: linear-gradient(90deg, #0080ff, #00ffff); color: #fff; border: none; padding: 14px; border-radius: 12px; font-size: 14px; font-weight: 700; cursor: pointer; margin-top: 8px; transition: all 0.2s; box-shadow: 0 4px 15px rgba(0,255,255,0.2); }
-    button.sec { background: transparent; border: 1px solid rgba(0,255,255,0.2); color: #00ffff; box-shadow: none; margin-top: 12px; }
+    
+    /* Estilo dos botões secundários original restaurado */
+    button.sec { background: transparent !important; border: 1px solid rgba(0,255,255,0.15) !important; color: #00ffff !important; box-shadow: none !important; margin-top: 12px; }
+    button.sec:hover { background: rgba(0,255,255,0.03) !important; border-color: #00ffff !important; }
+    
     button.del { background: rgba(255,68,68,0.1); color: #ff4444; border: 1px solid rgba(255,68,68,0.2); padding: 6px 12px; font-size: 11px; border-radius: 8px; width: auto; margin: 0; box-shadow: none; }
     .msg { color: #ff4444; background: rgba(255,68,68,0.1); border: 1px solid rgba(255,68,68,0.2); padding: 12px; border-radius: 10px; font-size: 13px; text-align: center; margin-bottom: 16px; }
     .hidden { display: none !important; }
@@ -170,14 +174,13 @@
 
   </div>
     <script>
-    // Altere para a URL correta da sua API Workers se necessário
     var API = '/api/bms'; 
     var TOKEN = localStorage.getItem('bms_token') || '';
     var USER = JSON.parse(localStorage.getItem('bms_user') || 'null');
     var CODIGO = localStorage.getItem('bms_codigo_ativo') || '';
     var INT = null;
 
-    // Inicialização do sistema ao carregar a página
+    // Inicialização automática do sistema
     if (TOKEN) {
       if (CODIGO) { abrirDash(CODIGO); } else { mostrarLista(); }
     }
@@ -192,13 +195,17 @@
     function mostrarLogin() { esconderTudo(); document.getElementById('login').classList.remove('hidden'); }
     function mostrarCadastro() { esconderTudo(); document.getElementById('cadastro').classList.remove('hidden'); }
 
+    // CORREÇÃO DEFINITIVA DA FUNÇÃO DE LOGIN
     function realizarLogin() {
       var email = document.getElementById('email').value.trim();
       var senha = document.getElementById('senha').value;
       var e = document.getElementById('erro');
-      e.classList.add('hidden');
+      if (e) e.classList.add('hidden');
       
-      if (!email || !senha) { e.textContent = 'Preencha todos os campos'; e.classList.remove('hidden'); return; }
+      if (!email || !senha) { 
+        if (e) { e.textContent = 'Preencha todos os campos'; e.classList.remove('hidden'); } 
+        return; 
+      }
       
       fetch(API + '?action=login', {
         method: 'POST',
@@ -207,14 +214,27 @@
       })
       .then(function(r) { return r.json(); })
       .then(function(d) {
-        if (d.ok) {
-          TOKEN = d.token; USER = d.user;
+        if (d && d.ok) {
+          TOKEN = d.token; 
+          USER = d.user;
           localStorage.setItem('bms_token', d.token);
           localStorage.setItem('bms_user', JSON.stringify(d.user));
           mostrarLista();
-        } else { e.textContent = d.error || 'Erro no login'; e.classList.remove('hidden'); }
+        } else { 
+          if (e) { 
+            e.textContent = (d && d.error) ? d.error : 'Não autorizado'; 
+            e.classList.remove('hidden'); 
+          } else {
+            alert(d.error || 'Não autorizado');
+          }
+        }
       })
-      .catch(function(err) { e.textContent = 'Erro de rede: ' + err.message; e.classList.remove('hidden'); });
+      .catch(function(err) { 
+        if (e) { 
+          e.textContent = 'Erro de rede: ' + err.message; 
+          e.classList.remove('hidden'); 
+        } 
+      });
     }
 
     // FUNÇÃO AUXILIAR: Alterna a visibilidade do olho de forma independente
@@ -436,7 +456,7 @@
       var bar = document.getElementById('socBar');
       var txt = document.getElementById('socBarTxt');
       if (!gauge || !valor || !bar || !txt) return;
-      var deg = soc * 3.6;
+      var deg = Math.min(Math.max(soc, 0), 100) * 3.6;
       valor.textContent = soc + '%';
       txt.textContent = soc + '%';
       bar.style.width = soc + '%';
