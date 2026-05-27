@@ -32,7 +32,7 @@ export async function onRequest({ request, env }) {
             <div>
               <h1 style="color:#ff4444;font-size:24px;">Link inválido ou expirado</h1>
               <p style="opacity:0.7;">Este link de verificação já foi utilizado ou não existe.</p>
-              <a href="/" style="display:inline-block;margin-top:20px;color:#00ffff;text-decoration:none;border:1px solid #00ffff;padding:10px 20px;border-radius:8px;">Voltar ao Início</a>
+              <a href="https://bms.app.br" style="display:inline-block;margin-top:20px;color:#00ffff;text-decoration:none;border:1px solid #00ffff;padding:10px 20px;border-radius:8px;">Voltar ao Início</a>
             </div>
           </body>
           </html>
@@ -47,30 +47,31 @@ export async function onRequest({ request, env }) {
           <div>
             <h1 style="color:#00ff88;font-size:28px;margin-bottom:8px;">Conta Ativada!</h1>
             <p style="opacity:0.8;margin-bottom:24px;">Seu e-mail foi verificado com sucesso.</p>
-            <a href="/" style="display:inline-block;background:linear-gradient(90deg, #0080ff, #00ffff);color:#fff;text-decoration:none;padding:14px 28px;border-radius:12px;font-weight:bold;box-shadow:0 4px 20px rgba(0,255,255,0.3);">ACESSAR MEU PAINEL</a>
+            <a href="https://bms.app.br" style="display:inline-block;background:linear-gradient(90deg, #0080ff, #00ffff);color:#fff;text-decoration:none;padding:14px 28px;border-radius:12px;font-weight:bold;box-shadow:0 4px 20px rgba(0,255,255,0.3);">ACESSAR MEU PAINEL</a>
           </div>
         </body>
         </html>
       `, { headers: { 'Content-Type': 'text/html; charset=utf-8' } });
     }
 
-    // ROTA 2: CADASTRO COM DISPARO DO RESEND (CORRIGIDO)
+    // ROTA 2: CADASTRO COM DISPARO DO RESEND (PRODUÇÃO COM DOMÍNIO PRÓPRIO)
     if (action === 'register' && request.method === 'POST') {
       const { nome, email, senha } = await request.json();
-      if (!nome ||!email ||!senha) return json({ ok: false, error: 'Dados inválidos' }, 400);
-      const exists = await env.DB.prepare('SELECT id FROM users WHERE email =?').bind(email).first();
+      if (!nome || !email || !senha) return json({ ok: false, error: 'Dados inválidos' }, 400);
+      const exists = await env.DB.prepare('SELECT id FROM users WHERE email = ?').bind(email).first();
       if (exists) return json({ ok: false, error: 'E-mail já cadastrado' }, 400);
       
       const hash = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(senha));
       const senha_hash = Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2, '0')).join('');
       
       const token_verificacao = crypto.randomUUID();
-      await env.DB.prepare('INSERT INTO users (nome, email, senha_hash, email_verificado, token_verificacao) VALUES (?,?,?, 0, ?)')
+      await env.DB.prepare('INSERT INTO users (nome, email, senha_hash, email_verificado, token_verificacao) VALUES (?, ?, ?, 0, ?)')
         .bind(nome, email, senha_hash, token_verificacao).run();
 
-      // Envio de E-mail usando o Remetente de Testes Oficial do Resend
+      // Envio de E-mail usando o seu domínio próprio e profissional
       if (env.RESEND_API_KEY) {
-        const verifyLink = `${new URL(request.url).origin}${url.pathname}?action=verify_email&token=${token_verificacao}`;
+        // Força o link de verificação a apontar para o seu domínio oficial bms.app.br
+        const verifyLink = `https://bms.app.br/api/bms?action=verify_email&token=${token_verificacao}`;
         
         await fetch('https://api.resend.com/emails', {
           method: 'POST',
@@ -79,7 +80,7 @@ export async function onRequest({ request, env }) {
             'Content-Type': 'application/json'
           },
           body: JSON.stringify({
-            from: 'SMART BMS <onboarding@resend.dev>', // Corrigido para o ambiente de testes
+            from: 'SMART BMS <nao-responda@bms.app.br>', // ALTERADO: Agora usando o seu domínio oficial liberado
             to: email,
             subject: 'Confirme seu e-mail - SMART BMS',
             html: `
@@ -106,11 +107,10 @@ export async function onRequest({ request, env }) {
       const hash = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(senha));
       const senha_hash = Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2, '0')).join('');
       
-      const user = await env.DB.prepare('SELECT id, nome, email, email_verificado FROM users WHERE email =? AND senha_hash =?').bind(email, senha_hash).first();
+      const user = await env.DB.prepare('SELECT id, nome, email, email_verificado FROM users WHERE email = ? AND senha_hash = ?').bind(email, senha_hash).first();
       
       if (!user) return json({ ok: false, error: 'E-mail ou senha incorretos' }, 401);
       
-      // Bloqueia se o email_verificado for igual a 0
       if (user.email_verificado === 0) {
         return json({ ok: false, error: 'Confirme seu e-mail na caixa de entrada antes de acessar.' }, 403);
       }
@@ -132,14 +132,15 @@ export async function onRequest({ request, env }) {
       if (!code) return json({ ok: false, error: 'Code obrigatório' }, 400);
       await env.DB.prepare(`
         INSERT INTO bms (code, soc, voltage, current, temp, cells, online, updated_at)
-        VALUES (?,?,?,?,?,?, 1, datetime('now'))
+        VALUES (?, ?, ?, ?, ?, ?, 1, datetime('now'))
         ON CONFLICT(code) DO UPDATE SET
           soc = excluded.soc, voltage = excluded.voltage, current = excluded.current,
           temp = excluded.temp, cells = excluded.cells, online = 1, updated_at = datetime('now')
       `).bind(code, soc || 0, voltage || 0, current || 0, temp || 0, JSON.stringify(cells || [])).run();
       return json({ ok: true });
     }
-        // VERIFICA TOKEN DAS ROTAS AUTENTICADAS
+
+    // VERIFICA TOKEN DAS ROTAS AUTENTICADAS
     const auth = request.headers.get('Authorization');
     if (!auth?.startsWith('Bearer ')) return json({ ok: false, error: 'Não autorizado' }, 401);
     const token = auth.slice(7);
@@ -165,18 +166,18 @@ export async function onRequest({ request, env }) {
       if (!userId) return json({ ok: false, error: 'Login necessário' }, 401);
 
       const { code, nome } = await request.json();
-      if (!code?.startsWith('SL') || code.length!== 14) return json({ ok: false, error: 'Código inválido. Use SL + 12 números' }, 400);
+      if (!code?.startsWith('SL') || code.length !== 14) return json({ ok: false, error: 'Código inválido. Use SL + 12 números' }, 400);
 
-      const bms = await env.DB.prepare("SELECT id, user_id FROM bms_master WHERE code =?").bind(code).first();
+      const bms = await env.DB.prepare("SELECT id, user_id FROM bms_master WHERE code = ?").bind(code).first();
       if (!bms) return json({ ok: false, error: 'BMS não encontrada no sistema' });
 
-      if (bms.user_id && bms.user_id!== userId) return json({ ok: false, error: 'Essa BMS já está vinculada a outra conta' });
+      if (bms.user_id && bms.user_id !== userId) return json({ ok: false, error: 'Essa BMS já está vinculada a outra conta' });
 
       if (bms.user_id === userId) return json({ ok: false, error: 'Você já adicionou essa BMS' });
 
-      await env.DB.prepare("UPDATE bms_master SET user_id =? WHERE id =?").bind(userId, bms.id).run();
-      await env.DB.prepare('INSERT OR IGNORE INTO bms (code, nome) VALUES (?,?)').bind(code, nome || code).run();
-      await env.DB.prepare('INSERT INTO user_bms (user_id, bms_code, bms_nome) VALUES (?,?,?)').bind(userId, code, nome || code).run();
+      await env.DB.prepare("UPDATE bms_master SET user_id = ? WHERE id = ?").bind(userId, bms.id).run();
+      await env.DB.prepare('INSERT OR IGNORE INTO bms (code, nome) VALUES (?, ?)').bind(code, nome || code).run();
+      await env.DB.prepare('INSERT INTO user_bms (user_id, bms_code, bms_nome) VALUES (?, ?, ?)').bind(userId, code, nome || code).run();
 
       return json({ ok: true });
     }
@@ -186,11 +187,11 @@ export async function onRequest({ request, env }) {
       const code = url.searchParams.get('code');
       if (!code) return json({ ok: false, error: 'Code obrigatório' }, 400);
 
-      const check = await env.DB.prepare('SELECT id FROM bms_master WHERE code =? AND user_id =?').bind(code, userId).first();
+      const check = await env.DB.prepare('SELECT id FROM bms_master WHERE code = ? AND user_id = ?').bind(code, userId).first();
       if (!check) return json({ ok: false, error: 'BMS não encontrada na sua conta' }, 403);
 
-      await env.DB.prepare('UPDATE bms_master SET user_id = NULL WHERE code =?').bind(code).run();
-      await env.DB.prepare('DELETE FROM user_bms WHERE user_id =? AND bms_code =?').bind(userId, code).run();
+      await env.DB.prepare('UPDATE bms_master SET user_id = NULL WHERE code = ?').bind(code).run();
+      await env.DB.prepare('DELETE FROM user_bms WHERE user_id = ? AND bms_code = ?').bind(userId, code).run();
 
       return json({ ok: true });
     }
@@ -202,12 +203,12 @@ export async function onRequest({ request, env }) {
         FROM bms_master m
         LEFT JOIN user_bms ub ON ub.bms_code = m.code AND ub.user_id = m.user_id
         LEFT JOIN bms b ON b.code = m.code
-        WHERE m.user_id =? ORDER BY m.id DESC
+        WHERE m.user_id = ? ORDER BY m.id DESC
       `).bind(userId).all();
 
       const now = Date.now();
       const withOnline = (results || []).map(r => ({
-     ...r,
+        ...r,
         online: r.updated_at && (now - new Date(r.updated_at).getTime() < 5000)
       }));
       return json(withOnline);
@@ -216,7 +217,7 @@ export async function onRequest({ request, env }) {
     if (action === 'admin_add_master' && request.method === 'POST') {
       if (!isAdmin) return json({ ok: false, error: 'Admin only' }, 403);
       const { code } = await request.json();
-      if (!code?.startsWith('SL') || code.length!== 14) return json({ ok: false, error: 'Código inválido. Use SL + 12 números' }, 400);
+      if (!code?.startsWith('SL') || code.length !== 14) return json({ ok: false, error: 'Código inválido. Use SL + 12 números' }, 400);
       try {
         await env.DB.prepare('INSERT INTO bms_master (code) VALUES (?)').bind(code).run();
         return json({ ok: true });
@@ -238,10 +239,10 @@ export async function onRequest({ request, env }) {
       `).all();
 
       const now = Date.now();
-      const withOnline = (results || []).map(r=>({
-     ...r,
+      const withOnline = (results || []).map(r => ({
+        ...r,
         online: r.updated_at && (now - new Date(r.updated_at).getTime() < 5000),
-        cells: JSON.parse(r.cells||'[]')
+        cells: JSON.parse(r.cells || '[]')
       }));
       return json(withOnline);
     }
@@ -250,10 +251,10 @@ export async function onRequest({ request, env }) {
       if (!isAdmin) return json({ ok: false, error: 'Admin only' }, 403);
       const { results } = await env.DB.prepare('SELECT *, datetime(updated_at) || "Z" as updated_at FROM bms ORDER BY updated_at DESC').all();
       const now = Date.now();
-      return json((results || []).map(r=>({
-     ...r,
+      return json((results || []).map(r => ({
+        ...r,
         online: r.updated_at && (now - new Date(r.updated_at).getTime() < 5000),
-        cells: JSON.parse(r.cells||'[]')
+        cells: JSON.parse(r.cells || '[]')
       })));
     }
 
@@ -270,8 +271,8 @@ export async function onRequest({ request, env }) {
     if (action === 'edit_user' && request.method === 'POST') {
       if (!isAdmin) return json({ ok: false, error: 'Admin only' }, 403);
       const { id, nome, email } = await request.json();
-      if (!id ||!nome ||!email) return json({ ok: false, error: 'Dados inválidos' }, 400);
-      await env.DB.prepare('UPDATE users SET nome =?, email =? WHERE id =?').bind(nome, email, id).run();
+      if (!id || !nome || !email) return json({ ok: false, error: 'Dados inválidos' }, 400);
+      await env.DB.prepare('UPDATE users SET nome = ?, email = ? WHERE id = ?').bind(nome, email, id).run();
       return json({ ok: true });
     }
 
@@ -279,32 +280,32 @@ export async function onRequest({ request, env }) {
       if (!isAdmin) return json({ ok: false, error: 'Admin only' }, 403);
       const id = url.searchParams.get('id');
       if (!id) return json({ ok: false, error: 'ID obrigatório' }, 400);
-      await env.DB.prepare('UPDATE bms_master SET user_id = NULL WHERE user_id =?').bind(id).run();
-      await env.DB.prepare('DELETE FROM users WHERE id =?').bind(id).run();
-      await env.DB.prepare('DELETE FROM user_bms WHERE user_id =?').bind(id).run();
+      await env.DB.prepare('UPDATE bms_master SET user_id = NULL WHERE user_id = ?').bind(id).run();
+      await env.DB.prepare('DELETE FROM users WHERE id = ?').bind(id).run();
+      await env.DB.prepare('DELETE FROM user_bms WHERE user_id = ?').bind(id).run();
       return json({ ok: true });
     }
 
     if (action === 'data' && request.method === 'GET') {
       const code = url.searchParams.get('code');
       if (!code) return json({ ok: false, error: 'Code obrigatório' }, 400);
-      if (userId &&!isAdmin) {
-        const check = await env.DB.prepare('SELECT id FROM user_bms WHERE user_id =? AND bms_code =?').bind(userId, code).first();
+      if (userId && !isAdmin) {
+        const check = await env.DB.prepare('SELECT id FROM user_bms WHERE user_id = ? AND bms_code = ?').bind(userId, code).first();
         if (!check) return json({ ok: false, error: 'Acesso negado' }, 403);
       }
-      const data = await env.DB.prepare('SELECT *, datetime(updated_at) || "Z" as updated_at FROM bms WHERE code =?').bind(code).first();
+      const data = await env.DB.prepare('SELECT *, datetime(updated_at) || "Z" as updated_at FROM bms WHERE code = ?').bind(code).first();
       if (!data) return json({ ok: false, error: 'BMS não encontrada' }, 404);
       const online = data.updated_at && (Date.now() - new Date(data.updated_at).getTime() < 5000);
-      return json({...data,online,cells:JSON.parse(data.cells || '[]')});
+      return json({...data, online, cells: JSON.parse(data.cells || '[]')});
     }
 
     if (action === 'deletar' && request.method === 'DELETE') {
       if (!isAdmin) return json({ ok: false, error: 'Admin only' }, 403);
       const code = url.searchParams.get('code');
       if (!code) return json({ ok: false, error: 'Code obrigatório' }, 400);
-      await env.DB.prepare('DELETE FROM bms_master WHERE code =?').bind(code).run();
-      await env.DB.prepare('DELETE FROM bms WHERE code =?').bind(code).run();
-      await env.DB.prepare('DELETE FROM user_bms WHERE bms_code =?').bind(code).run();
+      await env.DB.prepare('DELETE FROM bms_master WHERE code = ?').bind(code).run();
+      await env.DB.prepare('DELETE FROM bms WHERE code = ?').bind(code).run();
+      await env.DB.prepare('DELETE FROM user_bms WHERE bms_code = ?').bind(code).run();
       return json({ ok: true });
     }
 
