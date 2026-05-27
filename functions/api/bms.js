@@ -17,14 +17,86 @@ export async function onRequest({ request, env }) {
 
   try {
     // ROTAS PÚBLICAS
+
+    // ROTA 1: VERIFICAÇÃO DE E-MAIL (QUANDO CLICA NO LINK)
+    if (action === 'verify_email' && request.method === 'GET') {
+      const token = url.searchParams.get('token');
+      if (!token) return new Response('Token inválido', { status: 400 });
+
+      const user = await env.DB.prepare('SELECT id FROM users WHERE token_verificacao = ?').bind(token).first();
+      
+      if (!user) {
+        return new Response(`
+          <html lang="pt-BR">
+          <body style="background:#05070d;color:#fff;font-family:sans-serif;display:flex;align-items:center;justify-content:center;height:100vh;text-align:center;margin:0;">
+            <div>
+              <h1 style="color:#ff4444;font-size:24px;">Link inválido ou expirado</h1>
+              <p style="opacity:0.7;">Este link de verificação já foi utilizado ou não existe.</p>
+              <a href="/" style="display:inline-block;margin-top:20px;color:#00ffff;text-decoration:none;border:1px solid #00ffff;padding:10px 20px;border-radius:8px;">Voltar ao Início</a>
+            </div>
+          </body>
+          </html>
+        `, { headers: { 'Content-Type': 'text/html; charset=utf-8' } });
+      }
+
+      await env.DB.prepare('UPDATE users SET email_verificado = 1, token_verificacao = NULL WHERE id = ?').bind(user.id).run();
+
+      return new Response(`
+        <html lang="pt-BR">
+        <body style="background:#05070d;color:#fff;font-family:sans-serif;display:flex;align-items:center;justify-content:center;height:100vh;text-align:center;margin:0;">
+          <div>
+            <h1 style="color:#00ff88;font-size:28px;margin-bottom:8px;">Conta Ativada!</h1>
+            <p style="opacity:0.8;margin-bottom:24px;">Seu e-mail foi verificado com sucesso.</p>
+            <a href="/" style="display:inline-block;background:linear-gradient(90deg, #0080ff, #00ffff);color:#fff;text-decoration:none;padding:14px 28px;border-radius:12px;font-weight:bold;box-shadow:0 4px 20px rgba(0,255,255,0.3);">ACESSAR MEU PAINEL</a>
+          </div>
+        </body>
+        </html>
+      `, { headers: { 'Content-Type': 'text/html; charset=utf-8' } });
+    }
+
     if (action === 'register' && request.method === 'POST') {
       const { nome, email, senha } = await request.json();
       if (!nome ||!email ||!senha) return json({ ok: false, error: 'Dados inválidos' }, 400);
       const exists = await env.DB.prepare('SELECT id FROM users WHERE email =?').bind(email).first();
       if (exists) return json({ ok: false, error: 'E-mail já cadastrado' }, 400);
+      
       const hash = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(senha));
       const senha_hash = Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2, '0')).join('');
-      await env.DB.prepare('INSERT INTO users (nome, email, senha_hash) VALUES (?,?,?)').bind(nome, email, senha_hash).run();
+      
+      // Gera token único e salva com status 0 (não verificado)
+      const token_verificacao = crypto.randomUUID();
+      await env.DB.prepare('INSERT INTO users (nome, email, senha_hash, email_verificado, token_verificacao) VALUES (?,?,?, 0, ?)')
+        .bind(nome, email, senha_hash, token_verificacao).run();
+
+      // Disparo de E-mail via Resend
+      if (env.RESEND_API_KEY) {
+        const verifyLink = `${new URL(request.url).origin}${url.pathname}?action=verify_email&token=${token_verificacao}`;
+        
+        await fetch('https://api.resend.com/emails', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${env.RESEND_API_KEY}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            from: 'SMART BMS <naoresponda@seudominio.com>', // ALTERE PARA O SEU DOMÍNIO VERIFICADO NO RESEND
+            to: email,
+            subject: 'Confirme seu e-mail - SMART BMS',
+            html: `
+              <div style="font-family: sans-serif; max-width: 600px; margin: auto; padding: 24px; background: #05070d; color: #ffffff; border-radius: 12px; border: 1px solid rgba(0,255,255,0.1);">
+                <h2 style="color: #00ffff; text-align: center; margin-top: 0;">SMART BMS</h2>
+                <h3 style="text-align: center; color: #fff;">Bem-vindo(a), ${nome}!</h3>
+                <p style="text-align: center; color: #a1aab8; line-height: 1.6;">Para garantir a segurança da sua conta e liberar seu acesso ao painel, precisamos que você confirme seu endereço de e-mail.</p>
+                <div style="text-align: center; margin: 36px 0;">
+                  <a href="${verifyLink}" style="background: linear-gradient(90deg, #0080ff, #00ffff); color: #ffffff; padding: 16px 32px; text-decoration: none; border-radius: 12px; font-weight: bold; font-size: 16px;">ATIVAR MINHA CONTA</a>
+                </div>
+                <p style="text-align: center; color: #6b7c96; font-size: 12px; margin-top: 32px;">Se você não se cadastrou em nosso sistema, por favor, ignore este e-mail.</p>
+              </div>
+            `
+          })
+        }).catch(err => console.log('Erro ao enviar e-mail:', err));
+      }
+
       return json({ ok: true });
     }
 
@@ -32,8 +104,16 @@ export async function onRequest({ request, env }) {
       const { email, senha } = await request.json();
       const hash = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(senha));
       const senha_hash = Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2, '0')).join('');
-      const user = await env.DB.prepare('SELECT id, nome, email FROM users WHERE email =? AND senha_hash =?').bind(email, senha_hash).first();
+      
+      const user = await env.DB.prepare('SELECT id, nome, email, email_verificado FROM users WHERE email =? AND senha_hash =?').bind(email, senha_hash).first();
+      
       if (!user) return json({ ok: false, error: 'E-mail ou senha incorretos' }, 401);
+      
+      // Trava de Segurança: Bloqueia quem não ativou o e-mail
+      if (user.email_verificado === 0) {
+        return json({ ok: false, error: 'Confirme seu e-mail na caixa de entrada antes de acessar.' }, 403);
+      }
+
       const token = btoa(`user:${user.id}:${Date.now()}`);
       return json({ ok: true, token, nome: user.nome, email: user.email });
     }
@@ -58,8 +138,7 @@ export async function onRequest({ request, env }) {
       `).bind(code, soc || 0, voltage || 0, current || 0, temp || 0, JSON.stringify(cells || [])).run();
       return json({ ok: true });
     }
-
-    // VERIFICA TOKEN
+        // VERIFICA TOKEN
     const auth = request.headers.get('Authorization');
     if (!auth?.startsWith('Bearer ')) return json({ ok: false, error: 'Não autorizado' }, 401);
     const token = auth.slice(7);
