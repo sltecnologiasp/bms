@@ -10,57 +10,70 @@
 :root{--bg:#05070d;--cyan:#00ffff;--blue:#0080ff;--green:#00ff88;--red:#ff4444;--orange:#ffaa00}
 body{font-family:'Inter',sans-serif;background:var(--bg);color:#fff;min-height:100vh;width:100%;overflow-x:hidden}
 
-/* Padding aprimorado nas laterais para telas mobile */
-#login,#dash,#lista,#cadastro{position:relative;z-index:1;width:100%;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:20px 16px}
+/* Containers principais com espaçamento lateral fixo */
+#login,#dash,#lista,#cadastro{position:relative;z-index:1;width:100%;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:16px 12px}
 #login,#cadastro{justify-content:center}
-#dash,#lista{justify-content:flex-start;padding-top:20px;padding-bottom:32px}
+
+/* Telas de monitoramento alinhadas ao topo */
+#dash, #lista {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  height: auto;
+  min-height: 100vh;
+  width: 100%;
+}
 
 .title{font-size:clamp(32px,7vw,54px);font-weight:900;margin-bottom:4px;letter-spacing:2px;background:linear-gradient(90deg,var(--cyan),var(--blue));-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-align:center;width:100%}
-.user-info{color:#6b7c96;font-size:14px;text-align:center;margin-bottom:24px;font-weight:500}
+.user-info{color:#6b7c96;font-size:14px;text-align:center;margin-bottom:16px;font-weight:500}
 .user-info span{color:#fff;font-weight:600}
 
-/* Cards com visual mais limpo e sem bordas pesadas */
-.card{background:rgba(13,20,35,0.65);border:1px solid rgba(0,255,255,.08);border-radius:20px;padding:20px;width:100%;margin-bottom:16px;box-shadow:0 8px 32px rgba(0,0,0,0.4)}
+/* PADRONIZAÇÃO DE ESPAÇAMENTO: Todos os blocos com margem inferior exata de 12px */
+.card{
+  background:rgba(13,20,35,0.65);
+  border:1px solid rgba(0,255,255,.08);
+  border-radius:20px;
+  padding:20px;
+  width:100%;
+  margin-top: 0 !important;
+  margin-bottom: 12px !important; /* Espaçamento idêntico entre todos os blocos */
+  box-shadow:0 8px 32px rgba(0,0,0,0.4);
+}
 
 #login .card,#cadastro .card,#lista .card {width:100%;max-width:440px}
 
-/* Inputs elegantes e minimalistas */
+/* Elementos de Formulário */
 .label{font-size:11px;letter-spacing:1px;opacity:.5;text-transform:uppercase;text-align:left;width:100%;margin-bottom:6px;font-weight:600}
 input,select,button{width:100%;padding:16px;border-radius:14px;border:none;outline:none;font-size:16px;transition:all 0.2s ease}
 input,select{background:rgba(0,0,0,.4);color:#fff;border:1px solid rgba(255,255,255,.08);text-align:center}
 input:focus{border-color:rgba(0,255,255,0.4);background:rgba(0,0,0,.6)}
 input::placeholder{color:rgba(255,255,255,.25)}
 
-/* Botões Modernos com tamanho calibrado */
+/* Botões */
 button{background:linear-gradient(90deg,var(--blue),var(--cyan));color:#fff;font-weight:700;cursor:pointer;margin-top:12px;box-shadow:0 4px 20px rgba(0,128,255,0.25)}
 button:active{transform:scale(0.98)}
 .btn-sec{background:transparent;border:1px solid rgba(0,255,255,.25);color:var(--cyan);box-shadow:none}
 
-/* Nova grade de dispositivos (Mais compacta) */
+/* Grade de Dispositivos */
 .bms-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px;width:100%;margin-top:8px}
-
-/* Card de BMS estilo "Grid Item" profissional */
 .bms-item{background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.05);border-radius:16px;padding:16px;text-align:left;position:relative;display:flex;flex-direction:column;justify-content:space-between;min-height:120px;cursor:pointer}
 .bms-item:hover{border-color:rgba(0,255,255,0.2);background:rgba(0,255,255,0.02)}
 .bms-item h3{color:#fff;font-size:18px;font-weight:700;margin-bottom:2px;text-align:left}
 .bms-item p{color:#5f6e85;font-size:12px;font-family:monospace;text-align:left}
 
-/* Indicador de Status Discreto e Elegante (Bolinha) */
+/* Indicadores de Status da Lista */
 .status-dot{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;margin-top:12px}
 .status-dot::before{content:'';width:8px;height:8px;border-radius:50%;display:inline-block}
 .status-dot.on{color:var(--green)}.status-dot.on::before{background:var(--green);box-shadow:0 0 8px var(--green)}
 .status-dot.off{color:var(--red)}.status-dot.off::before{background:var(--red);box-shadow:0 0 8px var(--red)}
-
-/* Botão de remoção transformado em ícone elegante no topo do card */
 .bms-item button.del{position:absolute;top:12px;right:12px;background:transparent;border:none;padding:4px;margin:0;width:auto;height:auto;color:#5f6e85;font-size:16px;cursor:pointer;box-shadow:none}
 .bms-item button.del:hover{color:var(--red)}
 
-/* Botão Sair sutil e bem posicionado no rodapé */
-.logout{margin-top:auto;background:transparent;border:1px solid rgba(255,68,68,.2);color:var(--red);width:100%;max-width:440px;box-shadow:none}
+.logout{margin-top:4px;background:transparent;border:1px solid rgba(255,68,68,.2);color:var(--red);width:100%;max-width:440px;box-shadow:none}
 .logout:hover{background:rgba(255,68,68,.05)}
 
-/* Componentes do Dashboard */
-.gauge-wrap{width:100%;margin-bottom:12px}
+/* Componentes de Gráficos e Grid do Dashboard */
+.gauge-wrap{width:100%;margin-top:0 !important;margin-bottom:0 !important} /* Deixa o gerenciamento de espaço para o .card interno */
 .gauge-card{padding:20px;min-height:260px}
 .gauge{width:min(220px,55vw);height:min(220px,55vw);margin:auto;border-radius:50%;background:conic-gradient(#00ff88 0deg,#00ffff 180deg,rgba(255,255,255,.08) 180deg);position:relative;box-shadow:0 0 30px rgba(0,255,255,.1);transition:background.8s ease}
 .gauge::before{content:'';position:absolute;inset:16px;border-radius:50%;background:#05070d}
@@ -72,27 +85,30 @@ button:active{transform:scale(0.98)}
 .bar{height:12px;background:rgba(255,255,255,.06);border-radius:999px;overflow:hidden}
 .bar-fill{height:100%;width:0%;border-radius:999px;background:linear-gradient(90deg,#00ff88,#00ffff);transition:width.8s ease}
 
-.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px;width:100%;margin-bottom:8px}
-.grid .card{width:100%;height:100px;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:12px;margin:0}
+/* Distância horizontal idêntica à vertical (12px) */
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;width:100%;margin-top:0 !important;margin-bottom:12px !important}
+.grid .card{width:100%;height:100px;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:12px;margin:0 !important}
+.value{font-size:clamp(22px,6vw,30px);font-weight:800;margin-top:8px;line-height:1;width:100%;text-align:center;font-variant-numeric:tabular-nums}
 
 .status-badge{display:inline-flex;align-items:center;gap:8px;padding:10px 20px;border-radius:999px;font-weight:700;font-size:14px;margin-top:10px}
 .status-badge.on{background:rgba(0,255,136,.08);color:var(--green);border:1px solid rgba(0,255,136,.2)}
 .status-badge.off{background:rgba(255,68,68,.08);color:var(--red);border:1px solid rgba(255,68,68,.2)}
 
-.diff{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:16px}
+.diff{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:16px}
 .diff-item{padding:10px 6px;border-radius:12px;background:rgba(255,255,255,.02);text-align:center}
 .diff-item span{display:block;margin-top:4px;font-size:clamp(16px,4.5vw,20px);font-weight:800;font-variant-numeric:tabular-nums}
 
-.cells{display:grid;grid-template-columns:repeat(auto-fill,minmax(85px,1fr));gap:6px;margin-top:16px;width:100%}
-.cell{background:rgba(0,0,0,.3);border-radius:12px;padding:10px 6px;border:1px solid rgba(255,255,255,.04)}
+.cells{display:grid;grid-template-columns:repeat(auto-fill,minmax(85px,1fr));gap:12px;margin-top:16px;width:100%}
+.cell{background:rgba(0,0,0,.3);border-radius:12px;padding:10px 6px;border:1px solid rgba(255,255,255,.04);display:flex;flex-direction:column;align-items:center;justify-content:center}
 .cell-num{font-size:11px;opacity:.4;margin-bottom:2px}
 .cell-val{font-size:15px;font-weight:700;font-variant-numeric:tabular-nums}
 .cell.ok{border-color:rgba(0,255,136,.2)}
 .cell.warn{border-color:rgba(255,170,0,.2)}
 .cell.crit{border-color:rgba(255,68,68,.2)}
 
-.footer-voltar{width:100%;display:flex;justify-content:center;margin-top:0px!important}
-.footer-voltar button{width:100%;max-width:520px;margin-top:8px}
+/* Botão Voltar alinhado perfeitamente abaixo com os mesmos 12px de folga */
+.footer-voltar{width:100%;display:flex;justify-content:center;margin-top:0px!important;margin-bottom:24px}
+.footer-voltar button{width:100%;max-width:520px;margin-top:0px}
 
 .hidden{display:none!important}
 .erro{background:rgba(255,68,68,.1);border:1px solid var(--red);border-radius:12px;padding:14px;margin-top:16px;color:var(--red);font-size:14px}
@@ -153,26 +169,24 @@ button:active{transform:scale(0.98)}
 </div>
 
 <div id="dash" class="hidden">
-  <div class="gauge-wrap">
-    <div class="card gauge-card">
-      <div class="gauge" id="socGauge">
-        <div class="gauge-inner">
-          <div class="gauge-value" id="socValor">0%</div>
-          <div class="gauge-label">STATE OF CHARGE</div>
-        </div>
+  <div class="card gauge-card">
+    <div class="gauge" id="socGauge">
+      <div class="gauge-inner">
+        <div class="gauge-value" id="socValor">0%</div>
+        <div class="gauge-label">STATE OF CHARGE</div>
       </div>
-      <div class="bar-wrap">
-        <div class="bar-label"><span>Bateria</span><span id="socBarTxt">0%</span></div>
-        <div class="bar"><div class="bar-fill" id="socBar"></div></div>
-      </div>
+    </div>
+    <div class="bar-wrap">
+      <div class="bar-label"><span>Bateria</span><span id="socBarTxt">0%</span></div>
+      <div class="bar"><div class="bar-fill" id="socBar"></div></div>
     </div>
   </div>
 
-  <div class="card" style="padding:14px">
+  <div class="card" style="padding:14px;display:flex;flex-direction:column;align-items:center;justify-content:center">
     <div class="status-wrap" style="margin:0">
       <span id="status" class="status-badge off">Offline</span>
-      <div class="bms-code" id="bms-titulo" style="margin-top:6px;font-size:16px;opacity:.5">--</div>
     </div>
+    <div class="bms-code" id="bms-titulo" style="margin-top:8px;font-size:15px;opacity:.5;font-family:monospace">--</div>
   </div>
 
   <div class="grid">
