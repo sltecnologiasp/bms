@@ -10,14 +10,26 @@
 :root{--bg:#05070d;--cyan:#00ffff;--blue:#0080ff;--green:#00ff88;--red:#ff4444;--orange:#ffaa00}
 body{font-family:'Inter',sans-serif;background:var(--bg);color:#fff;min-height:100vh;width:100%;overflow-x:hidden}
 #login,#dash,#lista,#cadastro{position:relative;z-index:1;width:100%;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:8px}
-#dash,#lista{justify-content:flex-start;padding-top:12px}
 #login,#cadastro{justify-content:center}
 .title{font-size:clamp(32px,8vw,74px);font-weight:900;margin-bottom:16px;letter-spacing:3px;background:linear-gradient(90deg,var(--cyan),var(--blue));-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-align:center;width:100%}
 
+/* Estilo Base do Card */
 .card{background:rgba(10,15,25,.92);border:1px solid rgba(0,255,255,.12);border-radius:16px;padding:16px;width:100%;margin-bottom:4px}
 
+/* Alinhamento de containers */
 #login .card,#cadastro .card,#lista .card {display:flex;flex-direction:column;align-items:center;justify-content:center;max-width:520px}
 #lista input,#lista button{max-width:440px;width:100%}
+
+#dash, #lista {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  height: auto;
+  min-height: 100vh;
+  width: 100%;
+  padding-top: 12px;
+  padding-bottom: 24px;
+}
 
 .gauge-wrap{width:100%;margin:0 0 4px 0}
 .gauge-card{padding:20px 20px 30px;min-height:280px}
@@ -50,6 +62,7 @@ button{background:linear-gradient(90deg,var(--blue),var(--cyan));color:#fff;font
 .diff-item{padding:12px 8px;border-radius:14px;background:rgba(255,255,255,.03);text-align:center}
 .diff-item span{display:block;margin-top:6px;font-size:clamp(18px,5vw,22px);font-weight:800;width:6ch;margin:auto;text-align:center;font-variant-numeric:tabular-nums}
 
+/* Grid das Células Lado a Lado */
 .cells{display:grid;grid-template-columns:repeat(auto-fill,minmax(85px,1fr));gap:8px;margin-top:20px;width:100%}
 .cell{background:rgba(0,0,0,.4);border-radius:14px;padding:12px 8px;border:1px solid rgba(255,255,255,.05);display:flex;flex-direction:column;align-items:center;justify-content:center}
 .cell-num{font-size:11px;opacity:.5;margin-bottom:4px}
@@ -61,7 +74,7 @@ button{background:linear-gradient(90deg,var(--blue),var(--cyan));color:#fff;font
 .logout{margin-top:24px;background:rgba(255,68,68,.08);border:1px solid rgba(255,68,68,.2);width:100%;max-width:520px}
 .hidden{display:none!important}
 
-.bms-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:4px;margin-top:20px;width:100%;max-width:440px}
+.bms-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:4px;margin-top:20px;width:100%;max-width:440px;align-self:center}
 .bms-item{background:rgba(0,255,255,.05);border:1px solid rgba(0,255,255,.2);border-radius:16px;padding:20px;text-align:center;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;width:100%}
 .bms-item:active{transform:scale(0.98)}
 .bms-item h3{color:var(--cyan);font-size:20px;margin-bottom:0;text-align:center;width:100%}
@@ -71,8 +84,11 @@ button{background:linear-gradient(90deg,var(--blue),var(--cyan));color:#fff;font
 .erro{background:rgba(255,0,0,.1);border:2px solid #ff4444;border-radius:12px;padding:16px;margin-top:16px;color:#ff4444;font-size:14px}
 .link-cadastro{margin-top:20px;text-align:center;color:#fff;cursor:pointer;opacity:.8}
 .link-cadastro span{color:#00ffff;text-decoration:underline}
-.footer-voltar{width:100%;margin-top:24px;margin-bottom:12px;display:flex;justify-content:center}
-.footer-voltar button{max-width:520px}
+
+/* Botão Voltar Ajustado para colar no Card acima */
+.footer-voltar{width:100%;display:flex;justify-content:center;margin-top:0px!important;margin-bottom:0px}
+.footer-voltar button{width:100%;max-width:520px;margin-top:4px}
+
 @media(max-width:520px){.gauge-card{padding:16px;min-height:240px}.grid{grid-template-columns:repeat(2,1fr)}.bms-list{grid-template-columns:1fr}.diff{grid-template-columns:repeat(2,1fr)}}
 </style>
 </head>
@@ -104,8 +120,7 @@ button{background:linear-gradient(90deg,var(--blue),var(--cyan));color:#fff;font
     <button class="btn-sec" onclick="mostrarLogin()">VOLTAR</button>
     <div id="erro-cad" class="erro hidden"></div>
   </div>
-</div>
-<div id="lista" class="hidden">
+</div><div id="lista" class="hidden">
   <div class="title" style="font-size:clamp(28px,6vw,32px);margin-bottom:8px">SMART BMS</div>
   <div class="user-info">Olá, <span id="user-nome">--</span></div>
   <div class="card">
@@ -488,3 +503,4 @@ function sair(){
 </script>
 </body>
 </html>
+
