@@ -59,208 +59,390 @@ button.edit{background:rgba(255,170,0,.08);border:1px solid rgba(255,170,0,.2);c
 </style>
 </head>
 <body>
-  <div id="login">
-  <div class="title">SMART BMS</div>
-  <div class="user-info">Monitoramento de Baterias</div>
-  <div class="card">
-    <div class="label">Identificação / E-mail</div>
-    <input id="email" placeholder="Seu usuário ou e-mail" autocomplete="username">
-    <div class="label" style="margin-top:16px">Senha / Código de Acesso</div>
-    <input id="senha" type="password" placeholder="••••••••" autocomplete="current-password">
-    <button onclick="realizarLogin()">ENTRAR NO SISTEMA</button>
-    <button class="btn-sec" onclick="mostrarCadastro()">CRIAR UMA CONTA CLIENTE</button>
-    <div id="erro" class="erro hidden"></div>
-    <div id="sucesso-login" class="sucesso hidden"></div>
-  </div>
-</div>
-
-<div id="cadastro">
-  <div class="title">SMART BMS</div>
-  <div class="user-info">Crie sua Conta Cliente</div>
-  <div class="card">
-    <div class="label">Nome Completo</div>
-    <input id="cad-nome" placeholder="Ex: João Silva">
-    <div class="label" style="margin-top:12px">Seu Melhor E-mail</div>
-    <input id="cad-email" placeholder="exemplo@gmail.com">
-    <div class="label" style="margin-top:12px">Crie uma Senha</div>
-    <input id="cad-senha" type="password" placeholder="••••••••">
-    <button onclick="cadastrar()">CONCLUIR CADASTRO</button>
-    <button class="btn-sec" onclick="mostrarLogin()">← JÁ TENHO CONTA</button>
-    <div id="erro-cad" class="erro hidden"></div>
-  </div>
-</div>
-
-<div id="lista">
-  <div class="title" style="font-size:28px">MINHAS BATERIAS</div>
-  <div class="user-info">Olá, <span id="user-nome">Usuário</span></div>
-  <div class="card">
-    <div class="label">Monitorar Nova BMS</div>
-    <input id="bms-code" placeholder="SL000000000000" maxlength="14" style="margin-bottom:8px">
-    <input id="bms-nome" placeholder="Apelido (Ex: Bateria Casa)">
-    <button onclick="addBms()">VINCULAR DISPOSITIVO</button>
-  </div>
-  <div class="card" style="background:transparent;border:none;box-shadow:none;padding:0">
-    <div id="bms-list"></div>
-  </div>
-  <button class="btn-sec" style="max-width:520px;border-color:rgba(255,68,68,0.3);color:var(--red)" onclick="sair()">DESCONECTAR</button>
-</div>
-
-<div id="dash">
-  <div class="title" style="font-size:26px" id="bms-titulo">SL000000000000</div>
-  <div style="text-align:center;margin-bottom:16px"><span id="status" class="status-badge off">Offline</span></div>
-  <div class="card" style="display:flex;flex-direction:column;align-items:center;padding:20px 12px">
-    <div id="socGauge" style="width:140px;height:140px;border-radius:50%;display:flex;align-items:center;justify-content:center;position:relative;margin-bottom:16px;background:rgba(255,255,255,0.05)">
-      <div style="position:absolute;inset:8px;background:#05070d;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:2">
-        <div id="socValor" style="font-size:28px;font-weight:900">0%</div>
-        <div style="font-size:8px;letter-spacing:1px;opacity:0.5;margin-top:2px;font-weight:700">CAPACIDADE</div>
-      </div>
-    </div>
-    <div style="width:100%;max-width:280px">
-      <div style="display:flex;justify-content:space-between;font-size:11px;opacity:0.6;margin-bottom:6px;font-weight:600">
-        <span>Carga Autonômica</span><span id="socBarTxt">0%</span>
-      </div>
-      <div style="width:100%;height:6px;background:rgba(255,255,255,0.08);border-radius:99px;overflow:hidden">
-        <div id="socBar" style="width:0%;height:100%;background:linear-gradient(90deg,var(--green),var(--cyan));transition:width 0.4s ease"></div>
-      </div>
-    </div>
-  </div>
-  <div class="grid" style="margin-bottom:12px">
-    <div class="card" style="margin:0;padding:14px 8px"><div class="label">Nível (SOC)</div><div class="value" id="soc" style="color:var(--green)">0%</div></div>
-    <div class="card" style="margin:0;padding:14px 8px"><div class="label">Tensão Total</div><div class="value" id="volt" style="color:var(--cyan)">0.00V</div></div>
-    <div class="card" style="margin:0;padding:14px 8px"><div class="label">Corrente de Fluxo</div><div class="value" id="corr" style="color:var(--orange)">0.0A</div></div>
-    <div class="card" style="margin:0;padding:14px 8px"><div class="label">Temperatura</div><div class="value" id="temp" style="color:var(--red)">0.0°C</div></div>
-  </div>
-  <div class="card" style="padding:16px 12px">
-    <div class="label" style="margin-bottom:12px">Células - Tensão Individual</div>
-    <div class="diff">
-      <div class="diff-item">Min<span id="celMin" style="color:var(--green)">0.00V</span></div>
-      <div class="diff-item">Max<span id="celMax" style="color:var(--orange)">0.00V</span></div>
-      <div class="diff-item">Delta<span id="celDif" style="color:var(--red)">0.00V</span></div>
-      <div class="diff-item">Total<span id="celTot" style="color:var(--cyan)">0</span></div>
-    </div>
-    <div id="celulas" class="cells"></div>
-  </div>
-  <button class="btn-sec" style="max-width:520px" onclick="voltar()">← VOLTAR À LISTA</button>
-</div>
-
-<div id="painelAdmin">
-  <div class="title" style="font-size:30px">SMART BMS</div>
-  <div class="user-info">Painel do Administrador Geral</div>
-  <div class="card card-cadastro">
-    <div class="label">Cadastrar BMS no Sistema de Fábrica</div>
-    <input id="admin-code" placeholder="SL000000000000" maxlength="14" style="margin-top:8px">
-    <button class="btn-clientes" onclick="cadAdminBms()">CADASTRAR MASTER</button>
-    <button class="btn-sec" onclick="gerarECadastrarAdmin()">GERAR CÓDIGO ALEATÓRIO</button>
-    <button class="btn-clientes" style="margin-top:24px" onclick="mostrarClientesAdmin()">GERENCIAR CLIENTES</button>
-    <p id="admin-msg" style="text-align:center;margin-top:12px;font-size:14px;font-weight:600"></p>
-  </div>
-  <div class="card" style="background:transparent;border:none;box-shadow:none;padding:0">
-    <div class="label">Listagem Completa de Hardwares no Ar</div>
-    <div id="admin-lista-bms" class="grid"></div>
-  </div>
-  <button style="background:transparent;border:1px solid rgba(255,68,68,0.2);color:var(--red);max-width:440px" onclick="sair()">SAIR DO PAINEL ADMIN</button>
-</div>
-
-<div id="clientesAdmin">
-  <div class="title" style="font-size:30px">SMART BMS</div>
-  <div class="user-info">Clientes Cadastrados na Base</div>
-  <div class="card" style="background:transparent;border:none;box-shadow:none;padding:0">
-    <div id="admin-lista-users" class="grid" style="grid-template-columns:1fr"></div>
-  </div>
-  <button class="btn-sec" style="max-width:520px" onclick="voltarParaPainelAdmin()">← VOLTAR AO PAINEL</button>
-</div>
-
-<div id="dashAdminBms">
-  <div class="title" style="font-size:26px" id="modalBmsTitle">SL000000000000</div>
-  <div style="text-align:center;margin-bottom:16px" id="modalBmsDono"></div>
-  <div class="card" style="padding:12px;display:flex;justify-content:center;background:none;border:none;box-shadow:none">
-    <span id="adminBmsStatus" class="status off" style="font-size:13px;font-weight:700">Offline</span>
-  </div>
-  <div class="card" style="display:flex;flex-direction:column;align-items:center;padding:20px 12px">
-    <div id="adminSocGauge" style="width:140px;height:140px;border-radius:50%;display:flex;align-items:center;justify-content:center;position:relative;margin-bottom:16px;background:rgba(255,255,255,0.05)">
-      <div style="position:absolute;inset:8px;background:#05070d;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:2">
-        <div id="adminSocValor" style="font-size:28px;font-weight:900;color:#fff">0%</div>
-        <div style="font-size:8px;letter-spacing:1px;opacity:0.5;margin-top:2px;font-weight:700">STATE OF CHARGE</div>
-      </div>
-    </div>
-    <div style="width:100%;max-width:280px">
-      <div style="display:flex;justify-content:space-between;font-size:11px;opacity:0.6;margin-bottom:6px;font-weight:600">
-        <span>Bateria</span><span id="adminSocBarTxt">0%</span>
-      </div>
-      <div style="width:100%;height:6px;background:rgba(255,255,255,0.08);border-radius:99px;overflow:hidden">
-        <div id="adminSocBar" style="width:0%;height:100%;background:linear-gradient(90deg,var(--green),var(--cyan));transition:width 0.4s ease"></div>
-      </div>
-    </div>
-  </div>
-  <div class="grid" style="margin-bottom:12px">
-    <div class="card" style="margin:0;padding:14px 8px"><div class="label">SOC</div><div class="value" id="adminSoc" style="color:var(--green)">0%</div></div>
-    <div class="card" style="margin:0;padding:14px 8px"><div class="label">Tensão</div><div class="value" id="adminVolt" style="color:var(--cyan)">0.00V</div></div>
-    <div class="card" style="margin:0;padding:14px 8px"><div class="label">Corrente</div><div class="value" id="adminCorr" style="color:var(--orange)">0.0A</div></div>
-    <div class="card" style="margin:0;padding:14px 8px"><div class="label">Temperatura</div><div class="value" id="adminTemp" style="color:var(--red)">0.0°C</div></div>
-  </div>
-  <div class="card" style="padding:16px 12px">
-    <div class="label" style="margin-bottom:12px">Células - Tensão Individual</div>
-    <div class="diff">
-      <div class="diff-item">Min<span id="adminCelMin" style="color:var(--green)">0.00V</span></div>
-      <div class="diff-item">Max<span id="adminCelMax" style="color:var(--orange)">0.00V</span></div>
-      <div class="diff-item">Delta<span id="adminCelDif" style="color:var(--red)">0.00V</span></div>
-      <div class="diff-item">Total<span id="adminCelTot" style="color:var(--cyan)">0</span></div>
-    </div>
-    <div id="adminCellsContent" class="cells"></div>
-  </div>
-  <button class="btn-sec" style="width:100%" onclick="fecharDetalheBmsAdmin()">← VOLTAR À LISTA</button>
-</div>
-
-<div id="modalEditUser" class="modal">
-  <div class="modal-content">
-    <h2 style="text-align:center;margin-bottom:16px;font-size:20px;font-weight:900;background:linear-gradient(90deg,var(--cyan),var(--blue));-webkit-background-clip:text;-webkit-text-fill-color:transparent">Editar Cliente</h2>
-    <input id="editUserId" type="hidden">
-    <div class="label">Nome do Cliente</div>
-    <input id="editUserNome" placeholder="Nome">
-    <div class="label" style="margin-top:12px">E-mail de Acesso</div>
-    <input id="editUserEmail" placeholder="Email">
-    <button onclick="salvarUserAdmin()">SALVAR ALTERAÇÕES</button>
-    <button class="btn-sec" style="margin-top:8px" onclick="fecharEditUserAdmin()">← VOLTAR</button>
-    <p id="editMsg" style="text-align:center;margin-top:12px;font-size:14px;font-weight:600"></p>
-  </div>
-</div>
+<div id="login"><div class="title">SMART BMS</div><div class="user-info">Monitoramento de Baterias</div><div class="card"><div class="label">Identificação / E-mail</div><input id="email" placeholder="Seu usuário ou e-mail" autocomplete="username"><div class="label" style="margin-top:16px">Senha / Código de Acesso</div><input id="senha" type="password" placeholder="••••••••" autocomplete="current-password"><button onclick="realizarLogin()">ENTRAR NO SISTEMA</button><button class="btn-sec" onclick="mostrarCadastro()">CRIAR UMA CONTA CLIENTE</button><div id="erro" class="erro hidden"></div><div id="sucesso-login" class="sucesso hidden"></div></div></div>
+<div id="cadastro"><div class="title">SMART BMS</div><div class="user-info">Crie sua Conta Cliente</div><div class="card"><div class="label">Nome Completo</div><input id="cad-nome" placeholder="Ex: João Silva"><div class="label" style="margin-top:12px">Seu Melhor E-mail</div><input id="cad-email" placeholder="exemplo@gmail.com"><div class="label" style="margin-top:12px">Crie uma Senha</div><input id="cad-senha" type="password" placeholder="••••••••"><button onclick="cadastrar()">CONCLUIR CADASTRO</button><button class="btn-sec" onclick="mostrarLogin()">← JÁ TENHO CONTA</button><div id="erro-cad" class="erro hidden"></div></div></div>
+<div id="lista"><div class="title" style="font-size:28px">MINHAS BATERIAS</div><div class="user-info">Olá, <span id="user-nome">Usuário</span></div><div class="card"><div class="label">Monitorar Nova BMS</div><input id="bms-code" placeholder="SL000000000000" maxlength="14" style="margin-bottom:8px"><input id="bms-nome" placeholder="Apelido (Ex: Bateria Casa)"><button onclick="addBms()">VINCULAR DISPOSITIVO</button></div><div class="card" style="background:transparent;border:none;box-shadow:none;padding:0"><div id="bms-list"></div></div><button class="btn-sec" style="max-width:520px;border-color:rgba(255,68,68,0.3);color:var(--red)" onclick="sair()">DESCONECTAR</button></div>
+<div id="dash"><div class="title" style="font-size:26px" id="bms-titulo">SL000000000000</div><div style="text-align:center;margin-bottom:16px"><span id="status" class="status-badge off">Offline</span></div><div class="card" style="display:flex;flex-direction:column;align-items:center;padding:20px 12px"><div id="socGauge" style="width:140px;height:140px;border-radius:50%;display:flex;align-items:center;justify-content:center;position:relative;margin-bottom:16px;background:rgba(255,255,255,0.05)"><div style="position:absolute;inset:8px;background:#05070d;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:2"><div id="socValor" style="font-size:28px;font-weight:900">0%</div><div style="font-size:8px;letter-spacing:1px;opacity:0.5;margin-top:2px;font-weight:700">CAPACIDADE</div></div></div><div style="width:100%;max-width:280px"><div style="display:flex;justify-content:space-between;font-size:11px;opacity:0.6;margin-bottom:6px;font-weight:600"><span>Carga Autonômica</span><span id="socBarTxt">0%</span></div><div style="width:100%;height:6px;background:rgba(255,255,255,0.08);border-radius:99px;overflow:hidden"><div id="socBar" style="width:0%;height:100%;background:linear-gradient(90deg,var(--green),var(--cyan));transition:width 0.4s ease"></div></div></div></div><div class="grid" style="margin-bottom:12px"><div class="card" style="margin:0;padding:14px 8px"><div class="label">Nível (SOC)</div><div class="value" id="soc" style="color:var(--green)">0%</div></div><div class="card" style="margin:0;padding:14px 8px"><div class="label">Tensão Total</div><div class="value" id="volt" style="color:var(--cyan)">0.00V</div></div><div class="card" style="margin:0;padding:14px 8px"><div class="label">Corrente de Fluxo</div><div class="value" id="corr" style="color:var(--orange)">0.0A</div></div><div class="card" style="margin:0;padding:14px 8px"><div class="label">Temperatura</div><div class="value" id="temp" style="color:var(--red)">0.0°C</div></div></div><div class="card" style="padding:16px 12px"><div class="label" style="margin-bottom:12px">Células - Tensão Individual</div><div class="diff"><div class="diff-item">Min<span id="celMin" style="color:var(--green)">0.00V</span></div><div class="diff-item">Max<span id="celMax" style="color:var(--orange)">0.00V</span></div><div class="diff-item">Delta<span id="celDif" style="color:var(--red)">0.00V</span></div><div class="diff-item">Total<span id="celTot" style="color:var(--cyan)">0</span></div></div><div id="celulas" class="cells"></div></div><button class="btn-sec" style="max-width:520px" onclick="voltar()">← VOLTAR À LISTA</button></div>
+<div id="painelAdmin"><div class="title" style="font-size:30px">SMART BMS</div><div class="user-info">Painel do Administrador Geral</div><div class="card card-cadastro"><div class="label">Cadastrar BMS no Sistema de Fábrica</div><input id="admin-code" placeholder="SL000000000000" maxlength="14" style="margin-top:8px"><button class="btn-clientes" onclick="cadAdminBms()">CADASTRAR MASTER</button><button class="btn-sec" onclick="gerarECadastrarAdmin()">GERAR CÓDIGO ALEATÓRIO</button><button class="btn-clientes" style="margin-top:24px" onclick="mostrarClientesAdmin()">GERENCIAR CLIENTES</button><p id="admin-msg" style="text-align:center;margin-top:12px;font-size:14px;font-weight:600"></p></div><div class="card" style="background:transparent;border:none;box-shadow:none;padding:0"><div class="label">Listagem Completa de Hardwares no Ar</div><div id="admin-lista-bms" class="grid"></div></div><button style="background:transparent;border:1px solid rgba(255,68,68,0.2);color:var(--red);max-width:440px" onclick="sair()">SAIR DO PAINEL ADMIN</button></div>
+<div id="clientesAdmin"><div class="title" style="font-size:30px">SMART BMS</div><div class="user-info">Clientes Cadastrados na Base</div><div class="card" style="background:transparent;border:none;box-shadow:none;padding:0"><div id="admin-lista-users" class="grid" style="grid-template-columns:1fr"></div></div><button class="btn-sec" style="max-width:520px" onclick="voltarParaPainelAdmin()">← VOLTAR AO PAINEL</button></div>
+<div id="dashAdminBms"><div class="title" style="font-size:26px" id="modalBmsTitle">SL000000000000</div><div style="text-align:center;margin-bottom:16px" id="modalBmsDono"></div><div class="card" style="padding:12px;display:flex;justify-content:center;background:none;border:none;box-shadow:none"><span id="adminBmsStatus" class="status off" style="font-size:13px;font-weight:700">Offline</span></div><div class="card" style="display:flex;flex-direction:column;align-items:center;padding:20px 12px"><div id="adminSocGauge" style="width:140px;height:140px;border-radius:50%;display:flex;align-items:center;justify-content:center;position:relative;margin-bottom:16px;background:rgba(255,255,255,0.05)"><div style="position:absolute;inset:8px;background:#05070d;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:2"><div id="adminSocValor" style="font-size:28px;font-weight:900;color:#fff">0%</div><div style="font-size:8px;letter-spacing:1px;opacity:0.5;margin-top:2px;font-weight:700">STATE OF CHARGE</div></div></div><div style="width:100%;max-width:280px"><div style="display:flex;justify-content:space-between;font-size:11px;opacity:0.6;margin-bottom:6px;font-weight:600"><span>Bateria</span><span id="adminSocBarTxt">0%</span></div><div style="width:100%;height:6px;background:rgba(255,255,255,0.08);border-radius:99px;overflow:hidden"><div id="adminSocBar" style="width:0%;height:100%;background:linear-gradient(90deg,var(--green),var(--cyan));transition:width 0.4s ease"></div></div></div></div><div class="grid" style="margin-bottom:12px"><div class="card" style="margin:0;padding:14px 8px"><div class="label">SOC</div><div class="value" id="adminSoc" style="color:var(--green)">0%</div></div><div class="card" style="margin:0;padding:14px 8px"><div class="label">Tensão</div><div class="value" id="adminVolt" style="color:var(--cyan)">0.00V</div></div><div class="card" style="margin:0;padding:14px 8px"><div class="label">Corrente</div><div class="value" id="adminCorr" style="color:var(--orange)">0.0A</div></div><div class="card" style="margin:0;padding:14px 8px"><div class="label">Temperatura</div><div class="value" id="adminTemp" style="color:var(--red)">0.0°C</div></div></div><div class="card" style="padding:16px 12px"><div class="label" style="margin-bottom:12px">Células - Tensão Individual</div><div class="diff"><div class="diff-item">Min<span id="adminCelMin" style="color:var(--green)">0.00V</span></div><div class="diff-item">Max<span id="adminCelMax" style="color:var(--orange)">0.00V</span></div><div class="diff-item">Delta<span id="adminCelDif" style="color:var(--red)">0.00V</span></div><div class="diff-item">Total<span id="adminCelTot" style="color:var(--cyan)">0</span></div></div><div id="adminCellsContent" class="cells"></div></div><button class="btn-sec" style="width:100%" onclick="fecharDetalheBmsAdmin()">← VOLTAR À LISTA</button></div>
+<div id="modalEditUser" class="modal"><div class="modal-content"><h2 style="text-align:center;margin-bottom:16px;font-size:20px;font-weight:900;background:linear-gradient(90deg,var(--cyan),var(--blue));-webkit-background-clip:text;-webkit-text-fill-color:transparent">Editar Cliente</h2><input id="editUserId" type="hidden"><div class="label">Nome do Cliente</div><input id="editUserNome" placeholder="Nome"><div class="label" style="margin-top:12px">E-mail de Acesso</div><input id="editUserEmail" placeholder="Email"><button onclick="salvarUserAdmin()">SALVAR ALTERAÇÕES</button><button class="btn-sec" style="margin-top:8px" onclick="fecharEditUserAdmin()">← VOLTAR</button><p id="editMsg" style="text-align:center;margin-top:12px;font-size:14px;font-weight:600"></p></div></div>
 <script>
-const API='/api/bms';let TOKEN=localStorage.getItem('bms_token')||sessionStorage.getItem('admin_token');let USER=null;let CODIGO=localStorage.getItem('bms_codigo_ativo');let INT=null;let bmsList=[];let activeBmsCode=null;try{USER=JSON.parse(localStorage.getItem('bms_user')||'null')}catch(e){}
-function esconderTudo(){['login','cadastro','lista','dash','painelAdmin','clientesAdmin','dashAdminBms'].forEach(id=>{const el=document.getElementById(id);if(el){el.style.display='none';el.classList.add('hidden');el.classList.remove('active')}})}
-window.onload=function(){['bms-code','admin-code'].forEach(id=>{const input=document.getElementById(id);if(input){input.oninput=function(e){if(!e.target.value.startsWith('SL'))e.target.value='SL';e.target.value='SL'+e.target.value.slice(2).replace(/[^0-9]/g,'').slice(0,12)}}});if(sessionStorage.getItem('admin_token')==='admin_ok'){mostrarPainelAdmin()}else if(TOKEN&&USER){if(CODIGO)abrirDash(CODIGO);else mostrarLista()}else{mostrarLogin()}};
-function mostrarLogin(){clearInterval(INT);localStorage.removeItem('bms_codigo_ativo');esconderTudo();document.getElementById('erro').classList.add('hidden');const lg=document.getElementById('login');lg.style.display='flex';lg.classList.remove('hidden')}
-function mostrarCadastro(){clearInterval(INT);esconderTudo();document.getElementById('erro-cad').classList.add('hidden');const cd=document.getElementById('cadastro');cd.style.display='flex';cd.classList.remove('hidden')}
-function realizarLogin(){document.getElementById('erro').classList.add('hidden');document.getElementById('sucesso-login').classList.add('hidden');const emailInput=document.getElementById('email').value.trim();const senhaInput=document.getElementById('senha').value;if(!emailInput||!senhaInput){const e=document.getElementById('erro');e.textContent='Preencha os campos corretamente';e.classList.remove('hidden');return}if(emailInput==='administrador'){fetch(API+'?action=login_admin',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({user:emailInput,password:senhaInput})}).then(r=>r.json()).then(d=>{if(d.ok){TOKEN=d.token;sessionStorage.setItem('admin_token','admin_ok');mostrarPainelAdmin()}else{const e=document.getElementById('erro');e.textContent=d.error||'Credenciais inválidas';e.classList.remove('hidden')}}).catch(()=>{const e=document.getElementById('erro');e.textContent='Erro no servidor';e.classList.remove('hidden')});return}fetch(API+'?action=login_user',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:emailInput,senha:senhaInput})}).then(r=>r.json()).then(d=>{if(d.ok&&d.token){TOKEN=d.token;USER={nome:d.nome,email:d.email};localStorage.setItem('bms_token',TOKEN);localStorage.setItem('bms_user',JSON.stringify(USER));mostrarLista()}else{const e=document.getElementById('erro');e.textContent=d.error||'Erro ao fazer login';e.classList.remove('hidden')}}).catch(err=>{const er=document.getElementById('erro');er.textContent='Erro: '+err.message;er.classList.remove('hidden')})}
-function cadastrar(){const nome=document.getElementById('cad-nome').value.trim();const email=document.getElementById('cad-email').value.trim();const senha=document.getElementById('cad-senha').value;const e=document.getElementById('erro-cad');e.classList.add('hidden');if(!nome||!email||!senha){e.textContent='Preencha todos os campos';e.classList.remove('hidden');return}fetch(API+'?action=register',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({nome:nome,email:email,senha:senha})}).then(r=>r.json()).then(d=>{if(d.ok){mostrarLogin();document.getElementById('email').value=email;document.getElementById('senha').value=senha;document.getElementById('cad-nome').value='';document.getElementById('cad-email').value='';document.getElementById('cad-senha').value='';const s=document.getElementById('sucesso-login');s.innerHTML='<strong>Cadastro realizado!</strong><br>Ative a conta no link enviado ao seu e-mail.';s.classList.remove('hidden')}else{e.textContent='Erro: '+d.error;e.classList.remove('hidden')}}).catch(err=>{e.textContent='Erro: '+err.message;e.classList.remove('hidden')})}
-function mostrarLista(){clearInterval(INT);localStorage.removeItem('bms_codigo_ativo');esconderTudo();const ls=document.getElementById('lista');ls.style.display='flex';ls.classList.remove('hidden');document.getElementById('user-nome').textContent=USER?USER.nome:'Usuário';carregarLista();INT=setInterval(carregarLista,3000)}
-function carregarLista(){fetch(API+'?action=user_bms',{headers:{'Authorization':'Bearer '+TOKEN}}).then(r=>{if(r&&r.status===401){sair();return}return r?r.json():[]}).then(lista=>{const el=document.getElementById('bms-list');if(!lista||!lista.length){el.innerHTML='<p style="grid-column:1/-1;text-align:center;color:#4a5568;padding:30px;font-size:14px">Nenhuma BMS monitorada</p>';return}let html='';for(let i=0;i<lista.length;i++){const b=lista[i];html+='<div class="bms-item" onclick="abrirDash(\''+b.code+'\')"><div><h3>'+b.nome+'</h3><p>'+b.code+'</p></div><span class="status-dot '+(b.online?'on':'off')+'">'+(b.online?'Online':'Offline')+'</span><button class="del" onclick="event.stopPropagation();removerBms(\''+b.code+'\',\''+b.nome+'\')">🗑️</button></div>'}el.innerHTML=html}).catch(err=>console.error(err))}
-function removerBms(code,nome){if(!confirm(`Remover ${nome||code}?`))return;fetch(API+`?action=remove_bms&code=${code}`,{method:'DELETE',headers:{'Authorization':'Bearer '+TOKEN}}).then(r=>r.json()).then(d=>{if(d.ok)carregarLista();else alert('Erro: '+d.error)})}
-function addBms(){const code=document.getElementById('bms-code').value.trim();const nome=document.getElementById('bms-nome').value.trim();if(!code||code.length!==14){alert('Código inválido.');return}fetch(API+'?action=add_bms',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+TOKEN},body:JSON.stringify({code:code,nome:nome||code})}).then(r=>r.json()).then(d=>{document.getElementById('bms-code').value='';document.getElementById('bms-nome').value='';if(d.ok)carregarLista();else alert('Erro: '+d.error)})}
-function abrirDash(code){clearInterval(INT);CODIGO=code;localStorage.setItem('bms_codigo_ativo',code);esconderTudo();const ds=document.getElementById('dash');ds.style.display='flex';ds.classList.remove('hidden');document.getElementById('bms-titulo').textContent=code;atualizar();INT=setInterval(atualizar,3000)}
-function voltar(){clearInterval(INT);localStorage.removeItem('bms_codigo_ativo');mostrarLista()}
-function renderCelulas(cels){const container=document.getElementById('celulas');if(!cels||cels.length===0){container.innerHTML='<div style="grid-column:1/-1;text-align:center;opacity:.3;padding:10px;font-size:13px">Sem dados</div>';document.getElementById('celMin').textContent='0.00V';document.getElementById('celMax').textContent='0.00V';document.getElementById('celDif').textContent='0.00V';document.getElementById('celTot').textContent='0';return}let vals=[];for(let i=0;i<cels.length;i++){let v=parseFloat(cels[i]);if(v>0)vals.push(v)}if(vals.length===0)return;const min=Math.min.apply(null,vals);const max=Math.max.apply(null,vals);document.getElementById('celMin').textContent=min.toFixed(3)+'V';document.getElementById('celMax').textContent=max.toFixed(3)+'V';document.getElementById('celDif').textContent=(max-min).toFixed(3)+'V';document.getElementById('celTot').textContent=cels.length;let html='';for(let i=0;i<cels.length;i++){const val=parseFloat(cels[i]);let cls='ok';if(val<3.2||val>4.2)cls='crit';else if(val<3.4||val>4.15)cls='warn';html+='<div class="cell '+cls+'"><div class="cell-num">C'+(i+1)+'</div><div class="cell-val">'+val.toFixed(3)+'</div></div>'}container.innerHTML=html}
-function atualizarGauge(soc){const deg=soc*3.6;document.getElementById('socValor').textContent=soc+'%';document.getElementById('socBarTxt').textContent=soc+'%';document.getElementById('socBar').style.width=soc+'%';document.getElementById('socGauge').style.background='conic-gradient(#00ff88 0deg,#00ffff '+deg+'deg,rgba(255,255,255,.08) '+deg+'deg)'}
-function atualizar(){if(!CODIGO)return;fetch(API+'?action=data&code='+CODIGO,{headers:{'Authorization':'Bearer '+TOKEN}}).then(r=>{if(r&&r.status===401){sair();return}if(!r||!r.ok)return;return r.json()}).then(d=>{if(!d)return;const st=document.getElementById('status');st.textContent=d.online?'Online':'Offline';st.className='status-badge '+(d.online?'on':'off');if(!d.online){document.getElementById('soc').textContent='0%';document.getElementById('volt').textContent='0.00V';document.getElementById('corr').textContent='0.0A';document.getElementById('temp').textContent='0.0°C';atualizarGauge(0);renderCelulas([])}else{document.getElementById('soc').textContent=(d.soc?d.soc.toFixed(0):0)+'%';document.getElementById('volt').textContent=(d.voltage?d.voltage.toFixed(2):0)+'V';document.getElementById('corr').textContent=(d.current?d.current.toFixed(1):0)+'A';document.getElementById('temp').textContent=(d.temp?d.temp.toFixed(1):0)+'°C';renderCelulas(d.cells);atualizarGauge(parseInt(d.soc||0))}}).catch(err=>console.error(err))}
-function sair(){clearInterval(INT);localStorage.removeItem('bms_token');localStorage.removeItem('bms_user');localStorage.removeItem('bms_codigo_ativo');sessionStorage.removeItem('admin_token');location.reload()}
-function authAdminHeaders(){return{'Content-Type':'application/json','Authorization':'Bearer admin_ok'}}
-function mostrarPainelAdmin(){esconderTudo();const pa=document.getElementById('painelAdmin');pa.style.display='flex';pa.classList.add('active');carregarTudoAdmin()}
-function mostrarClientesAdmin(){esconderTudo();const ca=document.getElementById('clientesAdmin');ca.style.display='flex';ca.classList.add('active');listarUsersAdmin()}
-function voltarParaPainelAdmin(){mostrarPainelAdmin()}
-function gerarCodigoAleatorioAdmin(){return 'SL'+Math.floor(Math.random()*1000000000000).toString().padStart(12,'0')}
-async function gerarECadastrarAdmin(){const code=gerarCodigoAleatorioAdmin();document.getElementById('admin-code').value=code;await cadAdminBms()}
-async function cadAdminBms(){const code=document.getElementById('admin-code').value;const r=await fetch(API+'?action=admin_add_master',{method:'POST',headers:authAdminHeaders(),body:JSON.stringify({code})});const d=await r.json();const m=document.getElementById('admin-msg');m.textContent=d.ok?'Hardware cadastrado na fábrica!':d.error;m.style.color=d.ok?'#00ff88':'#ff4444';if(d.ok){document.getElementById('admin-code').value='';carregarTudoAdmin()}}
-async function delAdminBms(code){event.stopPropagation();if(!confirm(`Deletar ${code}?`))return;await fetch(API+`?action=deletar&code=${code}`,{method:'DELETE',headers:authAdminHeaders()});carregarTudoAdmin()}
-function verBmsDetalhadaAdmin(code){activeBmsCode=code;esconderTudo();const da=document.getElementById('dashAdminBms');da.style.display='flex';da.classList.add('active');document.getElementById('modalBmsTitle').textContent=code;renderAdminDashboardEngine()}
-function fecharDetalheBmsAdmin(){activeBmsCode=null;mostrarPainelAdmin()}
-function renderAdminDashboardEngine(){if(!activeBmsCode)return;const bms=bmsList.find(b=>b.code===activeBmsCode);if(!bms)return;const online=bms.updated_at&&(Date.now()-new Date(bms.updated_at).getTime()<10000);document.getElementById('modalBmsDono').innerHTML=bms.user_id?`<span class="badge badge-orange">Vinculada: ${bms.dono_nome||bms.dono_email}</span>`:`<span class="badge badge-green">Disponível</span>`;const st=document.getElementById('adminBmsStatus');st.textContent=online?'Online':'Offline';st.className='status '+(online?'on':'off');const socVal=bms.soc?parseInt(bms.soc):0;if(!online){document.getElementById('adminSoc').textContent='0%';document.getElementById('adminVolt').textContent='0.00V';document.getElementById('adminCorr').textContent='0.0A';document.getElementById('adminTemp').textContent='0.0°C';document.getElementById('adminSocValor').textContent='0%';document.getElementById('adminSocBarTxt').textContent='0%';document.getElementById('adminSocBar').style.width='0%';document.getElementById('adminSocGauge').style.background='rgba(255,255,255,0.05)';renderAdminCellsEngine([])}else{document.getElementById('adminSoc').textContent=socVal+'%';document.getElementById('adminVolt').textContent=(bms.voltage?bms.voltage.toFixed(2):'0.00')+'V';document.getElementById('adminCorr').textContent=(bms.current?bms.current.toFixed(1):'0.0')+'A';document.getElementById('adminTemp').textContent=(bms.temp?bms.temp.toFixed(1):'0.0')+'°C';document.getElementById('adminSocValor').textContent=socVal+'%';document.getElementById('adminSocBarTxt').textContent=socVal+'%';document.getElementById('adminSocBar').style.width=socVal+'%';const deg=socVal*3.6;document.getElementById('adminSocGauge').style.background=`conic-gradient(#00ff88 0deg,#00ffff ${deg}deg,rgba(255,255,255,.05) ${deg}deg)`;renderAdminCellsEngine(bms.cells||[])}}
-function renderAdminCellsEngine(cells){const container=document.getElementById('adminCellsContent');if(!cells||cells.length===0){container.innerHTML='<div style="grid-column:1/-1;text-align:center;opacity:.3;padding:10px;font-size:13px">Sem dados</div>';document.getElementById('adminCelMin').textContent='0.00V';document.getElementById('adminCelMax').textContent='0.00V';document.getElementById('adminCelDif').textContent='0.00V';document.getElementById('adminCelTot').textContent='0';return}let vals=[];for(let i=0;i<cells.length;i++){let v=parseFloat(cells[i]);if(v>0)vals.push(v)}if(vals.length===0)return;const min=Math.min.apply(null,vals);const max=Math.max.apply(null,vals);document.getElementById('adminCelMin').textContent=min.toFixed(3)+'V';document.getElementById('adminCelMax').textContent=max.toFixed(3)+'V';document.getElementById('adminCelDif').textContent=(max-min).toFixed(3)+'V';document.getElementById('adminCelTot').textContent=cells.length;container.innerHTML=cells.map((v,i)=>{const val=parseFloat(v);let cls='ok';if(val<3.2||val>4.2)cls='crit';else if(val<3.4||val>4.15)cls='warn';return `<div class="cell ${cls}"><div class="cell-num">C${i+1}</div><div class="cell-val">${val.toFixed(3)}</div></div>`}).join('')}
-function abrirEdicaoUserAdmin(id,nome,email){document.getElementById('editUserId').value=id;document.getElementById('editUserNome').value=nome;document.getElementById('editUserEmail').value=email;document.getElementById('editMsg').textContent='';document.getElementById('modalEditUser').classList.add('active')}
-function fecharEditUserAdmin(){document.getElementById('modalEditUser').classList.remove('active')}
-async function salvarUserAdmin(){const id=document.getElementById('editUserId').value;const nome=document.getElementById('editUserNome').value;const email=document.getElementById('editUserEmail').value;const msg=document.getElementById('editMsg');const r=await fetch(API+'?action=edit_user',{method:'POST',headers:authAdminHeaders(),body:JSON.stringify({id:parseInt(id),nome,email})});const d=await r.json();if(d.ok){msg.textContent='Alterações salvas!';msg.style.color='#00ff88';setTimeout(()=>{fecharEditUserAdmin();listarUsersAdmin()},1000)}else{msg.textContent=d.error;msg.style.color='#ff4444'}}
-async function deletarUserAdmin(id,nome){if(!confirm(`Remover ${nome}?`))return;await fetch(API+`?action=delete_user&id=${id}`,{method:'DELETE',headers:authAdminHeaders()});listarUsersAdmin()}
-async function carregarTudoAdmin(){const rBms=await fetch(API+'?action=admin_list_master',{headers:authAdminHeaders()});const dBms=await rBms.json();bmsList=dBms.sort((a,b)=>{const aOn=a.updated_at&&(Date.now()-new Date(a.updated_at).getTime()<10000);const bOn=b.updated_at&&(Date.now()-new Date(b.updated_at).getTime()<10000);if(aOn&&!bOn)return-1;if(!aOn&&bOn)return 1;return(b.updated_at?new Date(b.updated_at).getTime():0)-(a.updated_at?new Date(a.updated_at).getTime():0)});if(!activeBmsCode){document.getElementById('admin-lista-bms').innerHTML=bmsList.map(b=>{const online=b.updated_at&&(Date.now()-new Date(b.updated_at).getTime()<10000);const dono=b.user_id?`<span class="badge badge-orange">Vinculada</span>`:`<span class="badge badge-green">Disponível</span>`;return `<div class="card" onclick="verBmsDetalhadaAdmin('${b.code}')" style="margin:0!important;padding:16px;display:flex;flex-direction:column;justify-content:space-between;min-height:160px"><div><div style="text-align:center"><span class="status ${online?'on':'off'}">${online?'Online':'Offline'}</span></div><div class="card-code">${b.code}</div><div style="text-align:center">${dono}</div></div><button class="del" style="padding:10px;margin-top:10px" onclick="delAdminBms('${b.code}')">REMOVER</button></div>`}).join('')||'<div class="card" style="grid-column:1/-1;opacity:0.4;text-align:center;padding:20px">Nenhum hardware</div>'}else{renderAdminDashboardEngine()}}
-async function listarUsersAdmin(){const r=await fetch(API+'?action=all_users',{headers:authAdminHeaders()});if(r.status===401){sair();return}const d=await r.json();document.getElementById('admin-lista-users').innerHTML=d.map(u=>`<div class="card" style="margin:0 !important"><div style="text-align:center;margin-bottom:12px"><b>${u.nome}</b><div style="opacity:.5;font-size:13px;font-family:monospace;margin-top:4px">${u.email}</div></div><div class="data-item" style="display:flex;justify-content:space-between;padding:8px 12px;background:rgba(0,0,0,0.2);border-radius:12px"><span style="font-size:11px;opacity:0.5;font-weight:600;text-transform:uppercase">Módulos Atrelados</span><span style="color:#00ffff;font-weight:800">${u.bms_count}</span></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px"><button class="edit" style="margin:0;padding:10px" onclick="abrirEdicaoUserAdmin(${u.id},'${u.nome}','${u.email}')">EDITAR</button><button class="del" style="margin:0;padding:10px" onclick="deletarUserAdmin(${u.id},'${u.nome}')">DELETAR</button></div></div>`).join('')||'<div class="card" style="text-align:center;opacity:0.4;padding:20px">Nenhum cliente</div>'}
-setInterval(()=>{if(sessionStorage.getItem('admin_token')==='admin_ok'&&document.getElementById('painelAdmin').classList.contains('active')){carregarTudoAdmin()}},5000);
+const API = '/api/bms';
+let TOKEN = localStorage.getItem('bms_token') || sessionStorage.getItem('admin_token');
+let USER = null;
+let CODIGO = localStorage.getItem('bms_codigo_ativo');
+let INT = null;
+let bmsList = [];
+let activeBmsCode = null;
+
+try {
+  USER = JSON.parse(localStorage.getItem('bms_user') || 'null');
+} catch(e) {}
+
+function esconderTudo() {
+  ['login', 'cadastro', 'lista', 'dash', 'painelAdmin', 'clientesAdmin', 'dashAdminBms'].forEach(function(id) {
+    const el = document.getElementById(id);
+    if (el) { el.style.display = 'none'; el.classList.add('hidden'); el.classList.remove('active'); }
+  });
+}
+
+window.onload = function() {
+  ['bms-code', 'admin-code'].forEach(function(id) {
+    const input = document.getElementById(id);
+    if (input) {
+      input.oninput = function(e) {
+        if (!e.target.value.startsWith('SL')) e.target.value = 'SL';
+        e.target.value = 'SL' + e.target.value.slice(2).replace(/[^0-9]/g, '').slice(0, 12);
+      };
+    }
+  });
+  if (sessionStorage.getItem('admin_token') === 'admin_ok') { mostrarPainelAdmin(); }
+  else if (TOKEN && USER) { if (CODIGO) abrirDash(CODIGO); else mostrarLista(); }
+  else { mostrarLogin(); }
+};
+
+function mostrarLogin() {
+  clearInterval(INT); localStorage.removeItem('bms_codigo_ativo'); esconderTudo();
+  document.getElementById('erro').classList.add('hidden');
+  document.getElementById('login').style.display = 'flex';
+}
+
+function mostrarCadastro() {
+  clearInterval(INT); esconderTudo();
+  document.getElementById('erro-cad').classList.add('hidden');
+  document.getElementById('cadastro').style.display = 'flex';
+}
+
+function realizarLogin() {
+  document.getElementById('erro').classList.add('hidden');
+  document.getElementById('sucesso-login').classList.add('hidden');
+  const emailInput = document.getElementById('email').value.trim();
+  const senhaInput = document.getElementById('senha').value;
+  if (!emailInput || !senhaInput) {
+    document.getElementById('erro').textContent = 'Preencha os campos';
+    document.getElementById('erro').classList.remove('hidden');
+    return;
+  }
+  if (emailInput === 'administrador') {
+    fetch(API + '?action=login_admin', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ user: emailInput, password: senhaInput })
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(d) {
+      if (d.ok) { TOKEN = d.token; sessionStorage.setItem('admin_token', 'admin_ok'); mostrarPainelAdmin(); }
+      else { document.getElementById('erro').textContent = d.error; document.getElementById('erro').classList.remove('hidden'); }
+    });
+    return;
+  }
+  fetch(API + '?action=login_user', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email: emailInput, senha: senhaInput })
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(d) {
+    if (d.ok && d.token) {
+      TOKEN = d.token; USER = { nome: d.nome, email: d.email };
+      localStorage.setItem('bms_token', TOKEN); localStorage.setItem('bms_user', JSON.stringify(USER));
+      mostrarLista();
+    } else { document.getElementById('erro').textContent = d.error; document.getElementById('erro').classList.remove('hidden'); }
+  });
+}
+  function cadastrar() {
+  const nome = document.getElementById('cad-nome').value.trim();
+  const email = document.getElementById('cad-email').value.trim();
+  const senha = document.getElementById('cad-senha').value;
+  if (!nome || !email || !senha) { alert('Preencha os campos'); return; }
+  fetch(API + '?action=register', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ nome: nome, email: email, senha: senha })
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(d) {
+    if (d.ok) { mostrarLogin(); } else { alert(d.error); }
+  });
+}
+
+function mostrarLista() {
+  clearInterval(INT); localStorage.removeItem('bms_codigo_ativo'); esconderTudo();
+  document.getElementById('lista').style.display = 'flex';
+  document.getElementById('user-nome').textContent = USER ? USER.nome : 'Usuário';
+  carregarLista(); INT = setInterval(carregarLista, 3000);
+}
+
+function carregarLista() {
+  fetch(API + '?action=user_bms', { headers: { 'Authorization': 'Bearer ' + TOKEN } })
+  .then(function(r) { if (r && r.status === 401) { sair(); return; } return r ? r.json() : []; })
+  .then(function(lista) {
+    const el = document.getElementById('bms-list');
+    if (!lista || !lista.length) { el.innerHTML = '<p style="text-align:center;color:#4a5568;padding:20px">Nenhuma BMS</p>'; return; }
+    let html = '';
+    for (let i = 0; i < lista.length; i++) {
+      const b = lista[i];
+      html += '<div class="bms-item" onclick="abrirDash(\'' + b.code + '\')"><div><h3>' + b.nome + '</h3><p>' + b.code + '</p></div><span class="status-dot ' + (b.online ? 'on' : 'off') + '">' + (b.online ? 'Online' : 'Offline') + '</span><button class="del" onclick="event.stopPropagation();removerBms(\'' + b.code + '\',\'' + b.nome + '\')">🗑️</button></div>';
+    }
+    el.innerHTML = html;
+  });
+}
+
+function removerBms(code, nome) {
+  if (!confirm('Remover ' + (nome || code) + '?')) return;
+  fetch(API + '?action=remove_bms&code=' + code, { method: 'DELETE', headers: { 'Authorization': 'Bearer ' + TOKEN } })
+  .then(function() { carregarLista(); });
+}
+
+function addBms() {
+  const code = document.getElementById('bms-code').value.trim();
+  const nome = document.getElementById('bms-nome').value.trim();
+  if (code.length !== 14) { alert('Código inválido'); return; }
+  fetch(API + '?action=add_bms', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + TOKEN },
+    body: JSON.stringify({ code: code, nome: nome || code })
+  }).then(function() { carregarLista(); });
+}
+
+function abrirDash(code) {
+  clearInterval(INT); CODIGO = code; localStorage.setItem('bms_codigo_ativo', code); esconderTudo();
+  document.getElementById('dash').style.display = 'flex';
+  document.getElementById('bms-titulo').textContent = code;
+  atualizar(); INT = setInterval(atualizar, 3000);
+}
+
+function voltar() { clearInterval(INT); localStorage.removeItem('bms_codigo_ativo'); mostrarLista(); }
+
+function renderCelulas(cels) {
+  const container = document.getElementById('celulas');
+  if (!cels || cels.length === 0) { container.innerHTML = '<div>Sem dados</div>'; return; }
+  let vals = [];
+  for (let i = 0; i < cels.length; i++) { if (parseFloat(cels[i]) > 0) vals.push(parseFloat(cels[i])); }
+  const min = Math.min.apply(null, vals), max = Math.max.apply(null, vals);
+  document.getElementById('celMin').textContent = min.toFixed(3) + 'V';
+  document.getElementById('celMax').textContent = max.toFixed(3) + 'V';
+  document.getElementById('celDif').textContent = (max - min).toFixed(3) + 'V';
+  document.getElementById('celTot').textContent = cels.length;
+  let html = '';
+  for (let i = 0; i < cels.length; i++) {
+    const val = parseFloat(cels[i]); let cls = 'ok';
+    if (val < 3.2 || val > 4.2) cls = 'crit'; else if (val < 3.4 || val > 4.15) cls = 'warn';
+    html += '<div class="cell ' + cls + '"><div class="cell-num">C' + (i + 1) + '</div><div class="cell-val">' + val.toFixed(3) + '</div></div>';
+  }
+  container.innerHTML = html;
+}
+
+function atualizarGauge(soc) {
+  const deg = soc * 3.6;
+  document.getElementById('socValor').textContent = soc + '%';
+  document.getElementById('socBarTxt').textContent = soc + '%';
+  document.getElementById('socBar').style.width = soc + '%';
+  document.getElementById('socGauge').style.background = 'conic-gradient(#00ff88 0deg,#00ffff ' + deg + 'deg,rgba(255,255,255,.08) ' + deg + 'deg)';
+}
+
+function atualizar() {
+  if (!CODIGO) return;
+  fetch(API + '?action=data&code=' + CODIGO, { headers: { 'Authorization': 'Bearer ' + TOKEN } })
+  .then(function(r) { if (r && r.status === 401) { sair(); return; } return r ? r.json() : null; })
+  .then(function(d) {
+    if (!d) return;
+    document.getElementById('status').textContent = d.online ? 'Online' : 'Offline';
+    document.getElementById('status').className = 'status-badge ' + (d.online ? 'on' : 'off');
+    document.getElementById('soc').textContent = (d.soc ? d.soc.toFixed(0) : 0) + '%';
+    document.getElementById('volt').textContent = (d.voltage ? d.voltage.toFixed(2) : 0) + 'V';
+    document.getElementById('corr').textContent = (d.current ? d.current.toFixed(1) : 0) + 'A';
+    document.getElementById('temp').textContent = (d.temp ? d.temp.toFixed(1) : 0) + '°C';
+    renderCelulas(d.cells); atualizarGauge(parseInt(d.soc || 0));
+  });
+}
+
+function sair() {
+  clearInterval(INT); localStorage.clear(); sessionStorage.clear(); location.reload();
+      }
+  /* ---------------------------------------------- */
+/* PAINEL ADMINISTRATIVO E FECHAMENTO             */
+/* ---------------------------------------------- */
+
+function authAdminHeaders() {
+  return { 'Content-Type': 'application/json', 'Authorization': 'Bearer admin_ok' };
+}
+
+function mostrarPainelAdmin() {
+  esconderTudo();
+  document.getElementById('painelAdmin').style.display = 'flex';
+  carregarTudoAdmin();
+}
+
+function mostrarClientesAdmin() {
+  esconderTudo();
+  document.getElementById('clientesAdmin').style.display = 'flex';
+  listarUsersAdmin();
+}
+
+function voltarParaPainelAdmin() {
+  mostrarPainelAdmin();
+}
+
+function gerarCodigoAleatorioAdmin() {
+  return 'SL' + Math.floor(Math.random() * 1000000000000).toString().padStart(12, '0');
+}
+
+async function gerarECadastrarAdmin() {
+  const code = gerarCodigoAleatorioAdmin();
+  document.getElementById('admin-code').value = code;
+  await cadAdminBms();
+}
+
+async function cadAdminBms() {
+  const code = document.getElementById('admin-code').value;
+  const r = await fetch(API + '?action=admin_add_master', {
+    method: 'POST',
+    headers: authAdminHeaders(),
+    body: JSON.stringify({ code: code })
+  });
+  const d = await r.json();
+  const m = document.getElementById('admin-msg');
+  m.textContent = d.ok ? 'Hardware cadastrado na fábrica!' : d.error;
+  m.style.color = d.ok ? '#00ff88' : '#ff4444';
+  if (d.ok) {
+    document.getElementById('admin-code').value = '';
+    carregarTudoAdmin();
+  }
+}
+
+async function delAdminBms(code) {
+  event.stopPropagation();
+  if (!confirm('Deletar ' + code + '?')) return;
+  await fetch(API + '?action=deletar&code=' + code, { method: 'DELETE', headers: authAdminHeaders() });
+  carregarTudoAdmin();
+}
+
+function verBmsDetalhadaAdmin(code) {
+  activeBmsCode = code; esconderTudo();
+  document.getElementById('dashAdminBms').style.display = 'flex';
+  document.getElementById('modalBmsTitle').textContent = code;
+  renderAdminDashboardEngine();
+}
+
+function fecharDetalheBmsAdmin() {
+  activeBmsCode = null; mostrarPainelAdmin();
+}
+
+function renderAdminDashboardEngine() {
+  if (!activeBmsCode) return;
+  const bms = bmsList.find(function(b) { return b.code === activeBmsCode; });
+  if (!bms) return;
+  const online = bms.updated_at && (Date.now() - new Date(bms.updated_at).getTime() < 10000);
+  document.getElementById('modalBmsDono').innerHTML = bms.user_id ? '<span class="badge badge-orange">Vinculada: ' + (bms.dono_nome || bms.dono_email) + '</span>' : '<span class="badge badge-green">Disponível</span>';
+  const st = document.getElementById('adminBmsStatus');
+  st.textContent = online ? 'Online' : 'Offline'; st.className = 'status ' + (online ? 'on' : 'off');
+  const socVal = bms.soc ? parseInt(bms.soc) : 0;
+  if (!online) {
+    document.getElementById('adminSoc').textContent = '0%';
+    document.getElementById('adminVolt').textContent = '0.00V';
+    document.getElementById('adminCorr').textContent = '0.0A';
+    document.getElementById('adminTemp').textContent = '0.0°C';
+    document.getElementById('adminSocValor').textContent = '0%';
+    document.getElementById('adminSocBarTxt').textContent = '0%';
+    document.getElementById('adminSocBar').style.width = '0%';
+    document.getElementById('adminSocGauge').style.background = 'rgba(255,255,255,0.05)';
+    renderAdminCellsEngine([]);
+  } else {
+    document.getElementById('adminSoc').textContent = socVal + '%';
+    document.getElementById('adminVolt').textContent = (bms.voltage ? bms.voltage.toFixed(2) : '0.00') + 'V';
+    document.getElementById('adminCorr').textContent = (bms.current ? bms.current.toFixed(1) : '0.0') + 'A';
+    document.getElementById('adminTemp').textContent = (bms.temp ? bms.temp.toFixed(1) : '0.0') + '°C';
+    document.getElementById('adminSocValor').textContent = socVal + '%';
+    document.getElementById('adminSocBarTxt').textContent = socVal + '%';
+    document.getElementById('adminSocBar').style.width = socVal + '%';
+    const deg = socVal * 3.6;
+    document.getElementById('adminSocGauge').style.background = 'conic-gradient(#00ff88 0deg,#00ffff ' + deg + 'deg,rgba(255,255,255,.05) ' + deg + 'deg)';
+    renderAdminCellsEngine(bms.cells || []);
+  }
+}
+
+function renderAdminCellsEngine(cells) {
+  const container = document.getElementById('adminCellsContent');
+  if (!cells || cells.length === 0) { container.innerHTML = '<div>Sem dados</div>'; return; }
+  let vals = [];
+  for (let i = 0; i < cells.length; i++) { if (parseFloat(cells[i]) > 0) vals.push(parseFloat(cells[i])); }
+  const min = Math.min.apply(null, vals), max = Math.max.apply(null, vals);
+  document.getElementById('adminCelMin').textContent = min.toFixed(3) + 'V';
+  document.getElementById('adminCelMax').textContent = max.toFixed(3) + 'V';
+  document.getElementById('adminCelDif').textContent = (max - min).toFixed(3) + 'V';
+  document.getElementById('adminCelTot').textContent = cells.length;
+  container.innerHTML = cells.map(function(v, i) {
+    const val = parseFloat(v); let cls = 'ok';
+    if (val < 3.2 || val > 4.2) cls = 'crit'; else if (val < 3.4 || val > 4.15) cls = 'warn';
+    return '<div class="cell ' + cls + '"><div class="cell-num">C' + (i + 1) + '</div><div class="cell-val">' + val.toFixed(3) + '</div></div>';
+  }).join('');
+}
+
+function abrirEdicaoUserAdmin(id, nome, email) {
+  document.getElementById('editUserId').value = id;
+  document.getElementById('editUserNome').value = nome;
+  document.getElementById('editUserEmail').value = email;
+  document.getElementById('editMsg').textContent = '';
+  document.getElementById('modalEditUser').classList.add('active');
+}
+
+function fecharEditUserAdmin() {
+  document.getElementById('modalEditUser').classList.remove('active');
+}
+
+async function salvarUserAdmin() {
+  const id = document.getElementById('editUserId').value;
+  const nome = document.getElementById('editUserNome').value;
+  const email = document.getElementById('editUserEmail').value;
+  const r = await fetch(API + '?action=edit_user', {
+    method: 'POST',
+    headers: authAdminHeaders(),
+    body: JSON.stringify({ id: parseInt(id), nome: nome, email: email })
+  });
+  const d = await r.json();
+  if (d.ok) { fecharEditUserAdmin(); listarUsersAdmin(); } else { alert(d.error); }
+}
+
+async function deletarUserAdmin(id, nome) {
+  if (!confirm('Remover ' + nome + '?')) return;
+  await fetch(API + '?action=delete_user&id=' + id, { method: 'DELETE', headers: authAdminHeaders() });
+  listarUsersAdmin();
+}
+
+async function carregarTudoAdmin() {
+  const rBms = await fetch(API + '?action=admin_list_master', { headers: authAdminHeaders() });
+  const dBms = await rBms.json();
+  bmsList = dBms.sort(function(a, b) {
+    const aOn = a.updated_at && (Date.now() - new Date(a.updated_at).getTime() < 10000);
+    const bOn = b.updated_at && (Date.now() - new Date(b.updated_at).getTime() < 10000);
+    if (aOn && !bOn) return -1; if (!aOn && bOn) return 1;
+    return (b.updated_at ? new Date(b.updated_at).getTime() : 0) - (a.updated_at ? new Date(a.updated_at).getTime() : 0);
+  });
+  if (!activeBmsCode) {
+    document.getElementById('admin-lista-bms').innerHTML = bmsList.map(function(b) {
+      const online = b.updated_at && (Date.now() - new Date(b.updated_at).getTime() < 10000);
+      const dono = b.user_id ? '<span class="badge badge-orange">Vinculada</span>' : '<span class="badge badge-green">Disponível</span>';
+      return '<div class="card" onclick="verBmsDetalhadaAdmin(\'' + b.code + '\')" style="margin:0!important;padding:16px;display:flex;flex-direction:column;justify-content:space-between;min-height:160px"><div><div style="text-align:center"><span class="status ' + (online ? 'on' : 'off') + '">' + (online ? 'Online' : 'Offline') + '</span></div><div class="card-code">' + b.code + '</div><div style="text-align:center">' + dono + '</div></div><button class="del" style="padding:10px;margin-top:10px" onclick="delAdminBms(\'' + b.code + '\')">REMOVER</button></div>';
+    }).join('') || '<div>Sem hardware</div>';
+  } else { renderAdminDashboardEngine(); }
+}
+
+async function listarUsersAdmin() {
+  const r = await fetch(API + '?action=all_users', { headers: authAdminHeaders() });
+  if (r.status === 401) { sair(); return; }
+  const d = await r.json();
+  document.getElementById('admin-lista-users').innerHTML = d.map(function(u) {
+    return '<div class="card" style="margin:0!important"><div style="text-align:center;margin-bottom:12px"><b>' + u.nome + '</b><div style="opacity:.5;font-size:13px;font-family:monospace;margin-top:4px">' + u.email + '</div></div><div style="display:flex;justify-content:space-between;padding:8px;background:rgba(0,0,0,0.2);border-radius:12px"><span style="font-size:11px;opacity:0.5;font-weight:600">Módulos</span><span style="color:#00ffff;font-weight:800">' + u.bms_count + '</span></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px"><button class="edit" onclick="abrirEdicaoUserAdmin(' + u.id + ',\'' + u.nome + '\',\'' + u.email + '\')">EDITAR</button><button class="del" onclick="deletarUserAdmin(' + u.id + ',\'' + u.nome + '\')">DELETAR</button></div></div>';
+  }).join('') || '<div>Sem clientes</div>';
+}
+
+setInterval(function() {
+  if (sessionStorage.getItem('admin_token') === 'admin_ok' && document.getElementById('painelAdmin').offsetParent !== null) {
+    carregarTudoAdmin();
+  }
+}, 5000);
 </script>
 </body>
 </html>
