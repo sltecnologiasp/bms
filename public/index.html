@@ -10,7 +10,7 @@
 :root{--bg:#05070d;--cyan:#00ffff;--blue:#0080ff;--green:#00ff88;--red:#ff4444;--orange:#ffaa00}
 body{font-family:'Inter',sans-serif;background:var(--bg);color:#fff;min-height:100vh;width:100%;overflow-x:hidden}
 
-/* Containers principais ajustados para centralização vertical perfeita */
+/* Containers principais com centralização vertical */
 #login,#dash,#lista,#cadastro{
   position:relative;
   z-index:1;
@@ -19,11 +19,10 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:#fff;min-height:1
   display:flex;
   flex-direction:column;
   align-items:center;
-  justify-content:center; /* Deixa tudo centralizado verticalmente no meio da tela */
+  justify-content:center;
   padding:24px 12px;
 }
 
-/* Garante que o conteúdo role perfeitamente caso ultrapasse o tamanho da tela */
 #dash, #lista {
   height: auto;
   margin: auto 0;
@@ -33,7 +32,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:#fff;min-height:1
 .user-info{color:#6b7c96;font-size:14px;text-align:center;margin-bottom:16px;font-weight:500}
 .user-info span{color:#fff;font-weight:600}
 
-/* Padronização dos blocos e espaçamentos */
+/* Padronização dos blocos */
 .card{
   background:rgba(13,20,35,0.65);
   border:1px solid rgba(0,255,255,.08);
@@ -46,9 +45,9 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:#fff;min-height:1
 }
 
 #login .card,#cadastro .card,#lista .card {width:100%;max-width:440px}
-#dash .card { max-width: 520px; } /* Ajuste fino de largura para o painel */
+#dash .card { max-width: 520px; }
 
-/* Rótulos e Escritas Centralizadas */
+/* Rótulos e Inputs */
 .label{font-size:11px;letter-spacing:1px;opacity:.5;text-transform:uppercase;text-align:center;width:100%;margin-bottom:6px;font-weight:600}
 input,select,button{width:100%;padding:16px;border-radius:14px;border:none;outline:none;font-size:16px;transition:all 0.2s ease}
 input,select{background:rgba(0,0,0,.4);color:#fff;border:1px solid rgba(255,255,255,.08);text-align:center}
@@ -60,14 +59,35 @@ button{background:linear-gradient(90deg,var(--blue),var(--cyan));color:#fff;font
 button:active{transform:scale(0.98)}
 .btn-sec{background:transparent;border:1px solid rgba(0,255,255,.25);color:var(--cyan);box-shadow:none}
 
-/* Grade de Dispositivos */
-.bms-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px;width:100%;margin-top:8px}
+/* Grade Dinâmica Inteligente para Meus Dispositivos */
+.bms-list {
+  display: grid;
+  gap: 12px;
+  width: 100%;
+  margin-top: 8px;
+  grid-template-columns: 1fr; /* Padrão: 1 coluna cheia quando tem só 1 item */
+}
+
+/* Condição mágica CSS: Se houver 2 ou mais itens, muda automaticamente para 2 colunas fixas */
+.bms-list:has(.bms-item:nth-child(2)) {
+  grid-template-columns: repeat(2, 1fr);
+}
+
 .bms-item{background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.05);border-radius:16px;padding:16px;text-align:left;position:relative;display:flex;flex-direction:column;justify-content:space-between;min-height:120px;cursor:pointer}
 .bms-item:hover{border-color:rgba(0,255,255,0.2);background:rgba(0,255,255,0.02)}
 .bms-item h3{color:#fff;font-size:18px;font-weight:700;margin-bottom:2px;text-align:left}
 .bms-item p{color:#5f6e85;font-size:12px;font-family:monospace;text-align:left}
 
-/* Indicadores de Status da Lista */
+/* Alinhamento interno quando há apenas 1 card maior na tela */
+.bms-list:not(:has(.bms-item:nth-child(2))) .bms-item {
+  align-items: center;
+  text-align: center;
+  padding: 24px 16px;
+}
+.bms-list:not(:has(.bms-item:nth-child(2))) .bms-item h3 { text-align: center; font-size: 20px; }
+.bms-list:not(:has(.bms-item:nth-child(2))) .bms-item p { text-align: center; font-size: 13px; }
+
+/* Indicadores de Status */
 .status-dot{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;margin-top:12px}
 .status-dot::before{content:'';width:8px;height:8px;border-radius:50%;display:inline-block}
 .status-dot.on{color:var(--green)}.status-dot.on::before{background:var(--green);box-shadow:0 0 8px var(--green)}
@@ -78,7 +98,7 @@ button:active{transform:scale(0.98)}
 .logout{margin-top:4px;background:transparent;border:1px solid rgba(255,68,68,.2);color:var(--red);width:100%;max-width:440px;box-shadow:none}
 .logout:hover{background:rgba(255,68,68,.05)}
 
-/* Componentes de Gráficos e Grid do Dashboard */
+/* Componentes do Dashboard */
 .gauge-wrap{width:100%;margin-top:0 !important;margin-bottom:0 !important}
 .gauge-card{padding:20px;min-height:260px}
 .gauge{width:min(220px,55vw);height:min(220px,55vw);margin:auto;border-radius:50%;background:conic-gradient(#00ff88 0deg,#00ffff 180deg,rgba(255,255,255,.08) 180deg);position:relative;box-shadow:0 0 30px rgba(0,255,255,.1);transition:background.8s ease}
@@ -96,7 +116,7 @@ button:active{transform:scale(0.98)}
 .value{font-size:clamp(22px,6vw,30px);font-weight:800;margin-top:8px;line-height:1;width:100%;text-align:center;font-variant-numeric:tabular-nums}
 
 .status-badge{display:inline-flex;align-items:center;gap:8px;padding:10px 20px;border-radius:999px;font-weight:700;font-size:14px;margin-top:10px}
-.status-badge.on{background:rgba(0,255,136,.08);color:var(--green);border:1px solid rgba(0,0,0,136,.2)}
+.status-badge.on{background:rgba(0,255,136,.08);color:var(--green);border:1px solid rgba(0,255,136,.2)}
 .status-badge.off{background:rgba(255,68,68,.08);color:var(--red);border:1px solid rgba(255,68,68,.2)}
 
 .diff{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:16px}
