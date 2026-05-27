@@ -10,8 +10,8 @@
 :root{--bg:#05070d;--cyan:#00ffff;--blue:#0080ff;--green:#00ff88;--red:#ff4444;--orange:#ffaa00}
 body{font-family:'Inter',sans-serif;background:var(--bg);color:#fff;min-height:100vh;width:100%;overflow-x:hidden}
 
-/* Containers principais com alinhamento vertical centralizado */
-#login,#painel,#clientesPage{
+/* Containers principais com alinhamento vertical idêntico ao do cliente */
+#login,#painel,#clientesPage,#dashAdmin{
   position:relative;
   z-index:1;
   width:100%;
@@ -23,9 +23,9 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:#fff;min-height:1
   justify-content:center;
 }
 #login{display:flex}
-#painel.active,#clientesPage.active{display:flex}
+#painel.active,#clientesPage.active,#dashAdmin.active{display:flex}
 
-#painel, #clientesPage {
+#painel, #clientesPage, #dashAdmin {
   height: auto;
   margin: auto 0;
 }
@@ -45,7 +45,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:#fff;min-height:1
   box-shadow:0 8px 32px rgba(0,0,0,0.4);
 }
 #login .card, .card-cadastro { max-width:440px }
-#painel .card, #clientesPage .card { max-width:520px }
+#painel .card, #clientesPage .card, #dashAdmin .card { max-width:520px }
 
 /* Inputs e Seletores unificados */
 input,button{width:100%;padding:16px;border-radius:14px;border:none;outline:none;font-size:16px;transition:all 0.2s ease}
@@ -69,7 +69,7 @@ button.logout{margin-top:4px;background:transparent;border:1px solid rgba(255,68
 
 /* Ajuste das Grades Adaptáveis */
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px;width:100%;margin-top:8px}
-#painel .grid { grid-template-columns:repeat(auto-fill,minmax(145px,1fr)) }
+#painel .grid, #dashAdmin .grid { grid-template-columns:repeat(auto-fill,minmax(145px,1fr)) }
 
 /* Customização interna dos itens das listas */
 #lista .card, #listaUsers .card {
@@ -111,7 +111,7 @@ button.logout{margin-top:4px;background:transparent;border:1px solid rgba(255,68
 .cell.warn{border-color:rgba(255,170,0,.2)}
 .cell.crit{border-color:rgba(255,68,68,.2)}
 
-/* Modais Modernizados com Blur de fundo */
+/* Modais normais permanecem com blur */
 .modal{display:none;position:fixed;inset:0;background:rgba(3,5,10,0.85);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);z-index:999;overflow-y:auto;padding:20px}
 .modal.active{display:flex;align-items:center;justify-content:center}
 .modal-content{width:100%;max-width:520px;background:rgba(13,20,35,0.95);border:1px solid rgba(0,255,255,.15);border-radius:24px;padding:24px;position:relative;box-shadow:0 20px 50px rgba(0,0,0,0.6)}
@@ -125,12 +125,11 @@ button.logout{margin-top:4px;background:transparent;border:1px solid rgba(255,68
 
 .value { font-variant-numeric: tabular-nums; }
 
-/* Correção das classes de Erro para ocultação total */
 .erro{background:rgba(255,68,68,.1);border:1px solid var(--red);border-radius:12px;padding:14px;margin-top:16px;color:var(--red);font-size:14px}
 .erro.hidden{display:none!important}
 
 @media(max-width:440px){
-  #painel .grid { grid-template-columns:repeat(2,1fr) }
+  #painel .grid, #dashAdmin .grid { grid-template-columns:repeat(2,1fr) }
   .btn-group { grid-template-columns:1fr }
 }
 </style>
@@ -181,57 +180,54 @@ button.logout{margin-top:4px;background:transparent;border:1px solid rgba(255,68
   
   <button class="voltar" onclick="voltarPainel()">← VOLTAR AO PAINEL</button>
 </div>
-<div id="modalBms" class="modal">
-  <div class="modal-content" style="max-width:640px; padding:20px 14px;">
-    
-    <div style="text-align:center; margin-bottom:20px; margin-top:10px;">
-      <div class="title" id="modalBmsTitle" style="font-size:24px; font-family:monospace; letter-spacing:1px; margin-bottom:4px">SL000000000000</div>
-      <div id="modalBmsDono"></div>
-    </div>
-
-    <div class="card" style="background:rgba(0,0,0,0.2); display:flex; flex-direction:column; align-items:center; padding:20px 12px; border-color:rgba(255,255,255,0.04)">
-      <div id="adminSocGauge" style="width:140px; height:140px; border-radius:50%; display:flex; align-items:center; justify-content:center; position:relative; margin-bottom:16px; background:rgba(255,255,255,0.05)">
-        <div style="position:absolute; inset:8px; background:#070b12; border-radius:50%; display:flex; flex-direction:column; align-items:center; justify-content:center; z-index:2">
-          <div id="adminSocValor" style="font-size:28px; font-weight:900; color:#fff">0%</div>
-          <div style="font-size:8px; letter-spacing:1px; opacity:0.5; margin-top:2px; font-weight:700">STATE OF CHARGE</div>
-        </div>
-      </div>
-      <div style="width:100%; max-width:280px">
-        <div style="display:flex; justify-content:between; font-size:11px; opacity:0.6; margin-bottom:6px; font-weight:600">
-          <span style="flex:1; text-align:left">Progresso da Carga</span>
-          <span id="adminSocBarTxt">0%</span>
-        </div>
-        <div style="width:100%; height:6px; background:rgba(255,255,255,0.08); border-radius:99px; overflow:hidden">
-          <div id="adminSocBar" style="width:0%; height:100%; background:linear-gradient(90deg, var(--green), var(--cyan)); transition:width 0.4s ease"></div>
-        </div>
-      </div>
-    </div>
-
-    <div class="card" style="padding:12px; display:flex; justify-content:center; background:rgba(0,0,0,0.2); border-color:rgba(255,255,255,0.04)">
-      <span id="adminStatus" class="status off" style="font-size:13px; font-weight:700">Offline</span>
-    </div>
-
-    <div class="grid" style="grid-template-columns:repeat(2, 1fr); gap:12px; margin-bottom:12px">
-      <div class="card" style="margin:0 !important; padding:14px 8px; background:rgba(255,255,255,0.01)"><div class="label">SOC</div><div class="value" id="adminSoc" style="color:var(--green)">0%</div></div>
-      <div class="card" style="margin:0 !important; padding:14px 8px; background:rgba(255,255,255,0.01)"><div class="label">Tensão</div><div class="value" id="adminVolt" style="color:var(--cyan)">0.00V</div></div>
-      <div class="card" style="margin:0 !important; padding:14px 8px; background:rgba(255,255,255,0.01)"><div class="label">Corrente</div><div class="value" id="adminCorr" style="color:var(--orange)">0.0A</div></div>
-      <div class="card" style="margin:0 !important; padding:14px 8px; background:rgba(255,255,255,0.01)"><div class="label">Temperatura</div><div class="value" id="adminTemp" style="color:var(--red)">0.0°C</div></div>
-    </div>
-
-    <div class="card" style="background:rgba(0,0,0,0.15); border-color:rgba(255,255,255,0.03); padding:16px 12px">
-      <div class="label" style="margin-bottom:12px">Células - Tensão Individual</div>
-      <div style="display:grid; grid-template-columns:repeat(4, 1fr); gap:6px; background:rgba(0,0,0,0.2); padding:10px; border-radius:12px; margin-bottom:14px; font-size:11px">
-        <div style="text-align:center; border-right:1px solid rgba(255,255,255,0.05)">Min<span id="adminCelMin" style="display:block; color:var(--green); font-weight:700; margin-top:2px">0.00V</span></div>
-        <div style="text-align:center; border-right:1px solid rgba(255,255,255,0.05)">Max<span id="adminCelMax" style="display:block; color:var(--orange); font-weight:700; margin-top:2px">0.00V</span></div>
-        <div style="text-align:center; border-right:1px solid rgba(255,255,255,0.05)">Delta<span id="adminCelDif" style="display:block; color:var(--red); font-weight:700; margin-top:2px">0.00V</span></div>
-        <div style="text-align:center">Total<span id="adminCelTot" style="display:block; color:var(--cyan); font-weight:700; margin-top:2px">0</span></div>
-      </div>
-      <div id="adminCellsContent" class="cells" style="margin-top:0; gap:8px"></div>
-    </div>
-
-    <button class="voltar" style="width:100%; margin-top:12px; padding:18px" onclick="closeBmsModal()">← VOLTAR</button>
-
+<div id="dashAdmin">
+  <div class="title" style="font-size:clamp(28px,6vw,32px);margin-bottom:4px">SMART BMS</div>
+  <div style="text-align:center; margin-bottom:16px;">
+    <div id="modalBmsTitle" style="font-size:18px; font-family:monospace; font-weight:700; letter-spacing:1px; color:var(--cyan)">SL000000000000</div>
+    <div id="modalBmsDono"></div>
   </div>
+
+  <div class="card" style="display:flex; flex-direction:column; align-items:center; padding:20px 12px;">
+    <div id="adminSocGauge" style="width:140px; height:140px; border-radius:50%; display:flex; align-items:center; justify-content:center; position:relative; margin-bottom:16px; background:rgba(255,255,255,0.05)">
+      <div style="position:absolute; inset:8px; background:#05070d; border-radius:50%; display:flex; flex-direction:column; align-items:center; justify-content:center; z-index:2">
+        <div id="adminSocValor" style="font-size:28px; font-weight:900; color:#fff">0%</div>
+        <div style="font-size:8px; letter-spacing:1px; opacity:0.5; margin-top:2px; font-weight:700">STATE OF CHARGE</div>
+      </div>
+    </div>
+    <div style="width:100%; max-width:280px">
+      <div style="display:flex; justify-content:between; font-size:11px; opacity:0.6; margin-bottom:6px; font-weight:600">
+        <span style="flex:1; text-align:left">Bateria</span>
+        <span id="adminSocBarTxt">0%</span>
+      </div>
+      <div style="width:100%; height:6px; background:rgba(255,255,255,0.08); border-radius:99px; overflow:hidden">
+        <div id="adminSocBar" style="width:0%; height:100%; background:linear-gradient(90deg, var(--green), var(--cyan)); transition:width 0.4s ease"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" style="padding:12px; display:flex; justify-content:center;">
+    <span id="adminStatus" class="status off" style="font-size:13px; font-weight:700">Offline</span>
+  </div>
+
+  <div class="grid" style="margin-bottom:12px">
+    <div class="card" style="margin:0 !important; padding:14px 8px;"><div class="label">SOC</div><div class="value" id="adminSoc" style="color:var(--green)">0%</div></div>
+    <div class="card" style="margin:0 !important; padding:14px 8px;"><div class="label">Tensão</div><div class="value" id="adminVolt" style="color:var(--cyan)">0.00V</div></div>
+    <div class="card" style="margin:0 !important; padding:14px 8px;"><div class="label">Corrente</div><div class="value" id="adminCorr" style="color:var(--orange)">0.0A</div></div>
+    <div class="card" style="margin:0 !important; padding:14px 8px;"><div class="label">Temperatura</div><div class="value" id="adminTemp" style="color:var(--red)">0.0°C</div></div>
+  </div>
+
+  <div class="card" style="padding:16px 12px">
+    <div class="label" style="margin-bottom:12px">Células - Tensão Individual</div>
+    <div style="display:grid; grid-template-columns:repeat(4, 1fr); gap:6px; background:rgba(0,0,0,0.2); padding:10px; border-radius:12px; margin-bottom:14px; font-size:11px">
+      <div style="text-align:center; border-right:1px solid rgba(255,255,255,0.05)">Min<span id="adminCelMin" style="display:block; color:var(--green); font-weight:700; margin-top:2px">0.00V</span></div>
+      <div style="text-align:center; border-right:1px solid rgba(255,255,255,0.05)">Max<span id="adminCelMax" style="display:block; color:var(--orange); font-weight:700; margin-top:2px">0.00V</span></div>
+      <div style="text-align:center; border-right:1px solid rgba(255,255,255,0.05)">Delta<span id="adminCelDif" style="display:block; color:var(--red); font-weight:700; margin-top:2px">0.00V</span></div>
+      <div style="text-align:center">Total<span id="adminCelTot" style="display:block; color:var(--cyan); font-weight:700; margin-top:2px">0</span></div>
+    </div>
+    <div id="adminCellsContent" class="cells" style="margin-top:0; gap:8px"></div>
+  </div>
+
+  <button class="voltar" style="width:100%; margin-top:4px; padding:18px" onclick="closeBmsModal()">← VOLTAR À LISTA</button>
 </div>
 
 <div id="modalEditUser" class="modal">
@@ -282,6 +278,8 @@ async function adminLogin(){
 function showPainel(){
   document.getElementById('login').style.display = 'none';
   document.getElementById('clientesPage').style.display = 'none';
+  document.getElementById('dashAdmin').style.display = 'none';
+  document.getElementById('dashAdmin').classList.remove('active');
   document.getElementById('painel').classList.add('active');
   document.getElementById('painel').style.display = 'flex';
   carregarTudo();
@@ -343,16 +341,25 @@ async function del(code){
   carregarTudo();
 }
 
+// Muda de tela de forma nativa igual no app do cliente
 function viewBmsDetails(code){
   activeBmsCode = code;
+  document.getElementById('painel').classList.remove('active');
+  document.getElementById('painel').style.display = 'none';
+  document.getElementById('dashAdmin').classList.add('active');
+  document.getElementById('dashAdmin').style.display = 'flex';
+  
   document.getElementById('modalBmsTitle').textContent = code;
   renderAdminDashboard();
-  document.getElementById('modalBms').classList.add('active');
 }
 
 function closeBmsModal(){
   activeBmsCode = null;
-  document.getElementById('modalBms').classList.remove('active');
+  document.getElementById('dashAdmin').classList.remove('active');
+  document.getElementById('dashAdmin').style.display = 'none';
+  document.getElementById('painel').classList.add('active');
+  document.getElementById('painel').style.display = 'flex';
+  carregarTudo();
 }
 
 function renderAdminDashboard(){
@@ -364,7 +371,7 @@ function renderAdminDashboard(){
   
   document.getElementById('modalBmsDono').innerHTML = bms.user_id ? 
     `<span class="badge badge-orange">Vinculada: ${bms.dono_nome || bms.dono_email}</span>` : 
-    `<span class="badge badge-green">Disponível no Mercado</span>`;
+    `<span class="badge badge-green">Disponível</span>`;
     
   const st = document.getElementById('adminStatus');
   st.textContent = online ? 'Online' : 'Offline';
