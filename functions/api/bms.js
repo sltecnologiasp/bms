@@ -18,7 +18,7 @@ export async function onRequest({ request, env }) {
   try {
     // ROTAS PÚBLICAS
 
-    // ROTA 1: VERIFICAÇÃO DE E-MAIL (QUANDO CLICA NO LINK)
+    // ROTA 1: VERIFICAÇÃO DE E-MAIL (QUANDO O CLIENTE CLICA NO LINK)
     if (action === 'verify_email' && request.method === 'GET') {
       const token = url.searchParams.get('token');
       if (!token) return new Response('Token inválido', { status: 400 });
@@ -54,6 +54,7 @@ export async function onRequest({ request, env }) {
       `, { headers: { 'Content-Type': 'text/html; charset=utf-8' } });
     }
 
+    // ROTA 2: CADASTRO COM DISPARO DO RESEND (CORRIGIDO)
     if (action === 'register' && request.method === 'POST') {
       const { nome, email, senha } = await request.json();
       if (!nome ||!email ||!senha) return json({ ok: false, error: 'Dados inválidos' }, 400);
@@ -63,12 +64,11 @@ export async function onRequest({ request, env }) {
       const hash = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(senha));
       const senha_hash = Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2, '0')).join('');
       
-      // Gera token único e salva com status 0 (não verificado)
       const token_verificacao = crypto.randomUUID();
       await env.DB.prepare('INSERT INTO users (nome, email, senha_hash, email_verificado, token_verificacao) VALUES (?,?,?, 0, ?)')
         .bind(nome, email, senha_hash, token_verificacao).run();
 
-      // Disparo de E-mail via Resend
+      // Envio de E-mail usando o Remetente de Testes Oficial do Resend
       if (env.RESEND_API_KEY) {
         const verifyLink = `${new URL(request.url).origin}${url.pathname}?action=verify_email&token=${token_verificacao}`;
         
@@ -79,7 +79,7 @@ export async function onRequest({ request, env }) {
             'Content-Type': 'application/json'
           },
           body: JSON.stringify({
-            from: 'SMART BMS <naoresponda@seudominio.com>', // ALTERE PARA O SEU DOMÍNIO VERIFICADO NO RESEND
+            from: 'SMART BMS <onboarding@resend.dev>', // Corrigido para o ambiente de testes
             to: email,
             subject: 'Confirme seu e-mail - SMART BMS',
             html: `
@@ -100,6 +100,7 @@ export async function onRequest({ request, env }) {
       return json({ ok: true });
     }
 
+    // ROTA 3: LOGIN COM VALIDAÇÃO DE CONTA ATIVA
     if (action === 'login_user' && request.method === 'POST') {
       const { email, senha } = await request.json();
       const hash = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(senha));
@@ -109,7 +110,7 @@ export async function onRequest({ request, env }) {
       
       if (!user) return json({ ok: false, error: 'E-mail ou senha incorretos' }, 401);
       
-      // Trava de Segurança: Bloqueia quem não ativou o e-mail
+      // Bloqueia se o email_verificado for igual a 0
       if (user.email_verificado === 0) {
         return json({ ok: false, error: 'Confirme seu e-mail na caixa de entrada antes de acessar.' }, 403);
       }
@@ -138,7 +139,7 @@ export async function onRequest({ request, env }) {
       `).bind(code, soc || 0, voltage || 0, current || 0, temp || 0, JSON.stringify(cells || [])).run();
       return json({ ok: true });
     }
-        // VERIFICA TOKEN
+        // VERIFICA TOKEN DAS ROTAS AUTENTICADAS
     const auth = request.headers.get('Authorization');
     if (!auth?.startsWith('Bearer ')) return json({ ok: false, error: 'Não autorizado' }, 401);
     const token = auth.slice(7);
