@@ -13,8 +13,10 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:#fff;min-height:1
 #dash,#lista{justify-content:flex-start;padding-top:12px}
 #login,#cadastro{justify-content:center}
 .title{font-size:clamp(32px,8vw,74px);font-weight:900;margin-bottom:16px;letter-spacing:3px;background:linear-gradient(90deg,var(--cyan),var(--blue));-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-align:center;width:100%}
-.card{background:rgba(10,15,25,.92);border:1px solid rgba(0,255,255,.12);border-radius:16px;padding:12px;width:100%;margin-bottom:4px}
+.card{background:rgba(10,15,25,.92);border:1px solid rgba(0,255,255,.12);border-radius:16px;padding:16px;width:100%;margin-bottom:4px;display:flex;flex-direction:column;align-items:center;justify-content:center}
 #login .card,#cadastro .card{max-width:520px}
+#lista .card{max-width:520px;width:100%}
+#lista input,#lista button{max-width:440px;width:100%}
 .gauge-wrap{width:100%;margin:0 0 4px 0}
 .gauge-card{padding:20px 20px 30px;min-height:280px}
 .gauge{width:min(240px,60vw);height:min(240px,60vw);margin:auto;border-radius:50%;background:conic-gradient(#00ff88 0deg,#00ffff 180deg,rgba(255,255,255,.08) 180deg);position:relative;box-shadow:0 0 30px rgba(0,255,255,.15);transition:background.8s ease}
@@ -31,7 +33,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:#fff;min-height:1
 .label{font-size:10px;letter-spacing:1.5px;opacity:.6;text-transform:uppercase;text-align:center}
 .value{font-size:clamp(22px,6vw,30px);font-weight:800;margin-top:8px;line-height:1;width:100%;text-align:center;font-variant-numeric:tabular-nums}
 input,button{width:100%;padding:18px;border-radius:18px;border:none;outline:none;margin-top:16px;font-size:18px}
-input{background:rgba(0,0,0,.5);color:#fff;font-family:monospace;letter-spacing:2px;border:1px solid rgba(0,255,255,.2)}
+input{background:rgba(0,0,0,.5);color:#fff;font-family:monospace;letter-spacing:2px;border:1px solid rgba(0,255,255,.2);text-align:center}
 input::placeholder{color:rgba(255,255,255,.3)}
 button{background:linear-gradient(90deg,var(--blue),var(--cyan));color:#fff;font-weight:700;cursor:pointer}
 .btn-sec{background:transparent;border:1px solid rgba(0,255,255,.3);color:var(--cyan)}
@@ -50,10 +52,10 @@ button{background:linear-gradient(90deg,var(--blue),var(--cyan));color:#fff;font
 .cell.ok{border-color:rgba(0,255,136,.25)}
 .cell.warn{border-color:rgba(255,170,0,.25)}
 .cell.crit{border-color:rgba(255,68,68,.25)}
-.logout{margin-top:24px;background:rgba(255,68,68,.08);border:1px solid rgba(255,68,68,.2)}
+.logout{margin-top:24px;background:rgba(255,68,68,.08);border:1px solid rgba(255,68,68,.2);width:100%;max-width:520px}
 .hidden{display:none!important}
-.bms-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:4px;margin-top:20px}
-.bms-item{background:rgba(0,255,255,.05);border:1px solid rgba(0,255,255,.2);border-radius:16px;padding:20px;text-align:center;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px}
+.bms-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:4px;margin-top:20px;width:100%;max-width:440px}
+.bms-item{background:rgba(0,255,255,.05);border:1px solid rgba(0,255,255,.2);border-radius:16px;padding:20px;text-align:center;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;width:100%}
 .bms-item:active{transform:scale(0.98)}
 .bms-item h3{color:var(--cyan);font-size:20px;margin-bottom:0;text-align:center;width:100%}
 .bms-item p{color:#888;font-size:13px;margin:0;text-align:center;width:100%;display:flex;justify-content:center;align-items:center}
@@ -62,8 +64,9 @@ button{background:linear-gradient(90deg,var(--blue),var(--cyan));color:#fff;font
 .erro{background:rgba(255,0,0,.1);border:2px solid #ff4444;border-radius:12px;padding:16px;margin-top:16px;color:#ff4444;font-size:14px}
 .link-cadastro{margin-top:20px;text-align:center;color:#fff;cursor:pointer;opacity:.8}
 .link-cadastro span{color:#00ffff;text-decoration:underline}
-.footer-voltar{width:100%;margin-top:24px;margin-bottom:12px}
-@media(max-width:520px){.card{padding:12px}.gauge-card{padding:16px;min-height:240px}.grid{grid-template-columns:repeat(2,1fr)}.bms-list{grid-template-columns:1fr}.diff{grid-template-columns:repeat(2,1fr)}}
+.footer-voltar{width:100%;margin-top:24px;margin-bottom:12px;display:flex;justify-content:center}
+.footer-voltar button{max-width:520px}
+@media(max-width:520px){.card{padding:12px}.gauge-card{padding:16px;min-height:240px}.grid{grid-template-columns:repeat(2,1fr)}.bms-list{grid-template-columns:1fr} .diff{grid-template-columns:repeat(2,1fr)}}
 </style>
 </head>
 <body>
