@@ -6,273 +6,313 @@
 <title>SMART BMS</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
 <style>
-*{margin:0;padding:0;box-sizing:border-box}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 :root{--bg:#05070d;--cyan:#00ffff;--blue:#0080ff;--green:#00ff88;--red:#ff4444;--orange:#ffaa00}
 body{font-family:'Inter',sans-serif;background:var(--bg);color:#fff;min-height:100vh;width:100%;overflow-x:hidden}
 
-/* Containers principais com centralização vertical */
-#login,#dash,#lista,#cadastro{
+/* Estrutura Base de Contêineres */
+#login, #cadastro, #lista, #dash, #painelAdmin, #clientesAdmin, #dashAdminBms {
   position:relative;
   z-index:1;
   width:100%;
   min-height:100vh;
-  display:flex;
+  padding:24px 12px;
+  display:none;
   flex-direction:column;
   align-items:center;
   justify-content:center;
-  padding:24px 12px;
-}
-
-#dash, #lista {
   height: auto;
   margin: auto 0;
 }
+.hidden { display:none !important }
 
+/* Títulos Globais */
 .title{font-size:clamp(32px,7vw,54px);font-weight:900;margin-bottom:4px;letter-spacing:2px;background:linear-gradient(90deg,var(--cyan),var(--blue));-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-align:center;width:100%}
 .user-info{color:#6b7c96;font-size:14px;text-align:center;margin-bottom:16px;font-weight:500}
-.user-info span{color:#fff;font-weight:600}
 
-/* Padronização dos blocos */
+/* Cards Estilizados */
 .card{
   background:rgba(13,20,35,0.65);
   border:1px solid rgba(0,255,255,.08);
   border-radius:20px;
   padding:20px;
   width:100%;
-  margin-top: 0 !important;
-  margin-bottom: 12px !important;
+  margin-bottom:12px !important;
   box-shadow:0 8px 32px rgba(0,0,0,0.4);
 }
+#login .card, #cadastro .card, .card-cadastro { max-width:440px }
+#lista .card, #dash .card, #painelAdmin .card, #clientesAdmin .card, #dashAdminBms .card { max-width:520px }
 
-#login .card,#cadastro .card,#lista .card {width:100%;max-width:440px}
-#dash .card { max-width: 520px; }
-
-/* Rótulos e Inputs */
-.label{font-size:11px;letter-spacing:1px;opacity:.5;text-transform:uppercase;text-align:center;width:100%;margin-bottom:6px;font-weight:600}
-input,select,button{width:100%;padding:16px;border-radius:14px;border:none;outline:none;font-size:16px;transition:all 0.2s ease}
-input,select{background:rgba(0,0,0,.4);color:#fff;border:1px solid rgba(255,255,255,.08);text-align:center}
+/* Formulários */
+input,button{width:100%;padding:16px;border-radius:14px;border:none;outline:none;font-size:16px;transition:all 0.2s ease}
+input{background:rgba(0,0,0,.4);color:#fff;border:1px solid rgba(255,255,255,.08);text-align:center;font-family:monospace;letter-spacing:1px}
 input:focus{border-color:rgba(0,255,255,0.4);background:rgba(0,0,0,.6)}
 input::placeholder{color:rgba(255,255,255,.25)}
+.label{font-size:11px;letter-spacing:1px;opacity:.5;text-transform:uppercase;text-align:center;width:100%;margin-bottom:6px;font-weight:600}
 
 /* Botões */
 button{background:linear-gradient(90deg,var(--blue),var(--cyan));color:#fff;font-weight:700;cursor:pointer;margin-top:12px;box-shadow:0 4px 20px rgba(0,128,255,0.25)}
 button:active{transform:scale(0.98)}
 .btn-sec{background:transparent;border:1px solid rgba(0,255,255,.25);color:var(--cyan);box-shadow:none}
+.btn-clientes{background:transparent;border:1px solid rgba(0,255,136,.3);color:var(--green);box-shadow:none}
+button.del{background:rgba(255,68,68,.08);border:1px solid rgba(255,68,68,.2);color:var(--red);font-size:13px;padding:12px;box-shadow:none}
+button.edit{background:rgba(255,170,0,.08);border:1px solid rgba(255,170,0,.2);color:var(--orange);font-size:13px;padding:12px;box-shadow:none}
 
-/* Grade Dinâmica Inteligente para Meus Dispositivos */
-.bms-list {
-  display: grid;
-  gap: 12px;
-  width: 100%;
-  margin-top: 8px;
-  grid-template-columns: 1fr; /* Padrão: 1 coluna cheia quando tem só 1 item */
+/* Alinhamentos e Listas */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(145px,1fr));gap:12px;width:100%;margin-top:8px}
+.bms-item {
+  display: flex; align-items: center; justify-content: space-between;
+  background: rgba(13,20,35,0.5); padding: 16px; border-radius: 14px;
+  border: 1px solid rgba(255,255,255,0.05); margin-bottom: 10px; cursor: pointer;
 }
+.bms-item h3 { font-size:16px; color:#fff }
+.bms-item p { font-size:12px; color:#6b7c96; font-family:monospace }
 
-/* Condição mágica CSS: Se houver 2 ou mais itens, muda automaticamente para 2 colunas fixas */
-.bms-list:has(.bms-item:nth-child(2)) {
-  grid-template-columns: repeat(2, 1fr);
-}
+/* Badges e Status */
+.status{display:inline-flex;align-items:center;justify-content:center;gap:6px;font-size:12px;font-weight:600}
+.status::before{content:'';width:8px;height:8px;border-radius:50%;display:inline-block}
+.status.on{color:var(--green)}.status.on::before{background:var(--green);box-shadow:0 0 8px var(--green)}
+.status.off{color:var(--red)}.status.off::before{background:var(--red);box-shadow:0 0 8px var(--red)}
+.status-dot{font-size:12px;font-weight:600;padding:4px 8px;border-radius:6px}.status-dot.on{color:var(--green)}.status-dot.off{color:var(--red)}
+.status-badge{padding:6px 14px;border-radius:20px;font-weight:700;font-size:13px}.status-badge.on{background:rgba(0,255,136,0.1);color:var(--green)}.status-badge.off{background:rgba(255,68,68,0.1);color:var(--red)}
+.badge{display:inline-block;padding:4px 10px;border-radius:8px;font-size:11px;font-weight:700;margin-top:8px;text-align:center}
+.badge-green{background:rgba(0,255,136,.08);color:#00ff88;border:1px solid rgba(0,255,136,.15)}
+.badge-orange{background:rgba(255,170,0,.08);color:#ffaa00;border:1px solid rgba(255,170,0,.15)}
 
-.bms-item{background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.05);border-radius:16px;padding:16px;text-align:left;position:relative;display:flex;flex-direction:column;justify-content:space-between;min-height:120px;cursor:pointer}
-.bms-item:hover{border-color:rgba(0,255,255,0.2);background:rgba(0,255,255,0.02)}
-.bms-item h3{color:#fff;font-size:18px;font-weight:700;margin-bottom:2px;text-align:left}
-.bms-item p{color:#5f6e85;font-size:12px;font-family:monospace;text-align:left}
-
-/* Alinhamento interno quando há apenas 1 card maior na tela */
-.bms-list:not(:has(.bms-item:nth-child(2))) .bms-item {
-  align-items: center;
-  text-align: center;
-  padding: 24px 16px;
-}
-.bms-list:not(:has(.bms-item:nth-child(2))) .bms-item h3 { text-align: center; font-size: 20px; }
-.bms-list:not(:has(.bms-item:nth-child(2))) .bms-item p { text-align: center; font-size: 13px; }
-
-/* Indicadores de Status */
-.status-dot{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;margin-top:12px}
-.status-dot::before{content:'';width:8px;height:8px;border-radius:50%;display:inline-block}
-.status-dot.on{color:var(--green)}.status-dot.on::before{background:var(--green);box-shadow:0 0 8px var(--green)}
-.status-dot.off{color:var(--red)}.status-dot.off::before{background:var(--red);box-shadow:0 0 8px var(--red)}
-.bms-item button.del{position:absolute;top:12px;right:12px;background:transparent;border:none;padding:4px;margin:0;width:auto;height:auto;color:#5f6e85;font-size:16px;cursor:pointer;box-shadow:none}
-.bms-item button.del:hover{color:var(--red)}
-
-.logout{margin-top:4px;background:transparent;border:1px solid rgba(255,68,68,.2);color:var(--red);width:100%;max-width:440px;box-shadow:none}
-.logout:hover{background:rgba(255,68,68,.05)}
-
-/* Componentes do Dashboard */
-.gauge-wrap{width:100%;margin-top:0 !important;margin-bottom:0 !important}
-.gauge-card{padding:20px;min-height:260px}
-.gauge{width:min(220px,55vw);height:min(220px,55vw);margin:auto;border-radius:50%;background:conic-gradient(#00ff88 0deg,#00ffff 180deg,rgba(255,255,255,.08) 180deg);position:relative;box-shadow:0 0 30px rgba(0,255,255,.1);transition:background.8s ease}
-.gauge::before{content:'';position:absolute;inset:16px;border-radius:50%;background:#05070d}
-.gauge-inner{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;align-items:center;z-index:2}
-.gauge-value{font-size:clamp(36px,9vw,52px);font-weight:900;color:#00ff88}
-.gauge-label{opacity:.5;letter-spacing:1.5px;font-size:11px}
-.bar-wrap{margin-top:16px}
-.bar-label{display:flex;justify-content:space-between;margin-bottom:6px;font-size:13px;opacity:.6}
-.bar{height:12px;background:rgba(255,255,255,.06);border-radius:999px;overflow:hidden}
-.bar-fill{height:100%;width:0%;border-radius:999px;background:linear-gradient(90deg,#00ff88,#00ffff);transition:width.8s ease}
-
-.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;width:100%;max-width:520px;margin-top:0 !important;margin-bottom:12px !important}
-.grid .card{width:100%;height:100px;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:12px;margin:0 !important}
-.value{font-size:clamp(22px,6vw,30px);font-weight:800;margin-top:8px;line-height:1;width:100%;text-align:center;font-variant-numeric:tabular-nums}
-
-.status-badge{display:inline-flex;align-items:center;gap:8px;padding:10px 20px;border-radius:999px;font-weight:700;font-size:14px;margin-top:10px}
-.status-badge.on{background:rgba(0,255,136,.08);color:var(--green);border:1px solid rgba(0,255,136,.2)}
-.status-badge.off{background:rgba(255,68,68,.08);color:var(--red);border:1px solid rgba(255,68,68,.2)}
-
-.diff{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:16px}
-.diff-item{padding:10px 6px;border-radius:12px;background:rgba(255,255,255,.02);text-align:center}
-.diff-item span{display:block;margin-top:4px;font-size:clamp(16px,4.5vw,20px);font-weight:800;font-variant-numeric:tabular-nums}
-
-.cells{display:grid;grid-template-columns:repeat(auto-fill,minmax(85px,1fr));gap:12px;margin-top:16px;width:100%}
+/* Componentes das Células */
+.diff{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;background:rgba(0,0,0,0.2);padding:10px;border-radius:12px;margin-bottom:14px;font-size:11px;text-align:center}
+.diff-item span{display:block;font-weight:700;margin-top:2px}
+.cells{display:grid;grid-template-columns:repeat(auto-fill,minmax(85px,1fr));gap:8px;width:100%}
 .cell{background:rgba(0,0,0,.3);border-radius:12px;padding:10px 6px;border:1px solid rgba(255,255,255,.04);display:flex;flex-direction:column;align-items:center;justify-content:center}
-.cell-num{font-size:11px;opacity:.4;margin-bottom:2px}
-.cell-val{font-size:15px;font-weight:700;font-variant-numeric:tabular-nums}
+.cell-num{font-size:10px;opacity:.4;margin-bottom:2px}
+.cell-val{font-size:13px;font-weight:700;font-variant-numeric:tabular-nums}
 .cell.ok{border-color:rgba(0,255,136,.2)}
 .cell.warn{border-color:rgba(255,170,0,.2)}
 .cell.crit{border-color:rgba(255,68,68,.2)}
+.value { font-variant-numeric: tabular-nums; font-size:24px; font-weight:800; margin-top:4px; text-align:center }
+.card-code{font-size:14px;font-weight:700;font-family:monospace;color:#fff;margin:12px 0;text-align:center}
 
-.footer-voltar{width:100%;display:flex;justify-content:center;margin-top:0px!important;margin-bottom:8px}
-.footer-voltar button{width:100%;max-width:520px;margin-top:0px}
-
-.hidden{display:none!important}
-.erro{background:rgba(255,68,68,.1);border:1px solid var(--red);border-radius:12px;padding:14px;margin-top:16px;color:var(--red);font-size:14px;text-align:center;}
-.sucesso{background:rgba(0,255,136,.1);border:1px solid var(--green);border-radius:12px;padding:14px;margin-top:16px;color:var(--green);font-size:14px;text-align:center;}
-.link-cadastro{margin-top:20px;text-align:center;color:#6b7c96;cursor:pointer;font-size:14px}
-.link-cadastro span{color:var(--cyan);text-decoration:underline}
-
-@media(max-width:520px){.grid{grid-template-columns:repeat(2,1fr)}.diff{grid-template-columns:repeat(2,1fr)}}
+/* Modais */
+.modal{display:none;position:fixed;inset:0;background:rgba(3,5,10,0.85);backdrop-filter:blur(10px);z-index:999;overflow-y:auto;padding:20px}
+.modal.active{display:flex;align-items:center;justify-content:center}
+.modal-content{width:100%;max-width:400px;background:rgba(13,20,35,0.95);border:1px solid rgba(0,255,255,.15);border-radius:24px;padding:24px;position:relative}
+.erro{background:rgba(255,68,68,.1);border:1px solid var(--red);border-radius:12px;padding:14px;margin-top:16px;color:var(--red);font-size:14px;text-align:center}
+.sucesso{background:rgba(0,255,136,.1);border:1px solid var(--green);border-radius:12px;padding:14px;margin-top:16px;color:var(--green);font-size:14px;text-align:center}
 </style>
 </head>
 <body>
 
 <div id="login">
   <div class="title">SMART BMS</div>
-  <div class="user-info" style="margin-bottom:12px">Gerenciamento Avançado</div>
+  <div class="user-info" id="login-sub">Monitoramento de Baterias</div>
   <div class="card">
-    <div class="label">E-mail</div>
-    <input id="email" type="email" placeholder="seu@email.com">
-    <div class="label" style="margin-top:16px">Senha</div>
-    <input id="senha" type="password" placeholder="••••••••">
-    <button onclick="login()">ENTRAR</button>
-    <p class="link-cadastro" onclick="mostrarCadastro()">Ainda não tem conta? <span>Cadastre-se</span></p>
-    
+    <div class="label">Identificação / E-mail</div>
+    <input id="email" placeholder="Seu usuário ou e-mail" autocomplete="username">
+    <div class="label" style="margin-top:16px">Senha / Código de Acesso</div>
+    <input id="senha" type="password" placeholder="••••••••" autocomplete="current-password">
+    <button onclick="realizarLogin()">ENTRAR NO SISTEMA</button>
+    <button class="btn-sec" onclick="mostrarCadastro()">CRIAR UMA CONTA CLIENTE</button>
     <div id="erro" class="erro hidden"></div>
     <div id="sucesso-login" class="sucesso hidden"></div>
   </div>
 </div>
 
-<div id="cadastro" class="hidden">
+<div id="cadastro">
   <div class="title">SMART BMS</div>
-  <div class="user-info" style="margin-bottom:12px">Crie sua Conta de Monitoramento</div>
+  <div class="user-info">Crie sua Conta Cliente</div>
   <div class="card">
-    <div class="label">Nome</div>
-    <input id="cad-nome" placeholder="Seu nome">
-    <div class="label" style="margin-top:16px">E-mail</div>
-    <input id="cad-email" type="email" placeholder="seu@email.com">
-    <div class="label" style="margin-top:16px">Senha</div>
+    <div class="label">Nome Completo</div>
+    <input id="cad-nome" placeholder="Ex: João Silva">
+    <div class="label" style="margin-top:12px">Seu Melhor E-mail</div>
+    <input id="cad-email" placeholder="exemplo@gmail.com">
+    <div class="label" style="margin-top:12px">Crie uma Senha</div>
     <input id="cad-senha" type="password" placeholder="••••••••">
-    <button onclick="cadastrar()">CADASTRAR</button>
-    <button class="btn-sec" onclick="mostrarLogin()">VOLTAR</button>
+    <button onclick="cadastrar()">CONCLUIR CADASTRO</button>
+    <button class="btn-sec" onclick="mostrarLogin()">← JÁ TENHO CONTA</button>
     <div id="erro-cad" class="erro hidden"></div>
   </div>
 </div>
 
-<div id="lista" class="hidden">
-  <div class="title" style="font-size:clamp(28px,6vw,34px);margin-bottom:4px">SMART BMS</div>
-  <div class="user-info">Olá, <span id="user-nome">--</span></div>
-  
+<div id="lista">
+  <div class="title" style="font-size:28px">MINHAS BATERIAS</div>
+  <div class="user-info">Olá, <span id="user-nome">Usuário</span></div>
   <div class="card">
-    <div class="label">Adicionar Nova BMS</div>
-    <input id="bms-code" placeholder="SL000000000000" maxlength="14" style="margin-top:8px">
-    <input id="bms-nome" placeholder="Nome Ex: Bateria Casa" style="margin-top:12px">
-    <button onclick="addBms()">ADICIONAR DISPOSITIVO</button>
+    <div class="label">Monitorar Nova BMS</div>
+    <input id="bms-code" placeholder="SL000000000000" maxlength="14" style="margin-bottom:8px">
+    <input id="bms-nome" placeholder="Apelido (Ex: Bateria Casa)">
+    <button onclick="addBms()">VINCULAR DISPOSITIVO</button>
   </div>
-  
-  <div class="card" style="background:transparent;border:none;box-shadow:none;padding:0">
-    <div class="label">Meus Dispositivos Monitorados</div>
-    <div id="bms-list" class="bms-list"></div>
+  <div class="card" style="background:transparent; border:none; box-shadow:none; padding:0">
+    <div id="bms-list"></div>
   </div>
-  
-  <button class="logout" onclick="sair()">DESCONECTAR CONTA</button>
+  <button class="btn-sec" style="max-width:520px; border-color:rgba(255,68,68,0.3); color:var(--red)" onclick="sair()">DESCONECTAR</button>
 </div>
 
-<div id="dash" class="hidden">
-  <div class="card gauge-card">
-    <div class="gauge" id="socGauge">
-      <div class="gauge-inner">
-        <div class="gauge-value" id="socValor">0%</div>
-        <div class="gauge-label">STATE OF CHARGE</div>
+<div id="dash">
+  <div class="title" style="font-size:26px" id="bms-titulo">SL000000000000</div>
+  <div style="text-align:center; margin-bottom:16px"><span id="status" class="status-badge off">Offline</span></div>
+  
+  <div class="card" style="display:flex; flex-direction:column; align-items:center; padding:20px 12px">
+    <div id="socGauge" style="width:140px; height:140px; border-radius:50%; display:flex; align-items:center; justify-content:center; position:relative; margin-bottom:16px; background:rgba(255,255,255,0.05)">
+      <div style="position:absolute; inset:8px; background:#05070d; border-radius:50%; display:flex; flex-direction:column; align-items:center; justify-content:center; z-index:2">
+        <div id="socValor" style="font-size:28px; font-weight:900">0%</div>
+        <div style="font-size:8px; letter-spacing:1px; opacity:0.5; margin-top:2px; font-weight:700">CAPACIDADE</div>
       </div>
     </div>
-    <div class="bar-wrap">
-      <div class="bar-label"><span>Bateria</span><span id="socBarTxt">0%</span></div>
-      <div class="bar"><div class="bar-fill" id="socBar"></div></div>
+    <div style="width:100%; max-width:280px">
+      <div style="display:flex; justify-content:space-between; font-size:11px; opacity:0.6; margin-bottom:6px; font-weight:600">
+        <span>Carga Autonômica</span><span id="socBarTxt">0%</span>
+      </div>
+      <div style="width:100%; height:6px; background:rgba(255,255,255,0.08); border-radius:99px; overflow:hidden">
+        <div id="socBar" style="width:0%; height:100%; background:linear-gradient(90deg, var(--green), var(--cyan)); transition:width 0.4s ease"></div>
+      </div>
     </div>
   </div>
 
-  <div class="card" style="padding:14px;display:flex;flex-direction:column;align-items:center;justify-content:center">
-    <div class="status-wrap" style="margin:0">
-      <span id="status" class="status-badge off">Offline</span>
-    </div>
-    <div class="bms-code" id="bms-titulo" style="margin-top:8px;font-size:15px;opacity:.5;font-family:monospace">--</div>
+  <div class="grid" style="margin-bottom:12px">
+    <div class="card" style="margin:0; padding:14px 8px"><div class="label">Nível (SOC)</div><div class="value" id="soc" style="color:var(--green)">0%</div></div>
+    <div class="card" style="margin:0; padding:14px 8px"><div class="label">Tensão Total</div><div class="value" id="volt" style="color:var(--cyan)">0.00V</div></div>
+    <div class="card" style="margin:0; padding:14px 8px"><div class="label">Corrente de Fluxo</div><div class="value" id="corr" style="color:var(--orange)">0.0A</div></div>
+    <div class="card" style="margin:0; padding:14px 8px"><div class="label">Temperatura</div><div class="value" id="temp" style="color:var(--red)">0.0°C</div></div>
   </div>
 
-  <div class="grid">
-    <div class="card"><div class="label">SOC</div><div class="value" id="soc" style="color:#00ff88">0%</div></div>
-    <div class="card"><div class="label">Tensão</div><div class="value" id="volt" style="color:#00ffff">0V</div></div>
-    <div class="card"><div class="label">Corrente</div><div class="value" id="corr" style="color:#ffaa00">0A</div></div>
-    <div class="card"><div class="label">Temperatura</div><div class="value" id="temp" style="color:#ff4444">0°C</div></div>
-  </div>
-
-  <div class="card">
-    <div class="label">Células - Tensão Individual</div>
+  <div class="card" style="padding:16px 12px">
+    <div class="label" style="margin-bottom:12px">Células - Tensão Individual</div>
     <div class="diff">
-      <div class="diff-item">Min<span id="celMin" style="color:#00ff88">0.00V</span></div>
-      <div class="diff-item">Max<span id="celMax" style="color:#ffaa00">0.00V</span></div>
-      <div class="diff-item">Diferença<span id="celDif" style="color:#ff4444">0.00V</span></div>
-      <div class="diff-item">Total<span id="celTot" style="color:#00ffff">0</span></div>
+      <div class="diff-item">Min<span id="celMin" style="color:var(--green)">0.00V</span></div>
+      <div class="diff-item">Max<span id="celMax" style="color:var(--orange)">0.00V</span></div>
+      <div class="diff-item">Delta<span id="celDif" style="color:var(--red)">0.00V</span></div>
+      <div class="diff-item">Total<span id="celTot" style="color:var(--cyan)">0</span></div>
     </div>
     <div id="celulas" class="cells"></div>
   </div>
+  <button class="btn-sec" style="max-width:520px" onclick="voltar()">← VOLTAR À LISTA</button>
+</div>
 
-  <div class="footer-voltar">
-    <button class="btn-sec" onclick="voltar()">← VOLTAR À LISTA</button>
+<div id="painelAdmin">
+  <div class="title" style="font-size:30px">SMART BMS</div>
+  <div class="user-info">Painel do Administrador Geral</div>
+  <div class="card card-cadastro">
+    <div class="label">Cadastrar BMS no Sistema de Fábrica</div>
+    <input id="admin-code" placeholder="SL000000000000" maxlength="14" style="margin-top:8px">
+    <button class="btn-clientes" onclick="cadAdminBms()">CADASTRAR MASTER</button>
+    <button class="btn-sec" onclick="gerarECadastrarAdmin()">GERAR CÓDIGO ALEATÓRIO</button>
+    <button class="btn-clientes" style="margin-top:24px" onclick="mostrarClientesAdmin()">GERENCIAR CLIENTES DO SISTEMA</button>
+    <p id="admin-msg" style="text-align:center;margin-top:12px;font-size:14px;font-weight:600"></p>
+  </div>
+  <div class="card" style="background:transparent;border:none;box-shadow:none;padding:0">
+    <div class="label">Listagem Completa de Hardwares no Ar</div>
+    <div id="admin-lista-bms" class="grid"></div>
+  </div>
+  <button style="background:transparent; border:1px solid rgba(255,68,68,0.2); color:var(--red); max-width:440px" onclick="sair()">SAIR DO PAINEL ADMIN</button>
+</div>
+
+<div id="clientesAdmin">
+  <div class="title" style="font-size:30px">SMART BMS</div>
+  <div class="user-info">Clientes Cadastrados na Base</div>
+  <div class="card" style="background:transparent;border:none;box-shadow:none;padding:0">
+    <div id="admin-lista-users" class="grid" style="grid-template-columns:1fr"></div>
+  </div>
+  <button class="btn-sec" style="max-width:520px" onclick="voltarParaPainelAdmin()">← VOLTAR AO PAINEL</button>
+</div>
+
+<div id="dashAdminBms">
+  <div class="title" style="font-size:26px" id="modalBmsTitle">SL000000000000</div>
+  <div style="text-align:center; margin-bottom:16px;" id="modalBmsDono"></div>
+  <div class="card" style="padding:12px; display:flex; justify-content:center; background:none; border:none; box-shadow:none">
+    <span id="adminBmsStatus" class="status off" style="font-size:13px; font-weight:700">Offline</span>
+  </div>
+
+  <div class="card" style="display:flex; flex-direction:column; align-items:center; padding:20px 12px">
+    <div id="adminSocGauge" style="width:140px; height:140px; border-radius:50%; display:flex; align-items:center; justify-content:center; position:relative; margin-bottom:16px; background:rgba(255,255,255,0.05)">
+      <div style="position:absolute; inset:8px; background:#05070d; border-radius:50%; display:flex; flex-direction:column; align-items:center; justify-content:center; z-index:2">
+        <div id="adminSocValor" style="font-size:28px; font-weight:900; color:#fff">0%</div>
+        <div style="font-size:8px; letter-spacing:1px; opacity:0.5; margin-top:2px; font-weight:700">STATE OF CHARGE</div>
+      </div>
+    </div>
+    <div style="width:100%; max-width:280px">
+      <div style="display:flex; justify-content:space-between; font-size:11px; opacity:0.6; margin-bottom:6px; font-weight:600">
+        <span>Bateria</span><span id="adminSocBarTxt">0%</span>
+      </div>
+      <div style="width:100%; height:6px; background:rgba(255,255,255,0.08); border-radius:99px; overflow:hidden">
+        <div id="adminSocBar" style="width:0%; height:100%; background:linear-gradient(90deg, var(--green), var(--cyan)); transition:width 0.4s ease"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid" style="margin-bottom:12px">
+    <div class="card" style="margin:0; padding:14px 8px"><div class="label">SOC</div><div class="value" id="adminSoc" style="color:var(--green)">0%</div></div>
+    <div class="card" style="margin:0; padding:14px 8px"><div class="label">Tensão</div><div class="value" id="adminVolt" style="color:var(--cyan)">0.00V</div></div>
+    <div class="card" style="margin:0; padding:14px 8px"><div class="label">Corrente</div><div class="value" id="adminCorr" style="color:var(--orange)">0.0A</div></div>
+    <div class="card" style="margin:0; padding:14px 8px"><div class="label">Temperatura</div><div class="value" id="adminTemp" style="color:var(--red)">0.0°C</div></div>
+  </div>
+
+  <div class="card" style="padding:16px 12px">
+    <div class="label" style="margin-bottom:12px">Células - Tensão Individual</div>
+    <div class="diff">
+      <div class="diff-item">Min<span id="adminCelMin" style="color:var(--green)">0.00V</span></div>
+      <div class="diff-item">Max<span id="adminCelMax" style="color:var(--orange)">0.00V</span></div>
+      <div class="diff-item">Delta<span id="adminCelDif" style="color:var(--red)">0.00V</span></div>
+      <div class="diff-item">Total<span id="adminCelTot" style="color:var(--cyan)">0</span></div>
+    </div>
+    <div id="adminCellsContent" class="cells"></div>
+  </div>
+  <button class="btn-sec" style="width:100%" onclick="fecharDetalheBmsAdmin()">← VOLTAR À LISTA</button>
+</div>
+
+<div id="modalEditUser" class="modal">
+  <div class="modal-content">
+    <h2 style="text-align:center;margin-bottom:16px;font-size:20px;font-weight:900;background:linear-gradient(90deg,var(--cyan),var(--blue));-webkit-background-clip:text;-webkit-text-fill-color:transparent">Editar Cliente</h2>
+    <input id="editUserId" type="hidden">
+    <div class="label">Nome do Cliente</div>
+    <input id="editUserNome" placeholder="Nome">
+    <div class="label" style="margin-top:12px">E-mail de Acesso</div>
+    <input id="editUserEmail" placeholder="Email">
+    <button onclick="salvarUserAdmin()">SALVAR ALTERAÇÕES</button>
+    <button class="btn-sec" style="margin-top:8px" onclick="fecharEditUserAdmin()">← VOLTAR</button>
+    <p id="editMsg" style="text-align:center;margin-top:12px;font-size:14px;font-weight:600"></p>
   </div>
 </div>
 <script>
-var API = '/api/bms';
-var TOKEN = localStorage.getItem('bms_token');
-var USER = null;
-var CODIGO = localStorage.getItem('bms_codigo_ativo');
-var INT = null;
+const API = '/api/bms';
+let TOKEN = localStorage.getItem('bms_token') || sessionStorage.getItem('admin_token');
+let USER = null;
+let CODIGO = localStorage.getItem('bms_codigo_ativo');
+let INT = null;
 
-try{USER = JSON.parse(localStorage.getItem('bms_user')||'null');}catch(e){}
+// Variáveis Exclusivas do Admin
+let bmsList = [];
+let activeBmsCode = null;
+
+try { USER = JSON.parse(localStorage.getItem('bms_user') || 'null'); } catch(e){}
 
 function esconderTudo(){
-  document.getElementById('login').classList.add('hidden');
-  document.getElementById('cadastro').classList.add('hidden');
-  document.getElementById('lista').classList.add('hidden');
-  document.getElementById('dash').classList.add('hidden');
+  const ids = ['login','cadastro','lista','dash','painelAdmin','clientesAdmin','dashAdminBms'];
+  ids.forEach(id => {
+    const el = document.getElementById(id);
+    if(el) { el.style.display = 'none'; el.classList.add('hidden'); el.classList.remove('active'); }
+  });
 }
 
 window.onload = function(){
-  if(TOKEN && USER){
-    if(CODIGO){
-      abrirDash(CODIGO);
-    }else{
-      mostrarLista();
+  // Mascaramento de código padrão SL para os dois fluxos
+  ['bms-code', 'admin-code'].forEach(id => {
+    const input = document.getElementById(id);
+    if(input) {
+      input.oninput = function(e){
+        if(!e.target.value.startsWith('SL')) e.target.value = 'SL';
+        e.target.value = 'SL' + e.target.value.slice(2).replace(/[^0-9]/g,'').slice(0,12);
+      };
     }
-  }else{
-    esconderTudo();
-    document.getElementById('login').classList.remove('hidden');
-  }
+  });
 
-  var bmsInput = document.getElementById('bms-code');
-  if(bmsInput){
-    bmsInput.oninput = function(e){
-      if(!e.target.value.startsWith('SL')) e.target.value = 'SL';
-      e.target.value = 'SL' + e.target.value.slice(2).replace(/[^0-9]/g,'').slice(0,12);
-    };
+  // Checagem de Sessão Ativa
+  if(sessionStorage.getItem('admin_token') === 'admin_ok') {
+    mostrarPainelAdmin();
+  } else if(TOKEN && USER) {
+    if(CODIGO) abrirDash(CODIGO); else mostrarLista();
+  } else {
+    mostrarLogin();
   }
 };
 
@@ -281,7 +321,7 @@ function mostrarLogin(){
   localStorage.removeItem('bms_codigo_ativo');
   esconderTudo();
   document.getElementById('erro').classList.add('hidden');
-  // Não escondemos a div de sucesso aqui para ela aparecer logo após o cadastro
+  document.getElementById('login').style.display = 'flex';
   document.getElementById('login').classList.remove('hidden');
 }
 
@@ -289,56 +329,85 @@ function mostrarCadastro(){
   clearInterval(INT);
   esconderTudo();
   document.getElementById('erro-cad').classList.add('hidden');
+  document.getElementById('cadastro').style.display = 'flex';
   document.getElementById('cadastro').classList.remove('hidden');
 }
-
-function login(){
+  // Roteador de Entrada Inteligente (FUSÃO)
+function realizarLogin(){
   document.getElementById('erro').classList.add('hidden');
   document.getElementById('sucesso-login').classList.add('hidden');
   
-  var email = document.getElementById('email').value.trim();
-  var senha = document.getElementById('senha').value;
-  if(!email ||!senha){
-    var e = document.getElementById('erro');
-    e.textContent = 'Preencha e-mail e senha';
+  const emailInput = document.getElementById('email').value.trim();
+  const senhaInput = document.getElementById('senha').value;
+
+  if(!emailInput || !senhaInput){
+    const e = document.getElementById('erro');
+    e.textContent = 'Preencha os campos corretamente';
     e.classList.remove('hidden');
     return;
   }
+
+  // Se for o Admin logando
+  if(emailInput === 'administrador') {
+    fetch(API + '?action=login_admin', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({user: emailInput, password: senhaInput})
+    })
+    .then(r => r.json())
+    .then(d => {
+      if(d.ok) {
+        TOKEN = d.token;
+        sessionStorage.setItem('admin_token', 'admin_ok');
+        mostrarPainelAdmin();
+      } else {
+        const e = document.getElementById('erro');
+        e.textContent = d.error || 'Credenciais inválidas';
+        e.classList.remove('hidden');
+      }
+    }).catch(() => {
+      const e = document.getElementById('erro');
+      e.textContent = 'Erro na comunicação do servidor administrativo';
+      e.classList.remove('hidden');
+    });
+    return;
+  }
+
+  // Senão, segue o fluxo normal do Cliente
   fetch(API + '?action=login_user', {
     method:'POST',
     headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({email:email,senha:senha})
+    body:JSON.stringify({email:emailInput, senha:senhaInput})
   })
-  .then(function(r){return r.json();})
-  .then(function(d){
+  .then(r => r.json())
+  .then(d => {
     if(d.ok && d.token){
       TOKEN = d.token;
-      USER = {nome:d.nome,email:d.email};
+      USER = {nome:d.nome, email:d.email};
       localStorage.setItem('bms_token', TOKEN);
       localStorage.setItem('bms_user', JSON.stringify(USER));
       mostrarLista();
-    }else{
-      // Exibe os erros (incluindo o bloqueio de e-mail não confirmado vindo da API)
-      var e = document.getElementById('erro');
+    } else {
+      const e = document.getElementById('erro');
       e.textContent = d.error || 'Erro ao fazer login';
       e.classList.remove('hidden');
     }
   })
-  .catch(function(e){
-    var er = document.getElementById('erro');
-    er.textContent = 'Erro: ' + e.message;
+  .catch(err => {
+    const er = document.getElementById('erro');
+    er.textContent = 'Erro: ' + err.message;
     er.classList.remove('hidden');
   });
 }
 
 function cadastrar(){
-  var nome = document.getElementById('cad-nome').value.trim();
-  var email = document.getElementById('cad-email').value.trim();
-  var senha = document.getElementById('cad-senha').value;
-  var e = document.getElementById('erro-cad');
+  const nome = document.getElementById('cad-nome').value.trim();
+  const email = document.getElementById('cad-email').value.trim();
+  const senha = document.getElementById('cad-senha').value;
+  const e = document.getElementById('erro-cad');
   e.classList.add('hidden');
   
-  if(!nome ||!email ||!senha){
+  if(!nome || !email || !senha){
     e.textContent = 'Preencha todos os campos';
     e.classList.remove('hidden');
     return;
@@ -347,41 +416,43 @@ function cadastrar(){
   fetch(API + '?action=register', {
     method:'POST',
     headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({nome:nome,email:email,senha:senha})
+    body:JSON.stringify({nome:nome, email:email, senha:senha})
   })
-  .then(function(r){return r.json();})
-  .then(function(d){
+  .then(r => r.json())
+  .then(d => {
     if(d.ok){
       mostrarLogin();
       document.getElementById('email').value = email;
       document.getElementById('senha').value = senha;
-      
-      // Limpa os campos de cadastro
       document.getElementById('cad-nome').value = '';
       document.getElementById('cad-email').value = '';
       document.getElementById('cad-senha').value = '';
       
-      // Mostra a mensagem visual de sucesso no painel de login
-      var s = document.getElementById('sucesso-login');
+      const s = document.getElementById('sucesso-login');
       s.innerHTML = '<strong>Cadastro realizado!</strong><br>Acesse sua caixa de entrada e clique no link para ativar sua conta.';
       s.classList.remove('hidden');
-    }else{
+    } else {
       e.textContent = 'Erro: ' + d.error;
       e.classList.remove('hidden');
     }
   })
-  .catch(function(e2){
-    e.textContent = 'Erro: ' + e2.message;
+  .catch(err => {
+    e.textContent = 'Erro: ' + err.message;
     e.classList.remove('hidden');
   });
 }
+
+/* ---------------------------------------------- */
+/* FUNÇÕES INTERFACE CLIENTE                      */
+/* ---------------------------------------------- */
 
 function mostrarLista(){
   clearInterval(INT);
   localStorage.removeItem('bms_codigo_ativo');
   esconderTudo();
+  document.getElementById('lista').style.display = 'flex';
   document.getElementById('lista').classList.remove('hidden');
-  document.getElementById('user-nome').textContent = USER? USER.nome : 'Usuário';
+  document.getElementById('user-nome').textContent = USER ? USER.nome : 'Usuário';
   
   carregarLista();
   INT = setInterval(carregarLista, 3000);
@@ -391,19 +462,19 @@ function carregarLista(){
   fetch(API + '?action=user_bms', {
     headers:{'Authorization':'Bearer '+TOKEN}
   })
-  .then(function(r){
-    if(r && r.status === 401){sair();return;}
+  .then(r => {
+    if(r && r.status === 401){ sair(); return; }
     return r ? r.json() : [];
   })
-  .then(function(lista){
-    var el = document.getElementById('bms-list');
+  .then(lista => {
+    const el = document.getElementById('bms-list');
     if(!lista || !lista.length){
       el.innerHTML = '<p style="grid-column:1/-1;text-align:center;color:#4a5568;padding:30px;font-size:14px">Nenhuma BMS monitorada</p>';
       return;
     }
-    var html = '';
-    for(var i=0;i<lista.length;i++){
-      var b = lista[i];
+    let html = '';
+    for(let i=0; i<lista.length; i++){
+      const b = lista[i];
       html += '<div class="bms-item" onclick="abrirDash(\''+b.code+'\')">';
       html += '<div>';
       html += '<h3>'+b.nome+'</h3>';
@@ -414,47 +485,36 @@ function carregarLista(){
       html += '</div>';
     }
     el.innerHTML = html;
-  }).catch(function(err){ console.error(err); });
+  }).catch(err => console.error(err));
 }
 
 function removerBms(code, nome){
   if(!confirm(`Remover ${nome || code} da sua conta?\n\nA BMS ficará disponível para outros usuários.`)) return;
-
   fetch(API+`?action=remove_bms&code=${code}`,{
     method:'DELETE',
     headers:{'Authorization':'Bearer '+TOKEN}
   })
-  .then(function(r){return r.json();})
-  .then(function(d){
-    if(d.ok){
-      carregarLista();
-    }else{
-      alert('Erro: ' + d.error);
-    }
-  });
+  .then(r => r.json())
+  .then(d => { if(d.ok) carregarLista(); else alert('Erro: ' + d.error); });
 }
 
 function addBms(){
-  var code = document.getElementById('bms-code').value.trim();
-  var nome = document.getElementById('bms-nome').value.trim();
-
-  if(!code || code.length!== 14){
-    alert('Código inválido. Use SL + 12 números');
-    return;
-  }
+  const code = document.getElementById('bms-code').value.trim();
+  const nome = document.getElementById('bms-nome').value.trim();
+  if(!code || code.length !== 14){ alert('Código inválido. Use SL + 12 números'); return; }
 
   fetch(API + '?action=add_bms', {
     method:'POST',
     headers:{'Content-Type':'application/json','Authorization':'Bearer '+TOKEN},
-    body:JSON.stringify({code:code,nome:nome || code})
+    body:JSON.stringify({code:code, nome:nome || code})
   })
-  .then(function(r){return r.json();})
-  .then(function(d){
+  .then(r => r.json())
+  .then(d => {
     if(d.ok){
       document.getElementById('bms-code').value = '';
       document.getElementById('bms-nome').value = '';
       carregarLista();
-    }else{
+    } else {
       alert('Erro: ' + d.error);
       document.getElementById('bms-code').value = '';
       document.getElementById('bms-nome').value = '';
@@ -467,6 +527,7 @@ function abrirDash(code){
   CODIGO = code;
   localStorage.setItem('bms_codigo_ativo', code);
   esconderTudo();
+  document.getElementById('dash').style.display = 'flex';
   document.getElementById('dash').classList.remove('hidden');
   document.getElementById('bms-titulo').textContent = code;
   atualizar();
@@ -480,17 +541,18 @@ function voltar(){
 }
 
 function renderCelulas(cels){
+  const container = document.getElementById('celulas');
   if(!cels || cels.length === 0){
-    document.getElementById('celulas').innerHTML = '<div style="grid-column:1/-1;text-align:center;opacity:.3;padding:10px;font-size:13px">Sem dados das células</div>';
+    container.innerHTML = '<div style="grid-column:1/-1;text-align:center;opacity:.3;padding:10px;font-size:13px">Sem dados das células</div>';
     document.getElementById('celMin').textContent = '0.00V';
     document.getElementById('celMax').textContent = '0.00V';
     document.getElementById('celDif').textContent = '0.00V';
     document.getElementById('celTot').textContent = '0';
     return;
   }
-  var vals = [];
-  for(var i=0;i<cels.length;i++){
-    var v = parseFloat(cels[i]);
+  let vals = [];
+  for(let i=0; i<cels.length; i++){
+    let v = parseFloat(cels[i]);
     if(v > 0) vals.push(v);
   }
   if(vals.length === 0){
@@ -500,49 +562,44 @@ function renderCelulas(cels){
     document.getElementById('celTot').textContent = '0';
     return;
   }
-  var min = Math.min.apply(null, vals);
-  var max = Math.max.apply(null, vals);
-  var dif = max - min;
+  const min = Math.min.apply(null, vals);
+  const max = Math.max.apply(null, vals);
+  const dif = max - min;
   document.getElementById('celMin').textContent = min.toFixed(3)+'V';
   document.getElementById('celMax').textContent = max.toFixed(3)+'V';
   document.getElementById('celDif').textContent = dif.toFixed(3)+'V';
   document.getElementById('celTot').textContent = cels.length;
-  var html = '';
-  for(var i=0;i<cels.length;i++){
-    var val = parseFloat(cels[i]);
-    var cls = 'ok';
+  
+  let html = '';
+  for(let i=0; i<cels.length; i++){
+    const val = parseFloat(cels[i]);
+    let cls = 'ok';
     if(val < 3.2 || val > 4.2) cls = 'crit';
     else if(val < 3.4 || val > 4.15) cls = 'warn';
     html += '<div class="cell '+cls+'"><div class="cell-num">C'+(i+1)+'</div><div class="cell-val">'+val.toFixed(3)+'</div></div>';
   }
-  document.getElementById('celulas').innerHTML = html;
+  container.innerHTML = html;
 }
 
 function atualizarGauge(soc){
-  var gauge = document.getElementById('socGauge');
-  var valor = document.getElementById('socValor');
-  var bar = document.getElementById('socBar');
-  var txt = document.getElementById('socBarTxt');
-  var deg = soc * 3.6;
-  valor.textContent = soc + '%';
-  txt.textContent = soc + '%';
-  bar.style.width = soc + '%';
-  gauge.style.background = 'conic-gradient(#00ff88 0deg,#00ffff '+deg+'deg,rgba(255,255,255,.08) '+deg+'deg)';
+  const deg = soc * 3.6;
+  document.getElementById('socValor').textContent = soc + '%';
+  document.getElementById('socBarTxt').textContent = soc + '%';
+  document.getElementById('socBar').style.width = soc + '%';
+  document.getElementById('socGauge').style.background = 'conic-gradient(#00ff88 0deg,#00ffff '+deg+'deg,rgba(255,255,255,.08) '+deg+'deg)';
 }
 
 function atualizar(){
   if(!CODIGO) return;
-  fetch(API+'?action=data&code='+CODIGO, {
-    headers:{'Authorization':'Bearer '+TOKEN}
-  })
-  .then(function(r){
-    if(r && r.status === 401){sair();return;}
+  fetch(API+'?action=data&code='+CODIGO, { headers:{'Authorization':'Bearer '+TOKEN} })
+  .then(r => {
+    if(r && r.status === 401){ sair(); return; }
     if(!r || !r.ok) return;
     return r.json();
   })
-  .then(function(d){
+  .then(d => {
     if(!d) return;
-    var st = document.getElementById('status');
+    const st = document.getElementById('status');
     st.textContent = d.online?'Online':'Offline';
     st.className = 'status-badge ' + (d.online?'on':'off');
     
@@ -553,7 +610,7 @@ function atualizar(){
       document.getElementById('temp').textContent = '0.0°C';
       atualizarGauge(0);
       renderCelulas([]);
-    }else{
+    } else {
       document.getElementById('soc').textContent = (d.soc?d.soc.toFixed(0):0)+'%';
       document.getElementById('volt').textContent = (d.voltage?d.voltage.toFixed(2):0)+'V';
       document.getElementById('corr').textContent = (d.current?d.current.toFixed(1):0)+'A';
@@ -561,7 +618,7 @@ function atualizar(){
       renderCelulas(d.cells);
       atualizarGauge(parseInt(d.soc || 0));
     }
-  }).catch(function(err){ console.error(err); });
+  }).catch(err => console.error(err));
 }
 
 function sair(){
@@ -569,8 +626,239 @@ function sair(){
   localStorage.removeItem('bms_token');
   localStorage.removeItem('bms_user');
   localStorage.removeItem('bms_codigo_ativo');
+  sessionStorage.removeItem('admin_token');
   location.reload();
+  }
+  /* ---------------------------------------------- */
+/* FUNÇÕES INTERFACE ADMIN                        */
+/* ---------------------------------------------- */
+
+function authAdminHeaders(){
+  return {'Content-Type':'application/json','Authorization':'Bearer admin_ok'};
 }
+
+function mostrarPainelAdmin(){
+  esconderTudo();
+  document.getElementById('painelAdmin').style.display = 'flex';
+  document.getElementById('painelAdmin').classList.add('active');
+  carregarTudoAdmin();
+}
+
+function mostrarClientesAdmin(){
+  esconderTudo();
+  document.getElementById('clientesAdmin').style.display = 'flex';
+  document.getElementById('clientesAdmin').classList.add('active');
+  listarUsersAdmin();
+}
+
+function voltarParaPainelAdmin(){
+  mostrarPainelAdmin();
+}
+
+function gerarCodigoAleatorioAdmin(){
+  return 'SL' + Math.floor(Math.random() * 1000000000000).toString().padStart(12, '0');
+}
+
+async function gerarECadastrarAdmin(){
+  const code = gerarCodigoAleatorioAdmin();
+  document.getElementById('admin-code').value = code;
+  await cadAdminBms();
+}
+
+async function cadAdminBms(){
+  const code = document.getElementById('admin-code').value;
+  const r = await fetch(API+'?action=admin_add_master',{method:'POST',headers:authAdminHeaders(),body:JSON.stringify({code})});
+  const d = await r.json();
+  const m = document.getElementById('admin-msg');
+  m.textContent = d.ok?'Hardware cadastrado na fábrica!':d.error;
+  m.style.color = d.ok?'#00ff88':'#ff4444';
+  if(d.ok){document.getElementById('admin-code').value='';carregarTudoAdmin();}
+}
+
+async function delAdminBms(code){
+  event.stopPropagation();
+  if(!confirm(`Deletar ${code} definitivamente da fábrica?`)) return;
+  await fetch(API+`?action=deletar&code=${code}`,{method:'DELETE',headers:authAdminHeaders()});
+  carregarTudoAdmin();
+}
+
+function verBmsDetalhadaAdmin(code){
+  activeBmsCode = code;
+  esconderTudo();
+  document.getElementById('dashAdminBms').style.display = 'flex';
+  document.getElementById('dashAdminBms').classList.add('active');
+  document.getElementById('modalBmsTitle').textContent = code;
+  renderAdminDashboardEngine();
+}
+
+function fecharDetalheBmsAdmin(){
+  activeBmsCode = null;
+  mostrarPainelAdmin();
+}
+
+function renderAdminDashboardEngine(){
+  if(!activeBmsCode) return;
+  const bms = bmsList.find(b => b.code === activeBmsCode);
+  if(!bms) return;
+
+  const online = bms.updated_at && (Date.now() - new Date(bms.updated_at).getTime() < 10000);
+  document.getElementById('modalBmsDono').innerHTML = bms.user_id ? 
+    `<span class="badge badge-orange">Vinculada: ${bms.dono_nome || bms.dono_email}</span>` : 
+    `<span class="badge badge-green">Disponível na Fábrica</span>`;
+    
+  const st = document.getElementById('adminBmsStatus');
+  st.textContent = online ? 'Online' : 'Offline';
+  st.className = 'status ' + (online ? 'on' : 'off');
+
+  const socVal = bms.soc ? parseInt(bms.soc) : 0;
+  
+  if(!online){
+    document.getElementById('adminSoc').textContent = '0%';
+    document.getElementById('adminVolt').textContent = '0.00V';
+    document.getElementById('adminCorr').textContent = '0.0A';
+    document.getElementById('adminTemp').textContent = '0.0°C';
+    document.getElementById('adminSocValor').textContent = '0%';
+    document.getElementById('adminSocBarTxt').textContent = '0%';
+    document.getElementById('adminSocBar').style.width = '0%';
+    document.getElementById('adminSocGauge').style.background = 'rgba(255,255,255,0.05)';
+    renderAdminCellsEngine([]);
+  } else {
+    document.getElementById('adminSoc').textContent = socVal + '%';
+    document.getElementById('adminVolt').textContent = (bms.voltage ? bms.voltage.toFixed(2) : '0.00') + 'V';
+    document.getElementById('adminCorr').textContent = (bms.current ? bms.current.toFixed(1) : '0.0') + 'A';
+    document.getElementById('adminTemp').textContent = (bms.temp ? bms.temp.toFixed(1) : '0.0') + '°C';
+    document.getElementById('adminSocValor').textContent = socVal + '%';
+    document.getElementById('adminSocBarTxt').textContent = socVal + '%';
+    document.getElementById('adminSocBar').style.width = socVal + '%';
+    const deg = socVal * 3.6;
+    document.getElementById('adminSocGauge').style.background = `conic-gradient(#00ff88 0deg, #00ffff ${deg}deg, rgba(255,255,255,.05) ${deg}deg)`;
+    renderAdminCellsEngine(bms.cells || []);
+  }
+}
+
+function renderAdminCellsEngine(cells){
+  const container = document.getElementById('adminCellsContent');
+  if(!cells || cells.length === 0){
+    container.innerHTML = '<div style="grid-column:1/-1;text-align:center;opacity:.3;padding:10px;font-size:13px">Sem dados de telemetria</div>';
+    document.getElementById('adminCelMin').textContent = '0.00V';
+    document.getElementById('adminCelMax').textContent = '0.00V';
+    document.getElementById('adminCelDif').textContent = '0.00V';
+    document.getElementById('adminCelTot').textContent = '0';
+    return;
+  }
+  let vals = [];
+  for(let i=0; i<cells.length; i++) { let v = parseFloat(cells[i]); if(v > 0) vals.push(v); }
+  if(vals.length === 0) return;
+
+  const min = Math.min.apply(null, vals);
+  const max = Math.max.apply(null, vals);
+  document.getElementById('adminCelMin').textContent = min.toFixed(3) + 'V';
+  document.getElementById('adminCelMax').textContent = max.toFixed(3) + 'V';
+  document.getElementById('adminCelDif').textContent = (max - min).toFixed(3) + 'V';
+  document.getElementById('adminCelTot').textContent = cells.length;
+
+  container.innerHTML = cells.map((v, i) => {
+    const val = parseFloat(v);
+    let cls = 'ok';
+    if(val < 3.2 || val > 4.2) cls = 'crit';
+    else if(val < 3.4 || val > 4.15) cls = 'warn';
+    return `<div class="cell ${cls}"><div class="cell-num">C${i+1}</div><div class="cell-val">${val.toFixed(3)}</div></div>`;
+  }).join('');
+}
+
+function abrirEdicaoUserAdmin(id, nome, email){
+  document.getElementById('editUserId').value = id;
+  document.getElementById('editUserNome').value = nome;
+  document.getElementById('editUserEmail').value = email;
+  document.getElementById('editMsg').textContent = '';
+  document.getElementById('modalEditUser').classList.add('active');
+}
+
+function fecharEditUserAdmin(){
+  document.getElementById('modalEditUser').classList.remove('active');
+}
+
+async function salvarUserAdmin(){
+  const id = document.getElementById('editUserId').value;
+  const nome = document.getElementById('editUserNome').value;
+  const email = document.getElementById('editUserEmail').value;
+  const msg = document.getElementById('editMsg');
+
+  const r = await fetch(API+'?action=edit_user',{method:'POST',headers:authAdminHeaders(),body:JSON.stringify({id:parseInt(id),nome,email})});
+  const d = await r.json();
+  if(d.ok){
+    msg.textContent = 'Alterações salvas!'; msg.style.color = '#00ff88';
+    setTimeout(()=>{fecharEditUserAdmin();listarUsersAdmin();},1000);
+  } else {
+    msg.textContent = d.error; msg.style.color = '#ff4444';
+  }
+}
+
+async function deletarUserAdmin(id, nome){
+  if(!confirm(`Remover permanentemente o cliente ${nome}?`)) return;
+  await fetch(API+`?action=delete_user&id=${id}`,{method:'DELETE',headers:authAdminHeaders()});
+  listarUsersAdmin();
+}
+
+async function carregarTudoAdmin(){
+  const rBms = await fetch(API+'?action=admin_list_master',{headers:authAdminHeaders()});
+  const dBms = await rBms.json();
+  
+  bmsList = dBms.sort((a,b) => {
+    const aOn = a.updated_at && (Date.now() - new Date(a.updated_at).getTime() < 10000);
+    const bOn = b.updated_at && (Date.now() - new Date(b.updated_at).getTime() < 10000);
+    if (aOn && !bOn) return -1; if (!aOn && bOn) return 1;
+    return (b.updated_at ? new Date(b.updated_at).getTime() : 0) - (a.updated_at ? new Date(a.updated_at).getTime() : 0);
+  });
+
+  if(!activeBmsCode) {
+    document.getElementById('admin-lista-bms').innerHTML = bmsList.map(b=>{
+      const online = b.updated_at && (Date.now() - new Date(b.updated_at).getTime() < 10000);
+      const dono = b.user_id? `<span class="badge badge-orange">Vinculada</span>` : `<span class="badge badge-green">Disponível</span>`;
+      return `
+      <div class="card" onclick="verBmsDetalhadaAdmin('${b.code}')" style="margin:0 !important; padding:16px; display:flex; flex-direction:column; justify-content:space-between; min-height:160px">
+        <div>
+          <div style="text-align:center"><span class="status ${online?'on':'off'}">${online?'Online':'Offline'}</span></div>
+          <div class="card-code">${b.code}</div>
+          <div style="text-align:center">${dono}</div>
+        </div>
+        <button class="del" style="padding:10px; margin-top:10px" onclick="delAdminBms('${b.code}')">REMOVER</button>
+      </div>`
+    }).join('') || '<div class="card" style="grid-column:1/-1; opacity:0.4; text-align:center; padding:20px">Nenhum hardware na base</div>';
+  } else {
+    renderAdminDashboardEngine();
+  }
+}
+
+async function listarUsersAdmin(){
+  const r = await fetch(API+'?action=all_users',{headers:authAdminHeaders()});
+  if(r.status===401){sair();return;}
+  const d = await r.json();
+  
+  document.getElementById('admin-lista-users').innerHTML = d.map(u=>`
+    <div class="card" style="margin:0 !important">
+      <div style="text-align:center;margin-bottom:12px">
+        <b style="font-size:18px">${u.nome}</b>
+        <div style="opacity:.5;font-size:13px;font-family:monospace;margin-top:4px">${u.email}</div>
+      </div>
+      <div class="data-item" style="display:flex;justify-content:space-between;padding:8px 12px; background:rgba(0,0,0,0.2); border-radius:12px">
+        <span style="font-size:11px; opacity:0.5; font-weight:600; text-transform:uppercase">Módulos Atrelados</span>
+        <span style="color:#00ffff; font-weight:800">${u.bms_count}</span>
+      </div>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:12px">
+        <button class="edit" style="margin:0; padding:10px" onclick="abrirEdicaoUserAdmin(${u.id},'${u.nome}','${u.email}')">EDITAR</button>
+        <button class="del" style="margin:0; padding:10px" onclick="deletarUserAdmin(${u.id},'${u.nome}')">DELETAR</button>
+      </div>
+    </div>
+  `).join('') || '<div class="card" style="text-align:center; opacity:0.4; padding:20px">Nenhum cliente cadastrado</div>';
+}
+
+// Loop contínuo de varredura global
+setInterval(() => {
+  if(sessionStorage.getItem('admin_token') === 'admin_ok' && document.getElementById('painelAdmin').classList.contains('active')) {
+    carregarTudoAdmin();
+  }
+}, 5000);
 </script>
 </body>
 </html>
