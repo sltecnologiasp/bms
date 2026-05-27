@@ -36,14 +36,23 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:#fff;min-height:1
   padding:20px;
   width:100%;
   margin-top: 0 !important;
-  margin-bottom: 12px !important; /* Espaçamento idêntico entre todos os blocos */
+  margin-bottom: 12px !important;
   box-shadow:0 8px 32px rgba(0,0,0,0.4);
 }
 
 #login .card,#cadastro .card,#lista .card {width:100%;max-width:440px}
 
-/* Elementos de Formulário */
-.label{font-size:11px;letter-spacing:1px;opacity:.5;text-transform:uppercase;text-align:left;width:100%;margin-bottom:6px;font-weight:600}
+/* Elementos de Formulário e Rótulos Centralizados conforme pedido */
+.label{
+  font-size:11px;
+  letter-spacing:1px;
+  opacity:.5;
+  text-transform:uppercase;
+  text-align:center; /* Escritas agora ficam perfeitamente centralizadas */
+  width:100%;
+  margin-bottom:6px;
+  font-weight:600;
+}
 input,select,button{width:100%;padding:16px;border-radius:14px;border:none;outline:none;font-size:16px;transition:all 0.2s ease}
 input,select{background:rgba(0,0,0,.4);color:#fff;border:1px solid rgba(255,255,255,.08);text-align:center}
 input:focus{border-color:rgba(0,255,255,0.4);background:rgba(0,0,0,.6)}
@@ -73,7 +82,7 @@ button:active{transform:scale(0.98)}
 .logout:hover{background:rgba(255,68,68,.05)}
 
 /* Componentes de Gráficos e Grid do Dashboard */
-.gauge-wrap{width:100%;margin-top:0 !important;margin-bottom:0 !important} /* Deixa o gerenciamento de espaço para o .card interno */
+.gauge-wrap{width:100%;margin-top:0 !important;margin-bottom:0 !important}
 .gauge-card{padding:20px;min-height:260px}
 .gauge{width:min(220px,55vw);height:min(220px,55vw);margin:auto;border-radius:50%;background:conic-gradient(#00ff88 0deg,#00ffff 180deg,rgba(255,255,255,.08) 180deg);position:relative;box-shadow:0 0 30px rgba(0,255,255,.1);transition:background.8s ease}
 .gauge::before{content:'';position:absolute;inset:16px;border-radius:50%;background:#05070d}
@@ -85,7 +94,6 @@ button:active{transform:scale(0.98)}
 .bar{height:12px;background:rgba(255,255,255,.06);border-radius:999px;overflow:hidden}
 .bar-fill{height:100%;width:0%;border-radius:999px;background:linear-gradient(90deg,#00ff88,#00ffff);transition:width.8s ease}
 
-/* Distância horizontal idêntica à vertical (12px) */
 .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;width:100%;margin-top:0 !important;margin-bottom:12px !important}
 .grid .card{width:100%;height:100px;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:12px;margin:0 !important}
 .value{font-size:clamp(22px,6vw,30px);font-weight:800;margin-top:8px;line-height:1;width:100%;text-align:center;font-variant-numeric:tabular-nums}
@@ -106,7 +114,6 @@ button:active{transform:scale(0.98)}
 .cell.warn{border-color:rgba(255,170,0,.2)}
 .cell.crit{border-color:rgba(255,68,68,.2)}
 
-/* Botão Voltar alinhado perfeitamente abaixo com os mesmos 12px de folga */
 .footer-voltar{width:100%;display:flex;justify-content:center;margin-top:0px!important;margin-bottom:24px}
 .footer-voltar button{width:100%;max-width:520px;margin-top:0px}
 
@@ -437,7 +444,7 @@ function voltar(){
 
 function renderCelulas(cels){
   if(!cels || cels.length === 0){
-    document.getElementById('celulas').innerHTML = '<div style="grid-column:1/-1;opacity:.3;padding:10px;font-size:13px">Sem dados das células</div>';
+    document.getElementById('celulas').innerHTML = '<div style="grid-column:1/-1;text-align:center;opacity:.3;padding:10px;font-size:13px">Sem dados das células</div>';
     document.getElementById('celMin').textContent = '0.00V';
     document.getElementById('celMax').textContent = '0.00V';
     document.getElementById('celDif').textContent = '0.00V';
