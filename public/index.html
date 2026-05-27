@@ -135,7 +135,8 @@ button:active{transform:scale(0.98)}
 .footer-voltar button{width:100%;max-width:520px;margin-top:0px}
 
 .hidden{display:none!important}
-.erro{background:rgba(255,68,68,.1);border:1px solid var(--red);border-radius:12px;padding:14px;margin-top:16px;color:var(--red);font-size:14px}
+.erro{background:rgba(255,68,68,.1);border:1px solid var(--red);border-radius:12px;padding:14px;margin-top:16px;color:var(--red);font-size:14px;text-align:center;}
+.sucesso{background:rgba(0,255,136,.1);border:1px solid var(--green);border-radius:12px;padding:14px;margin-top:16px;color:var(--green);font-size:14px;text-align:center;}
 .link-cadastro{margin-top:20px;text-align:center;color:#6b7c96;cursor:pointer;font-size:14px}
 .link-cadastro span{color:var(--cyan);text-decoration:underline}
 
@@ -154,7 +155,9 @@ button:active{transform:scale(0.98)}
     <input id="senha" type="password" placeholder="••••••••">
     <button onclick="login()">ENTRAR</button>
     <p class="link-cadastro" onclick="mostrarCadastro()">Ainda não tem conta? <span>Cadastre-se</span></p>
+    
     <div id="erro" class="erro hidden"></div>
+    <div id="sucesso-login" class="sucesso hidden"></div>
   </div>
 </div>
 
@@ -173,6 +176,7 @@ button:active{transform:scale(0.98)}
     <div id="erro-cad" class="erro hidden"></div>
   </div>
 </div>
+
 <div id="lista" class="hidden">
   <div class="title" style="font-size:clamp(28px,6vw,34px);margin-bottom:4px">SMART BMS</div>
   <div class="user-info">Olá, <span id="user-nome">--</span></div>
@@ -235,7 +239,6 @@ button:active{transform:scale(0.98)}
     <button class="btn-sec" onclick="voltar()">← VOLTAR À LISTA</button>
   </div>
 </div>
-
 <script>
 var API = '/api/bms';
 var TOKEN = localStorage.getItem('bms_token');
@@ -277,17 +280,22 @@ function mostrarLogin(){
   clearInterval(INT);
   localStorage.removeItem('bms_codigo_ativo');
   esconderTudo();
+  document.getElementById('erro').classList.add('hidden');
+  // Não escondemos a div de sucesso aqui para ela aparecer logo após o cadastro
   document.getElementById('login').classList.remove('hidden');
 }
 
 function mostrarCadastro(){
   clearInterval(INT);
   esconderTudo();
+  document.getElementById('erro-cad').classList.add('hidden');
   document.getElementById('cadastro').classList.remove('hidden');
 }
 
 function login(){
   document.getElementById('erro').classList.add('hidden');
+  document.getElementById('sucesso-login').classList.add('hidden');
+  
   var email = document.getElementById('email').value.trim();
   var senha = document.getElementById('senha').value;
   if(!email ||!senha){
@@ -310,6 +318,7 @@ function login(){
       localStorage.setItem('bms_user', JSON.stringify(USER));
       mostrarLista();
     }else{
+      // Exibe os erros (incluindo o bloqueio de e-mail não confirmado vindo da API)
       var e = document.getElementById('erro');
       e.textContent = d.error || 'Erro ao fazer login';
       e.classList.remove('hidden');
@@ -328,11 +337,13 @@ function cadastrar(){
   var senha = document.getElementById('cad-senha').value;
   var e = document.getElementById('erro-cad');
   e.classList.add('hidden');
+  
   if(!nome ||!email ||!senha){
     e.textContent = 'Preencha todos os campos';
     e.classList.remove('hidden');
     return;
   }
+  
   fetch(API + '?action=register', {
     method:'POST',
     headers:{'Content-Type':'application/json'},
@@ -341,10 +352,19 @@ function cadastrar(){
   .then(function(r){return r.json();})
   .then(function(d){
     if(d.ok){
-      alert('Conta criada! Faça login');
       mostrarLogin();
       document.getElementById('email').value = email;
       document.getElementById('senha').value = senha;
+      
+      // Limpa os campos de cadastro
+      document.getElementById('cad-nome').value = '';
+      document.getElementById('cad-email').value = '';
+      document.getElementById('cad-senha').value = '';
+      
+      // Mostra a mensagem visual de sucesso no painel de login
+      var s = document.getElementById('sucesso-login');
+      s.innerHTML = '<strong>Cadastro realizado!</strong><br>Acesse sua caixa de entrada e clique no link para ativar sua conta.';
+      s.classList.remove('hidden');
     }else{
       e.textContent = 'Erro: ' + d.error;
       e.classList.remove('hidden');
