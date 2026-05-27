@@ -85,7 +85,7 @@ button.logout{margin-top:4px;background:transparent;border:1px solid rgba(255,68
   cursor:pointer;
 }
 #listaUsers .card { cursor:default; min-height:180px; max-width:100% }
-#lista .card:hover{border-color:rgba(0,255,255,.2);background:rgba(0,255,255,0.02)}
+#lista .card:hover{border-color:rgba(0,255,255,.2);background:rgba(0,0,0,0.02)}
 
 .card-empty{grid-column:1/-1;min-height:180px;display:flex;align-items:center;justify-content:center;opacity:0.4;font-size:14px}
 
@@ -116,7 +116,6 @@ button.logout{margin-top:4px;background:transparent;border:1px solid rgba(255,68
 .modal.active{display:flex;align-items:center;justify-content:center}
 .modal-content{width:100%;max-width:520px;background:rgba(13,20,35,0.95);border:1px solid rgba(0,255,255,.15);border-radius:24px;padding:24px;position:relative;box-shadow:0 20px 50px rgba(0,0,0,0.6)}
 .modal-content.small{max-width:400px}
-.modal-close{position:absolute;top:16px;right:16px;background:rgba(255,68,68,.1);border:1px solid rgba(255,68,68,.2);color:var(--red);padding:6px 12px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;margin-top:0}
 
 .data-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px}
 .data-item{text-align:center;background:rgba(0,0,0,0.2);padding:10px;border-radius:12px;border:1px solid rgba(255,255,255,0.02)}
@@ -125,7 +124,10 @@ button.logout{margin-top:4px;background:transparent;border:1px solid rgba(255,68
 .btn-group button{margin-top:0}
 
 .value { font-variant-numeric: tabular-nums; }
+
+/* Correção das classes de Erro para ocultação total */
 .erro{background:rgba(255,68,68,.1);border:1px solid var(--red);border-radius:12px;padding:14px;margin-top:16px;color:var(--red);font-size:14px}
+.erro.hidden{display:none!important}
 
 @media(max-width:440px){
   #painel .grid { grid-template-columns:repeat(2,1fr) }
@@ -260,14 +262,19 @@ async function adminLogin(){
   const errorEl = document.getElementById('loginError');
   errorEl.classList.add('hidden');
 
-  const r = await fetch(API+'?action=login_admin',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({user,password})});
-  const d = await r.json();
-  if(d.ok){
-    adminToken = d.token;
-    sessionStorage.setItem('admin_token', adminToken);
-    showPainel();
-  }else{
-    errorEl.textContent = d.error;
+  try {
+    const r = await fetch(API+'?action=login_admin',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({user,password})});
+    const d = await r.json();
+    if(d.ok){
+      adminToken = d.token;
+      sessionStorage.setItem('admin_token', adminToken);
+      showPainel();
+    }else{
+      errorEl.textContent = d.error || 'Credenciais inválidas';
+      errorEl.classList.remove('hidden');
+    }
+  } catch(e) {
+    errorEl.textContent = 'Erro de comunicação com o servidor';
     errorEl.classList.remove('hidden');
   }
 }
@@ -478,11 +485,10 @@ async function carregarTudo(){
     return (b.updated_at ? new Date(b.updated_at).getTime() : 0) - (a.updated_at ? new Date(a.updated_at).getTime() : 0);
   });
 
-  // CORREÇÃO VISUAL DEFINITIVA: Atualiza a lista só se o modal estiver fechado
   if(!activeBmsCode) {
     atualizarHTMLListaBms();
   } else {
-    renderAdminDashboard(); // Atualiza apenas os números de dentro do modal fixado
+    renderAdminDashboard();
   }
 }
 
