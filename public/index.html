@@ -53,11 +53,11 @@ button{background:linear-gradient(90deg,var(--blue),var(--cyan));color:#fff;font
 .logout{margin-top:24px;background:rgba(255,68,68,.08);border:1px solid rgba(255,68,68,.2)}
 .hidden{display:none!important}
 .bms-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:4px;margin-top:20px}
-.bms-item{background:rgba(0,255,255,.05);border:1px solid rgba(0,255,255,.2);border-radius:16px;padding:20px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:8px}
+.bms-item{background:rgba(0,255,255,.05);border:1px solid rgba(0,255,255,.2);border-radius:16px;padding:20px;text-align:center;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px}
 .bms-item:active{transform:scale(0.98)}
-.bms-item h3{color:var(--cyan);font-size:20px;margin-bottom:0}
-.bms-item p{color:#888;font-size:13px;margin:0;text-align:center}
-.bms-item button.del{background:rgba(255,68,68,.1);border:1px solid rgba(255,68,68,.4);padding:6px 16px;margin-top:12px;width:auto;box-shadow:0 0 15px rgba(255,68,68,.2);border-radius:10px;color:#fff;font-weight:600;font-size:14px;cursor:pointer}
+.bms-item h3{color:var(--cyan);font-size:20px;margin-bottom:0;text-align:center;width:100%}
+.bms-item p{color:#888;font-size:13px;margin:0;text-align:center;width:100%;display:flex;justify-content:center;align-items:center}
+.bms-item button.del{background:rgba(255,68,68,.1);border:1px solid rgba(255,68,68,.4);padding:8px 16px;margin-top:4px;width:auto;box-shadow:0 0 15px rgba(255,68,68,.2);border-radius:10px;color:#fff;font-weight:600;font-size:14px;cursor:pointer}
 .user-info{color:#888;font-size:14px;text-align:center;margin-bottom:20px}
 .erro{background:rgba(255,0,0,.1);border:2px solid #ff4444;border-radius:12px;padding:16px;margin-top:16px;color:#ff4444;font-size:14px}
 .link-cadastro{margin-top:20px;text-align:center;color:#fff;cursor:pointer;opacity:.8}
@@ -196,12 +196,14 @@ window.onload = function(){
 };
 
 function mostrarLogin(){
+  clearInterval(INT);
   localStorage.removeItem('bms_codigo_ativo');
   esconderTudo();
   document.getElementById('login').classList.remove('hidden');
 }
 
 function mostrarCadastro(){
+  clearInterval(INT);
   esconderTudo();
   document.getElementById('cadastro').classList.remove('hidden');
 }
@@ -277,11 +279,14 @@ function cadastrar(){
 }
 
 function mostrarLista(){
+  clearInterval(INT);
   localStorage.removeItem('bms_codigo_ativo');
   esconderTudo();
   document.getElementById('lista').classList.remove('hidden');
   document.getElementById('user-nome').textContent = USER? USER.nome : 'Usuário';
+  
   carregarLista();
+  INT = setInterval(carregarLista, 3000);
 }
 
 function carregarLista(){
@@ -302,11 +307,10 @@ function carregarLista(){
     for(var i=0;i<lista.length;i++){
       var b = lista[i];
       html += '<div class="bms-item">';
-      html += '<div onclick="abrirDash(\''+b.code+'\')" style="cursor:pointer;width:100%">';
+      html += '<div onclick="abrirDash(\''+b.code+'\')" style="cursor:pointer;width:100%;display:flex;flex-direction:column;align-items:center;gap:8px">';
       html += '<h3>'+b.nome+'</h3>';
       html += '<p>Código: '+b.code+'</p>';
-      html += '<p style="margin-top:4px"><span class="status '+(b.online?'on':'off')+'" style="padding:6px 12px;font-size:12px">'+(b.online?'Online':'Offline')+'</span></p>';
-      if(b.voltage) html += '<p style="margin-top:4px;color:#00ffff">'+b.voltage.toFixed(1)+'V</p>';
+      html += '<p><span class="status '+(b.online?'on':'off')+'" style="padding:6px 16px;font-size:12px;margin-top:4px">'+(b.online?'Online':'Offline')+'</span></p>';
       html += '</div>';
       html += '<button class="del" onclick="event.stopPropagation();removerBms(\''+b.code+'\',\''+b.nome+'\')">Remover dispositivo</button>';
       html += '</div>';
@@ -363,6 +367,7 @@ function addBms(){
 }
 
 function abrirDash(code){
+  clearInterval(INT);
   CODIGO = code;
   localStorage.setItem('bms_codigo_ativo', code);
   esconderTudo();
