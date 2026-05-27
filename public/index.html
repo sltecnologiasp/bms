@@ -10,7 +10,7 @@
 :root{--bg:#05070d;--cyan:#00ffff;--blue:#0080ff;--green:#00ff88;--red:#ff4444;--orange:#ffaa00}
 body{font-family:'Inter',sans-serif;background:var(--bg);color:#fff;min-height:100vh;width:100%;overflow-x:hidden}
 
-/* Containers principais originais centralizados */
+/* Containers principais flexíveis */
 #login,#dash,#lista,#cadastro{
   position:relative;
   z-index:1;
@@ -28,6 +28,23 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:#fff;min-height:1
   margin: auto 0;
 }
 
+/* Nova estrutura de layout expandido para o Dashboard */
+.dash-layout {
+  width: 100%;
+  max-width: 1100px; /* Expande o painel em telas grandes */
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Container de duas colunas para Computador/Tablet */
+.dash-columns {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+  width: 100%;
+}
+
 .title{font-size:clamp(32px,7vw,54px);font-weight:900;margin-bottom:4px;letter-spacing:2px;background:linear-gradient(90deg,var(--cyan),var(--blue));-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-align:center;width:100%}
 .user-info{color:#6b7c96;font-size:14px;text-align:center;margin-bottom:16px;font-weight:500}
 .user-info span{color:#fff;font-weight:600}
@@ -38,13 +55,11 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:#fff;min-height:1
   border-radius:20px;
   padding:20px;
   width:100%;
-  margin-top: 0 !important;
-  margin-bottom: 12px !important;
+  margin: 0 !important;
   box-shadow:0 8px 32px rgba(0,0,0,0.4);
 }
 
 #login .card,#cadastro .card,#lista .card {width:100%;max-width:440px}
-#dash .card { max-width: 520px; }
 
 .label{font-size:11px;letter-spacing:1px;opacity:.5;text-transform:uppercase;text-align:center;width:100%;margin-bottom:6px;font-weight:600}
 input,select,button{width:100%;padding:16px;border-radius:14px;border:none;outline:none;font-size:16px;transition:all 0.2s ease}
@@ -52,7 +67,7 @@ input,select{background:rgba(0,0,0,.4);color:#fff;border:1px solid rgba(255,255,
 input:focus{border-color:rgba(0,255,255,0.4);background:rgba(0,0,0,.6)}
 input::placeholder{color:rgba(255,255,255,.25)}
 
-/* Container dos Olhinhos perfeitamente embutido */
+/* Container dos Olhinhos */
 .pass-wrapper{position:relative;width:100%}
 .pass-wrapper input{padding-right:50px}
 .pass-toggle{position:absolute;right:16px;top:16px;cursor:pointer;opacity:.3;font-size:18px;user-select:none;transition:opacity .2s}
@@ -78,8 +93,8 @@ button:active{transform:scale(0.98)}
 .logout{margin-top:4px;background:transparent;border:1px solid rgba(255,68,68,.2);color:var(--red);width:100%;max-width:440px;box-shadow:none}
 .logout:hover{background:rgba(255,68,68,.05)}
 
-.gauge-wrap{width:100%;margin-top:0 !important;margin-bottom:0 !important}
-.gauge-card{padding:20px;min-height:260px}
+.gauge-wrap{width:100%;margin:0 !important}
+.gauge-card{padding:20px;min-height:260px;display:flex;flex-direction:column;justify-content:center}
 .gauge{width:min(220px,55vw);height:min(220px,55vw);margin:auto;border-radius:50%;background:conic-gradient(#00ff88 0deg,#00ffff 180deg,rgba(255,255,255,.08) 180deg);position:relative;box-shadow:0 0 30px rgba(0,255,255,.1);transition:background.8s ease}
 .gauge::before{content:'';position:absolute;inset:16px;border-radius:50%;background:#05070d}
 .gauge-inner{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;align-items:center;z-index:2}
@@ -90,17 +105,18 @@ button:active{transform:scale(0.98)}
 .bar{height:12px;background:rgba(255,255,255,.06);border-radius:999px;overflow:hidden}
 .bar-fill{height:100%;width:0%;border-radius:999px;background:linear-gradient(90deg,#00ff88,#00ffff);transition:width.8s ease}
 
-.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;width:100%;max-width:520px;margin-top:0 !important;margin-bottom:12px !important}
-.grid .card{width:100%;height:100px;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:12px;margin:0 !important}
-.value{font-size:clamp(22px,6vw,30px);font-weight:800;margin-top:8px;line-height:1;width:100%;text-align:center;font-variant-numeric:tabular-nums}
+/* Grid de informações gerais */
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;width:100%;margin:0 !important}
+.grid .card{width:100%;height:100px;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:12px}
+.value{font-size:clamp(20px,4vw,28px);font-weight:800;margin-top:8px;line-height:1;width:100%;text-align:center;font-variant-numeric:tabular-nums}
 
-.status-badge{display:inline-flex;align-items:center;gap:8px;padding:10px 20px;border-radius:999px;font-weight:700;font-size:14px;margin-top:10px}
-.status-badge.on{background:rgba(0,255,136,.08);color:var(--green);border:1px solid rgba(0,0,0,136,.2)}
+.status-badge{display:inline-flex;align-items:center;gap:8px;padding:10px 20px;border-radius:999px;font-weight:700;font-size:14px;margin-top:0}
+.status-badge.on{background:rgba(0,255,136,.08);color:var(--green);border:1px solid rgba(0,255,136,.2)}
 .status-badge.off{background:rgba(255,68,68,.08);color:var(--red);border:1px solid rgba(255,68,68,.2)}
 
 .diff{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:16px}
 .diff-item{padding:10px 6px;border-radius:12px;background:rgba(255,255,255,.02);text-align:center}
-.diff-item span{display:block;margin-top:4px;font-size:clamp(16px,4.5vw,20px);font-weight:800;font-variant-numeric:tabular-nums}
+.diff-item span{display:block;margin-top:4px;font-size:clamp(14px,3.5vw,18px);font-weight:800;font-variant-numeric:tabular-nums}
 
 .cells{display:grid;grid-template-columns:repeat(auto-fill,minmax(85px,1fr));gap:12px;margin-top:16px;width:100%}
 .cell{background:rgba(0,0,0,.3);border-radius:12px;padding:10px 6px;border:1px solid rgba(255,255,255,.04);display:flex;flex-direction:column;align-items:center;justify-content:center}
@@ -110,21 +126,29 @@ button:active{transform:scale(0.98)}
 .cell.warn{border-color:rgba(255,170,0,.2)}
 .cell.crit{border-color:rgba(255,68,68,.2)}
 
-.footer-voltar{width:100%;display:flex;justify-content:center;margin-top:0px!important;margin-bottom:8px}
-.footer-voltar button{width:100%;max-width:520px;margin-top:0px}
+.footer-voltar{width:100%;display:flex;justify-content:center;margin-top:0px!important}
+.footer-voltar button{width:100%;margin-top:0px}
 
 .hidden{display:none!important}
 .erro{background:rgba(255,68,68,.1);border:1px solid var(--red);border-radius:12px;padding:14px;margin-top:16px;color:var(--red);font-size:14px}
 .link-cadastro{margin-top:20px;text-align:center;color:#6b7c96;cursor:pointer;font-size:14px}
 .link-cadastro span{color:var(--cyan);text-decoration:underline}
 
-/* Novo Estilo do Rodapé: Link em Azul Ciano com quebra de linha organizada */
-.footer-link{font-size:11px;margin-top:24px;text-align:center;letter-spacing:1px;line-height:1.6}
+.footer-link{font-size:11px;margin-top:24px;text-align:center;letter-spacing:1px;line-height:1.6;width:100%}
 .footer-link a{color:var(--cyan);text-decoration:none;font-weight:600;transition:opacity 0.2s;}
 .footer-link a:hover{opacity:0.8;text-decoration:underline;}
 .footer-link span{color:#fff;opacity:0.35;display:block;margin-top:4px;}
 
-@media(max-width:520px){.grid{grid-template-columns:repeat(2,1fr)}.diff{grid-template-columns:repeat(2,1fr)}}
+/* REGRAS DE MEDIA QUERIES PARA ADAPTAR EM QUALQUER TELA */
+@media(min-width:768px){
+  .dash-columns {
+    grid-template-columns: 1fr 1fr; /* Divide em duas colunas perfeitas no PC/Tablet */
+  }
+}
+@media(max-width:600px){
+  .grid{grid-template-columns:repeat(2,1fr)}
+  .diff{grid-template-columns:repeat(2,1fr)}
+}
 </style>
 </head>
 <body>
@@ -189,18 +213,18 @@ button:active{transform:scale(0.98)}
   <div class="user-info">Olá, <span id="user-nome">--</span></div>
   
   <div class="card">
-    <div class="label">Adicionar dispositivo</div>
+    <div class="label">Adicionar Nova BMS</div>
     <input id="bms-code" placeholder="SL000000000000" maxlength="14" style="margin-top:8px">
     <input id="bms-nome" placeholder="Nome Ex: Bateria Casa" style="margin-top:12px">
     <button onclick="addBms()">ADICIONAR DISPOSITIVO</button>
   </div>
   
   <div class="card" style="background:transparent;border:none;box-shadow:none;padding:0">
-    <div class="label">Meus Dispositivos</div>
+    <div class="label">Meus Dispositivos Monitorados</div>
     <div id="bms-list" class="bms-list"></div>
   </div>
   
-  <button class="logout" onclick="sair()">Sair</button>
+  <button class="logout" onclick="sair()">DESCONECTAR CONTA</button>
   <div class="footer-link">
     <a href="https://wa.me/5515991355393" target="_blank">SL TECNOLOGIA</a>
     <span>© Todos os direitos reservados</span>
@@ -208,46 +232,54 @@ button:active{transform:scale(0.98)}
 </div>
 
 <div id="dash" class="hidden">
-  <div class="card gauge-card">
-    <div class="gauge" id="socGauge">
-      <div class="gauge-inner">
-        <div class="gauge-value" id="socValor">0%</div>
-        <div class="gauge-label">STATE OF CHARGE</div>
+  <div class="dash-layout">
+    
+    <div class="card" style="padding:14px;display:flex;flex-direction:column;align-items:center;justify-content:center">
+      <div class="status-wrap" style="margin:0">
+        <span id="status" class="status-badge off">Offline</span>
       </div>
+      <div class="bms-code" id="bms-titulo" style="margin-top:8px;font-size:15px;opacity:.5;font-family:monospace">--</div>
     </div>
-    <div class="bar-wrap">
-      <div class="bar-label"><span>Bateria</span><span id="socBarTxt">0%</span></div>
-      <div class="bar"><div class="bar-fill" id="socBar"></div></div>
+
+    <div class="dash-columns">
+      
+      <div class="card gauge-card">
+        <div class="gauge" id="socGauge">
+          <div class="gauge-inner">
+            <div class="gauge-value" id="socValor">0%</div>
+            <div class="gauge-label">STATE OF CHARGE</div>
+          </div>
+        </div>
+        <div class="bar-wrap">
+          <div class="bar-label"><span>Bateria</span><span id="socBarTxt">0%</span></div>
+          <div class="bar"><div class="bar-fill" id="socBar"></div></div>
+        </div>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:16px;width:100%">
+        <div class="grid">
+          <div class="card"><div class="label">SOC</div><div class="value" id="soc" style="color:#00ff88">0%</div></div>
+          <div class="card"><div class="label">Tensão</div><div class="value" id="volt" style="color:#00ffff">0V</div></div>
+          <div class="card"><div class="label">Corrente</div><div class="value" id="corr" style="color:#ffaa00">0A</div></div>
+          <div class="card"><div class="label">Temperatura</div><div class="value" id="temp" style="color:#ff4444">0°C</div></div>
+        </div>
+      </div>
+
+    </div> <div class="card">
+      <div class="label">Células - Tensão Individual</div>
+      <div class="diff">
+        <div class="diff-item">Min<span id="celMin" style="color:#00ff88">0.00V</span></div>
+        <div class="diff-item">Max<span id="celMax" style="color:#ffaa00">0.00V</span></div>
+        <div class="diff-item">Diferença<span id="celDif" style="color:#ff4444">0.00V</span></div>
+        <div class="diff-item">Total<span id="celTot" style="color:#00ffff">0</span></div>
+      </div>
+      <div id="celulas" class="cells"></div>
     </div>
-  </div>
 
-  <div class="card" style="padding:14px;display:flex;flex-direction:column;align-items:center;justify-content:center">
-    <div class="status-wrap" style="margin:0">
-      <span id="status" class="status-badge off">Offline</span>
+    <div class="footer-voltar">
+      <button class="btn-sec" onclick="voltar()">← VOLTAR À LISTA</button>
     </div>
-    <div class="bms-code" id="bms-titulo" style="margin-top:8px;font-size:15px;opacity:.5;font-family:monospace">--</div>
-  </div>
 
-  <div class="grid">
-    <div class="card"><div class="label">SOC</div><div class="value" id="soc" style="color:#00ff88">0%</div></div>
-    <div class="card"><div class="label">Tensão</div><div class="value" id="volt" style="color:#00ffff">0V</div></div>
-    <div class="card"><div class="label">Corrente</div><div class="value" id="corr" style="color:#ffaa00">0A</div></div>
-    <div class="card"><div class="label">Temperatura</div><div class="value" id="temp" style="color:#ff4444">0°C</div></div>
-  </div>
-
-  <div class="card">
-    <div class="label">Células - Tensão Individual</div>
-    <div class="diff">
-      <div class="diff-item">Min<span id="celMin" style="color:#00ff88">0.00V</span></div>
-      <div class="diff-item">Max<span id="celMax" style="color:#ffaa00">0.00V</span></div>
-      <div class="diff-item">Diferença<span id="celDif" style="color:#ff4444">0.00V</span></div>
-      <div class="diff-item">Total<span id="celTot" style="color:#00ffff">0</span></div>
-    </div>
-    <div id="celulas" class="cells"></div>
-  </div>
-
-  <div class="footer-voltar">
-    <button class="btn-sec" onclick="voltar()">VOLTAR</button>
   </div>
 </div>
 <script>
@@ -359,7 +391,7 @@ function login(){
   });
 }
 
-// CADASTRO: Com verificação de senha e timer de reenvio de 60 segundos
+// CADASTRO: Com verificação de senha e timer de reenvio de 60 segundos nativo
 function cadastrar(){
   var btn = document.getElementById('btn-cadastrar');
   if (btn && btn.disabled) return;
@@ -606,6 +638,7 @@ function atualizarGauge(soc){
   gauge.style.background = 'conic-gradient(#00ff88 0deg,#00ffff '+deg+'deg,rgba(255,255,255,.08) '+deg+'deg)';
 }
 
+// ATUALIZAR: Garante a reinicialização dos dados em caso de desconexão da BMS
 function atualizar(){
   if(!CODIGO) return;
   fetch(API+'?action=data&code='+CODIGO, {
