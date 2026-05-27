@@ -64,7 +64,6 @@ button:active{transform:scale(0.98)}
 button.del{background:rgba(255,68,68,.08);border:1px solid rgba(255,68,68,.2);color:var(--red);font-size:13px;padding:12px;box-shadow:none}
 button.del:hover{background:rgba(255,68,68,.15)}
 button.edit{background:rgba(255,170,0,.08);border:1px solid rgba(255,170,0,.2);color:var(--orange);font-size:13px;padding:12px;margin-top:auto;box-shadow:none}
-button.view{background:rgba(0,255,255,.08);border:1px solid rgba(0,255,255,.2);color:var(--cyan);padding:14px;margin-top:12px;box-shadow:none}
 button.voltar{background:transparent;border:1px solid rgba(0,255,136,.25);color:var(--green);max-width:520px;margin-top:8px;box-shadow:none}
 button.logout{margin-top:4px;background:transparent;border:1px solid rgba(255,68,68,.2);color:var(--red);max-width:440px;box-shadow:none}
 
@@ -182,9 +181,8 @@ button.logout{margin-top:4px;background:transparent;border:1px solid rgba(255,68
 </div>
 <div id="modalBms" class="modal">
   <div class="modal-content" style="max-width:640px; padding:20px 14px;">
-    <button class="modal-close" onclick="closeBmsModal()">FECHAR</button>
     
-    <div style="text-align:center; margin-bottom:20px; margin-top:20px;">
+    <div style="text-align:center; margin-bottom:20px; margin-top:10px;">
       <div class="title" id="modalBmsTitle" style="font-size:24px; font-family:monospace; letter-spacing:1px; margin-bottom:4px">SL000000000000</div>
       <div id="modalBmsDono"></div>
     </div>
@@ -229,12 +227,14 @@ button.logout{margin-top:4px;background:transparent;border:1px solid rgba(255,68
       <div id="adminCellsContent" class="cells" style="margin-top:0; gap:8px"></div>
     </div>
 
+    <button class="voltar" style="width:100%; margin-top:12px; padding:18px" onclick="closeBmsModal()">← VOLTAR</button>
+
   </div>
 </div>
 
 <div id="modalEditUser" class="modal">
   <div class="modal-content small">
-    <button class="modal-close" onclick="closeEditUser()">FECHAR</button>
+    <button class="modal-close" style="position:absolute; top:16px; right:16px; margin-top:0;" onclick="closeEditUser()">FECHAR</button>
     <h2 style="text-align:center;margin-bottom:16px;font-size:20px;font-weight:900">Editar Cliente</h2>
     <input id="editUserId" type="hidden">
     <div class="label">Nome do Cliente</div>
