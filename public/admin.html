@@ -68,7 +68,7 @@ button.view{background:rgba(0,255,255,.08);border:1px solid rgba(0,255,255,.2);c
 button.voltar{background:transparent;border:1px solid rgba(0,255,136,.25);color:var(--green);max-width:520px;margin-top:8px;box-shadow:none}
 button.logout{margin-top:4px;background:transparent;border:1px solid rgba(255,68,68,.2);color:var(--red);max-width:440px;box-shadow:none}
 
-/* Ajuste das Grades Adaptáveis (Removido aspect-ratio travado) */
+/* Ajuste das Grades Adaptáveis */
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px;width:100%;margin-top:8px}
 #painel .grid { grid-template-columns:repeat(auto-fill,minmax(145px,1fr)) }
 
@@ -181,18 +181,54 @@ button.logout{margin-top:4px;background:transparent;border:1px solid rgba(255,68
   <button class="voltar" onclick="voltarPainel()">← VOLTAR AO PAINEL</button>
 </div>
 <div id="modalBms" class="modal">
-  <div class="modal-content">
+  <div class="modal-content" style="max-width:640px; padding:20px 14px;">
     <button class="modal-close" onclick="closeBmsModal()">FECHAR</button>
-    <h2 id="modalBmsTitle" style="text-align:center;margin-bottom:16px;font-size:22px;font-weight:900;color:var(--cyan)"></h2>
-    <div id="modalBmsContent"></div>
-  </div>
-</div>
+    
+    <div style="text-align:center; margin-bottom:20px; margin-top:20px;">
+      <div class="title" id="modalBmsTitle" style="font-size:24px; font-family:monospace; letter-spacing:1px; margin-bottom:4px">SL000000000000</div>
+      <div id="modalBmsDono"></div>
+    </div>
 
-<div id="modalCells" class="modal">
-  <div class="modal-content">
-    <button class="modal-close" onclick="closeModal()">FECHAR</button>
-    <h2 id="modalTitle" style="text-align:center;margin-bottom:8px;font-size:20px;font-weight:900;color:var(--cyan)"></h2>
-    <div id="modalCellsContent" class="cells"></div>
+    <div class="card" style="background:rgba(0,0,0,0.2); display:flex; flex-direction:column; align-items:center; padding:20px 12px; border-color:rgba(255,255,255,0.04)">
+      <div id="adminSocGauge" style="width:140px; height:140px; border-radius:50%; display:flex; align-items:center; justify-content:center; position:relative; margin-bottom:16px; background:rgba(255,255,255,0.05)">
+        <div style="position:absolute; inset:8px; background:#070b12; border-radius:50%; display:flex; flex-direction:column; align-items:center; justify-content:center; z-index:2">
+          <div id="adminSocValor" style="font-size:28px; font-weight:900; color:#fff">0%</div>
+          <div style="font-size:8px; letter-spacing:1px; opacity:0.5; margin-top:2px; font-weight:700">STATE OF CHARGE</div>
+        </div>
+      </div>
+      <div style="width:100%; max-width:280px">
+        <div style="display:flex; justify-content:between; font-size:11px; opacity:0.6; margin-bottom:6px; font-weight:600">
+          <span style="flex:1; text-align:left">Progresso da Carga</span>
+          <span id="adminSocBarTxt">0%</span>
+        </div>
+        <div style="width:100%; height:6px; background:rgba(255,255,255,0.08); border-radius:99px; overflow:hidden">
+          <div id="adminSocBar" style="width:0%; height:100%; background:linear-gradient(90deg, var(--green), var(--cyan)); transition:width 0.4s ease"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card" style="padding:12px; display:flex; justify-content:center; background:rgba(0,0,0,0.2); border-color:rgba(255,255,255,0.04)">
+      <span id="adminStatus" class="status off" style="font-size:13px; font-weight:700">Offline</span>
+    </div>
+
+    <div class="grid" style="grid-template-columns:repeat(2, 1fr); gap:12px; margin-bottom:12px">
+      <div class="card" style="margin:0 !important; padding:14px 8px; background:rgba(255,255,255,0.01)"><div class="label">SOC</div><div class="value" id="adminSoc" style="color:var(--green)">0%</div></div>
+      <div class="card" style="margin:0 !important; padding:14px 8px; background:rgba(255,255,255,0.01)"><div class="label">Tensão</div><div class="value" id="adminVolt" style="color:var(--cyan)">0.00V</div></div>
+      <div class="card" style="margin:0 !important; padding:14px 8px; background:rgba(255,255,255,0.01)"><div class="label">Corrente</div><div class="value" id="adminCorr" style="color:var(--orange)">0.0A</div></div>
+      <div class="card" style="margin:0 !important; padding:14px 8px; background:rgba(255,255,255,0.01)"><div class="label">Temperatura</div><div class="value" id="adminTemp" style="color:var(--red)">0.0°C</div></div>
+    </div>
+
+    <div class="card" style="background:rgba(0,0,0,0.15); border-color:rgba(255,255,255,0.03); padding:16px 12px">
+      <div class="label" style="margin-bottom:12px">Células - Tensão Individual</div>
+      <div style="display:grid; grid-template-columns:repeat(4, 1fr); gap:6px; background:rgba(0,0,0,0.2); padding:10px; border-radius:12px; margin-bottom:14px; font-size:11px">
+        <div style="text-align:center; border-right:1px solid rgba(255,255,255,0.05)">Min<span id="adminCelMin" style="display:block; color:var(--green); font-weight:700; margin-top:2px">0.00V</span></div>
+        <div style="text-align:center; border-right:1px solid rgba(255,255,255,0.05)">Max<span id="adminCelMax" style="display:block; color:var(--orange); font-weight:700; margin-top:2px">0.00V</span></div>
+        <div style="text-align:center; border-right:1px solid rgba(255,255,255,0.05)">Delta<span id="adminCelDif" style="display:block; color:var(--red); font-weight:700; margin-top:2px">0.00V</span></div>
+        <div style="text-align:center">Total<span id="adminCelTot" style="display:block; color:var(--cyan); font-weight:700; margin-top:2px">0</span></div>
+      </div>
+      <div id="adminCellsContent" class="cells" style="margin-top:0; gap:8px"></div>
+    </div>
+
   </div>
 </div>
 
@@ -214,6 +250,7 @@ button.logout{margin-top:4px;background:transparent;border:1px solid rgba(255,68
 const API = '/api/bms';
 let adminToken = sessionStorage.getItem('admin_token');
 let bmsList = [];
+let activeBmsCode = null;
 
 if(adminToken === 'admin_ok') showPainel();
 
@@ -300,66 +337,97 @@ async function del(code){
 }
 
 function viewBmsDetails(code){
-  const bms = bmsList.find(b => b.code === code);
-  if(!bms) return;
-  
-  const online = bms.updated_at && (Date.now() - new Date(bms.updated_at).getTime() < 10000);
-  const cellsCount = bms.cells? bms.cells.length : 0;
-  const cellsHtml = cellsCount > 0?
-    `<button class="view" onclick="viewCells('${bms.code}')">Ver Células (${cellsCount})</button>` :
-    '<div style="opacity:.4;font-size:13px;margin:12px 0;text-align:center">Sem dados de células</div>';
-  
-  document.getElementById('modalBmsTitle').textContent = bms.code;
-  document.getElementById('modalBmsContent').innerHTML = `
-    <div style="text-align:center;margin-bottom:16px">
-      <span class="status ${online?'on':'off'}">${online?'Online':'Offline'}</span>
-      <div style="margin-top:8px">${bms.user_id?`<span class="badge badge-orange">Vinculada: ${bms.dono_nome||bms.dono_email}</span>`:`<span class="badge badge-green">Disponível</span>`}</div>
-    </div>
-    <div class="data-row">
-      <div class="data-item">
-        <div class="label">SOC</div>
-        <div class="value" style="color:#00ff88">${bms.soc?.toFixed(0)||0}%</div>
-      </div>
-      <div class="data-item">
-        <div class="label">Tensão</div>
-        <div class="value" style="color:#00ffff">${bms.voltage?.toFixed(2)||0}V</div>
-      </div>
-    </div>
-    <div class="data-row">
-      <div class="data-item">
-        <div class="label">Corrente</div>
-        <div class="value" style="color:#ffaa00">${bms.current?.toFixed(1)||0}A</div>
-      </div>
-      <div class="data-item">
-        <div class="label">Temperatura</div>
-        <div class="value" style="color:#ff4444">${bms.temp?.toFixed(1)||0}°C</div>
-      </div>
-    </div>
-    ${cellsHtml}
-  `;
+  activeBmsCode = code;
+  document.getElementById('modalBmsTitle').textContent = code;
+  renderAdminDashboard();
   document.getElementById('modalBms').classList.add('active');
 }
 
 function closeBmsModal(){
+  activeBmsCode = null;
   document.getElementById('modalBms').classList.remove('active');
 }
 
-function viewCells(code){
-  const bms = bmsList.find(b => b.code === code);
-  if(!bms ||!bms.cells || bms.cells.length === 0) return;
-  document.getElementById('modalTitle').textContent = `Células (${bms.cells.length})`;
-  document.getElementById('modalCellsContent').innerHTML = bms.cells.map((v,i)=>{
+function renderAdminDashboard(){
+  if(!activeBmsCode) return;
+  const bms = bmsList.find(b => b.code === activeBmsCode);
+  if(!bms) return;
+
+  const online = bms.updated_at && (Date.now() - new Date(bms.updated_at).getTime() < 10000);
+  
+  document.getElementById('modalBmsDono').innerHTML = bms.user_id ? 
+    `<span class="badge badge-orange">Vinculada: ${bms.dono_nome || bms.dono_email}</span>` : 
+    `<span class="badge badge-green">Disponível no Mercado</span>`;
+    
+  const st = document.getElementById('adminStatus');
+  st.textContent = online ? 'Online' : 'Offline';
+  st.className = 'status ' + (online ? 'on' : 'off');
+
+  const socVal = bms.soc ? parseInt(bms.soc) : 0;
+  
+  if(!online){
+    document.getElementById('adminSoc').textContent = '0%';
+    document.getElementById('adminVolt').textContent = '0.00V';
+    document.getElementById('adminCorr').textContent = '0.0A';
+    document.getElementById('adminTemp').textContent = '0.0°C';
+    
+    document.getElementById('adminSocValor').textContent = '0%';
+    document.getElementById('adminSocBarTxt').textContent = '0%';
+    document.getElementById('adminSocBar').style.width = '0%';
+    document.getElementById('adminSocGauge').style.background = 'rgba(255,255,255,0.05)';
+    
+    renderAdminCells([]);
+  } else {
+    document.getElementById('adminSoc').textContent = socVal + '%';
+    document.getElementById('adminVolt').textContent = (bms.voltage ? bms.voltage.toFixed(2) : '0.00') + 'V';
+    document.getElementById('adminCorr').textContent = (bms.current ? bms.current.toFixed(1) : '0.0') + 'A';
+    document.getElementById('adminTemp').textContent = (bms.temp ? bms.temp.toFixed(1) : '0.0') + '°C';
+    
+    document.getElementById('adminSocValor').textContent = socVal + '%';
+    document.getElementById('adminSocBarTxt').textContent = socVal + '%';
+    document.getElementById('adminSocBar').style.width = socVal + '%';
+    const deg = socVal * 3.6;
+    document.getElementById('adminSocGauge').style.background = `conic-gradient(#00ff88 0deg, #00ffff ${deg}deg, rgba(255,255,255,.05) ${deg}deg)`;
+    
+    renderAdminCells(bms.cells || []);
+  }
+}
+
+function renderAdminCells(cells){
+  const container = document.getElementById('adminCellsContent');
+  if(!cells || cells.length === 0){
+    container.innerHTML = '<div style="grid-column:1/-1;text-align:center;opacity:.3;padding:10px;font-size:13px">Sem dados das células</div>';
+    document.getElementById('adminCelMin').textContent = '0.00V';
+    document.getElementById('adminCelMax').textContent = '0.00V';
+    document.getElementById('adminCelDif').textContent = '0.00V';
+    document.getElementById('adminCelTot').textContent = '0';
+    return;
+  }
+
+  let vals = [];
+  for(let i=0; i<cells.length; i++){
+    let v = parseFloat(cells[i]);
+    if(v > 0) vals.push(v);
+  }
+
+  if(vals.length === 0) return;
+
+  const min = Math.min.apply(null, vals);
+  const max = Math.max.apply(null, vals);
+  const dif = max - min;
+
+  document.getElementById('adminCelMin').textContent = min.toFixed(3) + 'V';
+  document.getElementById('adminCelMax').textContent = max.toFixed(3) + 'V';
+  document.getElementById('adminCelDif').textContent = dif.toFixed(3) + 'V';
+  document.getElementById('adminCelTot').textContent = cells.length;
+
+  container.innerHTML = cells.map((v, i) => {
     const val = parseFloat(v);
     let cls = 'ok';
     if(val < 3.2 || val > 4.2) cls = 'crit';
     else if(val < 3.4 || val > 4.15) cls = 'warn';
-    return `<div class="cell ${cls}"><div class="cell-num">C${i+1}</div><div class="cell-val">${val.toFixed(3)}</div></div>`;
+    return `<div class="cell ${cls}" style="padding: 8px 4px;"><div class="cell-num" style="font-size:10px">C${i+1}</div><div class="cell-val" style="font-size:13px">${val.toFixed(3)}</div></div>`;
   }).join('');
-  document.getElementById('modalCells').classList.add('active');
-}
-
-function closeModal(){
-  document.getElementById('modalCells').classList.remove('active');
 }
 
 function editarUser(id, nome, email){
@@ -400,6 +468,7 @@ async function deletarUser(id, nome){
 
 async function carregarTudo(){
   await Promise.all([listarUsers(), listarBms()]);
+  if(activeBmsCode) renderAdminDashboard();
 }
 
 async function listarUsers(){
@@ -459,6 +528,7 @@ async function listarBms(){
     </div>
   `}).join('') || '<div class="card card-empty"><div>Nenhuma BMS cadastrada no sistema</div></div>';
 }
+
 setInterval(()=>{if(adminToken && document.getElementById('painel').classList.contains('active'))carregarTudo()},5000);
 </script>
 </body>
