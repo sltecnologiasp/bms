@@ -17,7 +17,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:#fff;min-height:1
 #login.card,#cadastro.card{max-width:520px}
 .gauge-wrap{width:100%;margin:0 0 4px 0}
 .gauge-card{padding:20px 20px 30px;min-height:280px}
-.gauge{width:min(240px,60vw);height:min(240px,60vw);margin:auto;border-radius:50%;background:conic-gradient(#00ff88 0deg,#00ffff 180deg,rgba(255,255,255,.08) 180deg);position:relative;box-shadow:0 0 30px rgba(0,255,255,.15)}
+.gauge{width:min(240px,60vw);height:min(240px,60vw);margin:auto;border-radius:50%;background:conic-gradient(#00ff88 0deg,#00ffff 180deg,rgba(255,255,255,.08) 180deg);position:relative;box-shadow:0 0 30px rgba(0,255,255,.15);transition:background.8s ease}
 .gauge::before{content:'';position:absolute;inset:18px;border-radius:50%;background:#05070d}
 .gauge-inner{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;align-items:center;z-index:2}
 .gauge-value{font-size:clamp(36px,10vw,58px);font-weight:900;color:#00ff88;width:3ch;text-align:center;font-variant-numeric:tabular-nums}
@@ -120,19 +120,15 @@ button{background:linear-gradient(90deg,var(--blue),var(--cyan));color:#fff;font
 <div class="gauge-value" id="socValor">0%</div>
 <div class="gauge-label">STATE OF CHARGE</div>
 </div>
-</div>
 <div class="bar-wrap">
 <div class="bar-label"><span>Bateria</span><span id="socBarTxt">0%</span></div>
 <div class="bar"><div class="bar-fill" id="socBar"></div></div>
-</div>
-</div>
 </div>
 <div class="card">
 <div class="label">Status</div>
 <div class="status-wrap">
 <span id="status" class="status off">Offline</span>
 <div class="bms-code" id="bms-titulo">--</div>
-</div>
 </div>
 <div class="grid">
 <div class="card"><div class="label">SOC</div><div class="value" id="soc" style="color:#00ff88">0%</div></div>
@@ -378,6 +374,10 @@ function voltar(){
 function renderCelulas(cels){
   if(!cels || cels.length === 0){
     document.getElementById('celulas').innerHTML = '<div style="grid-column:1/-1;opacity:.4;padding:20px">Sem dados das células</div>';
+    document.getElementById('celMin').textContent = '0.00V';
+    document.getElementById('celMax').textContent = '0.00V';
+    document.getElementById('celDif').textContent = '0.00V';
+    document.getElementById('celTot').textContent = '0';
     return;
   }
   var vals = [];
@@ -385,7 +385,13 @@ function renderCelulas(cels){
     var v = parseFloat(cels[i]);
     if(v > 0) vals.push(v);
   }
-  if(vals.length === 0) return;
+  if(vals.length === 0){
+    document.getElementById('celMin').textContent = '0.00V';
+    document.getElementById('celMax').textContent = '0.00V';
+    document.getElementById('celDif').textContent = '0.00V';
+    document.getElementById('celTot').textContent = '0';
+    return;
+  }
   var min = Math.min.apply(null, vals);
   var max = Math.max.apply(null, vals);
   var dif = max - min;
@@ -428,15 +434,25 @@ function atualizar(){
   })
 .then(function(d){
     if(!d) return;
-    document.getElementById('soc').textContent = (d.soc?d.soc.toFixed(0):0)+'%';
-    document.getElementById('volt').textContent = (d.voltage?d.voltage.toFixed(2):0)+'V';
-    document.getElementById('corr').textContent = (d.current?d.current.toFixed(1):0)+'A';
-    document.getElementById('temp').textContent = (d.temp?d.temp.toFixed(1):0)+'°C';
     var st = document.getElementById('status');
     st.textContent = d.online?'Online':'Offline';
     st.className = 'status ' + (d.online?'on':'off');
-    renderCelulas(d.cells);
-    atualizarGauge(parseInt(d.soc || 0));
+    
+    if(!d.online){
+      document.getElementById('soc').textContent = '0%';
+      document.getElementById('volt').textContent = '0.00V';
+      document.getElementById('corr').textContent = '0.0A';
+      document.getElementById('temp').textContent = '0.0°C';
+      atualizarGauge(0);
+      renderCelulas([]);
+    }else{
+      document.getElementById('soc').textContent = (d.soc?d.soc.toFixed(0):0)+'%';
+      document.getElementById('volt').textContent = (d.voltage?d.voltage.toFixed(2):0)+'V';
+      document.getElementById('corr').textContent = (d.current?d.current.toFixed(1):0)+'A';
+      document.getElementById('temp').textContent = (d.temp?d.temp.toFixed(1):0)+'°C';
+      renderCelulas(d.cells);
+      atualizarGauge(parseInt(d.soc || 0));
+    }
   });
 }
 
