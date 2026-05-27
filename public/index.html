@@ -10,56 +10,52 @@
 :root{--bg:#05070d;--cyan:#00ffff;--blue:#0080ff;--green:#00ff88;--red:#ff4444;--orange:#ffaa00}
 body{font-family:'Inter',sans-serif;background:var(--bg);color:#fff;min-height:100vh;width:100%;overflow-x:hidden}
 
-/* Containers principais flexíveis */
+/* Containers principais flexíveis que se expandem em telas grandes */
 #login,#dash,#lista,#cadastro{
   position:relative;
   z-index:1;
   width:100%;
+  max-width:1200px;
+  margin:0 auto;
   min-height:100vh;
   display:flex;
   flex-direction:column;
   align-items:center;
   justify-content:center;
-  padding:24px 12px;
+  padding:24px 16px;
 }
 
 #dash, #lista {
   height: auto;
-  margin: auto 0;
-}
-
-/* Nova estrutura de layout expandido para o Dashboard */
-.dash-layout {
-  width: 100%;
-  max-width: 1100px; /* Expande o painel em telas grandes */
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-/* Container de duas colunas para Computador/Tablet */
-.dash-columns {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 16px;
-  width: 100%;
 }
 
 .title{font-size:clamp(32px,7vw,54px);font-weight:900;margin-bottom:4px;letter-spacing:2px;background:linear-gradient(90deg,var(--cyan),var(--blue));-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-align:center;width:100%}
 .user-info{color:#6b7c96;font-size:14px;text-align:center;margin-bottom:16px;font-weight:500}
 .user-info span{color:#fff;font-weight:600}
 
+/* Cards fluidos que se adaptam ao tamanho da tela */
 .card{
   background:rgba(13,20,35,0.65);
   border:1px solid rgba(0,255,255,.08);
   border-radius:20px;
-  padding:20px;
+  padding:24px;
   width:100%;
-  margin: 0 !important;
+  margin-top: 0 !important;
+  margin-bottom: 16px !important;
   box-shadow:0 8px 32px rgba(0,0,0,0.4);
 }
 
-#login .card,#cadastro .card,#lista .card {width:100%;max-width:440px}
+#login .card, #cadastro .card {
+  max-width: 500px;
+}
+
+/* Estrutura de Grid Responsiva para o Painel */
+.dash-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+  width: 100%;
+}
 
 .label{font-size:11px;letter-spacing:1px;opacity:.5;text-transform:uppercase;text-align:center;width:100%;margin-bottom:6px;font-weight:600}
 input,select,button{width:100%;padding:16px;border-radius:14px;border:none;outline:none;font-size:16px;transition:all 0.2s ease}
@@ -77,8 +73,15 @@ button{background:linear-gradient(90deg,var(--blue),var(--cyan));color:#fff;font
 button:active{transform:scale(0.98)}
 .btn-sec{background:transparent;border:1px solid rgba(0,255,255,.25);color:var(--cyan);box-shadow:none}
 
-.bms-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px;width:100%;margin-top:8px}
-.bms-item{background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.05);border-radius:16px;padding:16px;text-align:left;position:relative;display:flex;flex-direction:column;justify-content:space-between;min-height:120px;cursor:pointer}
+/* Grid de Dispositivos adaptável: renderiza em colunas no PC */
+.bms-list{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(240px,1fr));
+  gap:16px;
+  width:100%;
+  margin-top:8px;
+}
+.bms-item{background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.05);border-radius:16px;padding:20px;text-align:left;position:relative;display:flex;flex-direction:column;justify-content:space-between;min-height:130px;cursor:pointer}
 .bms-item:hover{border-color:rgba(0,255,255,0.2);background:rgba(0,255,255,0.02)}
 .bms-item h3{color:#fff;font-size:18px;font-weight:700;margin-bottom:2px;text-align:left}
 .bms-item p{color:#5f6e85;font-size:12px;font-family:monospace;text-align:left}
@@ -90,62 +93,71 @@ button:active{transform:scale(0.98)}
 .bms-item button.del{position:absolute;top:12px;right:12px;background:transparent;border:none;padding:4px;margin:0;width:auto;height:auto;color:#5f6e85;font-size:16px;cursor:pointer;box-shadow:none}
 .bms-item button.del:hover{color:var(--red)}
 
-.logout{margin-top:4px;background:transparent;border:1px solid rgba(255,68,68,.2);color:var(--red);width:100%;max-width:440px;box-shadow:none}
+.logout{margin-top:16px;background:transparent;border:1px solid rgba(255,68,68,.2);color:var(--red);width:100%;max-width:320px;box-shadow:none}
 .logout:hover{background:rgba(255,68,68,.05)}
 
-.gauge-wrap{width:100%;margin:0 !important}
-.gauge-card{padding:20px;min-height:260px;display:flex;flex-direction:column;justify-content:center}
-.gauge{width:min(220px,55vw);height:min(220px,55vw);margin:auto;border-radius:50%;background:conic-gradient(#00ff88 0deg,#00ffff 180deg,rgba(255,255,255,.08) 180deg);position:relative;box-shadow:0 0 30px rgba(0,255,255,.1);transition:background.8s ease}
+/* Gráficos e Grid do Dashboard */
+.gauge-wrap{width:100%;margin-top:0 !important;margin-bottom:0 !important}
+.gauge-card{padding:24px;min-height:280px;display:flex;flex-direction:column;justify-content:center}
+.gauge{width:min(240px,50vw);height:min(240px,50vw);margin:auto;border-radius:50%;background:conic-gradient(#00ff88 0deg,#00ffff 180deg,rgba(255,255,255,.08) 180deg);position:relative;box-shadow:0 0 30px rgba(0,255,255,.1);transition:background.8s ease}
 .gauge::before{content:'';position:absolute;inset:16px;border-radius:50%;background:#05070d}
 .gauge-inner{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;align-items:center;z-index:2}
-.gauge-value{font-size:clamp(36px,9vw,52px);font-weight:900;color:#00ff88}
+.gauge-value{font-size:clamp(36px,8vw,52px);font-weight:900;color:#00ff88}
 .gauge-label{opacity:.5;letter-spacing:1.5px;font-size:11px}
-.bar-wrap{margin-top:16px}
+.bar-wrap{margin-top:20px}
 .bar-label{display:flex;justify-content:space-between;margin-bottom:6px;font-size:13px;opacity:.6}
 .bar{height:12px;background:rgba(255,255,255,.06);border-radius:999px;overflow:hidden}
 .bar-fill{height:100%;width:0%;border-radius:999px;background:linear-gradient(90deg,#00ff88,#00ffff);transition:width.8s ease}
 
-/* Grid de informações gerais */
-.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;width:100%;margin:0 !important}
-.grid .card{width:100%;height:100px;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:12px}
-.value{font-size:clamp(20px,4vw,28px);font-weight:800;margin-top:8px;line-height:1;width:100%;text-align:center;font-variant-numeric:tabular-nums}
+/* Grid de Telemetria */
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;width:100%;margin-top:0 !important;margin-bottom:0 !important}
+.grid .card{width:100%;height:110px;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:12px;margin:0 !important}
+.value{font-size:clamp(20px,4vw,32px);font-weight:800;margin-top:8px;line-height:1;width:100%;text-align:center;font-variant-numeric:tabular-nums}
 
-.status-badge{display:inline-flex;align-items:center;gap:8px;padding:10px 20px;border-radius:999px;font-weight:700;font-size:14px;margin-top:0}
+.status-badge{display:inline-flex;align-items:center;gap:8px;padding:10px 24px;border-radius:999px;font-weight:700;font-size:14px}
 .status-badge.on{background:rgba(0,255,136,.08);color:var(--green);border:1px solid rgba(0,255,136,.2)}
 .status-badge.off{background:rgba(255,68,68,.08);color:var(--red);border:1px solid rgba(255,68,68,.2)}
 
-.diff{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:16px}
-.diff-item{padding:10px 6px;border-radius:12px;background:rgba(255,255,255,.02);text-align:center}
-.diff-item span{display:block;margin-top:4px;font-size:clamp(14px,3.5vw,18px);font-weight:800;font-variant-numeric:tabular-nums}
+.diff{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:16px}
+.diff-item{padding:12px 6px;border-radius:12px;background:rgba(255,255,255,.02);text-align:center}
+.diff-item span{display:block;margin-top:4px;font-size:clamp(15px,3.5vw,22px);font-weight:800;font-variant-numeric:tabular-nums}
 
-.cells{display:grid;grid-template-columns:repeat(auto-fill,minmax(85px,1fr));gap:12px;margin-top:16px;width:100%}
-.cell{background:rgba(0,0,0,.3);border-radius:12px;padding:10px 6px;border:1px solid rgba(255,255,255,.04);display:flex;flex-direction:column;align-items:center;justify-content:center}
+.cells{display:grid;grid-template-columns:repeat(auto-fill,minmax(95px,1fr));gap:12px;margin-top:18px;width:100%}
+.cell{background:rgba(0,0,0,.3);border-radius:12px;padding:12px 6px;border:1px solid rgba(255,255,255,.04);display:flex;flex-direction:column;align-items:center;justify-content:center}
 .cell-num{font-size:11px;opacity:.4;margin-bottom:2px}
 .cell-val{font-size:15px;font-weight:700;font-variant-numeric:tabular-nums}
 .cell.ok{border-color:rgba(0,255,136,.2)}
 .cell.warn{border-color:rgba(255,170,0,.2)}
 .cell.crit{border-color:rgba(255,68,68,.2)}
 
-.footer-voltar{width:100%;display:flex;justify-content:center;margin-top:0px!important}
-.footer-voltar button{width:100%;margin-top:0px}
+.footer-voltar{width:100%;display:flex;justify-content:center;margin-top:8px!important;margin-bottom:8px}
+.footer-voltar button{width:100%;max-width:320px;margin-top:0px}
 
 .hidden{display:none!important}
 .erro{background:rgba(255,68,68,.1);border:1px solid var(--red);border-radius:12px;padding:14px;margin-top:16px;color:var(--red);font-size:14px}
 .link-cadastro{margin-top:20px;text-align:center;color:#6b7c96;cursor:pointer;font-size:14px}
 .link-cadastro span{color:var(--cyan);text-decoration:underline}
 
+/* Novo Rodapé do Link do WhatsApp */
 .footer-link{font-size:11px;margin-top:24px;text-align:center;letter-spacing:1px;line-height:1.6;width:100%}
 .footer-link a{color:var(--cyan);text-decoration:none;font-weight:600;transition:opacity 0.2s;}
 .footer-link a:hover{opacity:0.8;text-decoration:underline;}
 .footer-link span{color:#fff;opacity:0.35;display:block;margin-top:4px;}
 
-/* REGRAS DE MEDIA QUERIES PARA ADAPTAR EM QUALQUER TELA */
+/* CRIA AS DUAS COLUNAS EM TELAS GRANDES (PC / MODO DESKTOP / TABLET) */
 @media(min-width:768px){
-  .dash-columns {
-    grid-template-columns: 1fr 1fr; /* Divide em duas colunas perfeitas no PC/Tablet */
+  .dash-grid {
+    grid-template-columns: 1fr 1.2fr;
+  }
+  .grid-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 100%;
   }
 }
-@media(max-width:600px){
+
+@media(max-width:640px){
   .grid{grid-template-columns:repeat(2,1fr)}
   .diff{grid-template-columns:repeat(2,1fr)}
 }
@@ -220,7 +232,7 @@ button:active{transform:scale(0.98)}
   </div>
   
   <div class="card" style="background:transparent;border:none;box-shadow:none;padding:0">
-    <div class="label">Meus Dispositivos Monitorados</div>
+    <div class="label" style="text-align: left; font-size: 13px; margin-bottom: 12px;">Meus Dispositivos Monitorados</div>
     <div id="bms-list" class="bms-list"></div>
   </div>
   
@@ -231,57 +243,56 @@ button:active{transform:scale(0.98)}
   </div>
 </div>
 
-<div id="dash" class="hidden">
-  <div class="dash-layout">
+<div id="dash" class="hidden" style="width: 100%;">
+  <div class="dash-grid">
     
-    <div class="card" style="padding:14px;display:flex;flex-direction:column;align-items:center;justify-content:center">
-      <div class="status-wrap" style="margin:0">
-        <span id="status" class="status-badge off">Offline</span>
+    <div class="card gauge-card">
+      <div class="gauge" id="socGauge">
+        <div class="gauge-inner">
+          <div class="gauge-value" id="socValor">0%</div>
+          <div class="gauge-label">STATE OF CHARGE</div>
+        </div>
       </div>
-      <div class="bms-code" id="bms-titulo" style="margin-top:8px;font-size:15px;opacity:.5;font-family:monospace">--</div>
+      <div class="bar-wrap">
+        <div class="bar-label"><span>Bateria</span><span id="socBarTxt">0%</span></div>
+        <div class="bar"><div class="bar-fill" id="socBar"></div></div>
+      </div>
     </div>
 
-    <div class="dash-columns">
-      
-      <div class="card gauge-card">
-        <div class="gauge" id="socGauge">
-          <div class="gauge-inner">
-            <div class="gauge-value" id="socValor">0%</div>
-            <div class="gauge-label">STATE OF CHARGE</div>
-          </div>
-        </div>
-        <div class="bar-wrap">
-          <div class="bar-label"><span>Bateria</span><span id="socBarTxt">0%</span></div>
-          <div class="bar"><div class="bar-fill" id="socBar"></div></div>
+    <div class="grid-container">
+      <div class="card" style="padding:16px;display:flex;flex-direction:row;align-items:center;justify-content:space-between;margin-bottom:14px !important">
+        <div class="bms-code" id="bms-titulo" style="font-size:18px;font-weight:700;letter-spacing:1px;font-family:monospace">--</div>
+        <div class="status-wrap" style="margin:0">
+          <span id="status" class="status-badge off">Offline</span>
         </div>
       </div>
 
-      <div style="display:flex;flex-direction:column;gap:16px;width:100%">
-        <div class="grid">
-          <div class="card"><div class="label">SOC</div><div class="value" id="soc" style="color:#00ff88">0%</div></div>
-          <div class="card"><div class="label">Tensão</div><div class="value" id="volt" style="color:#00ffff">0V</div></div>
-          <div class="card"><div class="label">Corrente</div><div class="value" id="corr" style="color:#ffaa00">0A</div></div>
-          <div class="card"><div class="label">Temperatura</div><div class="value" id="temp" style="color:#ff4444">0°C</div></div>
-        </div>
+      <div class="grid">
+        <div class="card"><div class="label">SOC</div><div class="value" id="soc" style="color:#00ff88">0%</div></div>
+        <div class="card"><div class="label">Tensão</div><div class="value" id="volt" style="color:#00ffff">0V</div></div>
+        <div class="card"><div class="label">Corrente</div><div class="value" id="corr" style="color:#ffaa00">0A</div></div>
+        <div class="card"><div class="label">Temperatura</div><div class="value" id="temp" style="color:#ff4444">0°C</div></div>
       </div>
-
-    </div> <div class="card">
-      <div class="label">Células - Tensão Individual</div>
-      <div class="diff">
-        <div class="diff-item">Min<span id="celMin" style="color:#00ff88">0.00V</span></div>
-        <div class="diff-item">Max<span id="celMax" style="color:#ffaa00">0.00V</span></div>
-        <div class="diff-item">Diferença<span id="celDif" style="color:#ff4444">0.00V</span></div>
-        <div class="diff-item">Total<span id="celTot" style="color:#00ffff">0</span></div>
-      </div>
-      <div id="celulas" class="cells"></div>
-    </div>
-
-    <div class="footer-voltar">
-      <button class="btn-sec" onclick="voltar()">← VOLTAR À LISTA</button>
     </div>
 
   </div>
+
+  <div class="card" style="margin-top: 16px !important;">
+    <div class="label">Células - Tensão Individual</div>
+    <div class="diff">
+      <div class="diff-item">Min<span id="celMin" style="color:#00ff88">0.00V</span></div>
+      <div class="diff-item">Max<span id="celMax" style="color:#ffaa00">0.00V</span></div>
+      <div class="diff-item">Diferença<span id="celDif" style="color:#ff4444">0.00V</span></div>
+      <div class="diff-item">Total<span id="celTot" style="color:#00ffff">0</span></div>
+    </div>
+    <div id="celulas" class="cells"></div>
+  </div>
+
+  <div class="footer-voltar">
+    <button class="btn-sec" onclick="voltar()">← VOLTAR À LISTA</button>
+  </div>
 </div>
+
 <script>
 var API = '/api/bms';
 var TOKEN = localStorage.getItem('bms_token');
@@ -332,7 +343,6 @@ function mostrarCadastro(){
   document.getElementById('cadastro').classList.remove('hidden');
 }
 
-// FUNÇÃO DOS OLHINHOS: Altera a visibilidade da senha de forma limpa e independente
 function togglePass(inputId, iconEl) {
   var input = document.getElementById(inputId);
   if (!input) return;
@@ -347,14 +357,11 @@ function togglePass(inputId, iconEl) {
   }
 }
 
-// LOGIN: Apontando exatamente para a rota 'login' corrigida na API
 function login(){
   var e = document.getElementById('erro');
   if (e) e.classList.add('hidden');
-  
   var email = document.getElementById('email').value.trim();
   var senha = document.getElementById('senha').value;
-  
   if(!email || !senha){
     if (e) {
       e.textContent = 'Preencha e-mail e senha';
@@ -362,7 +369,6 @@ function login(){
     }
     return;
   }
-  
   fetch(API + '?action=login', {
     method:'POST',
     headers:{'Content-Type':'application/json'},
@@ -391,7 +397,6 @@ function login(){
   });
 }
 
-// CADASTRO: Com verificação de senha e timer de reenvio de 60 segundos nativo
 function cadastrar(){
   var btn = document.getElementById('btn-cadastrar');
   if (btn && btn.disabled) return;
@@ -430,7 +435,6 @@ function cadastrar(){
     window.cadastroTimer = setInterval(function() {
       tempo--;
       btn.textContent = 'AGUARDE ' + tempo + 's';
-      
       if (tempo <= 0) {
         clearInterval(window.cadastroTimer);
         btn.disabled = false;
@@ -486,7 +490,6 @@ function mostrarLista(){
   esconderTudo();
   document.getElementById('lista').classList.remove('hidden');
   document.getElementById('user-nome').textContent = USER? USER.nome : 'Usuário';
-  
   carregarLista();
   INT = setInterval(carregarLista, 3000);
 }
@@ -524,7 +527,6 @@ function carregarLista(){
 
 function removerBms(code, nome){
   if(!confirm(`Remover ${nome || code} da sua conta?\n\nA BMS ficará disponível para outros usuários.`)) return;
-
   fetch(API+`?action=remove_bms&code=${code}`,{
     method:'DELETE',
     headers:{'Authorization':'Bearer '+TOKEN}
@@ -542,12 +544,10 @@ function removerBms(code, nome){
 function addBms(){
   var code = document.getElementById('bms-code').value.trim();
   var nome = document.getElementById('bms-nome').value.trim();
-
   if(!code || code.length!== 14){
     alert('Código inválido. Use SL + 12 numbers');
     return;
   }
-
   fetch(API + '?action=add_bms', {
     method:'POST',
     headers:{'Content-Type':'application/json','Authorization':'Bearer '+TOKEN},
@@ -638,7 +638,6 @@ function atualizarGauge(soc){
   gauge.style.background = 'conic-gradient(#00ff88 0deg,#00ffff '+deg+'deg,rgba(255,255,255,.08) '+deg+'deg)';
 }
 
-// ATUALIZAR: Garante a reinicialização dos dados em caso de desconexão da BMS
 function atualizar(){
   if(!CODIGO) return;
   fetch(API+'?action=data&code='+CODIGO, {
@@ -656,7 +655,6 @@ function atualizar(){
       st.textContent = d.online?'Online':'Offline';
       st.className = 'status-badge ' + (d.online?'on':'off');
     }
-    
     if(!d.online){
       if(document.getElementById('soc')) document.getElementById('soc').textContent = '0%';
       if(document.getElementById('volt')) document.getElementById('volt').textContent = '0.00V';
