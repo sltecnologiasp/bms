@@ -94,7 +94,6 @@ button{background:linear-gradient(90deg,var(--blue),var(--cyan));color:#fff;font
 <button class="btn-sec" onclick="mostrarLogin()">VOLTAR</button>
 <div id="erro-cad" class="erro hidden"></div>
 </div>
-</div>
 
 <div id="lista" class="hidden">
 <div class="title" style="font-size:clamp(28px,6vw,32px);margin-bottom:8px">SMART BMS</div>
@@ -114,41 +113,49 @@ button{background:linear-gradient(90deg,var(--blue),var(--cyan));color:#fff;font
 
 <div id="dash" class="hidden">
 <div class="gauge-wrap">
-<div class="card gauge-card">
-<div class="gauge" id="socGauge">
-<div class="gauge-inner">
-<div class="gauge-value" id="socValor">0%</div>
-<div class="gauge-label">STATE OF CHARGE</div>
-<div class="bar-wrap">
-<div class="bar-label"><span>Bateria</span><span id="socBarTxt">0%</span></div>
-<div class="bar"><div class="bar-fill" id="socBar"></div></div>
+  <div class="card gauge-card">
+    <div class="gauge" id="socGauge">
+      <div class="gauge-inner">
+        <div class="gauge-value" id="socValor">0%</div>
+        <div class="gauge-label">STATE OF CHARGE</div>
+      </div>
+    </div>
+    <div class="bar-wrap">
+      <div class="bar-label"><span>Bateria</span><span id="socBarTxt">0%</span></div>
+      <div class="bar"><div class="bar-fill" id="socBar"></div></div>
+    </div>
+  </div>
 </div>
-</div>
+
 <div class="card">
-<div class="label">Status</div>
-<div class="status-wrap">
-<span id="status" class="status off">Offline</span>
-<div class="bms-code" id="bms-titulo">--</div>
+  <div class="label">Status</div>
+  <div class="status-wrap">
+    <span id="status" class="status off">Offline</span>
+    <div class="bms-code" id="bms-titulo">--</div>
+  </div>
 </div>
-</div>
+
 <div class="grid">
-<div class="card"><div class="label">SOC</div><div class="value" id="soc" style="color:#00ff88">0%</div></div>
-<div class="card"><div class="label">Tensão</div><div class="value" id="volt" style="color:#00ffff">0V</div></div>
-<div class="card"><div class="label">Corrente</div><div class="value" id="corr" style="color:#ffaa00">0A</div></div>
-<div class="card"><div class="label">Temperatura</div><div class="value" id="temp" style="color:#ff4444">0°C</div></div>
+  <div class="card"><div class="label">SOC</div><div class="value" id="soc" style="color:#00ff88">0%</div></div>
+  <div class="card"><div class="label">Tensão</div><div class="value" id="volt" style="color:#00ffff">0V</div></div>
+  <div class="card"><div class="label">Corrente</div><div class="value" id="corr" style="color:#ffaa00">0A</div></div>
+  <div class="card"><div class="label">Temperatura</div><div class="value" id="temp" style="color:#ff4444">0°C</div></div>
 </div>
+
 <div class="card">
-<div class="label">Células - Tensão Individual</div>
-<div class="diff">
-<div class="diff-item">Min<div><span id="celMin" style="color:#00ff88">0.00V</span></div></div>
-<div class="diff-item">Max<div><span id="celMax" style="color:#ffaa00">0.00V</span></div></div>
-<div class="diff-item">Diferença<div><span id="celDif" style="color:#ff4444">0.00V</span></div></div>
-<div class="diff-item">Total<div><span id="celTot" style="color:#00ffff">0</span></div></div>
+  <div class="label">Células - Tensão Individual</div>
+  <div class="diff">
+    <div class="diff-item">Min<div><span id="celMin" style="color:#00ff88">0.00V</span></div></div>
+    <div class="diff-item">Max<div><span id="celMax" style="color:#ffaa00">0.00V</span></div></div>
+    <div class="diff-item">Diferença<div><span id="celDif" style="color:#ff4444">0.00V</span></div></div>
+    <div class="diff-item">Total<div><span id="celTot" style="color:#00ffff">0</span></div></div>
+  </div>
+  <div id="celulas" class="cells"></div>
 </div>
-<div id="celulas" class="cells"></div>
-</div>
+
 <div class="footer-voltar">
-<button class="btn-sec" onclick="voltar()">← VOLTAR</button>
+  <button class="btn-sec" onclick="voltar()">← VOLTAR</button>
+</div>
 </div>
 
 <script>
