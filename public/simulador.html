@@ -3,534 +3,257 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-
 <title>SIMULADOR</title>
-
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
-
 <style>
-
-*{
-margin:0;
-padding:0;
-box-sizing:border-box;
-font-family:'Inter',sans-serif;
-text-align:center;
-}
-
-:root{
---bg:#05070d;
---cyan:#00ffff;
---blue:#0080ff;
---green:#00ff88;
---red:#ff4444;
---orange:#ffaa00;
-}
-
-body{
-background:var(--bg);
-color:#fff;
-padding:20px;
-min-height:100vh;
-overflow-x:hidden;
-}
-
-.title{
-font-size:clamp(34px,7vw,64px);
-font-weight:900;
-margin-bottom:25px;
-background:linear-gradient(90deg,var(--cyan),var(--blue));
--webkit-background-clip:text;
--webkit-text-fill-color:transparent;
-}
-
-.card{
-background:rgba(255,255,255,.04);
-border:1px solid rgba(0,255,255,.15);
-border-radius:28px;
-padding:24px;
-margin-bottom:20px;
-backdrop-filter:blur(20px);
-box-shadow:
-0 0 30px rgba(0,255,255,.08);
-max-width:1200px;
-margin:auto;
-}
-
-.grid{
-display:grid;
-grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
-gap:16px;
-margin-bottom:20px;
-}
-
-.label{
-font-size:12px;
-opacity:.6;
-margin-bottom:8px;
-text-transform:uppercase;
-letter-spacing:1px;
-}
-
-.metric-value{
-font-size:36px;
-font-weight:800;
-margin-top:10px;
-}
-
-input,
-select{
-width:100%;
-padding:16px;
-border:none;
-outline:none;
-border-radius:18px;
-background:#0b1220;
-color:#fff;
-font-size:18px;
-margin-top:8px;
-border:1px solid rgba(0,255,255,.15);
-}
-
-button{
-width:100%;
-padding:18px;
-border:none;
-border-radius:18px;
-margin-top:15px;
-font-size:18px;
-font-weight:700;
-cursor:pointer;
-background:linear-gradient(90deg,var(--blue),var(--cyan));
-color:#fff;
-box-shadow:
-0 0 30px rgba(0,255,255,.2);
-transition:.2s;
-}
-
-button:hover{
-transform:scale(1.01);
-}
-
-.cells{
-display:grid;
-grid-template-columns:repeat(auto-fit,minmax(90px,1fr));
-gap:12px;
-margin-top:20px;
-}
-
-.cell{
-background:#0b1220;
-padding:12px;
-border-radius:18px;
-border:1px solid rgba(255,255,255,.05);
-}
-
-.cell input{
-font-size:15px;
-padding:10px;
-margin-top:8px;
-}
-
-.status{
-padding:14px 20px;
-border-radius:999px;
-display:inline-block;
-font-weight:700;
-margin-top:20px;
-}
-
-.on{
-background:rgba(0,255,136,.1);
-border:1px solid rgba(0,255,136,.3);
-color:var(--green);
-}
-
-.off{
-background:rgba(255,68,68,.1);
-border:1px solid rgba(255,68,68,.3);
-color:var(--red);
-}
-
-.top-grid{
-display:grid;
-grid-template-columns:repeat(2,1fr);
-gap:14px;
-margin-top:20px;
-}
-
-.metric{
-background:#0b1220;
-border-radius:22px;
-padding:20px;
-border:1px solid rgba(0,255,255,.08);
-}
-
-@media(max-width:700px){
-
-.top-grid{
-grid-template-columns:1fr 1fr;
-}
-
-.metric-value{
-font-size:28px;
-}
-
-}
-
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Inter',sans-serif;text-align:center}
+:root{--bg:#05070d;--cyan:#00ffff;--blue:#0080ff;--green:#00ff88;--red:#ff4444;--orange:#ffaa00}
+body{background:var(--bg);color:#fff;padding:20px;min-height:100vh;overflow-x:hidden}
+.title{font-size:clamp(34px,7vw,64px);font-weight:900;margin-bottom:25px;background:linear-gradient(90deg,var(--cyan),var(--blue));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.card{background:rgba(255,255,255,.04);border:1px solid rgba(0,255,255,.15);border-radius:28px;padding:24px;margin-bottom:20px;backdrop-filter:blur(20px);box-shadow:0 0 30px rgba(0,255,255,.08);max-width:1200px;margin:auto}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin-bottom:20px}
+.label{font-size:12px;opacity:.6;margin-bottom:8px;text-transform:uppercase;letter-spacing:1px}
+.metric-value{font-size:36px;font-weight:800;margin-top:10px}
+input,select{width:100%;padding:16px;border:none;outline:none;border-radius:18px;background:#0b1220;color:#fff;font-size:18px;margin-top:8px;border:1px solid rgba(0,255,255,.15)}
+button{width:100%;padding:18px;border:none;border-radius:18px;margin-top:15px;font-size:18px;font-weight:700;cursor:pointer;background:linear-gradient(90deg,var(--blue),var(--cyan));color:#fff;box-shadow:0 0 30px rgba(0,255,255,.2);transition:.2s}
+button:hover{transform:scale(1.01)}
+.cells{display:grid;grid-template-columns:repeat(auto-fit,minmax(90px,1fr));gap:12px;margin-top:20px}
+.cell{background:#0b1220;padding:12px;border-radius:18px;border:1px solid rgba(255,255,255,.05)}
+.cell input{font-size:15px;padding:10px;margin-top:8px}
+.status{padding:14px 20px;border-radius:999px;display:inline-block;font-weight:700;margin-top:20px}
+.on{background:rgba(0,255,136,.1);border:1px solid rgba(0,255,136,.3);color:var(--green)}
+.off{background:rgba(255,68,68,.1);border:1px solid rgba(255,68,68,.3);color:var(--red)}
+.top-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-top:20px}
+.metric{background:#0b1220;border-radius:22px;padding:20px;border:1px solid rgba(0,255,255,.08)}
+@media(max-width:700px){.top-grid{grid-template-columns:1fr 1fr}.metric-value{font-size:28px}}
 </style>
 </head>
 <body>
 
-<div class="title">
-SIMULADOR BMS
-</div>
+<div class="title">SIMULADOR BMS</div>
 
 <div class="card">
+  <div class="grid">
+    <div>
+      <div class="label">Código BMS</div>
+      <input id="code" value="SL000000000001" maxlength="14">
+    </div>
+    <div>
+      <div class="label">Quantidade de Células</div>
+      <select id="cellCount">
+        <option value="1">1S</option>
+        <option value="2">2S</option>
+        <option value="3">3S</option>
+        <option value="4">4S</option>
+        <option value="5">5S</option>
+        <option value="6">6S</option>
+        <option value="7">7S</option>
+        <option value="8">8S</option>
+        <option value="9">9S</option>
+        <option value="10">10S</option>
+        <option value="11">11S</option>
+        <option value="12" selected>12S</option>
+        <option value="13">13S</option>
+        <option value="14">14S</option>
+        <option value="15">15S</option>
+        <option value="16">16S</option>
+      </select>
+    </div>
+  </div>
 
-<div class="grid">
+  <button onclick="createCells()">GERAR CÉLULAS</button>
+  <button onclick="toggleSim()">START / STOP SIMULAÇÃO</button>
 
-<div>
+  <div id="status" class="status off">DESCONECTADO</div>
 
-<div class="label">
-Código BMS
+  <div class="top-grid">
+    <div class="metric">
+      <div class="label">SOC</div>
+      <div class="metric-value" id="socText" style="color:#00ff88">20%</div>
+    </div>
+    <div class="metric">
+      <div class="label">TENSÃO</div>
+      <div class="metric-value" id="voltageText" style="color:#00ffff">0V</div>
+    </div>
+    <div class="metric">
+      <div class="label">CORRENTE</div>
+      <div class="metric-value" id="currentText" style="color:#ffaa00">0A</div>
+    </div>
+    <div class="metric">
+      <div class="label">TEMPERATURA</div>
+      <div class="metric-value" id="tempText" style="color:#ff4444">0°C</div>
+    </div>
+  </div>
+
+  <div class="cells" id="cells"></div>
 </div>
-
-<input
-id="code"
-value="SL000000000001"
-maxlength="14"
->
-
-</div>
-
-<div>
-
-<div class="label">
-Quantidade de Células
-</div>
-
-<select id="cellCount">
-
-<option value="1">1S</option>
-<option value="2">2S</option>
-<option value="3">3S</option>
-<option value="4">4S</option>
-<option value="5">5S</option>
-<option value="6">6S</option>
-<option value="7">7S</option>
-<option value="8">8S</option>
-<option value="9">9S</option>
-<option value="10">10S</option>
-<option value="11">11S</option>
-<option value="12" selected>12S</option>
-<option value="13">13S</option>
-<option value="14">14S</option>
-<option value="15">15S</option>
-<option value="16">16S</option>
-
-</select>
-
-</div>
-
-</div>
-
-<button onclick="createCells()">
-GERAR CÉLULAS
-</button>
-
-<button onclick="toggleSim()">
-START / STOP SIMULAÇÃO
-</button>
-
-<div id="status" class="status off">
-DESCONECTADO
-</div>
-
-<div class="top-grid">
-
-<div class="metric">
-<div class="label">SOC</div>
-<div class="metric-value" id="socText" style="color:#00ff88">
-20%
-</div>
-</div>
-
-<div class="metric">
-<div class="label">TENSÃO</div>
-<div class="metric-value" id="voltageText" style="color:#00ffff">
-0V
-</div>
-</div>
-
-<div class="metric">
-<div class="label">CORRENTE</div>
-<div class="metric-value" id="currentText" style="color:#ffaa00">
-0A
-</div>
-</div>
-
-<div class="metric">
-<div class="label">TEMPERATURA</div>
-<div class="metric-value" id="tempText" style="color:#ff4444">
-0°C
-</div>
-</div>
-
-</div>
-
-<div class="cells" id="cells"></div>
-
-</div>
-
-<script>
-
-const API =
-'/api/bms?action=update';
+   <script>
+const API = '/api/bms?action=update';
 
 let running = false;
 let interval;
 
 let soc = 20;
-let voltage = 51.2;
+let voltage = 0; // Começa zerado para calcular a partir das células geradas
 let current = 8.5;
 let temp = 28.0;
 
 /* =========================
-   CREATE CELLS
+   CALCULAR TENSÃO TOTAL
 ========================= */
-
-function createCells(){
-
-const count =
-parseInt(
-document.getElementById('cellCount').value
-);
-
-const container =
-document.getElementById('cells');
-
-container.innerHTML='';
-
-for(let i=0;i<count;i++){
-
-const cell =
-document.createElement('div');
-
-cell.className='cell';
-
-cell.innerHTML=`
-
-<div style="margin-bottom:6px;font-weight:700">
-C${i+1}
-</div>
-
-<input
-type="number"
-step="0.001"
-value="${(3.300 + Math.random()*0.05).toFixed(3)}"
-id="cell${i}"
->
-
-`;
-
-container.appendChild(cell);
-
+function calcularTensaoTotal() {
+  const count = parseInt(document.getElementById('cellCount').value);
+  let soma = 0;
+  
+  for (let i = 0; i < count; i++) {
+    const input = document.getElementById('cell' + i);
+    if (input) {
+      const val = parseFloat(input.value) || 0;
+      soma += val;
+    }
+  }
+  
+  voltage = soma;
+  document.getElementById('voltageText').textContent = voltage.toFixed(2) + 'V';
 }
 
+/* =========================
+   CREATE CELLS
+========================= */
+function createCells(){
+  const count = parseInt(document.getElementById('cellCount').value);
+  const container = document.getElementById('cells');
+  container.innerHTML='';
+
+  for(let i=0;i<count;i++){
+    const cell = document.createElement('div');
+    cell.className='cell';
+    cell.innerHTML=`
+      <div style="margin-bottom:6px;font-weight:700">C${i+1}</div>
+      <input
+        type="number"
+        step="0.001"
+        value="${(3.300 + Math.random()*0.05).toFixed(3)}"
+        id="cell${i}"
+        oninput="calcularTensaoTotal()"
+      >
+    `;
+    container.appendChild(cell);
+  }
+
+  // Calcula a tensão total logo após gerar as células
+  calcularTensaoTotal();
+  updateDisplay();
 }
 
 /* =========================
    START STOP
 ========================= */
-
 function toggleSim(){
+  running = !running;
+  const status = document.getElementById('status');
 
-running = !running;
-
-const status =
-document.getElementById('status');
-
-if(running){
-
-status.className='status on';
-status.textContent='CONECTADO';
-
-sendData();
-
-interval =
-setInterval(sendData,3000);
-
-}else{
-
-clearInterval(interval);
-
-status.className='status off';
-status.textContent='DESCONECTADO';
-
-}
-
+  if(running){
+    status.className='status on';
+    status.textContent='CONECTADO';
+    sendData();
+    interval = setInterval(sendData,3000);
+  }else{
+    clearInterval(interval);
+    status.className='status off';
+    status.textContent='DESCONECTADO';
+  }
 }
 
 /* =========================
    UPDATE UI
 ========================= */
-
 function updateDisplay(){
-
-document.getElementById('socText')
-.textContent =
-soc.toFixed(0)+'%';
-
-document.getElementById('voltageText')
-.textContent =
-voltage.toFixed(2)+'V';
-
-document.getElementById('currentText')
-.textContent =
-current.toFixed(1)+'A';
-
-document.getElementById('tempText')
-.textContent =
-temp.toFixed(1)+'°C';
-
+  document.getElementById('socText').textContent = soc.toFixed(0)+'%';
+  document.getElementById('voltageText').textContent = voltage.toFixed(2)+'V';
+  document.getElementById('currentText').textContent = current.toFixed(1)+'A';
+  document.getElementById('tempText').textContent = temp.toFixed(1)+'°C';
 }
 
 /* =========================
    SEND DATA
 ========================= */
-
 async function sendData(){
+  const count = parseInt(document.getElementById('cellCount').value);
+  const cells = [];
 
-const count =
-parseInt(
-document.getElementById('cellCount').value
-);
+  /* =========================
+     CARREGAMENTO AUTOMÁTICO
+  ========================= */
+  soc += 0.15;
+  if(soc > 100){
+    soc = 100;
+  }
 
-const cells = [];
+  /* =========================
+     OSCILAÇÕES
+  ========================= */
+  current += (Math.random()-0.5)*1.2;
+  temp += (Math.random()-0.5)*0.3;
 
-/* =========================
-   CARREGAMENTO AUTOMÁTICO
-========================= */
+  /* =========================
+     CÉLULAS
+  ========================= */
+  for(let i=0;i<count;i++){
+    let input = document.getElementById('cell'+i);
+    let value = parseFloat(input.value);
 
-soc += 0.15;
+    // Pequena oscilação de simulação
+    value += (Math.random()-0.5)*0.008;
+    input.value = value.toFixed(3);
+    cells.push(value);
+  }
 
-if(soc > 100){
-soc = 100;
-}
+  /* =========================
+     TENSÃO TOTAL (SOMA REAL)
+  ========================= */
+  voltage = cells.reduce((a,b)=>a+b,0);
 
-/* =========================
-   OSCILAÇÕES
-========================= */
+  /* =========================
+     UPDATE DISPLAY
+  ========================= */
+  updateDisplay();
 
-current +=
-(Math.random()-0.5)*1.2;
+  /* =========================
+     PAYLOAD
+  ========================= */
+  const payload = {
+    code: document.getElementById('code').value,
+    soc: parseFloat(soc.toFixed(0)),
+    voltage: parseFloat(voltage.toFixed(2)),
+    current: parseFloat(current.toFixed(1)),
+    temp: parseFloat(temp.toFixed(1)),
+    cells
+  };
 
-temp +=
-(Math.random()-0.5)*0.3;
+  console.log(payload);
 
-/* =========================
-   CÉLULAS
-========================= */
-
-for(let i=0;i<count;i++){
-
-let input =
-document.getElementById('cell'+i);
-
-let value =
-parseFloat(input.value);
-
-value +=
-(Math.random()-0.5)*0.008;
-
-input.value =
-value.toFixed(3);
-
-cells.push(value);
-
-}
-
-/* =========================
-   TENSÃO TOTAL
-========================= */
-
-voltage =
-cells.reduce((a,b)=>a+b,0);
-
-/* =========================
-   UPDATE DISPLAY
-========================= */
-
-updateDisplay();
-
-/* =========================
-   PAYLOAD
-========================= */
-
-const payload = {
-
-code:
-document.getElementById('code').value,
-
-soc:
-parseFloat(soc.toFixed(0)),
-
-voltage:
-parseFloat(voltage.toFixed(2)),
-
-current:
-parseFloat(current.toFixed(1)),
-
-temp:
-parseFloat(temp.toFixed(1)),
-
-cells
-
-};
-
-console.log(payload);
-
-/* =========================
-   API
-========================= */
-
-try{
-
-const r = await fetch(API,{
-
-method:'POST',
-
-headers:{
-'Content-Type':'application/json'
-},
-
-body:
-JSON.stringify(payload)
-
-});
-
-const d = await r.json();
-
-console.log(d);
-
-}catch(e){
-
-console.log(e);
-
-}
-
+  /* =========================
+     API
+  ========================= */
+  try{
+    const r = await fetch(API,{
+      method:'POST',
+      headers:{ 'Content-Type':'application/json' },
+      body: JSON.stringify(payload)
+    });
+    const d = await r.json();
+    console.log(d);
+  }catch(e){
+    console.log(e);
+  }
 }
 
 /* =========================
    INIT
 ========================= */
-
 createCells();
-
-updateDisplay();
-
 </script>
-
 </body>
 </html>
+
