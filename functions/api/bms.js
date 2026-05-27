@@ -54,10 +54,10 @@ export async function onRequest({ request, env }) {
       `, { headers: { 'Content-Type': 'text/html; charset=utf-8' } });
     }
 
-    // ROTA 2: CADASTRO COM DISPARO DO RESEND (CORRIGIDO LINK DE VERIFICAÇÃO)
+    // ROTA 2: CADASTRO COM DISPARO DO RESEND
     if (action === 'register' && request.method === 'POST') {
-      const { nome, email, resignation, senha } = await request.json(); // Garante leitura correta dos dados
-      const userEmail = email || resignation;
+      const { nome, email, resignation, senha } = await request.json();
+      const userEmail = (email || resignation || '').trim().toLowerCase();
       if (!nome || !userEmail || !senha) return json({ ok: false, error: 'Dados inválidos' }, 400);
       
       const exists = await env.DB.prepare('SELECT id FROM users WHERE email = ?').bind(userEmail).first();
@@ -71,7 +71,6 @@ export async function onRequest({ request, env }) {
         .bind(nome, userEmail, senha_hash, token_verificacao).run();
 
       if (env.RESEND_API_KEY) {
-        // CORREÇÃO: Utiliza a rota exata em que a requisição bateu dinamicamente para evitar erro de subpasta
         const verifyLink = `${url.origin}${url.pathname}?action=verify_email&token=${token_verificacao}`;
         
         await fetch('https://api.resend.com/emails', {
@@ -92,7 +91,7 @@ export async function onRequest({ request, env }) {
                 <div style="text-align: center; margin: 36px 0;">
                   <a href="${verifyLink}" style="background: linear-gradient(90deg, #0080ff, #00ffff); color: #ffffff; padding: 16px 32px; text-decoration: none; border-radius: 12px; font-weight: bold; font-size: 16px;">ATIVAR MINHA CONTA</a>
                 </div>
-                <p style="text-align: center; color: #6b7c96; font-size: 12px; margin-top: 32px;">Se você não se cadastrou em nosso sistema, por favor, ignore este e-mail.</p>
+                <p style="text-align: center; color: #6b7c96; font-size: 12px; margin-top: 32px;">Se você não se cadastrou em nosso system, por favor, ignore este e-mail.</p>
               </div>
             `
           })
@@ -101,14 +100,15 @@ export async function onRequest({ request, env }) {
 
       return json({ ok: true });
     }
-
-    // ROTA 3: LOGIN COM VALIDAÇÃO DE CONTA ATIVA
-    if (action === 'login_user' && request.method === 'POST') {
+        // ROTA 3: LOGIN CORRIGIDO COM VALIDAÇÃO DE CONTA ATIVA
+    if (action === 'login' && request.method === 'POST') {
       const { email, senha } = await request.json();
+      const cleanEmail = (email || '').trim().toLowerCase();
+      
       const hash = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(senha));
       const senha_hash = Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2, '0')).join('');
       
-      const user = await env.DB.prepare('SELECT id, nome, email, email_verificado FROM users WHERE email = ? AND senha_hash = ?').bind(email, senha_hash).first();
+      const user = await env.DB.prepare('SELECT id, nome, email, email_verificado FROM users WHERE email = ? AND senha_hash = ?').bind(cleanEmail, senha_hash).first();
       
       if (!user) return json({ ok: false, error: 'E-mail ou senha incorretos' }, 401);
       
@@ -117,7 +117,8 @@ export async function onRequest({ request, env }) {
       }
 
       const token = btoa(`user:${user.id}:${Date.now()}`);
-      return json({ ok: true, token, nome: user.nome, email: user.email });
+      // Retorno estruturado para que o index.html salve corretamente as credenciais do usuário
+      return json({ ok: true, token, user: { id: user.id, nome: user.nome, email: user.email } });
     }
 
     if (action === 'login_admin' && request.method === 'POST') {
@@ -161,8 +162,7 @@ export async function onRequest({ request, env }) {
         return json({ ok: false, error: 'Token inválido' }, 401);
       }
     }
-
-    // ROTAS COM TOKEN
+        // ROTAS COM TOKEN
     if (action === 'add_bms' && request.method === 'POST') {
       if (!userId) return json({ ok: false, error: 'Login necessário' }, 401);
 
