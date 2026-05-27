@@ -28,36 +28,10 @@ width:100%;
 overflow-x:hidden
 }
 
-#login,#dash,#lista,#cadastro{
-position:relative;
-z-index:1;
+#dash{
 width:100%;
 min-height:100vh;
-display:flex;
-flex-direction:column;
-align-items:center;
 padding:8px
-}
-
-#dash,#lista{
-justify-content:flex-start;
-padding-top:12px
-}
-
-#login,#cadastro{
-justify-content:center
-}
-
-.title{
-font-size:clamp(32px,8vw,74px);
-font-weight:900;
-margin-bottom:16px;
-letter-spacing:3px;
-background:linear-gradient(90deg,var(--cyan),var(--blue));
--webkit-background-clip:text;
--webkit-text-fill-color:transparent;
-text-align:center;
-width:100%
 }
 
 .card{
@@ -66,16 +40,11 @@ border:1px solid rgba(0,255,255,.12);
 border-radius:16px;
 padding:12px;
 width:100%;
-margin-bottom:4px
-}
-
-#login.card,#cadastro.card{
-max-width:520px
+margin-bottom:6px
 }
 
 .gauge-wrap{
-width:100%;
-margin:0 0 4px 0
+width:100%
 }
 
 .gauge-card{
@@ -114,10 +83,7 @@ z-index:2
 .gauge-value{
 font-size:clamp(36px,10vw,58px);
 font-weight:900;
-color:#00ff88;
-width:3ch;
-text-align:center;
-font-variant-numeric:tabular-nums
+color:#00ff88
 }
 
 .gauge-label{
@@ -153,25 +119,6 @@ background:linear-gradient(90deg,#00ff88,#00ffff);
 transition:width.8s ease
 }
 
-.grid{
-display:grid;
-grid-template-columns:repeat(auto-fit,minmax(140px,1fr));
-gap:4px;
-width:100%;
-margin:0 0 4px 0
-}
-
-.grid.card{
-width:100%;
-height:110px;
-display:flex;
-flex-direction:column;
-justify-content:center;
-align-items:center;
-padding:12px;
-margin:0
-}
-
 .label{
 font-size:10px;
 letter-spacing:1.5px;
@@ -180,58 +127,14 @@ text-transform:uppercase;
 text-align:center
 }
 
-.value{
-font-size:clamp(22px,6vw,30px);
-font-weight:800;
-margin-top:8px;
-line-height:1;
-width:100%;
-text-align:center;
-font-variant-numeric:tabular-nums
-}
-
-input,button{
-width:100%;
-padding:18px;
-border-radius:18px;
-border:none;
-outline:none;
-margin-top:16px;
-font-size:18px
-}
-
-input{
-background:rgba(0,0,0,.5);
-color:#fff;
-font-family:monospace;
-letter-spacing:2px;
-border:1px solid rgba(0,255,255,.2)
-}
-
-input::placeholder{
-color:rgba(255,255,255,.3)
-}
-
-button{
-background:linear-gradient(90deg,var(--blue),var(--cyan));
-color:#fff;
-font-weight:700;
-cursor:pointer
-}
-
-.btn-sec{
-background:transparent;
-border:1px solid rgba(0,255,255,.3);
-color:var(--cyan)
-}
-
 .status{
 display:inline-flex;
 align-items:center;
-gap:10px;
+justify-content:center;
 padding:14px 26px;
 border-radius:999px;
-font-weight:700
+font-weight:700;
+width:160px
 }
 
 .on{
@@ -255,19 +158,38 @@ margin-top:14px
 }
 
 .bms-code{
-font-size:clamp(18px,4.5vw,24px);
+font-size:22px;
 font-weight:700;
 margin-top:12px;
 letter-spacing:1.5px;
-color:#fff;
-text-align:center;
-opacity:.95
+text-align:center
+}
+
+.grid{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(140px,1fr));
+gap:6px;
+width:100%
+}
+
+.grid .card{
+height:110px;
+display:flex;
+flex-direction:column;
+justify-content:center;
+align-items:center
+}
+
+.value{
+font-size:30px;
+font-weight:800;
+margin-top:8px
 }
 
 .diff{
 display:grid;
 grid-template-columns:repeat(4,1fr);
-gap:4px;
+gap:6px;
 margin-top:18px
 }
 
@@ -281,12 +203,8 @@ text-align:center
 .diff-item span{
 display:block;
 margin-top:6px;
-font-size:clamp(18px,5vw,22px);
-font-weight:800;
-width:6ch;
-margin:auto;
-text-align:center;
-font-variant-numeric:tabular-nums
+font-size:22px;
+font-weight:800
 }
 
 .cells{
@@ -300,21 +218,8 @@ margin-top:20px
 background:rgba(0,0,0,.4);
 border-radius:18px;
 padding:14px;
-border:1px solid rgba(255,255,255,.05)
-}
-
-.cell-num{
-font-size:11px;
-opacity:.5;
-margin-bottom:6px
-}
-
-.cell-val{
-font-size:clamp(16px,4vw,20px);
-font-weight:700;
-width:7ch;
-text-align:center;
-font-variant-numeric:tabular-nums
+border:1px solid rgba(255,255,255,.05);
+text-align:center
 }
 
 .cell.ok{
@@ -329,125 +234,127 @@ border-color:rgba(255,170,0,.25)
 border-color:rgba(255,68,68,.25)
 }
 
-.logout{
-margin-top:24px;
-background:rgba(255,68,68,.08);
-border:1px solid rgba(255,68,68,.2)
+.cell-num{
+font-size:11px;
+opacity:.5;
+margin-bottom:6px
 }
 
-.hidden{
-display:none!important
-}
-
-.bms-list{
-display:grid;
-grid-template-columns:repeat(auto-fill,minmax(260px,1fr));
-gap:4px;
-margin-top:20px
-}
-
-.bms-item{
-background:rgba(0,255,255,.05);
-border:1px solid rgba(0,255,255,.2);
-border-radius:16px;
-padding:20px;
-text-align:center;
-display:flex;
-flex-direction:column;
-align-items:center;
-gap:8px
-}
-
-.bms-item:active{
-transform:scale(0.98)
-}
-
-.bms-item h3{
-color:var(--cyan);
+.cell-val{
 font-size:20px;
-margin-bottom:0
-}
-
-.bms-item p{
-color:#888;
-font-size:13px;
-margin:0;
-text-align:center
-}
-  .bms-item button.del{
-background:rgba(255,68,68,.1);
-border:1px solid rgba(255,68,68,.4);
-padding:6px 16px;
-margin-top:12px;
-width:auto;
-box-shadow:0 0 15px rgba(255,68,68,.2);
-border-radius:10px;
-color:#fff;
-font-weight:600;
-font-size:14px;
-cursor:pointer
-}
-
-.user-info{
-color:#888;
-font-size:14px;
-text-align:center;
-margin-bottom:20px
-}
-
-.erro{
-background:rgba(255,0,0,.1);
-border:2px solid #ff4444;
-border-radius:12px;
-padding:16px;
-margin-top:16px;
-color:#ff4444;
-font-size:14px
-}
-
-.link-cadastro{
-margin-top:20px;
-text-align:center;
-color:#fff;
-cursor:pointer;
-opacity:.8
-}
-
-.link-cadastro span{
-color:#00ffff;
-text-decoration:underline
-}
-
-.footer-voltar{
-width:100%;
-margin-top:24px;
-margin-bottom:12px
+font-weight:700
 }
 
 @media(max-width:520px){
-.card{padding:12px}
-.gauge-card{padding:16px;min-height:240px}
-.grid{grid-template-columns:repeat(2,1fr)}
-.bms-list{grid-template-columns:1fr}
-.diff{grid-template-columns:repeat(2,1fr)}
+.grid{
+grid-template-columns:repeat(2,1fr)
+}
+
+.diff{
+grid-template-columns:repeat(2,1fr)
+}
 }
 </style>
 </head>
 
 <body>
 
-<!-- TODO O HTML QUE VOCÊ JÁ TEM PERMANECE IGUAL -->
+<div id="dash">
+
+<div class="gauge-wrap">
+<div class="card gauge-card">
+
+<div class="gauge" id="socGauge">
+<div class="gauge-inner">
+<div class="gauge-value" id="socValor">0%</div>
+<div class="gauge-label">STATE OF CHARGE</div>
+</div>
+</div>
+
+<div class="bar-wrap">
+<div class="bar-label">
+<span>Bateria</span>
+<span id="socBarTxt">0%</span>
+</div>
+
+<div class="bar">
+<div class="bar-fill" id="socBar"></div>
+</div>
+</div>
+
+</div>
+</div>
+
+<div class="card">
+
+<div class="label">Status</div>
+
+<div class="status-wrap">
+<span id="status" class="status off">Offline</span>
+<div class="bms-code" id="bms-titulo">SL000000000000</div>
+</div>
+
+</div>
+
+<div class="grid">
+
+<div class="card">
+<div class="label">SOC</div>
+<div class="value" id="soc" style="color:#00ff88">0%</div>
+</div>
+
+<div class="card">
+<div class="label">Tensão</div>
+<div class="value" id="volt" style="color:#00ffff">0V</div>
+</div>
+
+<div class="card">
+<div class="label">Corrente</div>
+<div class="value" id="corr" style="color:#ffaa00">0A</div>
+</div>
+
+<div class="card">
+<div class="label">Temperatura</div>
+<div class="value" id="temp" style="color:#ff4444">0°C</div>
+</div>
+
+</div>
+
+<div class="card">
+
+<div class="label">Células - Tensão Individual</div>
+
+<div class="diff">
+
+<div class="diff-item">
+Min
+<div><span id="celMin" style="color:#00ff88">0.00V</span></div>
+</div>
+
+<div class="diff-item">
+Max
+<div><span id="celMax" style="color:#ffaa00">0.00V</span></div>
+</div>
+
+<div class="diff-item">
+Diferença
+<div><span id="celDif" style="color:#ff4444">0.00V</span></div>
+</div>
+
+<div class="diff-item">
+Total
+<div><span id="celTot" style="color:#00ffff">0</span></div>
+</div>
+
+</div>
+
+<div id="celulas" class="cells"></div>
+
+</div>
+
+</div>
 
 <script>
-var API='/api/bms';
-var TOKEN=localStorage.getItem('bms_token');
-var USER=null;
-var CODIGO=localStorage.getItem('bms_codigo_ativo');
-var INT=null;
-
-try{
-USER=JSON.parse(localStorage.getItem('bms_user')||'null');
-}catch(e){}
 
 function limparDashboard(){
 
@@ -528,7 +435,7 @@ else if(val<3.4||val>4.15) cls='warn';
 
 html+='<div class="cell '+cls+'">';
 html+='<div class="cell-num">C'+(i+1)+'</div>';
-html+='<div class="cell-val">'+val.toFixed(3)+'</div>';
+html+='<div class="cell-val">'+val.toFixed(3)+'V</div>';
 html+='</div>';
 }
 
@@ -537,29 +444,11 @@ document.getElementById('celulas').innerHTML=html;
 
 function atualizar(){
 
-if(!CODIGO) return;
+fetch('/api/bms?action=data&code=SL000000000000')
 
-fetch(API+'?action=data&code='+CODIGO,{
-headers:{
-'Authorization':'Bearer '+TOKEN
-}
-})
-
-.then(function(r){
-
-if(r.status===401){
-sair();
-return;
-}
-
-if(!r.ok) return;
-
-return r.json();
-})
+.then(r=>r.json())
 
 .then(function(d){
-
-if(!d) return;
 
 var st=document.getElementById('status');
 
@@ -603,6 +492,12 @@ st.className='status off';
 limparDashboard();
 });
 }
+
+setInterval(atualizar,3000);
+
+atualizar();
+
 </script>
+
 </body>
 </html>
