@@ -32,7 +32,7 @@ export async function onRequest({ request, env }) {
             <div>
               <h1 style="color:#ff4444;font-size:24px;">Link inválido ou expirado</h1>
               <p style="opacity:0.7;">Este link de verificação já foi utilizado ou não existe.</p>
-              <a href="https://bms.app.br" style="display:inline-block;margin-top:20px;color:#00ffff;text-decoration:none;border:1px solid #00ffff;padding:10px 20px;border-radius:8px;">Voltar ao Início</a>
+              <a href="/" style="display:inline-block;margin-top:20px;color:#00ffff;text-decoration:none;border:1px solid #00ffff;padding:10px 20px;border-radius:8px;">Voltar ao Início</a>
             </div>
           </body>
           </html>
@@ -47,18 +47,20 @@ export async function onRequest({ request, env }) {
           <div>
             <h1 style="color:#00ff88;font-size:28px;margin-bottom:8px;">Conta Ativada!</h1>
             <p style="opacity:0.8;margin-bottom:24px;">Seu e-mail foi verificado com sucesso.</p>
-            <a href="https://bms.app.br" style="display:inline-block;background:linear-gradient(90deg, #0080ff, #00ffff);color:#fff;text-decoration:none;padding:14px 28px;border-radius:12px;font-weight:bold;box-shadow:0 4px 20px rgba(0,255,255,0.3);">ACESSAR MEU PAINEL</a>
+            <a href="/" style="display:inline-block;background:linear-gradient(90deg, #0080ff, #00ffff);color:#fff;text-decoration:none;padding:14px 28px;border-radius:12px;font-weight:bold;box-shadow:0 4px 20px rgba(0,255,255,0.3);">ACESSAR MEU PAINEL</a>
           </div>
         </body>
         </html>
       `, { headers: { 'Content-Type': 'text/html; charset=utf-8' } });
     }
 
-    // ROTA 2: CADASTRO COM DISPARO DO RESEND (PRODUÇÃO COM DOMÍNIO PRÓPRIO)
+    // ROTA 2: CADASTRO COM DISPARO DO RESEND (CORRIGIDO LINK DE VERIFICAÇÃO)
     if (action === 'register' && request.method === 'POST') {
-      const { nome, email, senha } = await request.json();
-      if (!nome || !email || !senha) return json({ ok: false, error: 'Dados inválidos' }, 400);
-      const exists = await env.DB.prepare('SELECT id FROM users WHERE email = ?').bind(email).first();
+      const { nome, email, resignation, senha } = await request.json(); // Garante leitura correta dos dados
+      const userEmail = email || resignation;
+      if (!nome || !userEmail || !senha) return json({ ok: false, error: 'Dados inválidos' }, 400);
+      
+      const exists = await env.DB.prepare('SELECT id FROM users WHERE email = ?').bind(userEmail).first();
       if (exists) return json({ ok: false, error: 'E-mail já cadastrado' }, 400);
       
       const hash = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(senha));
@@ -66,12 +68,11 @@ export async function onRequest({ request, env }) {
       
       const token_verificacao = crypto.randomUUID();
       await env.DB.prepare('INSERT INTO users (nome, email, senha_hash, email_verificado, token_verificacao) VALUES (?, ?, ?, 0, ?)')
-        .bind(nome, email, senha_hash, token_verificacao).run();
+        .bind(nome, userEmail, senha_hash, token_verificacao).run();
 
-      // Envio de E-mail usando o seu domínio próprio e profissional
       if (env.RESEND_API_KEY) {
-        // Força o link de verificação a apontar para o seu domínio oficial bms.app.br
-        const verifyLink = `https://bms.app.br/api/bms?action=verify_email&token=${token_verificacao}`;
+        // CORREÇÃO: Utiliza a rota exata em que a requisição bateu dinamicamente para evitar erro de subpasta
+        const verifyLink = `${url.origin}${url.pathname}?action=verify_email&token=${token_verificacao}`;
         
         await fetch('https://api.resend.com/emails', {
           method: 'POST',
@@ -80,8 +81,8 @@ export async function onRequest({ request, env }) {
             'Content-Type': 'application/json'
           },
           body: JSON.stringify({
-            from: 'SMART BMS <nao-responda@bms.app.br>', // ALTERADO: Agora usando o seu domínio oficial liberado
-            to: email,
+            from: 'SMART BMS <nao-responda@bms.app.br>',
+            to: userEmail,
             subject: 'Confirme seu e-mail - SMART BMS',
             html: `
               <div style="font-family: sans-serif; max-width: 600px; margin: auto; padding: 24px; background: #05070d; color: #ffffff; border-radius: 12px; border: 1px solid rgba(0,255,255,0.1);">
