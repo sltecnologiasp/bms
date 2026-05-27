@@ -118,6 +118,11 @@ button:active{transform:scale(0.98)}
 .link-cadastro{margin-top:20px;text-align:center;color:#6b7c96;cursor:pointer;font-size:14px}
 .link-cadastro span{color:var(--cyan);text-decoration:underline}
 
+/* Estilo para o link do WhatsApp no rodapé */
+.footer-link{font-size:11px;opacity:0.3;margin-top:20px;text-align:center;letter-spacing:1px;}
+.footer-link a{color:#fff;text-decoration:none;transition:opacity 0.2s;}
+.footer-link a:hover{opacity:0.8;text-decoration:underline;}
+
 @media(max-width:520px){.grid{grid-template-columns:repeat(2,1fr)}.diff{grid-template-columns:repeat(2,1fr)}}
 </style>
 </head>
@@ -140,7 +145,7 @@ button:active{transform:scale(0.98)}
     <p class="link-cadastro" onclick="mostrarCadastro()">Ainda não tem conta? <span>Cadastre-se</span></p>
     <div id="erro" class="erro hidden"></div>
   </div>
-  <div style="font-size:11px; opacity:0.3; margin-top:20px; text-align:center; letter-spacing:1px;">SL TECNOLOGIA &bull; © Todos os direitos reservados</div>
+  <div class="footer-link"><a href="https://wa.me/5515991355393" target="_blank">SL TECNOLOGIA</a> &bull; © Todos os direitos reservados</div>
 </div>
 
 <div id="cadastro" class="hidden">
@@ -169,7 +174,7 @@ button:active{transform:scale(0.98)}
     <button class="btn-sec" onclick="mostrarLogin()">VOLTAR</button>
     <div id="erro-cad" class="erro hidden"></div>
   </div>
-  <div style="font-size:11px; opacity:0.3; margin-top:20px; text-align:center; letter-spacing:1px;">SL TECNOLOGIA &bull; © Todos os direitos reservados</div>
+  <div class="footer-link"><a href="https://wa.me/5515991355393" target="_blank">SL TECNOLOGIA</a> &bull; © Todos os direitos reservados</div>
 </div>
 
 <div id="lista" class="hidden">
@@ -189,7 +194,7 @@ button:active{transform:scale(0.98)}
   </div>
   
   <button class="logout" onclick="sair()">DESCONECTAR CONTA</button>
-  <div style="font-size:11px; opacity:0.3; margin-top:20px; text-align:center; letter-spacing:1px;">SL TECNOLOGIA &bull; © Todos os direitos reservados</div>
+  <div class="footer-link"><a href="https://wa.me/5515991355393" target="_blank">SL TECNOLOGIA</a> &bull; © Todos os direitos reservados</div>
 </div>
 
 <div id="dash" class="hidden">
@@ -285,7 +290,7 @@ function mostrarCadastro(){
   document.getElementById('cadastro').classList.remove('hidden');
 }
 
-// FUNÇÃO DOS OLHINHOS: Altera a visibilidade da senha de forma independente
+// FUNÇÃO DOS OLHINHOS: Altera a visibilidade da senha de forma independente nas telas
 function togglePass(inputId, iconEl) {
   var input = document.getElementById(inputId);
   if (!input) return;
@@ -300,7 +305,7 @@ function togglePass(inputId, iconEl) {
   }
 }
 
-// LOGIN: Conectando com a rota 'login' corrigida no Worker
+// LOGIN: Aponta para a rota ajustada 'login'
 function login(){
   var e = document.getElementById('erro');
   if (e) e.classList.add('hidden');
@@ -344,7 +349,7 @@ function login(){
   });
 }
 
-// CADASTRO: Com verificação de senha e timer de reenvio de 60 segundos nativo
+// CADASTRO: Valida senhas iguais e aciona o bloqueio temporário de 60s
 function cadastrar(){
   var btn = document.getElementById('btn-cadastrar');
   if (btn && btn.disabled) return;
@@ -373,7 +378,6 @@ function cadastrar(){
     return;
   }
 
-  // Ativa o timer visual de 60 segundos
   if (btn) {
     btn.disabled = true;
     btn.style.opacity = '0.5';
