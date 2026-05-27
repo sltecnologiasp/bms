@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 
-<title>ESP32 SIMULATOR</title>
+<title>ESP32 WEB PREMIUM</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
 
@@ -17,18 +17,29 @@ box-sizing:border-box;
 font-family:'Inter',sans-serif;
 }
 
+:root{
+--bg:#05070d;
+--cyan:#00ffff;
+--blue:#0080ff;
+--green:#00ff88;
+--red:#ff4444;
+--orange:#ffaa00;
+}
+
 body{
-background:#05070d;
+background:var(--bg);
 color:#fff;
 padding:20px;
 min-height:100vh;
+overflow-x:hidden;
 }
 
 .title{
-font-size:42px;
+font-size:clamp(34px,7vw,64px);
 font-weight:900;
-margin-bottom:20px;
-background:linear-gradient(90deg,#00ffff,#0080ff);
+margin-bottom:25px;
+text-align:center;
+background:linear-gradient(90deg,var(--cyan),var(--blue));
 -webkit-background-clip:text;
 -webkit-text-fill-color:transparent;
 }
@@ -36,15 +47,18 @@ background:linear-gradient(90deg,#00ffff,#0080ff);
 .card{
 background:rgba(255,255,255,.04);
 border:1px solid rgba(0,255,255,.15);
-border-radius:24px;
-padding:20px;
+border-radius:28px;
+padding:24px;
 margin-bottom:20px;
+backdrop-filter:blur(20px);
+box-shadow:
+0 0 30px rgba(0,255,255,.08);
 }
 
 .grid{
 display:grid;
 grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
-gap:15px;
+gap:16px;
 }
 
 .label{
@@ -52,77 +66,120 @@ font-size:12px;
 opacity:.6;
 margin-bottom:8px;
 text-transform:uppercase;
+letter-spacing:1px;
 }
 
 .value{
-font-size:36px;
+font-size:40px;
 font-weight:800;
 }
 
-input{
+input,
+select{
 width:100%;
 padding:16px;
 border:none;
 outline:none;
-border-radius:16px;
+border-radius:18px;
 background:#0b1220;
 color:#fff;
 font-size:18px;
 margin-top:8px;
+border:1px solid rgba(0,255,255,.15);
 }
 
 button{
 width:100%;
-padding:16px;
+padding:18px;
 border:none;
-border-radius:16px;
+border-radius:18px;
 margin-top:15px;
 font-size:18px;
 font-weight:700;
 cursor:pointer;
-background:linear-gradient(90deg,#0080ff,#00ffff);
+background:linear-gradient(90deg,var(--blue),var(--cyan));
 color:#fff;
+box-shadow:
+0 0 30px rgba(0,255,255,.2);
+}
+
+button:hover{
+transform:scale(1.01);
 }
 
 .cells{
 display:grid;
 grid-template-columns:repeat(auto-fit,minmax(90px,1fr));
-gap:10px;
+gap:12px;
 margin-top:20px;
 }
 
 .cell{
 background:#0b1220;
 padding:12px;
-border-radius:16px;
+border-radius:18px;
 text-align:center;
+border:1px solid rgba(255,255,255,.05);
 }
 
 .cell input{
 text-align:center;
-font-size:16px;
+font-size:15px;
 padding:10px;
 margin-top:8px;
 }
 
 .status{
-padding:12px 18px;
+padding:14px 20px;
 border-radius:999px;
 display:inline-block;
 font-weight:700;
-margin-top:10px;
+margin-top:20px;
 }
 
 .on{
 background:rgba(0,255,136,.1);
 border:1px solid rgba(0,255,136,.3);
-color:#00ff88;
+color:var(--green);
 }
 
 .off{
 background:rgba(255,68,68,.1);
 border:1px solid rgba(255,68,68,.3);
-color:#ff4444;
+color:var(--red);
+}
+
+.top-grid{
+display:grid;
+grid-template-columns:repeat(2,1fr);
+gap:14px;
+margin-top:20px;
+}
+
+.metric{
+background:#0b1220;
+border-radius:22px;
+padding:20px;
+text-align:center;
+border:1px solid rgba(0,255,255,.08);
+}
+
+.metric-value{
+font-size:36px;
+font-weight:800;
+margin-top:10px;
+}
+
+@media(max-width:700px){
+
+.top-grid{
+grid-template-columns:1fr 1fr;
+}
+
+.metric-value{
+font-size:28px;
+}
+
 }
 
 </style>
@@ -135,41 +192,87 @@ ESP32 WEB PREMIUM
 
 <div class="card">
 
+<div class="grid">
+
+<div>
 <div class="label">
 Código BMS
 </div>
 
-<input id="code" value="SL000000000001">
-
-<div class="grid" style="margin-top:20px">
+<input
+id="code"
+value="SL000000000001"
+maxlength="14"
+>
+</div>
 
 <div>
+<div class="label">
+Quantidade de Células
+</div>
+
+<select id="cellCount">
+
+<option value="1">1S</option>
+<option value="2">2S</option>
+<option value="3">3S</option>
+<option value="4">4S</option>
+<option value="5">5S</option>
+<option value="6">6S</option>
+<option value="7">7S</option>
+<option value="8">8S</option>
+<option value="9">9S</option>
+<option value="10">10S</option>
+<option value="11">11S</option>
+<option value="12" selected>12S</option>
+<option value="13">13S</option>
+<option value="14">14S</option>
+<option value="15">15S</option>
+<option value="16">16S</option>
+
+</select>
+
+</div>
+
+</div>
+
+<button onclick="createCells()">
+GERAR CÉLULAS
+</button>
+
+<div class="top-grid">
+
+<div class="metric">
 <div class="label">SOC</div>
-<input id="soc" type="number" value="85">
+<div class="metric-value" id="socText" style="color:#00ff88">
+0%
+</div>
 </div>
 
-<div>
+<div class="metric">
 <div class="label">Tensão</div>
-<input id="voltage" type="number" step="0.1" value="53.4">
+<div class="metric-value" id="voltageText" style="color:#00ffff">
+0V
+</div>
 </div>
 
-<div>
+<div class="metric">
 <div class="label">Corrente</div>
-<input id="current" type="number" step="0.1" value="12.5">
+<div class="metric-value" id="currentText" style="color:#ffaa00">
+0A
+</div>
 </div>
 
-<div>
+<div class="metric">
 <div class="label">Temperatura</div>
-<input id="temp" type="number" step="0.1" value="31.2">
+<div class="metric-value" id="tempText" style="color:#ff4444">
+0°C
+</div>
 </div>
 
 </div>
 
-<div class="label" style="margin-top:25px">
-Células
-</div>
-
-<div id="cells" class="cells"></div>
+<div class="cells" id="cells"></div>
 
 <button onclick="toggleSim()">
 START / STOP SIMULAÇÃO
@@ -183,41 +286,67 @@ DESCONECTADO
 
 <script>
 
-const API = '/api/bms?action=update';
+const API =
+'/api/bms?action=update';
 
 let running = false;
 let interval;
 
 /* =========================
+   INITIAL VALUES
+========================= */
+
+let soc = 20;
+let voltage = 51.2;
+let current = 8.5;
+let temp = 28.0;
+
+/* =========================
    CREATE CELLS
 ========================= */
 
-const cellsDiv =
+function createCells(){
+
+const count =
+parseInt(
+document.getElementById('cellCount').value
+);
+
+const container =
 document.getElementById('cells');
 
-for(let i=0;i<16;i++){
+container.innerHTML='';
 
-const div =
+for(let i=0;i<count;i++){
+
+const cell =
 document.createElement('div');
 
-div.className='cell';
+cell.className='cell';
 
-div.innerHTML=`
-<div>C${i+1}</div>
+cell.innerHTML=`
+
+<div style="margin-bottom:6px">
+C${i+1}
+</div>
+
 <input
 type="number"
 step="0.001"
-value="${(3.320 + Math.random()*0.02).toFixed(3)}"
+value="${(3.300 + Math.random()*0.05).toFixed(3)}"
 id="cell${i}"
 >
+
 `;
 
-cellsDiv.appendChild(div);
+container.appendChild(cell);
+
+}
 
 }
 
 /* =========================
-   SIMULATION
+   START
 ========================= */
 
 function toggleSim(){
@@ -249,75 +378,130 @@ status.textContent='DESCONECTADO';
 }
 
 /* =========================
+   UPDATE METRICS
+========================= */
+
+function updateDisplay(){
+
+document.getElementById('socText')
+.textContent =
+soc.toFixed(0)+'%';
+
+document.getElementById('voltageText')
+.textContent =
+voltage.toFixed(2)+'V';
+
+document.getElementById('currentText')
+.textContent =
+current.toFixed(1)+'A';
+
+document.getElementById('tempText')
+.textContent =
+temp.toFixed(1)+'°C';
+
+}
+
+/* =========================
    SEND DATA
 ========================= */
 
 async function sendData(){
 
-const cells = [];
-
-for(let i=0;i<16;i++){
-
-let val =
-parseFloat(
-document.getElementById('cell'+i).value
+const count =
+parseInt(
+document.getElementById('cellCount').value
 );
 
-val += (Math.random()-0.5)*0.005;
+const cells = [];
 
-document.getElementById('cell'+i).value =
-val.toFixed(3);
+/* =========================
+   SOC AUTO CHARGE
+========================= */
 
-cells.push(val);
+soc += 0.15;
+
+if(soc > 100){
+soc = 100;
+}
+
+/* =========================
+   OSCILLATION
+========================= */
+
+voltage +=
+(Math.random()-0.5)*0.15;
+
+current +=
+(Math.random()-0.5)*1.5;
+
+temp +=
+(Math.random()-0.5)*0.3;
+
+/* =========================
+   CELLS
+========================= */
+
+for(let i=0;i<count;i++){
+
+let input =
+document.getElementById('cell'+i);
+
+let value =
+parseFloat(input.value);
+
+value +=
+(Math.random()-0.5)*0.008;
+
+input.value =
+value.toFixed(3);
+
+cells.push(value);
 
 }
 
-let soc =
-parseFloat(document.getElementById('soc').value);
+/* =========================
+   VOLTAGE FROM CELLS
+========================= */
 
-soc += (Math.random()-0.5)*0.3;
+voltage =
+cells.reduce((a,b)=>a+b,0);
 
-soc = Math.max(0,Math.min(100,soc));
+/* =========================
+   UPDATE UI
+========================= */
 
-document.getElementById('soc').value =
-soc.toFixed(0);
+updateDisplay();
 
-let voltage =
-parseFloat(document.getElementById('voltage').value);
-
-voltage += (Math.random()-0.5)*0.2;
-
-document.getElementById('voltage').value =
-voltage.toFixed(2);
-
-let current =
-parseFloat(document.getElementById('current').value);
-
-current += (Math.random()-0.5)*2;
-
-document.getElementById('current').value =
-current.toFixed(1);
-
-let temp =
-parseFloat(document.getElementById('temp').value);
-
-temp += (Math.random()-0.5)*0.5;
-
-document.getElementById('temp').value =
-temp.toFixed(1);
+/* =========================
+   PAYLOAD
+========================= */
 
 const payload = {
 
 code:
 document.getElementById('code').value,
 
-soc,
-voltage,
-current,
-temp,
+soc:
+parseFloat(soc.toFixed(0)),
+
+voltage:
+parseFloat(voltage.toFixed(2)),
+
+current:
+parseFloat(current.toFixed(1)),
+
+temp:
+parseFloat(temp.toFixed(1)),
+
 cells
 
 };
+
+console.log(payload);
+
+/* =========================
+   API
+========================= */
 
 try{
 
@@ -329,7 +513,8 @@ headers:{
 'Content-Type':'application/json'
 },
 
-body:JSON.stringify(payload)
+body:
+JSON.stringify(payload)
 
 });
 
@@ -344,6 +529,14 @@ console.log(e);
 }
 
 }
+
+/* =========================
+   INIT
+========================= */
+
+createCells();
+
+updateDisplay();
 
 </script>
 
