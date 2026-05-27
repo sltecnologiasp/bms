@@ -232,14 +232,16 @@ button.logout{margin-top:4px;background:transparent;border:1px solid rgba(255,68
 
 <div id="modalEditUser" class="modal">
   <div class="modal-content small">
-    <button class="modal-close" style="position:absolute; top:16px; right:16px; margin-top:0;" onclick="closeEditUser()">FECHAR</button>
-    <h2 style="text-align:center;margin-bottom:16px;font-size:20px;font-weight:900">Editar Cliente</h2>
+    <h2 style="text-align:center;margin-bottom:16px;font-size:20px;font-weight:900;background:linear-gradient(90deg,var(--cyan),var(--blue));-webkit-background-clip:text;-webkit-text-fill-color:transparent">Editar Cliente</h2>
     <input id="editUserId" type="hidden">
     <div class="label">Nome do Cliente</div>
     <input id="editUserNome" placeholder="Nome">
     <div class="label" style="margin-top:12px">E-mail de Acesso</div>
     <input id="editUserEmail" placeholder="Email">
+    
     <button onclick="salvarUser()">SALVAR ALTERAÇÕES</button>
+    <button class="btn-sec" style="margin-top:8px" onclick="closeEditUser()">← VOLTAR</button>
+    
     <p id="editMsg" style="text-align:center;margin-top:12px;font-size:14px;font-weight:600"></p>
   </div>
 </div>
@@ -521,7 +523,6 @@ async function listarUsers(){
   if(r.status===401){adminLogout();return;}
   const d = await r.json();
   
-  // ALINHAMENTO CENTRAL ATUALIZADO: text-align:center aplicado nos dados identificadores
   document.getElementById('listaUsers').innerHTML = d.map(u=>`
     <div class="card">
       <div class="card-top">
