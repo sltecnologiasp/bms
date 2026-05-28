@@ -351,7 +351,6 @@ function gerarCodigoAleatorio(){
   return 'SL' + numeros;
 }
 
-// CORRIGIDO: Nome da função unificado com o botão HTML
 async function gerarECadastrar(){
   const code = gerarCodigoAleatorio();
   document.getElementById('code').value = code;
@@ -394,26 +393,25 @@ function closeBmsModal(){
   carregarTudo();
 }
 
-function checarOnline(bms) {
-  if (!bms) return false;
-  if (bms.hasOwnProperty('online') && bms.online === false) {
-    return false;
+// SOLUÇÃO INJETADA PARA VERIFICAÇÃO INDIVIDUAL COM A ROTA PRECISA DO CLIENTE
+async function verificarStatusBmsIndividual(code, elementoStatus) {
+  try {
+    const r = await fetch(API + '?action=data&code=' + code, { headers: authHeaders() });
+    if (!r.ok) return;
+    const d = await r.json();
+    
+    // Atualiza dinamicamente o card com base na resposta de telemetria em tempo real
+    if (d && d.online) {
+      elementoStatus.textContent = 'Online';
+      elementoStatus.className = 'status on';
+    } else {
+      elementoStatus.textContent = 'Offline';
+      elementoStatus.className = 'status off';
+    }
+  } catch(e) {
+    elementoStatus.textContent = 'Offline';
+    elementoStatus.className = 'status off';
   }
-  if (bms.user_id && (!bms.voltage || bms.voltage === 0 || bms.soc === 0)) {
-    return false;
-  }
-
-  const timestampStr = bms.updated_at || bms.created_at;
-  if (!timestampStr) return false;
-
-  const bmsTime = new Date(timestampStr).getTime();
-  const agora = Date.now();
-
-  if (agora - bmsTime > 12000 && bms.online === undefined) {
-    return false;
-  }
-
-  return true;
 }
 
 function renderAdminDashboard(){
@@ -421,44 +419,46 @@ function renderAdminDashboard(){
   const bms = bmsList.find(b => b.code === activeBmsCode);
   if(!bms) return;
 
-  const online = checarOnline(bms);
-  
-  document.getElementById('modalBmsDono').innerHTML = bms.user_id ? 
-    `<span class="badge badge-orange">Vinculada: ${bms.dono_nome || bms.dono_email}</span>` : 
-    `<span class="badge badge-green">Disponível</span>`;
+  // No painel interno estendemos a mesma lógica direta em tempo real
+  fetch(API + '?action=data&code=' + activeBmsCode, { headers: authHeaders() })
+  .then(r => r.json())
+  .then(d => {
+    const online = d && d.online;
     
-  const st = document.getElementById('adminStatus');
-  st.textContent = online ? 'Online' : 'Offline';
-  st.className = 'status ' + (online ? 'on' : 'off');
+    document.getElementById('modalBmsDono').innerHTML = bms.user_id ? 
+      `<span class="badge badge-orange">Vinculada: ${bms.dono_nome || bms.dono_email}</span>` : 
+      `<span class="badge badge-green">Disponível</span>`;
+      
+    const st = document.getElementById('adminStatus');
+    st.textContent = online ? 'Online' : 'Offline';
+    st.className = 'status ' + (online ? 'on' : 'off');
 
-  const socVal = bms.soc ? parseInt(bms.soc) : 0;
-  
-  if(!online){
-    document.getElementById('adminSoc').textContent = '0%';
-    document.getElementById('adminVolt').textContent = '0.00V';
-    document.getElementById('adminCorr').textContent = '0.0A';
-    document.getElementById('adminTemp').textContent = '0.0°C';
+    const socVal = d.soc ? parseInt(d.soc) : 0;
     
-    document.getElementById('adminSocValor').textContent = '0%';
-    document.getElementById('adminSocBarTxt').textContent = '0%';
-    document.getElementById('adminSocBar').style.width = '0%';
-    document.getElementById('adminSocGauge').style.background = 'var(--gauge-empty)';
-    
-    renderAdminCells([]);
-  } else {
-    document.getElementById('adminSoc').textContent = socVal + '%';
-    document.getElementById('adminVolt').textContent = (bms.voltage ? bms.voltage.toFixed(2) : '0.00') + 'V';
-    document.getElementById('adminCorr').textContent = (bms.current ? bms.current.toFixed(1) : '0.0') + 'A';
-    document.getElementById('adminTemp').textContent = (bms.temp ? bms.temp.toFixed(1) : '0.0') + '°C';
-    
-    document.getElementById('adminSocValor').textContent = socVal + '%';
-    document.getElementById('adminSocBarTxt').textContent = socVal + '%';
-    document.getElementById('adminSocBar').style.width = socVal + '%';
-    const deg = socVal * 3.6;
-    document.getElementById('adminSocGauge').style.background = `conic-gradient(var(--green) 0deg, var(--cyan) ${deg}deg, var(--gauge-empty) ${deg}deg)`;
-    
-    renderAdminCells(bms.cells || []);
-  }
+    if(!online){
+      document.getElementById('adminSoc').textContent = '0%';
+      document.getElementById('adminVolt').textContent = '0.00V';
+      document.getElementById('adminCorr').textContent = '0.0A';
+      document.getElementById('adminTemp').textContent = '0.0°C';
+      document.getElementById('adminSocValor').textContent = '0%';
+      document.getElementById('adminSocBarTxt').textContent = '0%';
+      document.getElementById('adminSocBar').style.width = '0%';
+      document.getElementById('adminSocGauge').style.background = 'var(--gauge-empty)';
+      renderAdminCells([]);
+    } else {
+      document.getElementById('adminSoc').textContent = socVal + '%';
+      document.getElementById('adminVolt').textContent = (d.voltage ? d.voltage.toFixed(2) : '0.00') + 'V';
+      document.getElementById('adminCorr').textContent = (d.current ? d.current.toFixed(1) : '0.0') + 'A';
+      document.getElementById('adminTemp').textContent = (d.temp ? d.temp.toFixed(1) : '0.0') + '°C';
+      
+      document.getElementById('adminSocValor').textContent = socVal + '%';
+      document.getElementById('adminSocBarTxt').textContent = socVal + '%';
+      document.getElementById('adminSocBar').style.width = socVal + '%';
+      const deg = socVal * 3.6;
+      document.getElementById('adminSocGauge').style.background = `conic-gradient(var(--green) 0deg, var(--cyan) ${deg}deg, var(--gauge-empty) ${deg}deg)`;
+      renderAdminCells(d.cells || []);
+    }
+  });
 }
 
 function renderAdminCells(cells){
@@ -538,13 +538,7 @@ async function carregarTudo(){
   const rBms = await fetch(API+'?action=admin_list_master',{headers:authHeaders()});
   const dBms = await rBms.json();
   
-  bmsList = dBms.sort((a,b) => {
-    const aOnline = checarOnline(a);
-    const bOnline = checarOnline(b);
-    if (aOnline && !bOnline) return -1;
-    if (!aOnline && bOnline) return 1;
-    return (b.updated_at ? new Date(b.updated_at).getTime() : 0) - (a.updated_at ? new Date(a.updated_at).getTime() : 0);
-  });
+  bmsList = dBms;
 
   if(!activeBmsCode) {
     atualizarHTMLListaBms();
@@ -555,13 +549,12 @@ async function carregarTudo(){
 
 function atualizarHTMLListaBms() {
   document.getElementById('lista').innerHTML = bmsList.map(b=>{
-    const online = checarOnline(b);
     const dono = b.user_id? `<span class="badge badge-orange">Vinculada</span>` : `<span class="badge badge-green">Disponível</span>`;
     return `
     <div class="card" onclick="viewBmsDetails('${b.code}')">
       <div class="card-top">
         <div style="text-align:center">
-          <span class="status ${online?'on':'off'}">${online?'Online':'Offline'}</span>
+          <span id="status-card-${b.code}" class="status off">Carregando...</span>
         </div>
         <div class="card-code">${b.code}</div>
         <div style="text-align:center">${dono}</div>
@@ -569,6 +562,14 @@ function atualizarHTMLListaBms() {
       <button class="del" onclick="del('${b.code}')">EXCLUIR</button>
     </div>
   `}).join('') || '<div class="card card-empty"><div>Nenhuma BMS cadastrada no sistema</div></div>';
+
+  // Dispara a checagem individual ultra rápida em segundo plano para cada card ativo
+  bmsList.forEach(b => {
+    const elStatus = document.getElementById(`status-card-${b.code}`);
+    if (elStatus) {
+      verificarStatusBmsIndividual(b.code, elStatus);
+    }
+  });
 }
 
 async function listarUsers(){
@@ -606,7 +607,7 @@ async function setupInicial() {
 }
 if(adminToken === 'admin_ok') setupInicial();
 
-setInterval(()=>{if(adminToken && document.getElementById('painel').classList.contains('active'))carregarTudo()},5000);
+setInterval(()=>{if(adminToken && document.getElementById('painel').classList.contains('active'))carregarTudo()}, 5000);
 </script>
 </body>
 </html>
