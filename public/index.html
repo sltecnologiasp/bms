@@ -263,8 +263,13 @@ button:active{transform:scale(0.98)}
 <body>
 
 <div id="login">
-  <div class="title">SMART BMS</div>
-  <div class="user-info" style="margin-bottom:12px">Gerenciamento Avançado</div>
+  <!-- INJETADO: Bloco da Logo Estilizada "1000229030.png" com o texto integrado embaixo -->
+  <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; margin-bottom: 24px; width: 100%;">
+    <img src="1000229030.png" alt="Logo BMS" style="width: 100px; height: 100px; object-fit: contain; border-radius: 50%; box-shadow: 0 4px 15px rgba(0, 180, 216, 0.2); background: var(--card-bg); padding: 8px; transition: transform 0.3s ease;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+    <div style="font-size: clamp(32px, 7vw, 48px); font-weight: 900; margin-top: 12px; letter-spacing: 2px; background: linear-gradient(90deg, var(--blue), var(--cyan)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; text-align: center;">SMART BMS</div>
+    <div class="user-info" style="margin-bottom:0; margin-top: 4px;">Gerenciamento Avançado</div>
+  </div>
+
   <div class="card">
     <div class="label">E-mail</div>
     <input id="email" type="email" placeholder="seu@email.com">
@@ -876,7 +881,7 @@ function carregarLista(){
   })
   .then(function(r){
     if(r && r.status === 401){
-      alert('Sua conta ou sessão não está mais ativa no sistema.');
+      alert('Sua conta ou sessão não está mais activa no sistema.');
       sairSemConfirmacao();
       return;
     }
@@ -1001,7 +1006,6 @@ function renderCelulas(cels){
   var max = Math.max.apply(null, vals);
   var dif = max - min;
   
-  // MODIFICADO AQUI: Sumário (Min, Max, Diferença) agora formatado uniformemente com 2 casas decimais (ex: 3.31V)
   document.getElementById('celMin').textContent = min.toFixed(2)+'V';
   document.getElementById('celMax').textContent = max.toFixed(2)+'V';
   document.getElementById('celDif').textContent = dif.toFixed(2)+'V';
@@ -1039,7 +1043,7 @@ function atualizar(){
   })
   .then(function(r){
     if(r && r.status === 401){
-      alert('Sua conta ou sessão não está mais ativa no sistema.');
+      alert('Sua conta ou sessão não está mais activa no sistema.');
       sairSemConfirmacao();
       return;
     }
