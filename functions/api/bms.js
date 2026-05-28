@@ -95,10 +95,9 @@ export async function onRequest({ request, env }) {
       if (!cleanEmail) return json({ ok: false, error: 'E-mail obrigatório' }, 400);
 
       const user = await env.DB.prepare('SELECT id, nome FROM users WHERE email = ?').bind(cleanEmail).first();
-      if (!user) return json({ ok: true }); // Retorna OK falso por segurança contra robôs
+      if (!user) return json({ ok: true }); 
 
       const token_reset = crypto.randomUUID();
-      // Reutiliza o campo 'token_verificacao' para salvar o token de reset temporário
       await env.DB.prepare('UPDATE users SET token_verificacao = ? WHERE id = ?').bind(token_reset, user.id).run();
 
       if (env.RESEND_API_KEY) {
@@ -142,7 +141,7 @@ export async function onRequest({ request, env }) {
       return json({ ok: true });
     }
 
-    // ROTA 5: LOGIN
+    // ROTA 5: LOGIN USER
     if (action === 'login' && request.method === 'POST') {
       const { email, senha } = await request.json();
       const cleanEmail = (email || '').trim().toLowerCase();
@@ -155,12 +154,14 @@ export async function onRequest({ request, env }) {
       return json({ ok: true, token, user: { id: user.id, nome: user.nome, email: user.email } });
     }
 
+    // ROTA 6: LOGIN ADMIN
     if (action === 'login_admin' && request.method === 'POST') {
       const { user, password } = await request.json();
       if (user === 'administrador' && password === '426240637') return json({ ok: true, token: 'admin_ok' });
       return json({ ok: false, error: 'Credenciais inválidas' }, 401);
     }
 
+    // ROTA 7: UPDATE TELEMETRIA DA EQUIPE/BMS
     if (action === 'update' && request.method === 'POST') {
       const { code, soc, voltage, current, temp, cells } = await request.json();
       if (!code) return json({ ok: false, error: 'Code obrigatório' }, 400);
@@ -175,7 +176,7 @@ export async function onRequest({ request, env }) {
     }
 
     // ==========================================
-    // BARREIRA DE SEGURANÇA
+    // BARREIRA DE SEGURANÇA (TOKEN)
     // ==========================================
     const auth = request.headers.get('Authorization');
     if (!auth?.startsWith('Bearer ')) return json({ ok: false, error: 'Não autorizado' }, 401);
@@ -198,7 +199,82 @@ export async function onRequest({ request, env }) {
     }
 
     // ==========================================
-    // ROTAS PROTEGIDAS
+    // ROTAS PROTEGIDAS - EXCLUSIVAS DO ADMIN
+    // ==========================================
+    if (isAdmin) {
+      // LISTAR TODAS AS BMS PARA O ADMIN
+      if (action === 'admin_list_master' && request.method === 'GET') {
+        const { results } = await env.DB.prepare(`
+          SELECT bm.code, bm.user_id, b.soc, b.voltage, b.current, b.temp, b.cells, b.updated_at,
+                 u.nome as dono_nome, u.email as dono_email
+          FROM bms_master bm
+          LEFT JOIN bms b ON b.code = bm.code
+          LEFT JOIN users u ON u.id = bm.user_id
+        `).all();
+        
+        // Trata os dados das células que estão salvos em string JSON
+        const data = (results || []).map(item => ({
+          ...item,
+          cells: JSON.parse(item.cells || '[]')
+        }));
+        return json(data);
+      }
+
+      // CADASTRAR NOVA BMS MASTER NO SISTEMA
+      if (action === 'admin_add_master' && request.method === 'POST') {
+        const { code } = await request.json();
+        if (!code) return json({ ok: false, error: 'Código inválido' }, 400);
+        try {
+          await env.DB.prepare('INSERT INTO bms_master (code, user_id) VALUES (?, NULL)').bind(code).run();
+          return json({ ok: true });
+        } catch (err) {
+          return json({ ok: false, error: 'Este código de BMS já existe no sistema' }, 400);
+        }
+      }
+
+      // DELETAR BMS MASTER
+      if (action === 'deletar' && request.method === 'DELETE') {
+        const code = url.searchParams.get('code');
+        if (!code) return json({ ok: false, error: 'Código inválido' }, 400);
+        await env.DB.prepare('DELETE FROM bms_master WHERE code = ?').bind(code).run();
+        await env.DB.prepare('DELETE FROM user_bms WHERE bms_code = ?').bind(code).run();
+        await env.DB.prepare('DELETE FROM bms WHERE code = ?').bind(code).run();
+        return json({ ok: true });
+      }
+
+      // LISTAR TODOS OS CLIENTES
+      if (action === 'all_users' && request.method === 'GET') {
+        const { results } = await env.DB.prepare(`
+          SELECT u.id, u.nome, u.email, u.created_at, COUNT(bm.id) as bms_count
+          FROM users u
+          LEFT JOIN bms_master bm ON bm.user_id = u.id
+          GROUP BY u.id
+          ORDER BY u.id DESC
+        `).all();
+        return json(results || []);
+      }
+
+      // EDITAR CLIENTE
+      if (action === 'edit_user' && request.method === 'POST') {
+        const { id, nome, email } = await request.json();
+        await env.DB.prepare('UPDATE users SET nome = ?, email = ? WHERE id = ?').bind(nome, email.trim().toLowerCase(), id).run();
+        return json({ ok: true });
+      }
+
+      // EXCLUIR CLIENTE
+      if (action === 'delete_user' && request.method === 'DELETE') {
+        const id = url.searchParams.get('id');
+        if (!id) return json({ ok: false, error: 'ID inválido' }, 400);
+        // Desvincula as BMS dele antes de apagar
+        await env.DB.prepare('UPDATE bms_master SET user_id = NULL WHERE user_id = ?').bind(id).run();
+        await env.DB.prepare('DELETE FROM user_bms WHERE user_id = ?').bind(id).run();
+        await env.DB.prepare('DELETE FROM users WHERE id = ?').bind(id).run();
+        return json({ ok: true });
+      }
+    }
+
+    // ==========================================
+    // ROTAS PROTEGIDAS - EXCLUSIVAS DO USUÁRIO
     // ==========================================
     if (action === 'add_bms' && request.method === 'POST') {
       if (!userId) return json({ ok: false, error: 'Login necessário' }, 401);
@@ -242,6 +318,7 @@ export async function onRequest({ request, env }) {
       return json(withOnline);
     }
 
+    // ROTA COMPARTILHADA (DATA DETALHADA) - SUPORTA USER E ADMIN
     if (action === 'data' && request.method === 'GET') {
       const code = url.searchParams.get('code');
       if (!code) return json({ ok: false, error: 'Code obrigatório' }, 400);
