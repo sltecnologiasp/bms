@@ -10,13 +10,11 @@
 :root{--bg:#05070d;--cyan:#00ffff;--blue:#0080ff;--green:#00ff88;--red:#ff4444;--orange:#ffaa00}
 body{font-family:'Inter',sans-serif;background:var(--bg);color:#fff;min-height:100vh;width:100%;overflow-x:hidden}
 
-/* Containers principais expansíveis para Desktop */
+/* Containers principais com alinhamento vertical centralizado */
 #login,#painel,#clientesPage,#dashAdmin{
   position:relative;
   z-index:1;
   width:100%;
-  max-width:1200px;
-  margin:0 auto;
   min-height:100vh;
   padding:24px 12px;
   display:none;
@@ -29,13 +27,13 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:#fff;min-height:1
 
 #painel, #clientesPage, #dashAdmin {
   height: auto;
-  margin: auto auto;
+  margin: auto 0;
 }
 
 .title{font-size:clamp(32px,7vw,54px);font-weight:900;margin-bottom:4px;letter-spacing:2px;background:linear-gradient(90deg,var(--cyan),var(--blue));-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-align:center;width:100%}
 .user-info{color:#6b7c96;font-size:14px;text-align:center;margin-bottom:16px;font-weight:500}
 
-/* Cards sem travas rígidas laterais */
+/* Padronização dos Blocos (Cards) para 12px de respiro */
 .card{
   background:rgba(13,20,35,0.65);
   border:1px solid rgba(0,255,255,.08);
@@ -46,22 +44,18 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:#fff;min-height:1
   margin-bottom: 12px !important;
   box-shadow:0 8px 32px rgba(0,0,0,0.4);
 }
-#login .card, .card-cadastro { width:100%; max-width:480px; }
-#painel .card, #clientesPage .card, #dashAdmin .card { width:100%; max-width:100%; }
+#login .card, .card-cadastro { max-width:440px }
+#painel .card, #clientesPage .card, #dashAdmin .card { max-width:520px }
 
+/* Inputs e Seletores unificados */
 input,button{width:100%;padding:16px;border-radius:14px;border:none;outline:none;font-size:16px;transition:all 0.2s ease}
 input{background:rgba(0,0,0,.4);color:#fff;border:1px solid rgba(255,255,255,.08);text-align:center;font-family:monospace;letter-spacing:1px}
 input:focus{border-color:rgba(0,255,255,0.4);background:rgba(0,0,0,.6)}
 input::placeholder{color:rgba(255,255,255,.25)}
 
-/* Container do Olhinho de Senha */
-.pass-wrapper{position:relative;width:100%}
-.pass-wrapper input{padding-right:50px}
-.pass-toggle{position:absolute;right:16px;top:16px;cursor:pointer;opacity:.3;font-size:18px;user-select:none;transition:opacity .2s}
-.pass-toggle:hover{opacity:.7}
-
 .label{font-size:11px;letter-spacing:1px;opacity:.5;text-transform:uppercase;text-align:center;width:100%;margin-bottom:6px;font-weight:600}
 
+/* Tipografia de Botões do Sistema */
 button{background:linear-gradient(90deg,var(--blue),var(--cyan));color:#fff;font-weight:700;cursor:pointer;margin-top:12px;box-shadow:0 4px 20px rgba(0,128,255,0.25)}
 button:active{transform:scale(0.98)}
 .btn-sec{background:transparent;border:1px solid rgba(0,255,255,.25);color:var(--cyan);box-shadow:none}
@@ -70,16 +64,32 @@ button:active{transform:scale(0.98)}
 button.del{background:rgba(255,68,68,.08);border:1px solid rgba(255,68,68,.2);color:var(--red);font-size:13px;padding:12px;box-shadow:none}
 button.del:hover{background:rgba(255,68,68,.15)}
 button.edit{background:rgba(255,170,0,.08);border:1px solid rgba(255,170,0,.2);color:var(--orange);font-size:13px;padding:12px;margin-top:auto;box-shadow:none}
-button.voltar{background:transparent;border:1px solid rgba(0,255,136,.25);color:var(--green);max-width:320px;margin-top:8px;box-shadow:none}
-button.logout{margin-top:4px;background:transparent;border:1px solid rgba(255,68,68,.2);color:var(--red);max-width:320px;box-shadow:none}
+button.voltar{background:transparent;border:1px solid rgba(0,255,136,.25);color:var(--green);max-width:520px;margin-top:8px;box-shadow:none}
+button.logout{margin-top:4px;background:transparent;border:1px solid rgba(255,68,68,.2);color:var(--red);max-width:440px;box-shadow:none}
 
-/* Grades responsivas */
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px;width:100%;margin-top:8px}
-#painel .grid { grid-template-columns:repeat(auto-fill,minmax(200px,1fr)) }
-#clientesPage .grid { grid-template-columns:repeat(auto-fill,minmax(280px,1fr)) }
+/* Ajuste das Grades Adaptáveis */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px;width:100%;margin-top:8px}
+#painel .grid, #dashAdmin .grid { grid-template-columns:repeat(auto-fill,minmax(145px,1fr)) }
+
+/* Customização interna dos itens das listas */
+#lista .card, #listaUsers .card {
+  background:rgba(13,20,35,0.65);
+  border:1px solid rgba(0,255,255,.08);
+  border-radius:16px;
+  padding:16px;
+  margin:0 !important;
+  display:flex;
+  flex-direction:column;
+  justify-content:space-between;
+  min-height:160px;
+  cursor:pointer;
+}
+#listaUsers .card { cursor:default; min-height:180px; max-width:100% }
+#lista .card:hover{border-color:rgba(0,255,255,.2);background:rgba(0,0,0,0.02)}
 
 .card-empty{grid-column:1/-1;min-height:180px;display:flex;align-items:center;justify-content:center;opacity:0.4;font-size:14px}
 
+/* Status e Badges unificados */
 .status{display:inline-flex;align-items:center;justify-content:center;gap:6px;font-size:12px;font-weight:600}
 .status::before{content:'';width:8px;height:8px;border-radius:50%;display:inline-block}
 .status.on{color:var(--green)}.status.on::before{background:var(--green);box-shadow:0 0 8px var(--green)}
@@ -92,6 +102,7 @@ button.logout{margin-top:4px;background:transparent;border:1px solid rgba(255,68
 .card-code{font-size:14px;font-weight:700;font-family:monospace;color:#fff;margin:12px 0;text-align:center;letter-spacing:0.5px}
 .card-top{display:flex;flex-direction:column;justify-content:flex-start;width:100%}
 
+/* Grid de Células nos Modais */
 .cells{display:grid;grid-template-columns:repeat(auto-fill,minmax(85px,1fr));gap:12px;margin-top:16px;width:100%}
 .cell{background:rgba(0,0,0,.3);border-radius:12px;padding:10px 6px;border:1px solid rgba(255,255,255,.04);display:flex;flex-direction:column;align-items:center;justify-content:center}
 .cell-num{font-size:11px;opacity:.4;margin-bottom:2px}
@@ -100,6 +111,7 @@ button.logout{margin-top:4px;background:transparent;border:1px solid rgba(255,68
 .cell.warn{border-color:rgba(255,170,0,.2)}
 .cell.crit{border-color:rgba(255,68,68,.2)}
 
+/* Modais normais permanecem com blur */
 .modal{display:none;position:fixed;inset:0;background:rgba(3,5,10,0.85);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);z-index:999;overflow-y:auto;padding:20px}
 .modal.active{display:flex;align-items:center;justify-content:center}
 .modal-content{width:100%;max-width:520px;background:rgba(13,20,35,0.95);border:1px solid rgba(0,255,255,.15);border-radius:24px;padding:24px;position:relative;box-shadow:0 20px 50px rgba(0,0,0,0.6)}
@@ -112,14 +124,44 @@ button.logout{margin-top:4px;background:transparent;border:1px solid rgba(255,68
 .btn-group button{margin-top:0}
 
 .value { font-variant-numeric: tabular-nums; }
+
 .erro{background:rgba(255,68,68,.1);border:1px solid var(--red);border-radius:12px;padding:14px;margin-top:16px;color:var(--red);font-size:14px}
 .erro.hidden{display:none!important}
 
-.admin-dash-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; width:100%; }
-
-@media(max-width:768px){
-  #painel .grid, .admin-dash-grid { grid-template-columns:repeat(2,1fr) }
+@media(max-width:440px){
+  #painel .grid, #dashAdmin .grid { grid-template-columns:repeat(2,1fr) }
   .btn-group { grid-template-columns:1fr }
+}
+
+/* =======================================================================
+   REGRAS ADICIONAIS: EXPANSÃO INTELIGENTE PARA TELAS GRANDES (DESKTOP)
+   ======================================================================= */
+@media (min-width: 769px) {
+  #login, #painel, #clientesPage, #dashAdmin {
+    max-width: 1200px !important;
+    margin: 0 auto !important;
+    width: 100% !important;
+  }
+  #login .card, .card-cadastro {
+    max-width: 460px !important;
+    margin: 0 auto 12px auto !important;
+  }
+  #painel .card, #clientesPage .card, #dashAdmin .card {
+    max-width: 100% !important;
+  }
+  #painel .grid, #dashAdmin .grid {
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)) !important;
+    width: 100% !important;
+  }
+  #clientesPage .grid {
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)) !important;
+    width: 100% !important;
+  }
+  button.voltar, button.logout {
+    max-width: 320px !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+  }
 }
 </style>
 </head>
@@ -131,13 +173,8 @@ button.logout{margin-top:4px;background:transparent;border:1px solid rgba(255,68
   <div class="card">
     <div class="label">Usuário</div>
     <input id="user" placeholder="administrador" autocomplete="username" value="administrador">
-    
     <div class="label" style="margin-top:16px">Senha</div>
-    <div class="pass-wrapper">
-      <input id="password" type="password" placeholder="••••••••" autocomplete="current-password">
-      <span class="pass-toggle" onclick="togglePass('password', this)">👁️‍🗨️</span>
-    </div>
-    
+    <input id="password" type="password" placeholder="••••••••" autocomplete="current-password">
     <button onclick="adminLogin()">ENTRAR NO PAINEL</button>
     <div id="loginError" class="erro hidden"></div>
   </div>
@@ -169,12 +206,11 @@ button.logout{margin-top:4px;background:transparent;border:1px solid rgba(255,68
   <div class="user-info">Clientes Cadastrados</div>
   
   <div class="card" style="background:transparent;border:none;box-shadow:none;padding:0">
-    <div id="listaUsers" class="grid"></div>
+    <div id="listaUsers" class="grid" style="grid-template-columns:1fr"></div>
   </div>
   
   <button class="voltar" onclick="voltarPainel()">← VOLTAR AO PAINEL</button>
 </div>
-
 <div id="dashAdmin">
   <div class="title" style="font-size:clamp(28px,6vw,32px);margin-bottom:4px">SMART BMS</div>
   <div style="text-align:center; margin-bottom:16px;">
@@ -204,7 +240,7 @@ button.logout{margin-top:4px;background:transparent;border:1px solid rgba(255,68
     <span id="adminStatus" class="status off" style="font-size:13px; font-weight:700">Offline</span>
   </div>
 
-  <div class="admin-dash-grid" style="margin-bottom:12px">
+  <div class="grid" style="margin-bottom:12px">
     <div class="card" style="margin:0 !important; padding:14px 8px;"><div class="label">SOC</div><div class="value" id="adminSoc" style="color:var(--green)">0%</div></div>
     <div class="card" style="margin:0 !important; padding:14px 8px;"><div class="label">Tensão</div><div class="value" id="adminVolt" style="color:var(--cyan)">0.00V</div></div>
     <div class="card" style="margin:0 !important; padding:14px 8px;"><div class="label">Corrente</div><div class="value" id="adminCorr" style="color:var(--orange)">0.0A</div></div>
@@ -243,17 +279,11 @@ button.logout{margin-top:4px;background:transparent;border:1px solid rgba(255,68
 
 <script>
 const API = '/api/bms';
-// CORREÇÃO: Utilizando localStorage para manter a sessão estável e evitar quedas aleatórias
-let adminToken = localStorage.getItem('admin_token');
+let adminToken = sessionStorage.getItem('admin_token');
 let bmsList = [];
 let activeBmsCode = null;
 
-// Inicializa o painel caso o token esteja salvo e ativo
-if(adminToken === 'admin_ok') {
-  window.addEventListener('DOMContentLoaded', () => {
-    showPainel();
-  });
-}
+if(adminToken === 'admin_ok') showPainel();
 
 async function adminLogin(){
   const user = document.getElementById('user').value;
@@ -266,7 +296,7 @@ async function adminLogin(){
     const d = await r.json();
     if(d.ok){
       adminToken = d.token;
-      localStorage.setItem('admin_token', adminToken);
+      sessionStorage.setItem('admin_token', adminToken);
       showPainel();
     }else{
       errorEl.textContent = d.error || 'Credenciais inválidas';
@@ -285,7 +315,7 @@ function showPainel(){
   document.getElementById('dashAdmin').classList.remove('active');
   document.getElementById('painel').classList.add('active');
   document.getElementById('painel').style.display = 'flex';
-  setupInicial();
+  carregarTudo();
 }
 
 function mostrarClientes(){
@@ -301,30 +331,15 @@ function voltarPainel(){
   document.getElementById('clientesPage').style.display = 'none';
   document.getElementById('painel').classList.add('active');
   document.getElementById('painel').style.display = 'flex';
-  carregarTudo();
 }
 
 function adminLogout(){
-  localStorage.removeItem('admin_token');
+  sessionStorage.removeItem('admin_token');
   location.reload();
 }
 
 function authHeaders(){
   return {'Content-Type':'application/json','Authorization':'Bearer '+adminToken};
-}
-
-function togglePass(inputId, iconEl) {
-  var input = document.getElementById(inputId);
-  if (!input) return;
-  if (input.type === "password") {
-    input.type = "text";
-    iconEl.textContent = "👁️"; 
-    iconEl.style.opacity = ".8";
-  } else {
-    input.type = "password";
-    iconEl.textContent = "👁️‍🗨️"; 
-    iconEl.style.opacity = ".3";
-  }
 }
 
 document.getElementById('code').oninput = e => {
@@ -560,9 +575,13 @@ async function listarUsers(){
 }
 
 async function setupInicial() {
-  await carregarTudo();
   await listarUsers();
+  const r = await fetch(API+'?action=admin_list_master',{headers:authHeaders()});
+  const d = await r.json();
+  bmsList = d;
+  atualizarHTMLListaBms();
 }
+if(adminToken === 'admin_ok') setupInicial();
 
 setInterval(()=>{if(adminToken && document.getElementById('painel').classList.contains('active'))carregarTudo()},5000);
 </script>
