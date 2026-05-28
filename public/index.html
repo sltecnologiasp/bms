@@ -11,7 +11,7 @@
 :root {
   --bg: #f4f6f9;
   --card-bg: rgba(255, 255, 255, 0.9);
-  --card-border: rgba(0, 0, 0, 0.08);
+  --card-border: rgba(0, 180, 216, 0.15);
   --text-main: #0f172a;
   --text-muted: #64748b;
   --input-bg: #ffffff;
@@ -21,6 +21,9 @@
   --gauge-empty: #e2e8f0;
   --cell-bg: #f8fafc;
   --cell-border: #e2e8f0;
+  
+  /* Brilho neon sutil adaptado para o modo claro */
+  --neon-glow: 0 0 12px rgba(0, 180, 216, 0.12);
   
   --cyan: #00b4d8;
   --blue: #0077b6;
@@ -32,7 +35,7 @@
 [data-theme="dark"] {
   --bg: #05070d;
   --card-bg: rgba(13, 20, 35, 0.65);
-  --card-border: rgba(0, 255, 255, .08);
+  --card-border: rgba(0, 255, 255, .15);
   --text-main: #ffffff;
   --text-muted: #6b7c96;
   --input-bg: rgba(255, 255, 255, 0.08);
@@ -42,6 +45,9 @@
   --gauge-empty: rgba(255, 255, 255, .08);
   --cell-bg: rgba(0, 0, 0, .3);
   --cell-border: rgba(255, 255, 255, .04);
+  
+  /* Brilho neon sutil adaptado para o modo escuro */
+  --neon-glow: 0 0 15px rgba(0, 255, 255, 0.2);
   
   --cyan: #00ffff;
   --blue: #0080ff;
@@ -83,7 +89,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text-main);
   width:100%;
   margin-top: 0 !important;
   margin-bottom: 12px !important;
-  box-shadow:0 8px 32px rgba(0,0,0,0.04);
+  box-shadow: var(--neon-glow); /* Neon aplicado */
 }
 
 #login .card,#cadastro .card,#redefinir .card,#configuracoesPage .card { width:100%; max-width:500px; }
@@ -127,14 +133,28 @@ button{background:linear-gradient(90deg,var(--blue),var(--cyan));color:#fff;font
 button:active{transform:scale(0.98)}
 
 .btn-sec{background:transparent;border:1px solid var(--cyan);color:var(--cyan);box-shadow:none;font-weight:700}
-.btn-config{background:var(--input-bg);border:1px solid var(--input-border);color:var(--text-main);width:100%;max-width:440px;margin-top:16px;box-shadow:none}
-.btn-config:hover{border-color:var(--cyan)}
-.logout{margin-top:8px;background:transparent;border:1px solid var(--input-border);color:var(--text-muted);width:100%;max-width:440px;box-shadow:none}
-.logout:hover{background:rgba(255,68,68,0.1);color:var(--red);border-color:var(--red)}
+
+/* PADRONIZAÇÃO DOS BOTÕES INFERIORES COM NEON */
+.btn-config, .logout {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  color: var(--text-main);
+  width: 100%;
+  max-width: 440px;
+  box-shadow: var(--neon-glow); /* Neon aplicado */
+  font-weight: 700;
+}
+.btn-config { margin-top: 16px; }
+.logout { margin-top: 8px; }
+
+.btn-config:hover, .logout:hover {
+  border-color: var(--cyan);
+  background: var(--input-bg);
+}
+
 .btn-danger{background:rgba(255,68,68,0.05);border:1px solid var(--red);color:var(--red);box-shadow:none}
 .btn-danger:hover{background:rgba(255,68,68,0.15)}
 
-/* ITEM DA LISTA TOTALMENTE CENTRALIZADO E HARMONIOSO */
 .bms-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px;width:100%;margin-top:8px}
 .bms-item{
   background:var(--card-bg);
@@ -148,6 +168,7 @@ button:active{transform:scale(0.98)}
   justify-content:center;
   min-height:180px;
   cursor:pointer;
+  box-shadow: var(--neon-glow); /* Neon aplicado */
 }
 .bms-item:hover{border-color:var(--cyan)}
 .bms-item h3{color:var(--text-main);font-size:19px;font-weight:800;margin-bottom:4px;width:100%}
@@ -158,7 +179,6 @@ button:active{transform:scale(0.98)}
 .status-dot.on{color:var(--green)}.status-dot.on::before{background:var(--green);box-shadow:0 0 8px var(--green)}
 .status-dot.off{color:var(--red)}.status-dot.off::before{background:var(--red);box-shadow:0 0 8px var(--red)}
 
-/* Botão pequeno e sutil de exclusão do dispositivo */
 .bms-item .btn-item-del{
   background:transparent;
   border:1px solid var(--input-border);
@@ -223,7 +243,7 @@ button:active{transform:scale(0.98)}
 .footer-link{font-size:11px;margin-top:24px;text-align:center;letter-spacing:1px;line-height:1.6}
 .footer-link a{color:var(--blue);text-decoration:none;font-weight:600;transition:opacity 0.2s;}
 .footer-link a:hover{opacity:0.8;text-decoration:underline;}
-.footer-link span{color:var(--text-muted);opacity:0.6;display:block;margin-top:4px;}
+.footer-link span{color(--text-muted);opacity:0.6;display:block;margin-top:4px;}
 
 .footer-voltar{width:100%;display:flex;justify-content:center;margin-top:0px!important;margin-bottom:8px}
 .footer-voltar button{width:100%;max-width:320px;margin-top:0px}
@@ -329,7 +349,7 @@ button:active{transform:scale(0.98)}
     <div id="bms-list" class="bms-list"></div>
   </div>
   
-  <button class="btn-config" onclick="mostrarPaginaConta()">⚙️ Configurações da Conta</button>
+  <button class="btn-config" onclick="mostrarPaginaConta()">Configurações da Conta</button>
   <button class="logout" onclick="sair()">Sair</button>
   <div class="footer-link">
     <a href="https://wa.me/5515991355393" target="_blank">SL TECNOLOGIA</a>
@@ -396,7 +416,7 @@ button:active{transform:scale(0.98)}
       <div class="diff-item">Min<span id="celMin" style="color:var(--green)">0.00V</span></div>
       <div class="diff-item">Max<span id="celMax" style="color:var(--orange)">0.00V</span></div>
       <div class="diff-item">Diferença<span id="celDif" style="color:var(--red)">0.00V</span></div>
-      <div class="diff-item">Total<span id="celTot" style="color(--cyan)">0</span></div>
+      <div class="diff-item">Total<span id="celTot" style="color:var(--cyan)">0</span></div>
     </div>
     <div id="celulas" class="cells"></div>
   </div>
