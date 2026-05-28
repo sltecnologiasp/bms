@@ -106,11 +106,8 @@ button.voltar:hover{background:rgba(46,196,182,0.08)}
 button.logout{margin-top:4px;background:transparent;border:1px solid var(--input-border);color:var(--text-muted);max-width:440px;box-shadow:none;font-weight:700}
 button.logout:hover{background:rgba(231,29,54,0.08);color:var(--red);border-color:var(--red)}
 
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px;width:100%;margin-top:8px}
-#painel .grid, #dashAdmin .grid { grid-template-columns:repeat(auto-fill,minmax(145px,1fr)) }
-
-#lista, #listaUsers { width: 100% }
-#listaUsers { display: flex; flex-direction: column; gap: 14px; }
+/* AJUSTADO: Alinhamento fluido e empilhado em formato de lista responsiva idêntico ao cliente */
+.grid{display:flex;flex-direction:column;gap:12px;width:100%;max-width:520px;margin:0 auto;margin-top:8px}
 
 #lista .card {
   background:var(--card-bg);
@@ -120,10 +117,12 @@ button.logout:hover{background:rgba(231,29,54,0.08);color:var(--red);border-colo
   margin:0 !important;
   display:flex;
   flex-direction:column;
-  justify-content:space-between;
-  min-height:160px;
+  align-items:center;
+  justify-content:center;
+  min-height:150px;
   cursor:pointer;
   box-shadow: var(--neon-glow);
+  width:100%;
 }
 #listaUsers .card { background:var(--card-bg); border:1px solid var(--card-border); border-radius:20px; padding:20px; cursor:default; width:100%; max-width:100% }
 #lista .card:hover{border-color:var(--cyan)}
@@ -139,7 +138,7 @@ button.logout:hover{background:rgba(231,29,54,0.08);color:var(--red);border-colo
 .badge-green{background:rgba(46,196,182,0.1);color:var(--green);border:1px solid var(--green)}
 .badge-orange{background:rgba(255,159,28,0.1);color:var(--orange);border:1px solid var(--orange)}
 
-.card-code{font-size:14px;font-weight:700;font-family:monospace;color:var(--text-main);margin:12px 0;text-align:center;letter-spacing:0.5px}
+.card-code{font-size:17px;font-weight:800;font-family:monospace;color:var(--text-main);margin:8px 0;text-align:center;letter-spacing:0.5px}
 .card-top{display:flex;flex-direction:column;justify-content:flex-start;width:100%}
 
 .cells{display:grid;grid-template-columns:repeat(auto-fill,minmax(85px,1fr));gap:12px;margin-top:16px;width:100%}
@@ -165,9 +164,11 @@ button.logout:hover{background:rgba(231,29,54,0.08);color:var(--red);border-colo
 .erro{background:rgba(231,29,54,0.1);border:1px solid var(--red);border-radius:12px;padding:14px;margin-top:16px;color:var(--red);font-size:14px}
 .erro.hidden{display:none!important}
 
-@media(max-width:440px){
-  #painel .grid { grid-template-columns:repeat(2,1fr) }
-  #dashAdmin .grid { grid-template-columns:repeat(2,1fr) }
+/* Ajuste específico para grades internas do dashboard de telemetria */
+.dash-grid { display:grid; grid-template-columns:repeat(2, 1fr); gap:12px; width:100% }
+
+@media(min-width:600px){
+  .dash-grid { grid-template-columns:repeat(4,1fr) }
 }
 </style>
 </head>
@@ -175,7 +176,7 @@ button.logout:hover{background:rgba(231,29,54,0.08);color:var(--red);border-colo
 
 <div id="login">
   <div class="title">SMART BMS</div>
-  <div class="user-info">Acesso administrativo</div>
+  <div class="user-info">Acesso administrative</div>
   <div class="card">
     <div class="label">Usuário</div>
     <input id="user" placeholder="administrador" autocomplete="username" value="administrador">
@@ -199,8 +200,9 @@ button.logout:hover{background:rgba(231,29,54,0.08);color:var(--red);border-colo
     <p id="msg" style="text-align:center;margin-top:12px;font-size:14px;font-weight:600"></p>
   </div>
 
-  <div class="card" style="background:transparent;border:none;box-shadow:none;padding:0">
-    <div class="label">Todas as BMS do Sistema</div>
+  <!-- MODIFICADO: Bloco unificado com largura total alinhado com as caixas superiores -->
+  <div style="width:100%; max-width:520px; display:flex; flex-direction:column; margin-bottom:12px">
+    <div class="label" style="margin-bottom:8px">Todas as BMS do Sistema</div>
     <div id="lista" class="grid"></div>
   </div>
   
@@ -212,7 +214,7 @@ button.logout:hover{background:rgba(231,29,54,0.08);color:var(--red);border-colo
   <div class="user-info">Clientes Cadastrados</div>
   
   <div class="card" style="background:transparent;border:none;box-shadow:none;padding:0; width:100%">
-    <div id="listaUsers"></div>
+    <div id="listaUsers" style="display:flex; flex-direction:column; gap:12px; width:100%; max-width:520px; margin:0 auto;"></div>
   </div>
   
   <button class="voltar" onclick="voltarPainel()">← VOLTAR AO PAINEL</button>
@@ -247,7 +249,7 @@ button.logout:hover{background:rgba(231,29,54,0.08);color:var(--red);border-colo
     <span id="adminStatus" class="status off" style="font-size:13px; font-weight:700">Offline</span>
   </div>
 
-  <div class="grid" style="margin-bottom:12px">
+  <div class="dash-grid" style="margin-bottom:12px">
     <div class="card" style="margin:0 !important; padding:14px 8px;"><div class="label">SOC</div><div class="value" id="adminSoc" style="color:var(--green)">0%</div></div>
     <div class="card" style="margin:0 !important; padding:14px 8px;"><div class="label">Tensão</div><div class="value" id="adminVolt" style="color:var(--cyan)">0.00V</div></div>
     <div class="card" style="margin:0 !important; padding:14px 8px;"><div class="label">Corrente</div><div class="value" id="adminCorr" style="color:var(--orange)">0.0A</div></div>
@@ -268,7 +270,6 @@ button.logout:hover{background:rgba(231,29,54,0.08);color:var(--red);border-colo
   <button class="voltar" style="width:100%; margin-top:4px; padding:18px" onclick="closeBmsModal()">← VOLTAR À LISTA</button>
 </div>
 
-<!-- MODAL INDEPENDENTE DE VÍNCULO (DINÂMICO) -->
 <div id="modalVincularBms" class="modal">
   <div class="modal-content small">
     <h2 style="text-align:center;margin-bottom:16px;font-size:20px;font-weight:900;background:linear-gradient(90deg,var(--blue),var(--cyan));-webkit-background-clip:text;-webkit-text-fill-color:transparent">Vincular Nova BMS</h2>
@@ -283,7 +284,6 @@ button.logout:hover{background:rgba(231,29,54,0.08);color:var(--red);border-colo
   </div>
 </div>
 
-<!-- MODAL INDEPENDENTE DE DESVÍNCULO (DINÂMICO) -->
 <div id="modalDesvincularBms" class="modal">
   <div class="modal-content small">
     <h2 style="text-align:center;margin-bottom:16px;font-size:20px;font-weight:900;background:linear-gradient(90deg,var(--orange),var(--red));-webkit-background-clip:text;-webkit-text-fill-color:transparent">Desvincular BMS</h2>
@@ -462,7 +462,6 @@ function closeBmsModal(){
   showPainelPage();
 }
 
-// CORREÇÃO: Nova Janela de Vínculo que busca apenas as baterias livres do banco de dados
 function abrirModalVincular(userId, nomeCliente) {
   document.getElementById('vincularUserId').value = userId;
   document.getElementById('txtVincularUser').textContent = `Cliente: ${nomeCliente}`;
@@ -517,7 +516,6 @@ async function confirmarVinculoManual() {
   }
 }
 
-// CORREÇÃO: Nova Janela de Desvínculo que busca apenas as baterias que pertencem àquele cliente
 async function abrirModalDesvincular(userId, nomeCliente) {
   document.getElementById('desvincularUserId').value = userId;
   document.getElementById('txtDesvincularUser').textContent = `Cliente: ${nomeCliente}`;
@@ -708,22 +706,21 @@ async function carregarTudo(){
   }
 }
 
+/* MODIFICADO: Layout dos itens da lista de BMS ajustado para bloco único horizontal idêntico ao painel do cliente */
 function atualizarHTMLListaBms() {
   document.getElementById('lista').innerHTML = bmsList.map(b=>{
-    const dono = b.user_id? `<span class="badge badge-orange">Vinculada</span>` : `<span class="badge badge-green">Disponível</span>`;
+    const dono = b.user_id? `<span class="badge badge-orange">Vinculada: ${b.dono_nome || b.dono_email}</span>` : `<span class="badge badge-green">Disponível</span>`;
     const statusClass = b.online ? 'on' : 'off';
     const statusText = b.online ? 'Online' : 'Offline';
 
     return `
-    <div class="card" onclick="viewBmsDetails('${b.code}')">
-      <div class="card-top">
-        <div style="text-align:center">
-          <span class="status ${statusClass}">${statusText}</span>
-        </div>
-        <div class="card-code">${b.code}</div>
-        <div style="text-align:center">${dono}</div>
+    <div class="card" onclick="viewBmsDetails('${b.code}')" style="padding: 20px 16px; min-height: auto; align-items: stretch;">
+      <div class="card-top" style="align-items: center; text-align: center;">
+        <span class="status ${statusClass}" style="margin-bottom: 6px;">${statusText}</span>
+        <div class="card-code" style="margin: 4px 0 6px 0; font-size: 18px;">${b.code}</div>
+        <div style="margin-bottom: 12px;">${dono}</div>
       </div>
-      <button class="del" onclick="del('${b.code}')">EXCLUIR</button>
+      <button class="del" style="margin-top: 4px; padding: 12px; border-radius: 10px;" onclick="del('${b.code}')">EXCLUIR DISPOSITIVO</button>
     </div>
   `}).join('') || '<div class="card card-empty"><div>Nenhuma BMS cadastrada no sistema</div></div>';
 }
@@ -751,7 +748,6 @@ async function listarUsers(){
         <button class="edit" onclick="editarUser(${u.id},'${u.nome}','${u.email}')">EDITAR</button>
         <button class="del" onclick="deletarUser(${u.id},'${u.nome}')">EXCLUIR</button>
       </div>
-      <!-- Modificações dinâmicas sem digitação manual de código -->
       <button class="vincular" onclick="abrirModalVincular(${u.id}, '${u.nome}')">+ VINCULAR BMS</button>
       <button class="desvincular" onclick="abrirModalDesvincular(${u.id}, '${u.nome}')">- DESVINCULAR BMS</button>
     </div>
