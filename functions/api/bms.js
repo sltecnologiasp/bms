@@ -20,13 +20,11 @@ export async function onRequest({ request, env }) {
     // ROTAS PÚBLICAS (NÃO EXIGEM TOKEN / LOGIN)
     // ==========================================
 
-    // ROTA 1: VERIFICAÇÃO DE E-MAIL (QUANDO O CLIENTE CLICA NO LINK)
+    // ROTA 1: VERIFICAÇÃO DE E-MAIL
     if (action === 'verify_email' && request.method === 'GET') {
       const token = url.searchParams.get('token');
       if (!token) return new Response('Token inválido', { status: 400 });
-
       const user = await env.DB.prepare('SELECT id FROM users WHERE token_verificacao = ?').bind(token).first();
-      
       if (!user) {
         return new Response(`
           <html lang="pt-BR">
@@ -40,9 +38,7 @@ export async function onRequest({ request, env }) {
           </html>
         `, { headers: { 'Content-Type': 'text/html; charset=utf-8' } });
       }
-
       await env.DB.prepare('UPDATE users SET email_verificado = 1, token_verificacao = NULL WHERE id = ?').bind(user.id).run();
-
       return new Response(`
         <html lang="pt-BR">
         <body style="background:#05070d;color:#fff;font-family:sans-serif;display:flex;align-items:center;justify-content:center;height:100vh;text-align:center;margin:0;">
@@ -56,31 +52,24 @@ export async function onRequest({ request, env }) {
       `, { headers: { 'Content-Type': 'text/html; charset=utf-8' } });
     }
 
-    // ROTA 2: CADASTRO COM DISPARO DO RESEND (Suporta 'register' ou 'register_user')
+    // ROTA 2: CADASTRO COM DISPARO DO RESEND
     if ((action === 'register' || action === 'register_user') && request.method === 'POST') {
       const { nome, email, resignation, senha } = await request.json();
       const userEmail = (email || resignation || '').trim().toLowerCase();
       if (!nome || !userEmail || !senha) return json({ ok: false, error: 'Dados inválidos' }, 400);
-      
       const exists = await env.DB.prepare('SELECT id FROM users WHERE email = ?').bind(userEmail).first();
       if (exists) return json({ ok: false, error: 'E-mail já cadastrado' }, 400);
-      
       const hash = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(senha));
       const senha_hash = Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2, '0')).join('');
-      
       const token_verificacao = crypto.randomUUID();
       await env.DB.prepare('INSERT INTO users (nome, email, senha_hash, email_verificado, token_verificacao) VALUES (?, ?, ?, 0, ?)')
         .bind(nome, userEmail, senha_hash, token_verificacao).run();
 
       if (env.RESEND_API_KEY) {
         const verifyLink = `${url.origin}${url.pathname}?action=verify_email&token=${token_verificacao}`;
-        
         await fetch('https://api.resend.com/emails', {
           method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${env.RESEND_API_KEY}`,
-            'Content-Type': 'application/json'
-          },
+          headers: { 'Authorization': `Bearer ${env.RESEND_API_KEY}`, 'Content-Type': 'application/json' },
           body: JSON.stringify({
             from: 'SMART BMS <nao-responda@bms.app.br>',
             to: userEmail,
@@ -89,87 +78,86 @@ export async function onRequest({ request, env }) {
               <div style="font-family: sans-serif; max-width: 600px; margin: auto; padding: 24px; background: #05070d; color: #ffffff; border-radius: 12px; border: 1px solid rgba(0,255,255,0.1);">
                 <h2 style="color: #00ffff; text-align: center; margin-top: 0;">SMART BMS</h2>
                 <h3 style="text-align: center; color: #fff;">Bem-vindo(a), ${nome}!</h3>
-                <p style="text-align: center; color: #a1aab8; line-height: 1.6;">Para garantir a segurança da sua conta e liberar seu acesso ao painel, precisamos que você confirme seu endereço de e-mail.</p>
-                <div style="text-align: center; margin: 36px 0;">
-                  <a href="${verifyLink}" style="background: linear-gradient(90deg, #0080ff, #00ffff); color: #ffffff; padding: 16px 32px; text-decoration: none; border-radius: 12px; font-weight: bold; font-size: 16px;">ATIVAR MINHA CONTA</a>
-                </div>
-                <p style="text-align: center; color: #6b7c96; font-size: 12px; margin-top: 32px;">Se você não se cadastrou em nosso sistema, por favor, ignore este e-mail.</p>
+                <p style="text-align: center; color: #a1aab8; line-height: 1.6;">Confirme seu e-mail para liberar o acesso.</p>
+                <div style="text-align: center; margin: 36px 0;"><a href="${verifyLink}" style="background: linear-gradient(90deg, #0080ff, #00ffff); color: #ffffff; padding: 16px 32px; text-decoration: none; border-radius: 12px; font-weight: bold; font-size: 16px;">ATIVAR MINHA CONTA</a></div>
               </div>
             `
           })
         }).catch(err => console.log('Erro ao enviar e-mail:', err));
       }
-
       return json({ ok: true });
     }
 
-    // NOVA ROTA INJETADA: RECUPERAÇÃO DE SENHA PÚBLICA (Evita o erro de Não Autorizado)
+    // ROTA 3: DISPARAR E-MAIL DE RECUPERAÇÃO AUTÔNOMO
     if (action === 'recover_user' && request.method === 'POST') {
       const { email } = await request.json();
       const cleanEmail = (email || '').trim().toLowerCase();
       if (!cleanEmail) return json({ ok: false, error: 'E-mail obrigatório' }, 400);
 
-      // Verifica se o usuário existe
       const user = await env.DB.prepare('SELECT id, nome FROM users WHERE email = ?').bind(cleanEmail).first();
-      
-      // Por segurança, respondemos "ok: true" mesmo se não existir (evita que descubram e-mails cadastrados)
-      if (!user) return json({ ok: true });
+      if (!user) return json({ ok: true }); // Retorna OK falso por segurança contra robôs
 
-      // Como o seu sistema usa uma rota genérica, o ideal é direcionar o cliente para falar com o seu suporte ou gerar um token temporário
+      const token_reset = crypto.randomUUID();
+      // Reutiliza o campo 'token_verificacao' para salvar o token de reset temporário
+      await env.DB.prepare('UPDATE users SET token_verificacao = ? WHERE id = ?').bind(token_reset, user.id).run();
+
       if (env.RESEND_API_KEY) {
+        const resetLink = `${url.origin}/?reset_token=${token_reset}`;
         await fetch('https://api.resend.com/emails', {
           method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${env.RESEND_API_KEY}`,
-            'Content-Type': 'application/json'
-          },
+          headers: { 'Authorization': `Bearer ${env.RESEND_API_KEY}`, 'Content-Type': 'application/json' },
           body: JSON.stringify({
             from: 'SMART BMS <nao-responda@bms.app.br>',
             to: cleanEmail,
-            subject: 'Recuperação de Senha - SMART BMS',
+            subject: 'Redefinição de Senha - SMART BMS',
             html: `
               <div style="font-family: sans-serif; max-width: 600px; margin: auto; padding: 24px; background: #05070d; color: #ffffff; border-radius: 12px; border: 1px solid rgba(0,255,255,0.1);">
                 <h2 style="color: #00ffff; text-align: center; margin-top: 0;">SMART BMS</h2>
                 <h3 style="text-align: center; color: #fff;">Olá, ${user.nome}!</h3>
-                <p style="text-align: center; color: #a1aab8; line-height: 1.6;">Recebemos uma solicitação de redefinição de senha para a sua conta.</p>
-                <p style="text-align: center; color: #a1aab8; line-height: 1.6;">Para redefinir sua credencial ou receber suporte com o acesso, por favor entre em contato direto com o nosso suporte técnico da <strong>SL TECNOLOGIA</strong>.</p>
+                <p style="text-align: center; color: #a1aab8; line-height: 1.6;">Você solicitou a redefinição de sua senha. Clique no botão abaixo para criar uma nova senha agora mesmo:</p>
                 <div style="text-align: center; margin: 36px 0;">
-                  <a href="https://wa.me/5515991355393" target="_blank" style="background: #00ff88; color: #05070d; padding: 16px 32px; text-decoration: none; border-radius: 12px; font-weight: bold; font-size: 16px;">FALAR COM SUPORTE</a>
+                  <a href="${resetLink}" style="background: linear-gradient(90deg, #0080ff, #00ffff); color: #ffffff; padding: 16px 32px; text-decoration: none; border-radius: 12px; font-weight: bold; font-size: 16px;">REDEFINIR MINHA SENHA</a>
                 </div>
+                <p style="text-align: center; color: #6b7c96; font-size: 12px;">Se você não solicitou essa mudança, pode ignorar este e-mail.</p>
               </div>
             `
           })
-        }).catch(err => console.log('Erro ao enviar e-mail de recuperação:', err));
+        }).catch(err => console.log('Erro e-mail recuperação:', err));
       }
-
       return json({ ok: true });
     }
 
-    // ROTA 3: LOGIN CORRIGIDO COM VALIDAÇÃO DE CONTA ATIVA
+    // ROTA 4: SALVAR NOVA SENHA REDEFINIDA SOZINHO
+    if (action === 'reset_password' && request.method === 'POST') {
+      const { token, novaSenha } = await request.json();
+      if (!token || !novaSenha) return json({ ok: false, error: 'Dados incompletos' }, 400);
+
+      const user = await env.DB.prepare('SELECT id FROM users WHERE token_verificacao = ?').bind(token).first();
+      if (!user) return json({ ok: false, error: 'Link de redefinição inválido ou já utilizado.' }, 400);
+
+      const hash = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(novaSenha));
+      const nova_senha_hash = Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2, '0')).join('');
+
+      await env.DB.prepare('UPDATE users SET senha_hash = ?, token_verificacao = NULL, email_verificado = 1 WHERE id = ?').bind(nova_senha_hash, user.id).run();
+      return json({ ok: true });
+    }
+
+    // ROTA 5: LOGIN
     if (action === 'login' && request.method === 'POST') {
       const { email, senha } = await request.json();
       const cleanEmail = (email || '').trim().toLowerCase();
-      
       const hash = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(senha));
       const senha_hash = Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2, '0')).join('');
-      
       const user = await env.DB.prepare('SELECT id, nome, email, email_verificado FROM users WHERE email = ? AND senha_hash = ?').bind(cleanEmail, senha_hash).first();
-      
       if (!user) return json({ ok: false, error: 'E-mail ou senha incorretos' }, 401);
-      
-      if (user.email_verificado === 0) {
-        return json({ ok: false, error: 'Confirme seu e-mail na caixa de entrada antes de acessar.' }, 403);
-      }
-
+      if (user.email_verificado === 0) return json({ ok: false, error: 'Confirme seu e-mail na caixa de entrada antes de acessar.' }, 403);
       const token = btoa(`user:${user.id}:${Date.now()}`);
       return json({ ok: true, token, user: { id: user.id, nome: user.nome, email: user.email } });
     }
 
     if (action === 'login_admin' && request.method === 'POST') {
       const { user, password } = await request.json();
-      if (user === 'administrador' && password === '426240637') {
-        return json({ ok: true, token: 'admin_ok' });
-      }
+      if (user === 'administrador' && password === '426240637') return json({ ok: true, token: 'admin_ok' });
       return json({ ok: false, error: 'Credenciais inválidas' }, 401);
     }
 
@@ -187,7 +175,7 @@ export async function onRequest({ request, env }) {
     }
 
     // ==========================================
-    // BARREIRA DE SEGURANÇA (VERIFICA TOKEN DAS ROTAS AUTENTICADAS)
+    // BARREIRA DE SEGURANÇA
     // ==========================================
     const auth = request.headers.get('Authorization');
     if (!auth?.startsWith('Bearer ')) return json({ ok: false, error: 'Não autorizado' }, 401);
@@ -210,25 +198,19 @@ export async function onRequest({ request, env }) {
     }
 
     // ==========================================
-    // ROTAS PROTEGIDAS (EXIGEM TOKEN VÁLIDO)
+    // ROTAS PROTEGIDAS
     // ==========================================
     if (action === 'add_bms' && request.method === 'POST') {
       if (!userId) return json({ ok: false, error: 'Login necessário' }, 401);
-
       const { code, nome } = await request.json();
       if (!code?.startsWith('SL') || code.length !== 14) return json({ ok: false, error: 'Código inválido. Use SL + 12 números' }, 400);
-
       const bms = await env.DB.prepare("SELECT id, user_id FROM bms_master WHERE code = ?").bind(code).first();
       if (!bms) return json({ ok: false, error: 'BMS não encontrada no sistema' });
-
       if (bms.user_id && bms.user_id !== userId) return json({ ok: false, error: 'Essa BMS já está vinculada a outra conta' });
-
       if (bms.user_id === userId) return json({ ok: false, error: 'Você já adicionou essa BMS' });
-
       await env.DB.prepare("UPDATE bms_master SET user_id = ? WHERE id = ?").bind(userId, bms.id).run();
       await env.DB.prepare('INSERT OR IGNORE INTO bms (code, nome) VALUES (?, ?)').bind(code, nome || code).run();
       await env.DB.prepare('INSERT INTO user_bms (user_id, bms_code, bms_nome) VALUES (?, ?, ?)').bind(userId, code, nome || code).run();
-
       return json({ ok: true });
     }
 
@@ -236,13 +218,10 @@ export async function onRequest({ request, env }) {
       if (!userId) return json({ ok: false, error: 'Login necessário' }, 401);
       const code = url.searchParams.get('code');
       if (!code) return json({ ok: false, error: 'Code obrigatório' }, 400);
-
       const check = await env.DB.prepare('SELECT id FROM bms_master WHERE code = ? AND user_id = ?').bind(code, userId).first();
       if (!check) return json({ ok: false, error: 'BMS não encontrada na sua conta' }, 403);
-
       await env.DB.prepare('UPDATE bms_master SET user_id = NULL WHERE code = ?').bind(code).run();
       await env.DB.prepare('DELETE FROM user_bms WHERE user_id = ? AND bms_code = ?').bind(userId, code).run();
-
       return json({ ok: true });
     }
 
@@ -255,85 +234,12 @@ export async function onRequest({ request, env }) {
         LEFT JOIN bms b ON b.code = m.code
         WHERE m.user_id = ? ORDER BY m.id DESC
       `).bind(userId).all();
-
       const now = Date.now();
       const withOnline = (results || []).map(r => ({
         ...r,
         online: r.updated_at && (now - new Date(r.updated_at).getTime() < 5000)
       }));
       return json(withOnline);
-    }
-
-    if (action === 'admin_add_master' && request.method === 'POST') {
-      if (!isAdmin) return json({ ok: false, error: 'Admin only' }, 403);
-      const { code } = await request.json();
-      if (!code?.startsWith('SL') || code.length !== 14) return json({ ok: false, error: 'Código inválido. Use SL + 12 números' }, 400);
-      try {
-        await env.DB.prepare('INSERT INTO bms_master (code) VALUES (?)').bind(code).run();
-        return json({ ok: true });
-      } catch(e) {
-        return json({ ok: false, error: 'BMS já existe no sistema' });
-      }
-    }
-
-    if (action === 'admin_list_master' && request.method === 'GET') {
-      if (!isAdmin) return json({ ok: false, error: 'Admin only' }, 403);
-      const { results } = await env.DB.prepare(`
-        SELECT m.code, m.user_id, u.nome as dono_nome, u.email as dono_email,
-               b.soc, b.voltage, b.current, b.temp, b.cells,
-               datetime(b.updated_at) || 'Z' as updated_at
-        FROM bms_master m
-        LEFT JOIN users u ON u.id = m.user_id
-        LEFT JOIN bms b ON b.code = m.code
-        ORDER BY m.id DESC
-      `).all();
-
-      const now = Date.now();
-      const withOnline = (results || []).map(r => ({
-        ...r,
-        online: r.updated_at && (now - new Date(r.updated_at).getTime() < 5000),
-        cells: JSON.parse(r.cells || '[]')
-      }));
-      return json(withOnline);
-    }
-
-    if (action === 'all_bms' && request.method === 'GET') {
-      if (!isAdmin) return json({ ok: false, error: 'Admin only' }, 403);
-      const { results } = await env.DB.prepare('SELECT *, datetime(updated_at) || "Z" as updated_at FROM bms ORDER BY updated_at DESC').all();
-      const now = Date.now();
-      return json((results || []).map(r => ({
-        ...r,
-        online: r.updated_at && (now - new Date(r.updated_at).getTime() < 5000),
-        cells: JSON.parse(r.cells || '[]')
-      })));
-    }
-
-    if (action === 'all_users' && request.method === 'GET') {
-      if (!isAdmin) return json({ ok: false, error: 'Admin only' }, 403);
-      const { results } = await env.DB.prepare(`
-        SELECT u.id, u.nome, u.email, u.created_at, COUNT(ub.id) as bms_count
-        FROM users u LEFT JOIN user_bms ub ON ub.user_id = u.id
-        GROUP BY u.id ORDER BY u.created_at DESC
-      `).all();
-      return json(results || []);
-    }
-
-    if (action === 'edit_user' && request.method === 'POST') {
-      if (!isAdmin) return json({ ok: false, error: 'Admin only' }, 403);
-      const { id, nome, email } = await request.json();
-      if (!id || !nome || !email) return json({ ok: false, error: 'Dados inválidos' }, 400);
-      await env.DB.prepare('UPDATE users SET nome = ?, email = ? WHERE id = ?').bind(nome, email, id).run();
-      return json({ ok: true });
-    }
-
-    if (action === 'delete_user' && request.method === 'DELETE') {
-      if (!isAdmin) return json({ ok: false, error: 'Admin only' }, 403);
-      const id = url.searchParams.get('id');
-      if (!id) return json({ ok: false, error: 'ID obrigatório' }, 400);
-      await env.DB.prepare('UPDATE bms_master SET user_id = NULL WHERE user_id = ?').bind(id).run();
-      await env.DB.prepare('DELETE FROM users WHERE id = ?').bind(id).run();
-      await env.DB.prepare('DELETE FROM user_bms WHERE user_id = ?').bind(id).run();
-      return json({ ok: true });
     }
 
     if (action === 'data' && request.method === 'GET') {
@@ -349,18 +255,7 @@ export async function onRequest({ request, env }) {
       return json({...data, online, cells: JSON.parse(data.cells || '[]')});
     }
 
-    if (action === 'deletar' && request.method === 'DELETE') {
-      if (!isAdmin) return json({ ok: false, error: 'Admin only' }, 403);
-      const code = url.searchParams.get('code');
-      if (!code) return json({ ok: false, error: 'Code obrigatório' }, 400);
-      await env.DB.prepare('DELETE FROM bms_master WHERE code = ?').bind(code).run();
-      await env.DB.prepare('DELETE FROM bms WHERE code = ?').bind(code).run();
-      await env.DB.prepare('DELETE FROM user_bms WHERE bms_code = ?').bind(code).run();
-      return json({ ok: true });
-    }
-
     return json({ error: 'Not found' }, 404);
-
   } catch (e) {
     return json({ ok: false, error: e.message }, 500);
   }
