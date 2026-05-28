@@ -10,7 +10,8 @@
 :root{--bg:#05070d;--cyan:#00ffff;--blue:#0080ff;--green:#00ff88;--red:#ff4444;--orange:#ffaa00}
 body{font-family:'Inter',sans-serif;background:var(--bg);color:#fff;min-height:100vh;width:100%;overflow-x:hidden}
 
-#login,#dash,#lista,#cadastro{
+/* Containers principais originais esticando no desktop */
+#login,#dash,#lista,#cadastro,#redefinir{
   position:relative;
   z-index:1;
   width:100%;
@@ -33,6 +34,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:#fff;min-height:1
 .user-info{color:#6b7c96;font-size:14px;text-align:center;margin-bottom:16px;font-weight:500}
 .user-info span{color:#fff;font-weight:600}
 
+/* Cards expansíveis */
 .card{
   background:rgba(13,20,35,0.65);
   border:1px solid rgba(0,255,255,.08);
@@ -44,7 +46,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:#fff;min-height:1
   box-shadow:0 8px 32px rgba(0,0,0,0.4);
 }
 
-#login .card,#cadastro .card { width:100%; max-width:500px; }
+#login .card,#cadastro .card,#redefinir .card { width:100%; max-width:500px; }
 #lista .card, #dash .card { width:100%; max-width:100%; }
 
 .label{font-size:11px;letter-spacing:1px;opacity:.5;text-transform:uppercase;text-align:center;width:100%;margin-bottom:6px;font-weight:600}
@@ -53,6 +55,7 @@ input,select{background:rgba(0,0,0,.4);color:#fff;border:1px solid rgba(255,255,
 input:focus{border-color:rgba(0,255,255,0.4);background:rgba(0,0,0,.6)}
 input::placeholder{color:rgba(255,255,255,.25)}
 
+/* Container dos Olhinhos */
 .pass-wrapper{position:relative;width:100%}
 .pass-wrapper input{padding-right:50px}
 .pass-toggle{position:absolute;right:16px;top:16px;cursor:pointer;opacity:.3;font-size:18px;user-select:none;transition:opacity .2s}
@@ -188,6 +191,31 @@ button:active{transform:scale(0.98)}
   </div>
 </div>
 
+<div id="redefinir" class="hidden">
+  <div class="title">SMART BMS</div>
+  <div class="user-info" style="margin-bottom:12px">Crie uma Nova Senha de Acesso</div>
+  <div class="card">
+    <div class="label">Nova Senha</div>
+    <div class="pass-wrapper">
+      <input id="nova-senha" type="password" placeholder="••••••••">
+      <span class="pass-toggle" onclick="togglePass('nova-senha', this)">👁️‍🗨️</span>
+    </div>
+
+    <div class="label" style="margin-top:16px">Confirmar Nova Senha</div>
+    <div class="pass-wrapper">
+      <input id="nova-senha-confirmar" type="password" placeholder="••••••••">
+      <span class="pass-toggle" onclick="togglePass('nova-senha-confirmar', this)">👁️‍🗨️</span>
+    </div>
+    
+    <button onclick="salvarNovaSenha()">SALVAR NOVA SENHA</button>
+    <div id="erro-redefinir" class="erro hidden"></div>
+  </div>
+  <div class="footer-link">
+    <a href="https://wa.me/5515991355393" target="_blank">SL TECNOLOGIA</a>
+    <span>© Todos os direitos reservados</span>
+  </div>
+</div>
+
 <div id="lista" class="hidden">
   <div class="title" style="font-size:clamp(28px,6vw,34px);margin-bottom:4px">SMART BMS</div>
   <div class="user-info">Olá, <span id="user-nome">--</span></div>
@@ -267,11 +295,22 @@ try{USER = JSON.parse(localStorage.getItem('bms_user')||'null');}catch(e){}
 function esconderTudo(){
   document.getElementById('login').classList.add('hidden');
   document.getElementById('cadastro').classList.add('hidden');
+  document.getElementById('redefinir').classList.add('hidden');
   document.getElementById('lista').classList.add('hidden');
   document.getElementById('dash').classList.add('hidden');
 }
 
 window.onload = function(){
+  const urlParams = new URLSearchParams(window.location.search);
+  const resetToken = urlParams.get('reset_token');
+
+  // CAPTURA DO LINK: Se vier o token de reset no link do e-mail, força abertura da tela de Nova Senha
+  if (resetToken) {
+    esconderTudo();
+    document.getElementById('redefinir').classList.remove('hidden');
+    return;
+  }
+
   if(TOKEN && USER){
     if(CODIGO){
       abrirDash(CODIGO);
@@ -362,7 +401,6 @@ function login(){
   });
 }
 
-// CORREÇÃO DA ROTA: Direcionando para a ação pública do Worker correspondente
 function recuperarSenha() {
   var emailAtual = document.getElementById('email').value.trim();
   var email = prompt("Digite o e-mail da sua conta para receber as instruções de recuperação:", emailAtual);
@@ -393,7 +431,45 @@ function recuperarSenha() {
   });
 }
 
-// CORREÇÃO DA ROTA: Ajustado para o endpoint público correto da sua API
+// LOGICA AUTÔNOMA: Grava a nova senha usando o token da URL
+function salvarNovaSenha() {
+  const urlParams = new URLSearchParams(window.location.search);
+  const token = urlParams.get('reset_token');
+  const novaSenha = document.getElementById('nova-senha').value;
+  const confirmarSenha = document.getElementById('nova-senha-confirmar').value;
+  const errBox = document.getElementById('erro-redefinir');
+
+  if (errBox) errBox.classList.add('hidden');
+
+  if (!novaSenha || !confirmarSenha) {
+    if (errBox) { errBox.textContent = "Preencha todos os campos."; errBox.classList.remove('hidden'); }
+    return;
+  }
+
+  if (novaSenha !== confirmarSenha) {
+    if (errBox) { errBox.textContent = "As senhas não coincidem!"; errBox.classList.remove('hidden'); }
+    return;
+  }
+
+  fetch(API + '?action=reset_password', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ token: token, novaSenha: novaSenha })
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(d) {
+    if (d.ok) {
+      alert("Senha alterada com sucesso! Você já pode realizar o login.");
+      window.location.href = "/"; // Remove o token da URL e joga pro login limpo
+    } else {
+      if (errBox) { errBox.textContent = d.error || "Erro ao redefinir."; errBox.classList.remove('hidden'); }
+    }
+  })
+  .catch(function(err) {
+    if (errBox) { errBox.textContent = "Erro: " + err.message; errBox.classList.remove('hidden'); }
+  });
+}
+
 function cadastrar(){
   var btn = document.getElementById('btn-cadastrar');
   if (btn && btn.disabled) return;
@@ -468,7 +544,7 @@ function cadastrar(){
     }else{
       resetBotao();
       if (e) {
-        e.textContent = 'Erro: ' + d.error;
+        e.textContent = d.error || "Erro ao cadastrar.";
         e.classList.remove('hidden');
       }
     }
@@ -639,7 +715,6 @@ function atualizarGauge(soc){
   bar.style.width = soc + '%';
   gauge.style.background = 'conic-gradient(#00ff88 0deg,#00ffff '+deg+'deg,rgba(255,255,255,.08) '+deg+'deg)';
 }
-
 function atualizar(){
   if(!CODIGO) return;
   fetch(API+'?action=data&code='+CODIGO, {
