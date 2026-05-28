@@ -30,7 +30,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:#fff;min-height:1
 }
 
 .title{font-size:clamp(32px,7vw,54px);font-weight:900;margin-bottom:4px;letter-spacing:2px;background:linear-gradient(90deg,var(--cyan),var(--blue));-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-align:center;width:100%}
-.user-info{color:#6b7c96;font-size:14px;text-align:center;margin-bottom:16px;font-weight:500}
+.user-info{color:#6b7c96;font-size:14px;text-align:center;margin-bottom:16px;font-weight:500;display:flex;align-items:center;justify-content:center;gap:10px;width:100%}
 .user-info span{color:#fff;font-weight:600}
 
 .card{
@@ -64,13 +64,15 @@ input::placeholder{color:rgba(255,255,255,.25)}
   font-size:18px;
   user-select:none;
   transition:opacity .2s;
-  filter: grayscale(100%); /* Garante que o olhinho fique preto e branco */
+  filter: grayscale(100%);
 }
 .pass-toggle:hover{opacity:.7}
 
 button{background:linear-gradient(90deg,var(--blue),var(--cyan));color:#fff;font-weight:700;cursor:pointer;margin-top:12px;box-shadow:0 4px 20px rgba(0,128,255,0.25)}
 button:active{transform:scale(0.98)}
 .btn-sec{background:transparent;border:1px solid rgba(0,255,255,.25);color:var(--cyan);box-shadow:none}
+.btn-danger{background:rgba(255,68,68,.08);border:1px solid rgba(255,68,68,.2);color:var(--red);box-shadow:none}
+.btn-danger:hover{background:rgba(255,68,68,.15)}
 
 .bms-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;width:100%;margin-top:8px}
 .bms-item{background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.05);border-radius:16px;padding:16px;text-align:left;position:relative;display:flex;flex-direction:column;justify-content:space-between;min-height:120px;cursor:pointer}
@@ -119,8 +121,13 @@ button:active{transform:scale(0.98)}
 .cell.warn{border-color:rgba(255,170,0,.2)}
 .cell.crit{border-color:rgba(255,68,68,.2)}
 
-.footer-voltar{width:100%;display:flex;justify-content:center;margin-top:0px!important;margin-bottom:8px}
-.footer-voltar button{width:100%;max-width:320px;margin-top:0px}
+/* Modais de Configurações */
+.modal{display:none;position:fixed;inset:0;background:rgba(3,5,10,0.85);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);z-index:999;overflow-y:auto;padding:20px}
+.modal.active{display:flex;align-items:center;justify-content:center}
+.modal-content{width:100%;max-width:440px;background:rgba(13,20,35,0.95);border:1px solid rgba(0,255,255,.15);border-radius:24px;padding:24px;position:relative;box-shadow:0 20px 50px rgba(0,0,0,0.6)}
+
+.btn-config{background:transparent;border:1px solid rgba(255,255,255,0.1);padding:6px 12px;border-radius:10px;font-size:12px;color:#6b7c96;cursor:pointer;width:auto;margin:0}
+.btn-config:hover{border-color:var(--cyan);color:#fff}
 
 .hidden{display:none!important}
 .erro{background:rgba(255,68,68,.1);border:1px solid var(--red);border-radius:12px;padding:14px;margin-top:16px;color:var(--red);font-size:14px}
@@ -134,6 +141,9 @@ button:active{transform:scale(0.98)}
 .footer-link a{color:var(--cyan);text-decoration:none;font-weight:600;transition:opacity 0.2s;}
 .footer-link a:hover{opacity:0.8;text-decoration:underline;}
 .footer-link span{color:#fff;opacity:0.35;display:block;margin-top:4px;}
+
+.footer-voltar{width:100%;display:flex;justify-content:center;margin-top:0px!important;margin-bottom:8px}
+.footer-voltar button{width:100%;max-width:320px;margin-top:0px}
 
 @media(max-width:640px){.grid{grid-template-columns:repeat(2,1fr)}.diff{grid-template-columns:repeat(2,1fr)}}
 </style>
@@ -224,7 +234,16 @@ button:active{transform:scale(0.98)}
 
 <div id="lista" class="hidden">
   <div class="title" style="font-size:clamp(28px,6vw,34px);margin-bottom:4px">SMART BMS</div>
-  <div class="user-info">Olá, <span id="user-nome">--</span></div>
+  <div class="user-info">
+    <div>Olá, <span id="user-nome">--</span></div>
+    <button class="btn-config" onclick="toggleMenuConta()">⚙️ Configurações</button>
+  </div>
+  
+  <div id="menu-conta" class="card hidden" style="background:rgba(20,30,50,0.5); border-color:rgba(0,255,255,0.15)">
+    <div class="label" style="margin-bottom:12px">Opções de Segurança da Conta</div>
+    <button class="btn-sec" style="margin-top:0" onclick="abrirModalSenha()">ALTERAR MINHA SENHA</button>
+    <button class="btn-danger" style="margin-top:10px" onclick="excluirMinhaConta()">EXCLUIR MINHA CONTA PERMANENTEMENTE</button>
+  </div>
   
   <div class="card">
     <div class="label">Adicionar dispositivo</div>
@@ -286,6 +305,34 @@ button:active{transform:scale(0.98)}
 
   <div class="footer-voltar">
     <button class="btn-sec" onclick="voltar()">VOLTAR</button>
+  </div>
+</div>
+
+<div id="modalSenha" class="modal">
+  <div class="modal-content">
+    <h2 style="text-align:center;margin-bottom:16px;font-size:20px;font-weight:900;background:linear-gradient(90deg,var(--cyan),var(--blue));-webkit-background-clip:text;-webkit-text-fill-color:transparent">Alterar Senha</h2>
+    
+    <div class="label">Senha Atual</div>
+    <div class="pass-wrapper">
+      <input id="change-senha-atual" type="password" placeholder="••••••••">
+      <span class="pass-toggle" onclick="togglePass('change-senha-atual', this)">👁️</span>
+    </div>
+    
+    <div class="label" style="margin-top:12px">Nova Senha</div>
+    <div class="pass-wrapper">
+      <input id="change-nova-senha" type="password" placeholder="••••••••">
+      <span class="pass-toggle" onclick="togglePass('change-nova-senha', this)">👁️</span>
+    </div>
+
+    <div class="label" style="margin-top:12px">Confirmar Nova Senha</div>
+    <div class="pass-wrapper">
+      <input id="change-confirmar-senha" type="password" placeholder="••••••••">
+      <span class="pass-toggle" onclick="togglePass('change-confirmar-senha', this)">👁️</span>
+    </div>
+    
+    <button onclick="salvarAlteracaoSenha()">SALVAR NOVA SENHA</button>
+    <button class="btn-sec" style="margin-top:8px" onclick="fecharModalSenha()">CANCELAR</button>
+    <div id="erro-change-senha" class="erro hidden"></div>
   </div>
 </div>
 
@@ -360,6 +407,91 @@ function togglePass(inputId, iconEl) {
     input.type = "password";
     iconEl.textContent = "👁️"; 
     iconEl.style.opacity = ".3";
+  }
+}
+
+function toggleMenuConta() {
+  document.getElementById('menu-conta').classList.toggle('hidden');
+}
+
+function abrirModalSenha() {
+  document.getElementById('change-senha-atual').value = '';
+  document.getElementById('change-nova-senha').value = '';
+  document.getElementById('change-confirmar-senha').value = '';
+  document.getElementById('erro-change-senha').classList.add('hidden');
+  document.getElementById('modalSenha').classList.add('active');
+}
+function fecharModalSenha() {
+  document.getElementById('modalSenha').classList.remove('active');
+}
+
+async function salvarAlteracaoSenha() {
+  const senhaAtual = document.getElementById('change-senha-atual').value;
+  const novaSenha = document.getElementById('change-nova-senha').value;
+  const confirmarSenha = document.getElementById('change-confirmar-senha').value;
+  const errBox = document.getElementById('erro-change-senha');
+  
+  errBox.classList.add('hidden');
+
+  if(!senhaAtual || !novaSenha || !confirmarSenha) {
+    errBox.textContent = 'Preencha todos os campos.';
+    errBox.classList.remove('hidden');
+    return;
+  }
+
+  if(novaSenha !== confirmarSenha) {
+    errBox.textContent = 'As novas senhas não coincidem!';
+    errBox.classList.remove('hidden');
+    return;
+  }
+
+  try {
+    const r = await fetch(API + '?action=user_change_password', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + TOKEN },
+      body: JSON.stringify({ senhaAtual, novaSenha })
+    });
+    
+    if(r.status === 401) { sair(); return; }
+    const d = await r.json();
+    
+    if(d.ok) {
+      alert('Senha alterada com sucesso!');
+      fecharModalSenha();
+      toggleMenuConta();
+    } else {
+      errBox.textContent = d.error || 'Erro ao alterar senha';
+      errBox.classList.remove('hidden');
+    }
+  } catch(err) {
+    errBox.textContent = 'Erro de rede: ' + err.message;
+    errBox.classList.remove('hidden');
+  }
+}
+
+async function excluirMinhaConta() {
+  if(!confirm('ATENÇÃO: Você tem certeza que deseja deletar sua conta permanentemente?\n\nIsso removerá seus dados e desvinculará todas as suas baterias.')) return;
+  
+  const confirmacao = prompt('Para confirmar a exclusão definitiva, digite "CONCORDO" em letras maiúsculas:');
+  if(confirmacao !== "CONCORDO") {
+    alert('Exclusão cancelada. Texto de confirmação inválido.');
+    return;
+  }
+
+  try {
+    const r = await fetch(API + '?action=user_delete_self', {
+      method: 'DELETE',
+      headers: { 'Authorization': 'Bearer ' + TOKEN }
+    });
+    
+    if(r.ok) {
+      alert('Sua conta foi excluída com sucesso. Obrigado por usar nosso sistema!');
+      sair();
+    } else {
+      alert('Não foi possível excluir a conta no momento.');
+    }
+  } catch(err) {
+    alert('Erro ao tentar se comunicar com o servidor.');
   }
 }
 
@@ -473,6 +605,7 @@ function salvarNovaSenha() {
     if (errBox) { errBox.textContent = "Erro: " + err.message; errBox.classList.remove('hidden'); }
   });
 }
+
 function cadastrar(){
   var btn = document.getElementById('btn-cadastrar');
   if (btn && btn.disabled) return;
@@ -565,6 +698,7 @@ function mostrarLista(){
   clearInterval(INT);
   localStorage.removeItem('bms_codigo_ativo');
   esconderTudo();
+  document.getElementById('menu-conta').classList.add('hidden'); // garante menu fechado ao entrar
   document.getElementById('lista').classList.remove('hidden');
   document.getElementById('user-nome').textContent = USER? USER.nome : 'Usuário';
   
