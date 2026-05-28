@@ -7,8 +7,53 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-:root{--bg:#05070d;--cyan:#00ffff;--blue:#0080ff;--green:#00ff88;--red:#ff4444;--orange:#ffaa00}
-body{font-family:'Inter',sans-serif;background:var(--bg);color:#fff;min-height:100vh;width:100%;overflow-x:hidden}
+
+/* CONFIGURAÇÃO DOS TEMAS (PADRÃO: MODO CLARO) */
+:root {
+  --bg: #f4f6f9;
+  --card-bg: rgba(255, 255, 255, 0.9);
+  --card-border: rgba(0, 0, 0, 0.08);
+  --text-main: #0f172a;
+  --text-muted: #64748b;
+  --input-bg: #ffffff;
+  --input-border: #cbd5e1;
+  --input-text: #0f172a;
+  --input-placeholder: #94a3b8;
+  --gauge-empty: #e2e8f0;
+  --cell-bg: #f8fafc;
+  --cell-border: #e2e8f0;
+  
+  /* Cores de status idênticas para ambos */
+  --cyan: #00b4d8;
+  --blue: #0077b6;
+  --green: #2ec4b6;
+  --red: #e71d36;
+  --orange: #ff9f1c;
+}
+
+/* CLASSES APLICADAS QUANDO O MODO ESCURO ATIVAR */
+[data-theme="dark"] {
+  --bg: #05070d;
+  --card-bg: rgba(13, 20, 35, 0.65);
+  --card-border: rgba(0, 255, 255, .08);
+  --text-main: #ffffff;
+  --text-muted: #6b7c96;
+  --input-bg: rgba(255, 255, 255, 0.08);
+  --input-border: rgba(255, 255, 255, 0.2);
+  --input-text: #ffffff;
+  --input-placeholder: rgba(255, 255, 255, 0.5);
+  --gauge-empty: rgba(255, 255, 255, .08);
+  --cell-bg: rgba(0, 0, 0, .3);
+  --cell-border: rgba(255, 255, 255, .04);
+  
+  --cyan: #00ffff;
+  --blue: #0080ff;
+  --green: #00ff88;
+  --red: #ff4444;
+  --orange: #ffaa00;
+}
+
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text-main);min-height:100vh;width:100%;overflow-x:hidden;transition: background 0.3s, color 0.3s}
 
 #login,#dash,#lista,#cadastro,#redefinir,#configuracoesPage{
   position:relative;
@@ -29,41 +74,40 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:#fff;min-height:1
   margin: auto auto;
 }
 
-.title{font-size:clamp(32px,7vw,54px);font-weight:900;margin-bottom:4px;letter-spacing:2px;background:linear-gradient(90deg,var(--cyan),var(--blue));-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-align:center;width:100%}
-.user-info{color:#6b7c96;font-size:14px;text-align:center;margin-bottom:16px;font-weight:500;width:100%}
-.user-info span{color:#fff;font-weight:600}
+.title{font-size:clamp(32px,7vw,54px);font-weight:900;margin-bottom:4px;letter-spacing:2px;background:linear-gradient(90deg,var(--blue),var(--cyan));-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-align:center;width:100%}
+.user-info{color:var(--text-muted);font-size:14px;text-align:center;margin-bottom:16px;font-weight:500;width:100%}
+.user-info span{color:var(--text-main);font-weight:600}
 
 .card{
-  background:rgba(13,20,35,0.65);
-  border:1px solid rgba(0,255,255,.08);
+  background:var(--card-bg);
+  border:1px solid var(--card-border);
   border-radius:20px;
   padding:20px;
   width:100%;
   margin-top: 0 !important;
   margin-bottom: 12px !important;
-  box-shadow:0 8px 32px rgba(0,0,0,0.4);
+  box-shadow:0 8px 32px rgba(0,0,0,0.08);
 }
 
 #login .card,#cadastro .card,#redefinir .card,#configuracoesPage .card { width:100%; max-width:500px; }
 #lista .card, #dash .card { width:100%; max-width:100%; }
 
-.label{font-size:11px;letter-spacing:1px;opacity:.7;text-transform:uppercase;text-align:center;width:100%;margin-bottom:6px;font-weight:700;color:#a1aab8}
+.label{font-size:11px;letter-spacing:1px;text-transform:uppercase;text-align:center;width:100%;margin-bottom:6px;font-weight:700;color:var(--text-muted)}
 
 input,select,button{width:100%;padding:16px;border-radius:14px;border:none;outline:none;font-size:16px;transition:all 0.2s ease}
 input,select{
-  background: rgba(255, 255, 255, 0.08);
-  color: #fff;
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: var(--input-bg);
+  color: var(--input-text);
+  border: 1px solid var(--input-border);
   text-align: center;
   font-weight: 600;
 }
 input:focus{
   border-color: var(--cyan);
-  background: rgba(255, 255, 255, 0.15);
   box-shadow: 0 0 10px rgba(0, 255, 255, 0.2);
 }
 input::placeholder{
-  color: rgba(255, 255, 255, 0.5) !important;
+  color: var(--input-placeholder) !important;
   opacity: 1 !important;
 }
 
@@ -74,7 +118,7 @@ input::placeholder{
   right:16px;
   top:16px;
   cursor:pointer;
-  opacity:.5;
+  opacity:.6;
   font-size:18px;
   user-select:none;
   transition:opacity .2s;
@@ -82,122 +126,77 @@ input::placeholder{
 }
 .pass-toggle:hover{opacity:.9}
 
-/* BOTÕES REESTILIZADOS COM BORDAS CONFORME SOLICITADO */
-
-/* Botão Adicionar Dispositivo (Borda azul/ciano) */
-button{
-  background: transparent;
-  border: 1px solid rgba(0, 128, 255, 0.6);
-  color: #00bfff;
-  font-weight: 700;
-  cursor: pointer;
-  margin-top: 12px;
-  box-shadow: none;
-}
-button:hover{
-  background: rgba(0, 128, 255, 0.1);
-  border-color: var(--cyan);
-  color: var(--cyan);
-}
+button{background:linear-gradient(90deg,var(--blue),var(--cyan));color:#fff;font-weight:700;cursor:pointer;margin-top:12px;box-shadow:0 4px 20px rgba(0,128,255,0.25)}
 button:active{transform:scale(0.98)}
 
-.btn-sec{background:transparent;border:1px solid rgba(0,255,255,.35);color:var(--cyan);box-shadow:none;font-weight:700}
-
-/* Botão Configurações da Conta (Borda azul/ciano) */
-.btn-config{
-  background: transparent;
-  border: 1px solid rgba(0, 128, 255, 0.6);
-  color: #00bfff;
-  width: 100%;
-  max-width: 440px;
-  margin-top: 16px;
-  box-shadow: none;
-}
-.btn-config:hover{
-  background: rgba(0, 128, 255, 0.1);
-  border-color: var(--cyan);
-  color: var(--cyan);
-}
-
-/* Botão Sair (Borda vermelha) */
-.logout{
-  margin-top: 8px;
-  background: transparent;
-  border: 1px solid rgba(255, 68, 68, 0.4);
-  color: var(--red);
-  width: 100%;
-  max-width: 440px;
-  box-shadow: none;
-}
-.logout:hover{
-  background: rgba(255, 68, 68, 0.1);
-  border-color: #ff2222;
-  color: #ff2222;
-}
-
-.btn-danger{background:rgba(255,68,68,0.08);border:1px solid rgba(255,68,68,0.25);color:var(--red);box-shadow:none}
-.btn-danger:hover{background:rgba(255,68,68,0.15);border-color:var(--red)}
+.btn-sec{background:transparent;border:1px solid var(--cyan);color:var(--cyan);box-shadow:none;font-weight:700}
+.btn-config{background:var(--input-bg);border:1px solid var(--input-border);color:var(--text-main);width:100%;max-width:440px;margin-top:16px;box-shadow:none}
+.btn-config:hover{border-color:var(--cyan)}
+.logout{margin-top:8px;background:transparent;border:1px solid var(--input-border);color:var(--text-muted);width:100%;max-width:440px;box-shadow:none}
+.logout:hover{background:rgba(255,68,68,0.1);color:var(--red);border-color:var(--red)}
+.btn-danger{background:rgba(255,68,68,0.05);border:1px solid var(--red);color:var(--red);box-shadow:none}
+.btn-danger:hover{background:rgba(255,68,68,0.15)}
 
 .bms-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;width:100%;margin-top:8px}
-.bms-item{background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.05);border-radius:16px;padding:16px;text-align:left;position:relative;display:flex;flex-direction:column;justify-content:space-between;min-height:120px;cursor:pointer}
-.bms-item:hover{border-color:rgba(0,255,255,0.2);background:rgba(0,255,255,0.02)}
-.bms-item h3{color:#fff;font-size:18px;font-weight:700;margin-bottom:2px;text-align:left}
-.bms-item p{color:#5f6e85;font-size:12px;font-family:monospace;text-align:left}
+.bms-item{background:var(--card-bg);border:1px solid var(--card-border);border-radius:16px;padding:16px;text-align:left;position:relative;display:flex;flex-direction:column;justify-content:space-between;min-height:120px;cursor:pointer}
+.bms-item:hover{border-color:var(--cyan)}
+.bms-item h3{color:var(--text-main);font-size:18px;font-weight:700;margin-bottom:2px;text-align:left}
+.bms-item p{color:var(--text-muted);font-size:12px;font-family:monospace;text-align:left}
 
 .status-dot{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;margin-top:12px}
 .status-dot::before{content:'';width:8px;height:8px;border-radius:50%;display:inline-block}
 .status-dot.on{color:var(--green)}.status-dot.on::before{background:var(--green);box-shadow:0 0 8px var(--green)}
 .status-dot.off{color:var(--red)}.status-dot.off::before{background:var(--red);box-shadow:0 0 8px var(--red)}
-.bms-item button.del{position:absolute;top:12px;right:12px;background:transparent;border:none;padding:4px;margin:0;width:auto;height:auto;color:#5f6e85;font-size:16px;cursor:pointer;box-shadow:none}
+.bms-item button.del{position:absolute;top:12px;right:12px;background:transparent;border:none;padding:4px;margin:0;width:auto;height:auto;color:var(--text-muted);font-size:16px;cursor:pointer;box-shadow:none}
 .bms-item button.del:hover{color:var(--red)}
 
 .gauge-card{padding:20px;min-height:260px}
-.gauge{width:min(220px,55vw);height:min(220px,55vw);margin:auto;border-radius:50%;background:conic-gradient(#00ff88 0deg,#00ffff 180deg,rgba(255,255,255,.08) 180deg);position:relative;box-shadow:0 0 30px rgba(0,255,255,.1);transition:background.8s ease}
-.gauge::before{content:'';position:absolute;inset:16px;border-radius:50%;background:#05070d}
+.gauge{width:min(220px,55vw);height:min(220px,55vw);margin:auto;border-radius:50%;background:conic-gradient(var(--green) 0deg,var(--cyan) 180deg,var(--gauge-empty) 180deg);position:relative;box-shadow:0 0 30px rgba(0,255,255,.05);transition:background.8s ease}
+.gauge::before{content:'';position:absolute;inset:16px;border-radius:50%;background:var(--bg);transition: background 0.3s}
 .gauge-inner{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;align-items:center;z-index:2}
-.gauge-value{font-size:clamp(36px,9vw,52px);font-weight:900;color:#00ff88}
-.gauge-label{opacity:.5;letter-spacing:1.5px;font-size:11px}
+.gauge-value{font-size:clamp(36px,9vw,52px);font-weight:900;color:var(--green)}
+.gauge-label{opacity:.6;letter-spacing:1.5px;font-size:11px;color:var(--text-main)}
 .bar-wrap{margin-top:16px}
-.bar-label{display:flex;justify-content:space-between;margin-bottom:6px;font-size:13px;opacity:.6}
-.bar{height:12px;background:rgba(255,255,255,.06);border-radius:999px;overflow:hidden}
-.bar-fill{height:100%;width:0%;border-radius:999px;background:linear-gradient(90deg,#00ff88,#00ffff);transition:width.8s ease}
+.bar-label{display:flex;justify-content:space-between;margin-bottom:6px;font-size:13px;opacity:.8}
+.bar{height:12px;background:var(--gauge-empty);border-radius:999px;overflow:hidden}
+.bar-fill{height:100%;width:0%;border-radius:999px;background:linear-gradient(90deg,var(--green),var(--cyan));transition:width.8s ease}
 
 .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;width:100%;max-width:100%;margin-top:0 !important;margin-bottom:12px !important}
 .grid .card{width:100%;height:100px;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:12px;margin:0 !important}
 .value{font-size:clamp(22px,4vw,30px);font-weight:800;margin-top:8px;line-height:1;width:100%;text-align:center;font-variant-numeric:tabular-nums}
 
 .status-badge{display:inline-flex;align-items:center;gap:8px;padding:10px 20px;border-radius:999px;font-weight:700;font-size:14px;margin-top:10px}
-.status-badge.on{background:rgba(0,255,136,.08);color:var(--green);border:1px solid rgba(0,0,0,136,.2)}
-.status-badge.off{background:rgba(255,68,68,.08);color:var(--red);border:1px solid rgba(255,68,68,.2)}
+.status-badge.on{background:rgba(46,196,182,.1);color:var(--green);border:1px solid var(--green)}
+.status-badge.off{background:rgba(231,29,54,.1);color:var(--red);border:1px solid var(--red)}
 
 .diff{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:16px}
-.diff-item{padding:10px 6px;border-radius:12px;background:rgba(255,255,255,.02);text-align:center}
+.diff-item{padding:10px 6px;border-radius:12px;background:var(--cell-bg);border:1px solid var(--cell-border);text-align:center}
 .diff-item span{display:block;margin-top:4px;font-size:clamp(16px,4.5vw,20px);font-weight:800;font-variant-numeric:tabular-nums}
 
 .cells{display:grid;grid-template-columns:repeat(auto-fill,minmax(85px,1fr));gap:12px;margin-top:16px;width:100%}
-.cell{background:rgba(0,0,0,.3);border-radius:12px;padding:10px 6px;border:1px solid rgba(255,255,255,.04);display:flex;flex-direction:column;align-items:center;justify-content:center}
-.cell-num{font-size:11px;opacity:.4;margin-bottom:2px}
-.cell-val{font-size:15px;font-weight:700;font-variant-numeric:tabular-nums}
-.cell.ok{border-color:rgba(0,255,136,.2)}
-.cell.warn{border-color:rgba(255,170,0,.2)}
-.cell.crit{border-color:rgba(255,68,68,.2)}
+.cell{background:var(--cell-bg);border-radius:12px;padding:10px 6px;border:1px solid var(--cell-border);display:flex;flex-direction:column;align-items:center;justify-content:center}
+.cell-num{font-size:11px;opacity:.6;margin-bottom:2px}
+.cell-val{font-size:15px;font-weight:700;font-variant-numeric:tabular-nums;color:var(--text-main)}
+.cell.ok{border-color:var(--green)}
+.cell.warn{border-color:var(--orange)}
+.cell.crit{border-color:var(--red)}
 
-.modal{display:none;position:fixed;inset:0;background:rgba(3,5,10,0.85);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);z-index:999;overflow-y:auto;padding:20px}
+.modal{display:none;position:fixed;inset:0;background:rgba(3,5,10,0.5);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);z-index:999;overflow-y:auto;padding:20px}
 .modal.active{display:flex;align-items:center;justify-content:center}
-.modal-content{width:100%;max-width:440px;background:rgba(13,20,35,0.95);border:1px solid rgba(0,255,255,.15);border-radius:24px;padding:24px;position:relative;box-shadow:0 20px 50px rgba(0,0,0,0.6)}
+.modal-content{width:100%;max-width:440px;background:var(--input-bg);border:1px solid var(--input-border);border-radius:24px;padding:24px;position:relative;box-shadow:0 20px 50px rgba(0,0,0,0.15)}
 
 .hidden{display:none!important}
-.erro{background:rgba(255,68,68,.1);border:1px solid var(--red);border-radius:12px;padding:14px;margin-top:16px;color:var(--red);font-size:14px}
+.erro{background:rgba(231,29,54,.1);border:1px solid var(--red);border-radius:12px;padding:14px;margin-top:16px;color:var(--red);font-size:14px}
 
-.link-cadastro{margin-top:20px;text-align:center;color:#6b7c96;cursor:pointer;font-size:14px}
-.link-cadastro span{color:var(--cyan);text-decoration:underline}
-.link-esqueceu{display:block;text-align:right;font-size:12px;color:rgba(255,255,255,0.5);margin-top:8px;cursor:pointer;text-decoration:none;transition:color 0.2s}
-.link-esqueceu:hover{color:var(--cyan)}
+.link-cadastro{margin-top:20px;text-align:center;color:var(--text-muted);cursor:pointer;font-size:14px}
+.link-cadastro span{color:var(--blue);text-decoration:underline}
+.link-esqueceu{display:block;text-align:right;font-size:12px;color:var(--text-muted);margin-top:8px;cursor:pointer;text-decoration:none;transition:color 0.2s}
+.link-esqueceu:hover{color:var(--blue)}
 
 .footer-link{font-size:11px;margin-top:24px;text-align:center;letter-spacing:1px;line-height:1.6}
-.footer-link a{color:var(--cyan);text-decoration:none;font-weight:600;transition:opacity 0.2s;}
+.footer-link a{color:var(--blue);text-decoration:none;font-weight:600;transition:opacity 0.2s;}
 .footer-link a:hover{opacity:0.8;text-decoration:underline;}
-.footer-link span{color:#fff;opacity:0.35;display:block;margin-top:4px;}
+.footer-link span{color:var(--text-muted);opacity:0.6;display:block;margin-top:4px;}
 
 .footer-voltar{width:100%;display:flex;justify-content:center;margin-top:0px!important;margin-bottom:8px}
 .footer-voltar button{width:100%;max-width:320px;margin-top:0px}
@@ -316,12 +315,20 @@ button:active{transform:scale(0.98)}
   <div class="user-info">Configurações de Segurança</div>
 
   <div class="card" style="max-width:440px; width:100%">
+    <div class="label" style="margin-bottom:12px">Visual do Aplicativo</div>
+    <select id="theme-selector" onchange="alterarTema(this.value)">
+      <option value="light">☀️ Modo Claro (Padrão)</option>
+      <option value="dark">🌙 Modo Escuro</option>
+    </select>
+  </div>
+
+  <div class="card" style="max-width:440px; width:100%">
     <div class="label" style="margin-bottom:16px">Gerenciar Minha Conta</div>
     <button class="btn-sec" style="margin-top:0" onclick="abrirModalSenha()">ALTERAR MINHA SENHA</button>
     <button class="btn-danger" style="margin-top:12px" onclick="excluirMinhaConta()">EXCLUIR CONTA DEFINITIVAMENTE</button>
   </div>
 
-  <button class="btn-sec" style="max-width:440px; width:100%; border-color:rgba(255,255,255,0.1); color:#fff" onclick="voltarParaLista()">← VOLTAR À LISTA</button>
+  <button class="btn-sec" style="max-width:440px; width:100%; border-color:var(--input-border); color:var(--text-main)" onclick="voltarParaLista()">← VOLTAR À LISTA</button>
   <div class="footer-link">
     <a href="https://wa.me/5515991355393" target="_blank">SL TECNOLOGIA</a>
     <span>© Todos os direitos reservados</span>
@@ -346,23 +353,23 @@ button:active{transform:scale(0.98)}
     <div class="status-wrap" style="margin:0">
       <span id="status" class="status-badge off">Offline</span>
     </div>
-    <div class="bms-code" id="bms-titulo" style="margin-top:8px;font-size:15px;opacity:.5;font-family:monospace">--</div>
+    <div class="bms-code" id="bms-titulo" style="margin-top:8px;font-size:15px;opacity:.7;font-family:monospace;color:var(--text-main)">--</div>
   </div>
 
   <div class="grid">
-    <div class="card"><div class="label">SOC</div><div class="value" id="soc" style="color:#00ff88">0%</div></div>
-    <div class="card"><div class="label">Tensão</div><div class="value" id="volt" style="color:#00ffff">0V</div></div>
-    <div class="card"><div class="label">Corrente</div><div class="value" id="corr" style="color:#ffaa00">0A</div></div>
-    <div class="card"><div class="label">Temperatura</div><div class="value" id="temp" style="color:#ff4444">0°C</div></div>
+    <div class="card"><div class="label">SOC</div><div class="value" id="soc" style="color:var(--green)">0%</div></div>
+    <div class="card"><div class="label">Tensão</div><div class="value" id="volt" style="color:var(--cyan)">0V</div></div>
+    <div class="card"><div class="label">Corrente</div><div class="value" id="corr" style="color:var(--orange)">0A</div></div>
+    <div class="card"><div class="label">Temperatura</div><div class="value" id="temp" style="color:var(--red)">0°C</div></div>
   </div>
 
   <div class="card">
     <div class="label">Células - Tensão Individual</div>
     <div class="diff">
-      <div class="diff-item">Min<span id="celMin" style="color:#00ff88">0.00V</span></div>
-      <div class="diff-item">Max<span id="celMax" style="color:#ffaa00">0.00V</span></div>
-      <div class="diff-item">Diferença<span id="celDif" style="color:#ff4444">0.00V</span></div>
-      <div class="diff-item">Total<span id="celTot" style="color:#00ffff">0</span></div>
+      <div class="diff-item">Min<span id="celMin" style="color:var(--green)">0.00V</span></div>
+      <div class="diff-item">Max<span id="celMax" style="color:var(--orange)">0.00V</span></div>
+      <div class="diff-item">Diferença<span id="celDif" style="color:var(--red)">0.00V</span></div>
+      <div class="diff-item">Total<span id="celTot" style="color:var(--cyan)">0</span></div>
     </div>
     <div id="celulas" class="cells"></div>
   </div>
@@ -374,7 +381,7 @@ button:active{transform:scale(0.98)}
 
 <div id="modalSenha" class="modal">
   <div class="modal-content">
-    <h2 style="text-align:center;margin-bottom:16px;font-size:20px;font-weight:900;background:linear-gradient(90deg,var(--cyan),var(--blue));-webkit-background-clip:text;-webkit-text-fill-color:transparent">Alterar Senha</h2>
+    <h2 style="text-align:center;margin-bottom:16px;font-size:20px;font-weight:900;background:linear-gradient(90deg,var(--blue),var(--cyan));-webkit-background-clip:text;-webkit-text-fill-color:transparent">Alterar Senha</h2>
     
     <div class="label">Senha Atual</div>
     <div class="pass-wrapper">
@@ -409,6 +416,15 @@ var INT = null;
 
 try{USER = JSON.parse(localStorage.getItem('bms_user')||'null');}catch(e){}
 
+// LÓGICA DE INICIALIZAÇÃO DE TEMA (PADRÃO: LIGHT)
+var temaSalvo = localStorage.getItem('bms_theme') || 'light';
+document.documentElement.setAttribute('data-theme', temaSalvo);
+
+function alterarTema(tema) {
+  document.documentElement.setAttribute('data-theme', tema);
+  localStorage.setItem('bms_theme', tema);
+}
+
 function esconderTudo(){
   document.getElementById('login').classList.add('hidden');
   document.getElementById('cadastro').classList.add('hidden');
@@ -419,6 +435,11 @@ function esconderTudo(){
 }
 
 window.onload = function(){
+  // Atualiza o select de configurações com o tema ativo
+  if(document.getElementById('theme-selector')) {
+    document.getElementById('theme-selector').value = temaSalvo;
+  }
+
   const urlParams = new URLSearchParams(window.location.search);
   const resetToken = urlParams.get('reset_token');
 
@@ -794,7 +815,7 @@ function carregarLista(){
     var el = document.getElementById('bms-list');
     if(!el) return;
     if(!lista || !lista.length){
-      el.innerHTML = '<p style="grid-column:1/-1;text-align:center;color:#4a5568;padding:30px;font-size:14px">Nenhuma BMS monitorada</p>';
+      el.innerHTML = '<p style="grid-column:1/-1;text-align:center;color:var(--text-muted);padding:30px;font-size:14px">Nenhuma BMS monitorada</p>';
       return;
     }
     var html = '';
@@ -934,7 +955,7 @@ function atualizarGauge(soc){
   valor.textContent = soc + '%';
   txt.textContent = soc + '%';
   bar.style.width = soc + '%';
-  gauge.style.background = 'conic-gradient(#00ff88 0deg,#00ffff '+deg+'deg,rgba(255,255,255,.08) '+deg+'deg)';
+  gauge.style.background = 'conic-gradient(var(--green) 0deg,var(--cyan) '+deg+'deg,var(--gauge-empty) '+deg+'deg)';
 }
 
 function atualizar(){
