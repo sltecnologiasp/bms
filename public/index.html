@@ -132,24 +132,21 @@ button:active{transform:scale(0.98)}
 
 .btn-sec{background:transparent;border:1px solid var(--cyan);color:var(--cyan);box-shadow:none;font-weight:700}
 
-.btn-config, .logout {
-  background: var(--card-bg);
-  border: 1px solid var(--card-border);
+/* Ajuste dos botões secundários para cards integrados */
+.btn-card-action {
+  background: transparent;
+  border: 1px solid var(--input-border);
   color: var(--text-main);
-  width: 100%;
-  max-width: 440px;
-  box-shadow: var(--neon-glow);
+  box-shadow: none;
   font-weight: 700;
+  margin-top: 0;
 }
-.btn-config { margin-top: 16px; }
-.logout { margin-top: 8px; }
-
-.btn-config:hover, .logout:hover {
+.btn-card-action:hover {
   border-color: var(--cyan);
   background: var(--input-bg);
 }
 
-.btn-danger{background:rgba(255,68,68,0.05);border:1px solid var(--red);color:var(--red);box-shadow:none}
+.btn-danger{background:rgba(255,68,68,0.05);border:1px solid var(--red);color:var(--red);box-shadow:none;font-weight:700}
 .btn-danger:hover{background:rgba(255,68,68,0.15)}
 
 .bms-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px;width:100%;margin-top:8px}
@@ -198,7 +195,7 @@ button:active{transform:scale(0.98)}
 .gauge{width:min(220px,55vw);height:min(220px,55vw);margin:auto;border-radius:50%;background:conic-gradient(var(--green) 0deg,var(--cyan) 180deg,var(--gauge-empty) 180deg);position:relative;box-shadow:0 0 30px rgba(0,255,255,.05);transition:background.8s ease}
 .gauge::before{content:'';position:absolute;inset:16px;border-radius:50%;background:var(--bg);transition: background 0.3s}
 .gauge-inner{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;align-items:center;z-index:2}
-.gauge-value{font-size:clamp(36px,9vw,52px);font-weight:900;color(--green)}
+.gauge-value{font-size:clamp(36px,9vw,52px);font-weight:900;color:var(--green)}
 .gauge-label{opacity:.6;letter-spacing:1.5px;font-size:11px;color:var(--text-main)}
 .bar-wrap{margin-top:16px}
 .bar-label{display:flex;justify-content:space-between;margin-bottom:6px;font-size:13px;opacity:.8}
@@ -346,8 +343,12 @@ button:active{transform:scale(0.98)}
     <div id="bms-list" class="bms-list"></div>
   </div>
   
-  <button class="btn-config" onclick="mostrarPaginaConta()">Configurações da Conta</button>
-  <button class="logout" onclick="sair()">Sair</button>
+  <!-- NOVO BLOCO AGRUPADOR DE AÇÕES NO FINAL DA TELA -->
+  <div class="card" style="max-width:440px; width:100%; display:flex; flex-direction:column; gap:10px; padding:16px;">
+    <button class="btn-card-action" onclick="mostrarPaginaConta()">Configurações da Conta</button>
+    <button class="btn-card-action" style="color:var(--red);" onclick="sair()">Sair</button>
+  </div>
+
   <div class="footer-link">
     <a href="https://wa.me/5515991355393" target="_blank">SL TECNOLOGIA</a>
     <span>© Todos os direitos reservados</span>
@@ -358,9 +359,11 @@ button:active{transform:scale(0.98)}
   <div class="title" style="font-size:clamp(28px,6vw,34px);margin-bottom:4px">SMART BMS</div>
   <div class="user-info">Configurações de Segurança</div>
 
+  <!-- GERENCIAR CONTA COM BOTÃO DE SUPORTE NO WHATSAPP ADICIONADO -->
   <div class="card" style="max-width:440px; width:100%">
     <div class="label" style="margin-bottom:16px">Gerenciar Minha Conta</div>
     <button class="btn-sec" style="margin-top:0" onclick="abrirModalSenha()">ALTERAR MINHA SENHA</button>
+    <button class="btn-sec" style="margin-top:12px; border-color:var(--green); color:var(--green);" onclick="window.open('https://wa.me/5515991355393', '_blank')">SUPORTE</button>
     <button class="btn-danger" style="margin-top:12px" onclick="excluirMinhaConta()">EXCLUIR CONTA DEFINITIVAMENTE</button>
   </div>
 
@@ -457,7 +460,6 @@ var INT = null;
 
 try{USER = JSON.parse(localStorage.getItem('bms_user')||'null');}catch(e){}
 
-// GERENCIAMENTO ATUALIZADO DO TEMA EM UM CLIQUE
 var temaSalvo = localStorage.getItem('bms_theme') || 'light';
 document.documentElement.setAttribute('data-theme', temaSalvo);
 
