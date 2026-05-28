@@ -132,21 +132,6 @@ button.logout{margin-top:4px;background:transparent;border:1px solid rgba(255,68
   #painel .grid, #dashAdmin .grid { grid-template-columns:repeat(2,1fr) }
   .btn-group { grid-template-columns:1fr }
 }
-
-/* =======================================================================
-   REGRAS ADICIONAIS: EXPANSÃO SEGURA APENAS NOS PROPORCIONAIS DE LARGURA
-   ======================================================================= */
-@media (min-width: 769px) {
-  #login, #painel, #clientesPage, #dashAdmin {
-    max-width: 1000px !important;
-    margin: 0 auto !important;
-    width: 100% !important;
-  }
-  /* Remove as travas de 520px/440px no PC de forma limpa, preservando grids e scripts */
-  #painel .card, #clientesPage .card, #dashAdmin .card {
-    max-width: 100% !important;
-  }
-}
 </style>
 </head>
 <body>
@@ -172,7 +157,7 @@ button.logout{margin-top:4px;background:transparent;border:1px solid rgba(255,68
     <div class="label">Cadastrar BMS no Sistema</div>
     <input id="code" placeholder="SL000000000000" maxlength="14" style="margin-top:8px">
     <button class="btn-clientes" onclick="cad()">CADASTRAR BMS MASTER</button>
-    <button class="btn-sec" onclick="generarECadastrar()">GERAR CÓDIGO ALEATÓRIO</button>
+    <button class="btn-sec" onclick="gerarECadastrar()">GERAR CÓDIGO ALEATÓRIO</button>
     <button class="btn-clientes" style="margin-top:24px" onclick="mostrarClientes()">VER CLIENTES CADASTRADOS</button>
     <p id="msg" style="text-align:center;margin-top:12px;font-size:14px;font-weight:600"></p>
   </div>
@@ -291,8 +276,7 @@ async function adminLogin(){
     errorEl.classList.remove('hidden');
   }
 }
-
-function showPainel(){
+  function showPainel(){
   document.getElementById('login').style.display = 'none';
   document.getElementById('clientesPage').style.display = 'none';
   document.getElementById('dashAdmin').style.display = 'none';
@@ -377,6 +361,52 @@ function closeBmsModal(){
   document.getElementById('painel').style.display = 'flex';
   carregarTudo();
 }
+
+function renderAdminDashboard(){
+  if(!activeBmsCode) return;
+  const bms = bmsList.find(b => b.code === activeBmsCode);
+  if(!bms) return;
+
+  const online = bms.updated_at && (Date.now() - new Date(bms.updated_at).getTime() < 10000);
+  
+  document.getElementById('modalBmsDono').innerHTML = bms.user_id ? 
+    `<span class="badge badge-orange">Vinculada: ${bms.dono_nome || bms.dono_email}</span>` : 
+    `<span class="badge badge-green">Disponível</span>`;
+    
+  const st = document.getElementById('adminStatus');
+  st.textContent = online ? 'Online' : 'Offline';
+  st.className = 'status ' + (online ? 'on' : 'off');
+
+  const socVal = bms.soc ? parseInt(bms.soc) : 0;
+  
+  if(!online){
+    document.getElementById('adminSoc').textContent = '0%';
+    document.getElementById('adminVolt').textContent = '0.00V';
+    document.getElementById('adminCorr').textContent = '0.0A';
+    document.getElementById('adminTemp').textContent = '0.0°C';
+    
+    document.getElementById('adminSocValor').textContent = '0%';
+    document.getElementById('adminSocBarTxt').textContent = '0%';
+    document.getElementById('adminSocBar').style.width = '0%';
+    document.getElementById('adminSocGauge').style.background = 'rgba(255,255,255,0.05)';
+    
+    renderAdminCells([]);
+  } else {
+    document.getElementById('adminSoc').textContent = socVal + '%';
+    document.getElementById('adminVolt').textContent = (bms.voltage ? bms.voltage.toFixed(2) : '0.00') + 'V';
+    document.getElementById('adminCorr').textContent = (bms.current ? bms.current.toFixed(1) : '0.0') + 'A';
+    document.getElementById('adminTemp').textContent = (bms.temp ? bms.temp.toFixed(1) : '0.0') + '°C';
+    
+    document.getElementById('adminSocValor').textContent = socVal + '%';
+    document.getElementById('adminSocBarTxt').textContent = socVal + '%';
+    document.getElementById('adminSocBar').style.width = socVal + '%';
+    const deg = socVal * 3.6;
+    document.getElementById('adminSocGauge').style.background = `conic-gradient(#00ff88 0deg, #00ffff ${deg}deg, rgba(255,255,255,.05) ${deg}deg)`;
+    
+    renderAdminCells(bms.cells || []);
+  }
+}
+
 function renderAdminCells(cells){
   const container = document.getElementById('adminCellsContent');
   if(!cells || cells.length === 0){
