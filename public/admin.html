@@ -65,19 +65,17 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text-main);
 #login .card, .card-cadastro { max-width:440px }
 #painel .card, #clientesPage .card, #dashAdmin .card { max-width:520px }
 
-input,button{width:100%;padding:16px;border-radius:14px;border:none;outline:none;font-size:16px;transition:all 0.2s ease}
-input{
+input,select,button{width:100%;padding:16px;border-radius:14px;border:none;outline:none;font-size:16px;transition:all 0.2s ease}
+input,select{
   background:var(--input-bg);
   color:var(--input-text);
   border:1px solid var(--input-border);
   text-align:center;
-  font-family:monospace;
-  letter-spacing:1px;
   font-weight:600;
 }
-input:focus{
+input{ font-family:monospace; letter-spacing:1px; }
+input:focus,select:focus{
   border-color:var(--cyan);
-  background:var(--input-bg);
   box-shadow: 0 0 10px rgba(0, 255, 255, 0.2);
 }
 input::placeholder{color:var(--input-placeholder)}
@@ -96,7 +94,6 @@ button.del:hover{background:rgba(231,29,54,0.08);color:var(--red);border-color:v
 button.edit{background:transparent;border:1px solid var(--cyan);color:var(--cyan);font-size:13px;padding:12px;margin-top:auto;box-shadow:none;font-weight:700}
 button.edit:hover{background:rgba(0,180,216,0.08)}
 
-/* Novos botões de gerenciamento de vínculo na lista de usuários */
 button.vincular{background:transparent;border:1px solid var(--green);color:var(--green);font-size:13px;padding:12px;margin-top:6px;box-shadow:none;font-weight:700}
 button.vincular:hover{background:rgba(46,196,182,0.08)}
 
@@ -112,7 +109,10 @@ button.logout:hover{background:rgba(231,29,54,0.08);color:var(--red);border-colo
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px;width:100%;margin-top:8px}
 #painel .grid, #dashAdmin .grid { grid-template-columns:repeat(auto-fill,minmax(145px,1fr)) }
 
-#lista .card, #listaUsers .card {
+#lista, #listaUsers { width: 100% }
+#listaUsers { display: flex; flex-direction: column; gap: 14px; }
+
+#lista .card {
   background:var(--card-bg);
   border:1px solid var(--card-border);
   border-radius:16px;
@@ -125,7 +125,7 @@ button.logout:hover{background:rgba(231,29,54,0.08);color:var(--red);border-colo
   cursor:pointer;
   box-shadow: var(--neon-glow);
 }
-#listaUsers .card { cursor:default; min-height:220px; max-width:100% }
+#listaUsers .card { background:var(--card-bg); border:1px solid var(--card-border); border-radius:20px; padding:20px; cursor:default; width:100%; max-width:100% }
 #lista .card:hover{border-color:var(--cyan)}
 
 .card-empty{grid-column:1/-1;min-height:180px;display:flex;align-items:center;justify-content:center;color:var(--text-muted);font-size:14px}
@@ -150,25 +150,24 @@ button.logout:hover{background:rgba(231,29,54,0.08);color:var(--red);border-colo
 .cell.warn{border-color:var(--orange)}
 .cell.crit{border-color:var(--red)}
 
-.modal{display:none;position:fixed;inset:0;background:rgba(3,5,10,0.4);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);z-index:999;overflow-y:auto;padding:20px}
+.modal{display:none;position:fixed;inset:0;background:rgba(3,5,10,0.5);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);z-index:999;overflow-y:auto;padding:20px}
 .modal.active{display:flex;align-items:center;justify-content:center}
-.modal-content{width:100%;max-width:520px;background:var(--input-bg);border:1px solid var(--input-border);border-radius:24px;padding:24px;position:relative;box-shadow:0 20px 50px rgba(0,0,0,0.1)}
-.modal-content.small{max-width:400px}
+.modal-content{width:100%;max-width:520px;background:var(--input-bg);border:1px solid var(--input-border);border-radius:24px;padding:24px;position:relative;box-shadow:0 20px 50px rgba(0,0,0,0.15)}
+.modal-content.small{max-width:420px}
 
 .data-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px}
 .data-item{text-align:center;background:var(--cell-bg);padding:10px;border-radius:12px;border:1px solid var(--cell-border)}
 .data-item .value{font-size:24px;font-weight:800;margin-top:4px}
-.btn-group{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px;width:100%}
+.btn-group{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px;width:100%}
 .btn-group button{margin-top:0}
 
 .value { font-variant-numeric: tabular-nums; }
-
 .erro{background:rgba(231,29,54,0.1);border:1px solid var(--red);border-radius:12px;padding:14px;margin-top:16px;color:var(--red);font-size:14px}
 .erro.hidden{display:none!important}
 
 @media(max-width:440px){
-  #painel .grid, #dashAdmin .grid { grid-template-columns:repeat(2,1fr) }
-  .btn-group { grid-template-columns:1fr }
+  #painel .grid { grid-template-columns:repeat(2,1fr) }
+  #dashAdmin .grid { grid-template-columns:repeat(2,1fr) }
 }
 </style>
 </head>
@@ -212,8 +211,8 @@ button.logout:hover{background:rgba(231,29,54,0.08);color:var(--red);border-colo
   <div class="title" style="font-size:clamp(28px,6vw,32px);margin-bottom:4px">SMART BMS</div>
   <div class="user-info">Clientes Cadastrados</div>
   
-  <div class="card" style="background:transparent;border:none;box-shadow:none;padding:0">
-    <div id="listaUsers" class="grid" style="grid-template-columns:1fr"></div>
+  <div class="card" style="background:transparent;border:none;box-shadow:none;padding:0; width:100%">
+    <div id="listaUsers"></div>
   </div>
   
   <button class="voltar" onclick="voltarPainel()">← VOLTAR AO PAINEL</button>
@@ -269,6 +268,36 @@ button.logout:hover{background:rgba(231,29,54,0.08);color:var(--red);border-colo
   <button class="voltar" style="width:100%; margin-top:4px; padding:18px" onclick="closeBmsModal()">← VOLTAR À LISTA</button>
 </div>
 
+<!-- MODAL INDEPENDENTE DE VÍNCULO (DINÂMICO) -->
+<div id="modalVincularBms" class="modal">
+  <div class="modal-content small">
+    <h2 style="text-align:center;margin-bottom:16px;font-size:20px;font-weight:900;background:linear-gradient(90deg,var(--blue),var(--cyan));-webkit-background-clip:text;-webkit-text-fill-color:transparent">Vincular Nova BMS</h2>
+    <p id="txtVincularUser" style="text-align:center; font-size:14px; margin-bottom:16px; color:var(--text-muted)"></p>
+    <input id="vincularUserId" type="hidden">
+    
+    <div class="label">Selecione uma BMS Disponível</div>
+    <select id="selectBmsDisponiveis" style="width:100%; margin-top:6px;"></select>
+    
+    <button onclick="confirmarVinculoManual()" style="background:linear-gradient(90deg,var(--green),var(--cyan))">CONFIRMAR VÍNCULO</button>
+    <button class="btn-sec" style="margin-top:8px" onclick="fecharModalVincular()">CANCELAR</button>
+  </div>
+</div>
+
+<!-- MODAL INDEPENDENTE DE DESVÍNCULO (DINÂMICO) -->
+<div id="modalDesvincularBms" class="modal">
+  <div class="modal-content small">
+    <h2 style="text-align:center;margin-bottom:16px;font-size:20px;font-weight:900;background:linear-gradient(90deg,var(--orange),var(--red));-webkit-background-clip:text;-webkit-text-fill-color:transparent">Desvincular BMS</h2>
+    <p id="txtDesvincularUser" style="text-align:center; font-size:14px; margin-bottom:16px; color:var(--text-muted)"></p>
+    <input id="desvincularUserId" type="hidden">
+    
+    <div class="label">Selecione a BMS para Remover</div>
+    <select id="selectBmsVinculadas" style="width:100%; margin-top:6px;"></select>
+    
+    <button onclick="confirmarDesvinculoManual()" style="background:linear-gradient(90deg,var(--orange),var(--red))">REMOVER VÍNCULO</button>
+    <button class="btn-sec" style="margin-top:8px" onclick="fecharModalDesvincular()">CANCELAR</button>
+  </div>
+</div>
+
 <div id="modalEditUser" class="modal">
   <div class="modal-content small">
     <h2 style="text-align:center;margin-bottom:16px;font-size:20px;font-weight:900;background:linear-gradient(90deg,var(--blue),var(--cyan));-webkit-background-clip:text;-webkit-text-fill-color:transparent">Editar Cliente</h2>
@@ -292,7 +321,6 @@ let bmsList = [];
 let activeBmsCode = sessionStorage.getItem('admin_active_bms_code');
 let activeScreen = sessionStorage.getItem('admin_active_screen') || 'painel';
 
-// Gerenciamento de persistência de tela ao atualizar a página
 if(adminToken === 'admin_ok') {
   if (activeScreen === 'dashAdmin' && activeBmsCode) {
     showDashAdmin(activeBmsCode);
@@ -434,41 +462,95 @@ function closeBmsModal(){
   showPainelPage();
 }
 
-// Novas Funções de vínculo manual direto pela lista de clientes
-async function vincularBmsManual(userId, nomeCliente) {
-  let code = prompt(`Digite o código da BMS (14 caracteres) para vincular à conta de ${nomeCliente}:`);
-  if (!code) return;
-  code = code.trim().toUpperCase();
+// CORREÇÃO: Nova Janela de Vínculo que busca apenas as baterias livres do banco de dados
+function abrirModalVincular(userId, nomeCliente) {
+  document.getElementById('vincularUserId').value = userId;
+  document.getElementById('txtVincularUser').textContent = `Cliente: ${nomeCliente}`;
   
-  if (!code.startsWith('SL') || code.length !== 14) {
-    alert('Código inválido! Deve ser no formato SL seguido de 12 números.');
+  const select = document.getElementById('selectBmsDisponiveis');
+  select.innerHTML = '<option value="">Carregando baterias livres...</option>';
+  
+  const livres = bmsList.filter(b => !b.user_id);
+  
+  if (livres.length === 0) {
+    select.innerHTML = '<option value="">Nenhuma BMS disponível no banco</option>';
+  } else {
+    select.innerHTML = '<option value="">-- Selecione uma BMS --</option>' + 
+      livres.map(b => `<option value="${b.code}">${b.code} (${b.online ? 'Online' : 'Offline'})</option>`).join('');
+  }
+  
+  document.getElementById('modalVincularBms').classList.add('active');
+}
+
+function fecharModalVincular() {
+  document.getElementById('modalVincularBms').classList.remove('active');
+}
+
+async function confirmarVinculoManual() {
+  const userId = document.getElementById('vincularUserId').value;
+  const code = document.getElementById('selectBmsDisponiveis').value;
+  
+  if (!code) {
+    alert('Selecione uma BMS válida da lista.');
     return;
   }
+  
+  if (!confirm(`Confirmar o vínculo da bateria ${code} para este cliente?`)) return;
 
   try {
     const r = await fetch(API + '?action=admin_force_bind', {
       method: 'POST',
       headers: authHeaders(),
-      body: JSON.stringify({ userId, code })
+      body: JSON.stringify({ userId: parseInt(userId), code })
     });
     const d = await r.json();
     if (d.ok) {
       alert('BMS vinculada com sucesso!');
+      fecharModalVincular();
+      await carregarTudo();
       listarUsers();
     } else {
       alert('Erro: ' + d.error);
     }
   } catch (e) {
-    alert('Erro de comunicação com o servidor.');
+    alert('Erro ao processar vínculo.');
   }
 }
 
-async function desvincularBmsManual(userId, nomeCliente) {
-  let code = prompt(`Digite o código da BMS que deseja REMOVER da conta de ${nomeCliente}:`);
-  if (!code) return;
-  code = code.trim().toUpperCase();
+// CORREÇÃO: Nova Janela de Desvínculo que busca apenas as baterias que pertencem àquele cliente
+async function abrirModalDesvincular(userId, nomeCliente) {
+  document.getElementById('desvincularUserId').value = userId;
+  document.getElementById('txtDesvincularUser').textContent = `Cliente: ${nomeCliente}`;
+  
+  const select = document.getElementById('selectBmsVinculadas');
+  select.innerHTML = '<option value="">Buscando conexões...</option>';
+  
+  const vinculadas = bmsList.filter(b => b.user_id == userId);
+  
+  if (vinculadas.length === 0) {
+    select.innerHTML = '<option value="">Este usuário não possui nenhuma BMS</option>';
+  } else {
+    select.innerHTML = '<option value="">-- Selecione a BMS para remover --</option>' + 
+      vinculadas.map(b => `<option value="${b.code}">${b.code}</option>`).join('');
+  }
+  
+  document.getElementById('modalDesvincularBms').classList.add('active');
+}
 
-  if (!confirm(`Tem certeza que deseja desvincular a BMS ${code} do cliente ${nomeCliente}?`)) return;
+function fecharModalDesvincular() {
+  document.getElementById('modalDesvincularBms').classList.remove('active');
+}
+
+async function confirmarDesvinculoManual() {
+  const userId = document.getElementById('desvincularUserId').value;
+  const code = document.getElementById('selectBmsVinculadas').value;
+  
+  if (!code) {
+    alert('Selecione a BMS que deseja desvincular.');
+    return;
+  }
+  
+  if (!confirm(`⚠️ ALERTA DE SEGURANÇA:\n\nTem certeza que deseja apagar o vínculo e remover a BMS ${code} da conta deste cliente?`)) return;
 
   try {
     const r = await fetch(API + `?action=admin_force_unbind&userId=${userId}&code=${code}`, {
@@ -478,12 +560,14 @@ async function desvincularBmsManual(userId, nomeCliente) {
     const d = await r.json();
     if (d.ok) {
       alert('BMS desvinculada com sucesso!');
+      fecharModalDesvincular();
+      await carregarTudo();
       listarUsers();
     } else {
       alert('Erro: ' + d.error);
     }
   } catch (e) {
-    alert('Erro de comunicação com o servidor.');
+    alert('Erro ao deletar vínculo.');
   }
 }
 
@@ -667,9 +751,9 @@ async function listarUsers(){
         <button class="edit" onclick="editarUser(${u.id},'${u.nome}','${u.email}')">EDITAR</button>
         <button class="del" onclick="deletarUser(${u.id},'${u.nome}')">EXCLUIR</button>
       </div>
-      <!-- ADICIONADO: Opções de gerenciar vínculo manuais direto na conta do usuário -->
-      <button class="vincular" onclick="vincularBmsManual(${u.id}, '${u.nome}')">+ VINCULAR BMS</button>
-      <button class="desvincular" onclick="desvincularBmsManual(${u.id}, '${u.nome}')">- DESVINCULAR BMS</button>
+      <!-- Modificações dinâmicas sem digitação manual de código -->
+      <button class="vincular" onclick="abrirModalVincular(${u.id}, '${u.nome}')">+ VINCULAR BMS</button>
+      <button class="desvincular" onclick="abrirModalDesvincular(${u.id}, '${u.nome}')">- DESVINCULAR BMS</button>
     </div>
   `).join('') || '<div class="card card-empty"><div>Nenhum cliente cadastrado</div></div>';
 }
