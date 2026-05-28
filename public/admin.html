@@ -518,7 +518,13 @@ async function carregarTudo(){
   const rBms = await fetch(API+'?action=admin_list_master',{headers:authHeaders()});
   const dBms = await rBms.json();
   
-  bmsList = dBms;
+  // MODIFICADO AQUI: Ordenamento prioritário por status online/offline primeiro
+  bmsList = dBms.sort((a, b) => {
+    if (a.online && !b.online) return -1;
+    if (!a.online && b.online) return 1;
+    // Sub-ordenação secundária: se os status forem iguais, ordena pela comunicação mais recente
+    return (b.updated_at ? new Date(b.updated_at).getTime() : 0) - (a.updated_at ? new Date(a.updated_at).getTime() : 0);
+  });
 
   if(!activeBmsCode) {
     atualizarHTMLListaBms();
@@ -580,7 +586,6 @@ async function setupInicial() {
 }
 if(adminToken === 'admin_ok') setupInicial();
 
-// LOOP INTELIGENTE CORRIGIDO: Monitora de forma síncrona dependendo de qual tela está aberta na sua visão
 setInterval(()=>{
   if(!adminToken) return;
   
