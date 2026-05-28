@@ -8,7 +8,6 @@
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 
-/* CONFIGURAÇÃO DOS TEMAS (PADRÃO: MODO CLARO) */
 :root {
   --bg: #f4f6f9;
   --card-bg: rgba(255, 255, 255, 0.9);
@@ -23,7 +22,6 @@
   --cell-bg: #f8fafc;
   --cell-border: #e2e8f0;
   
-  /* Cores de status idênticas para ambos */
   --cyan: #00b4d8;
   --blue: #0077b6;
   --green: #2ec4b6;
@@ -31,7 +29,6 @@
   --orange: #ff9f1c;
 }
 
-/* CLASSES APLICADAS QUANDO O MODO ESCURO ATIVAR */
 [data-theme="dark"] {
   --bg: #05070d;
   --card-bg: rgba(13, 20, 35, 0.65);
@@ -86,7 +83,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text-main);
   width:100%;
   margin-top: 0 !important;
   margin-bottom: 12px !important;
-  box-shadow:0 8px 32px rgba(0,0,0,0.08);
+  box-shadow:0 8px 32px rgba(0,0,0,0.04);
 }
 
 #login .card,#cadastro .card,#redefinir .card,#configuracoesPage .card { width:100%; max-width:500px; }
@@ -137,18 +134,48 @@ button:active{transform:scale(0.98)}
 .btn-danger{background:rgba(255,68,68,0.05);border:1px solid var(--red);color:var(--red);box-shadow:none}
 .btn-danger:hover{background:rgba(255,68,68,0.15)}
 
-.bms-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;width:100%;margin-top:8px}
-.bms-item{background:var(--card-bg);border:1px solid var(--card-border);border-radius:16px;padding:16px;text-align:left;position:relative;display:flex;flex-direction:column;justify-content:space-between;min-height:120px;cursor:pointer}
+/* ITEM DA LISTA TOTALMENTE CENTRALIZADO E HARMONIOSO */
+.bms-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px;width:100%;margin-top:8px}
+.bms-item{
+  background:var(--card-bg);
+  border:1px solid var(--card-border);
+  border-radius:16px;
+  padding:20px 16px;
+  text-align:center;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  min-height:180px;
+  cursor:pointer;
+}
 .bms-item:hover{border-color:var(--cyan)}
-.bms-item h3{color:var(--text-main);font-size:18px;font-weight:700;margin-bottom:2px;text-align:left}
-.bms-item p{color:var(--text-muted);font-size:12px;font-family:monospace;text-align:left}
+.bms-item h3{color:var(--text-main);font-size:19px;font-weight:800;margin-bottom:4px;width:100%}
+.bms-item p{color:var(--text-muted);font-size:13px;font-family:monospace;margin-bottom:8px;width:100%}
 
-.status-dot{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;margin-top:12px}
+.status-dot{display:inline-flex;align-items:center;justify-content:center;gap:6px;font-size:12px;font-weight:700;margin-bottom:14px;width:100%}
 .status-dot::before{content:'';width:8px;height:8px;border-radius:50%;display:inline-block}
 .status-dot.on{color:var(--green)}.status-dot.on::before{background:var(--green);box-shadow:0 0 8px var(--green)}
 .status-dot.off{color:var(--red)}.status-dot.off::before{background:var(--red);box-shadow:0 0 8px var(--red)}
-.bms-item button.del{position:absolute;top:12px;right:12px;background:transparent;border:none;padding:4px;margin:0;width:auto;height:auto;color:var(--text-muted);font-size:16px;cursor:pointer;box-shadow:none}
-.bms-item button.del:hover{color:var(--red)}
+
+/* Botão pequeno e sutil de exclusão do dispositivo */
+.bms-item .btn-item-del{
+  background:transparent;
+  border:1px solid var(--input-border);
+  color:var(--text-muted);
+  font-size:11px;
+  font-weight:700;
+  padding:6px 12px;
+  border-radius:8px;
+  width:auto;
+  margin-top:4px;
+  box-shadow:none;
+}
+.bms-item .btn-item-del:hover{
+  background:rgba(255,68,68,0.08);
+  color:var(--red);
+  border-color:var(--red);
+}
 
 .gauge-card{padding:20px;min-height:260px}
 .gauge{width:min(220px,55vw);height:min(220px,55vw);margin:auto;border-radius:50%;background:conic-gradient(var(--green) 0deg,var(--cyan) 180deg,var(--gauge-empty) 180deg);position:relative;box-shadow:0 0 30px rgba(0,255,255,.05);transition:background.8s ease}
@@ -369,7 +396,7 @@ button:active{transform:scale(0.98)}
       <div class="diff-item">Min<span id="celMin" style="color:var(--green)">0.00V</span></div>
       <div class="diff-item">Max<span id="celMax" style="color:var(--orange)">0.00V</span></div>
       <div class="diff-item">Diferença<span id="celDif" style="color:var(--red)">0.00V</span></div>
-      <div class="diff-item">Total<span id="celTot" style="color:var(--cyan)">0</span></div>
+      <div class="diff-item">Total<span id="celTot" style="color(--cyan)">0</span></div>
     </div>
     <div id="celulas" class="cells"></div>
   </div>
@@ -416,7 +443,6 @@ var INT = null;
 
 try{USER = JSON.parse(localStorage.getItem('bms_user')||'null');}catch(e){}
 
-// LÓGICA DE INICIALIZAÇÃO DE TEMA (PADRÃO: LIGHT)
 var temaSalvo = localStorage.getItem('bms_theme') || 'light';
 document.documentElement.setAttribute('data-theme', temaSalvo);
 
@@ -435,7 +461,6 @@ function esconderTudo(){
 }
 
 window.onload = function(){
-  // Atualiza o select de configurações com o tema ativo
   if(document.getElementById('theme-selector')) {
     document.getElementById('theme-selector').value = temaSalvo;
   }
@@ -822,12 +847,10 @@ function carregarLista(){
     for(var i=0;i<lista.length;i++){
       var b = lista[i];
       html += '<div class="bms-item" onclick="abrirDash(\''+b.code+'\')">';
-      html += '<div>';
       html += '<h3>'+b.nome+'</h3>';
       html += '<p>'+b.code+'</p>';
-      html += '</div>';
       html += '<span class="status-dot '+(b.online?'on':'off')+'">'+(b.online?'Online':'Offline')+'</span>';
-      html += '<button class="del" onclick="event.stopPropagation();removerBms(\''+b.code+'\',\''+b.nome+'\')">🗑️</button>';
+      html += '<button class="btn-item-del" onclick="event.stopPropagation();removerBms(\''+b.code+'\',\''+b.nome+'\')">Excluir Dispositivo</button>';
       html += '</div>';
     }
     el.innerHTML = html;
@@ -835,7 +858,7 @@ function carregarLista(){
 }
 
 function removerBms(code, nome){
-  if(!confirm(`Remover ${nome || code} da sua conta?\n\nA BMS ficará disponível para outros usuários.`)) return;
+  if(!confirm(`Remover o dispositivo "${nome || code}" da sua conta?\n\nEsta ação exigirá um novo vínculo caso queira monitorá-lo novamente.`)) return;
 
   fetch(API+`?action=remove_bms&code=${code}`,{
     method:'DELETE',
