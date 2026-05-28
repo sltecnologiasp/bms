@@ -82,14 +82,59 @@ input::placeholder{
 }
 .pass-toggle:hover{opacity:.9}
 
-button{background:linear-gradient(90deg,var(--blue),var(--cyan));color:#fff;font-weight:700;cursor:pointer;margin-top:12px;box-shadow:0 4px 20px rgba(0,128,255,0.25)}
+/* BOTÕES REESTILIZADOS COM BORDAS CONFORME SOLICITADO */
+
+/* Botão Adicionar Dispositivo (Borda azul/ciano) */
+button{
+  background: transparent;
+  border: 1px solid rgba(0, 128, 255, 0.6);
+  color: #00bfff;
+  font-weight: 700;
+  cursor: pointer;
+  margin-top: 12px;
+  box-shadow: none;
+}
+button:hover{
+  background: rgba(0, 128, 255, 0.1);
+  border-color: var(--cyan);
+  color: var(--cyan);
+}
 button:active{transform:scale(0.98)}
 
 .btn-sec{background:transparent;border:1px solid rgba(0,255,255,.35);color:var(--cyan);box-shadow:none;font-weight:700}
-.btn-config{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.12);color:#ced4da;width:100%;max-width:440px;margin-top:16px;box-shadow:none}
-.btn-config:hover{background:rgba(255,255,255,0.08);color:#fff;border-color:rgba(255,255,255,0.25)}
-.logout{margin-top:8px;background:transparent;border:1px solid rgba(255,255,255,0.08);color:#ced4da;width:100%;max-width:440px;box-shadow:none}
-.logout:hover{background:rgba(255,68,68,0.1);color:var(--red);border-color:rgba(255,68,68,0.3)}
+
+/* Botão Configurações da Conta (Borda azul/ciano) */
+.btn-config{
+  background: transparent;
+  border: 1px solid rgba(0, 128, 255, 0.6);
+  color: #00bfff;
+  width: 100%;
+  max-width: 440px;
+  margin-top: 16px;
+  box-shadow: none;
+}
+.btn-config:hover{
+  background: rgba(0, 128, 255, 0.1);
+  border-color: var(--cyan);
+  color: var(--cyan);
+}
+
+/* Botão Sair (Borda vermelha) */
+.logout{
+  margin-top: 8px;
+  background: transparent;
+  border: 1px solid rgba(255, 68, 68, 0.4);
+  color: var(--red);
+  width: 100%;
+  max-width: 440px;
+  box-shadow: none;
+}
+.logout:hover{
+  background: rgba(255, 68, 68, 0.1);
+  border-color: #ff2222;
+  color: #ff2222;
+}
+
 .btn-danger{background:rgba(255,68,68,0.08);border:1px solid rgba(255,68,68,0.25);color:var(--red);box-shadow:none}
 .btn-danger:hover{background:rgba(255,68,68,0.15);border-color:var(--red)}
 
@@ -932,13 +977,11 @@ function atualizar(){
   }).catch(function(err){ console.error(err); });
 }
 
-/* BOTÃO SAIR COM CONFIRMAÇÃO DE SEGURANÇA */
 function sair(){
   if(!confirm('Deseja realmente sair do painel?')) return;
   sairSemConfirmacao();
 }
 
-/* Função interna para limpar o token sem alertar redundâncias */
 function sairSemConfirmacao(){
   clearInterval(INT);
   localStorage.removeItem('bms_token');
