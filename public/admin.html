@@ -188,7 +188,7 @@ button.logout:hover{background:rgba(231,29,54,0.08);color:var(--red);border-colo
     <div class="label">Cadastrar BMS no Sistema</div>
     <input id="code" placeholder="SL000000000000" maxlength="14" style="margin-top:8px">
     <button class="btn-clientes" onclick="cad()">CADASTRAR BMS MASTER</button>
-    <button class="btn-sec" onclick="generarECadastrar()">GERAR CÓDIGO ALEATÓRIO</button>
+    <button class="btn-sec" onclick="gerarECadastrar()">GERAR CÓDIGO ALEATÓRIO</button>
     <button class="btn-clientes" style="margin-top:24px" onclick="mostrarClientes()">VER CLIENTES CADASTRADOS</button>
     <p id="msg" style="text-align:center;margin-top:12px;font-size:14px;font-weight:600"></p>
   </div>
@@ -351,6 +351,7 @@ function gerarCodigoAleatorio(){
   return 'SL' + numeros;
 }
 
+// CORRIGIDO: Nome da função unificado com o botão HTML
 async function gerarECadastrar(){
   const code = gerarCodigoAleatorio();
   document.getElementById('code').value = code;
@@ -393,17 +394,11 @@ function closeBmsModal(){
   carregarTudo();
 }
 
-// SOLUÇÃO DE CONTROLE CLIENTE-ADMIN CROSS-CHECK
 function checarOnline(bms) {
   if (!bms) return false;
-  
-  // Se a propriedade nativa explícita do backend disser falso, respeitamos imediatamente
   if (bms.hasOwnProperty('online') && bms.online === false) {
     return false;
   }
-  
-  // Se o dispositivo foi desligado e parou de atualizar o SOC e a Tensão no Admin,
-  // ou se os dados vierem zerados de campo, consideramos Offline na hora.
   if (bms.user_id && (!bms.voltage || bms.voltage === 0 || bms.soc === 0)) {
     return false;
   }
@@ -414,7 +409,6 @@ function checarOnline(bms) {
   const bmsTime = new Date(timestampStr).getTime();
   const agora = Date.now();
 
-  // Trava de segurança: Se a diferença de requisição de listagem passar do timeout
   if (agora - bmsTime > 12000 && bms.online === undefined) {
     return false;
   }
@@ -422,7 +416,7 @@ function checarOnline(bms) {
   return true;
 }
 
-  function renderAdminDashboard(){
+function renderAdminDashboard(){
   if(!activeBmsCode) return;
   const bms = bmsList.find(b => b.code === activeBmsCode);
   if(!bms) return;
