@@ -6,7 +6,6 @@
 <title>Admin BMS</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
 <style>
-/* PALETA DE CORES ATUALIZADA - MODO CLARO FIXO */
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 :root{
   --bg:#f4f6f9;
@@ -21,11 +20,7 @@
   --gauge-empty:#e2e8f0;
   --cell-bg:#f8fafc;
   --cell-border:#e2e8f0;
-
-  /* Brilho neon sutil uniforme */
   --neon-glow: 0 0 12px rgba(0, 180, 216, 0.12);
-
-  /* Identidade Visual SL Tecnologia */
   --cyan:#00b4d8;
   --blue:#0077b6;
   --green:#2ec4b6;
@@ -35,7 +30,6 @@
 
 body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text-main);min-height:100vh;width:100%;overflow-x:hidden}
 
-/* Containers principais com alinhamento vertical centralizado */
 #login,#painel,#clientesPage,#dashAdmin{
   position:relative;
   z-index:1;
@@ -58,7 +52,6 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text-main);
 .title{font-size:clamp(32px,7vw,54px);font-weight:900;margin-bottom:4px;letter-spacing:2px;background:linear-gradient(90deg,var(--blue),var(--cyan));-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-align:center;width:100%}
 .user-info{color:var(--text-muted);font-size:14px;text-align:center;margin-bottom:16px;font-weight:500}
 
-/* Padronização dos Blocos (Cards) com efeito Neon */
 .card{
   background:var(--card-bg);
   border:1px solid var(--card-border);
@@ -72,7 +65,6 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text-main);
 #login .card, .card-cadastro { max-width:440px }
 #painel .card, #clientesPage .card, #dashAdmin .card { max-width:520px }
 
-/* Inputs de alto contraste para visibilidade no sol */
 input,button{width:100%;padding:16px;border-radius:14px;border:none;outline:none;font-size:16px;transition:all 0.2s ease}
 input{
   background:var(--input-bg);
@@ -92,7 +84,6 @@ input::placeholder{color:var(--input-placeholder)}
 
 .label{font-size:11px;letter-spacing:1px;text-transform:uppercase;text-align:center;width:100%;margin-bottom:6px;font-weight:700;color:var(--text-muted)}
 
-/* Tipografia de Botões do Sistema */
 button{background:linear-gradient(90deg,var(--blue),var(--cyan));color:#fff;font-weight:700;cursor:pointer;margin-top:12px;box-shadow:0 4px 20px rgba(0,128,255,0.25)}
 button:active{transform:scale(0.98)}
 
@@ -111,11 +102,9 @@ button.voltar:hover{background:rgba(46,196,182,0.08)}
 button.logout{margin-top:4px;background:transparent;border:1px solid var(--input-border);color:var(--text-muted);max-width:440px;box-shadow:none;font-weight:700}
 button.logout:hover{background:rgba(231,29,54,0.08);color:var(--red);border-color:var(--red)}
 
-/* Ajuste das Grades Adaptáveis */
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px;width:100%;margin-top:8px}
 #painel .grid, #dashAdmin .grid { grid-template-columns:repeat(auto-fill,minmax(145px,1fr)) }
 
-/* Customização interna dos itens das listas */
 #lista .card, #listaUsers .card {
   background:var(--card-bg);
   border:1px solid var(--card-border);
@@ -134,7 +123,6 @@ button.logout:hover{background:rgba(231,29,54,0.08);color:var(--red);border-colo
 
 .card-empty{grid-column:1/-1;min-height:180px;display:flex;align-items:center;justify-content:center;color:var(--text-muted);font-size:14px}
 
-/* Status e Badges unificados */
 .status{display:inline-flex;align-items:center;justify-content:center;gap:6px;font-size:12px;font-weight:700}
 .status::before{content:'';width:8px;height:8px;border-radius:50%;display:inline-block}
 .status.on{color:var(--green)}.status.on::before{background:var(--green);box-shadow:0 0 8px var(--green)}
@@ -147,7 +135,6 @@ button.logout:hover{background:rgba(231,29,54,0.08);color:var(--red);border-colo
 .card-code{font-size:14px;font-weight:700;font-family:monospace;color:var(--text-main);margin:12px 0;text-align:center;letter-spacing:0.5px}
 .card-top{display:flex;flex-direction:column;justify-content:flex-start;width:100%}
 
-/* Grid de Células nos Modais */
 .cells{display:grid;grid-template-columns:repeat(auto-fill,minmax(85px,1fr));gap:12px;margin-top:16px;width:100%}
 .cell{background:var(--cell-bg);border-radius:12px;padding:10px 6px;border:1px solid var(--cell-border);display:flex;flex-direction:column;align-items:center;justify-content:center}
 .cell-num{font-size:11px;opacity:.7;margin-bottom:2px;color:var(--text-muted)}
@@ -156,7 +143,6 @@ button.logout:hover{background:rgba(231,29,54,0.08);color:var(--red);border-colo
 .cell.warn{border-color:var(--orange)}
 .cell.crit{border-color:var(--red)}
 
-/* Modais normais permanecem com blur */
 .modal{display:none;position:fixed;inset:0;background:rgba(3,5,10,0.4);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);z-index:999;overflow-y:auto;padding:20px}
 .modal.active{display:flex;align-items:center;justify-content:center}
 .modal-content{width:100%;max-width:520px;background:var(--input-bg);border:1px solid var(--input-border);border-radius:24px;padding:24px;position:relative;box-shadow:0 20px 50px rgba(0,0,0,0.1)}
@@ -183,7 +169,7 @@ button.logout:hover{background:rgba(231,29,54,0.08);color:var(--red);border-colo
 
 <div id="login">
   <div class="title">SMART BMS</div>
-  <div class="user-info">Acesso administrativo</div>
+  <div class="user-info">Acesso administrative</div>
   <div class="card">
     <div class="label">Usuário</div>
     <input id="user" placeholder="administrador" autocomplete="username" value="administrador">
@@ -376,7 +362,7 @@ async function cad(){
   const r = await fetch(API+'?action=admin_add_master',{method:'POST',headers:authHeaders(),body:JSON.stringify({code})});
   const d = await r.json();
   document.getElementById('msg').textContent = d.ok?'Cadastrada no sistema!':d.error;
-  document.getElementById('msg').style.color = d.ok?'#2ec4b6':'#e71d36';
+  document.getElementById('msg').style.color = d.ok?'var(--green)':'var(--red)';
   if(d.ok){document.getElementById('code').value='';carregarTudo();}
 }
 
@@ -406,7 +392,6 @@ function closeBmsModal(){
   document.getElementById('painel').style.display = 'flex';
   carregarTudo();
 }
-
 function renderAdminDashboard(){
   if(!activeBmsCode) return;
   const bms = bmsList.find(b => b.code === activeBmsCode);
@@ -530,8 +515,9 @@ async function carregarTudo(){
   const dBms = await rBms.json();
   
   bmsList = dBms.sort((a,b) => {
-    const aOnline = a.updated_at && (Date.now() - new Date(a.updated_at).getTime() < 10000);
-    const bOnline = b.updated_at && (Date.now() - new Date(b.updated_at).getTime() < 10000);
+    const now = Date.now(); // CAPTURA O TEMPO ATUAL CORRETAMENTE A CADA LOOP
+    const aOnline = a.updated_at && (now - new Date(a.updated_at).getTime() < 10000);
+    const bOnline = b.updated_at && (now - new Date(b.updated_at).getTime() < 10000);
     if (aOnline && !bOnline) return -1;
     if (!aOnline && bOnline) return 1;
     return (b.updated_at ? new Date(b.updated_at).getTime() : 0) - (a.updated_at ? new Date(a.updated_at).getTime() : 0);
@@ -545,8 +531,9 @@ async function carregarTudo(){
 }
 
 function atualizarHTMLListaBms() {
+  const now = Date.now(); // CAPTURA O TEMPO DINÂMICO AQUI TAMBÉM
   document.getElementById('lista').innerHTML = bmsList.map(b=>{
-    const online = b.updated_at && (Date.now() - new Date(b.updated_at).getTime() < 10000);
+    const online = b.updated_at && (now - new Date(b.updated_at).getTime() < 10000);
     const dono = b.user_id? `<span class="badge badge-orange">Vinculada</span>` : `<span class="badge badge-green">Disponível</span>`;
     return `
     <div class="card" onclick="viewBmsDetails('${b.code}')">
