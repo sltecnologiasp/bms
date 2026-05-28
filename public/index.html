@@ -4,6 +4,18 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <title>SMART BMS</title>
+
+<!-- Tags obrigatórias para o WhatsApp mostrar o card com foto -->
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://bms.app.br/">
+<meta property="og:title" content="SMART BMS">
+<meta property="og:description" content="Gerenciamento e Monitoramento Avançado de Baterias em Tempo Real - SL Tecnologia">
+<meta property="og:image" content="https://bms.app.br/1000229030.png">
+<meta property="og:image:secure_url" content="https://bms.app.br/1000229030.png">
+<meta property="og:image:width" content="300">
+<meta property="og:image:height" content="300">
+<meta property="og:image:type" content="image/png">
+
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
@@ -182,8 +194,7 @@ button:active{transform:scale(0.98)}
 .bms-item .btn-item-del:hover{
   background:rgba(255,68,68,0.08);
   color:var(--red);
-  border-color:var(--red);
-}
+  border-color:var(--red)}
 
 .gauge-card{padding:20px;min-height:260px}
 .gauge{width:min(220px,55vw);height:min(220px,55vw);margin:auto;border-radius:50%;background:conic-gradient(var(--green) 0deg,var(--cyan) 180deg,var(--gauge-empty) 180deg);position:relative;box-shadow:0 0 30px rgba(0,255,255,.05);transition:background.8s ease}
@@ -263,7 +274,7 @@ button:active{transform:scale(0.98)}
 <body>
 
 <div id="login">
-  <!-- INJETADO: Bloco da Logo Estilizada "1000229030.png" com o texto integrado embaixo -->
+  <!-- Bloco da Logo Estilizada com o texto integrado embaixo -->
   <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; margin-bottom: 24px; width: 100%;">
     <img src="1000229030.png" alt="Logo BMS" style="width: 100px; height: 100px; object-fit: contain; border-radius: 50%; box-shadow: 0 4px 15px rgba(0, 180, 216, 0.2); background: var(--card-bg); padding: 8px; transition: transform 0.3s ease;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
     <div style="font-size: clamp(32px, 7vw, 48px); font-weight: 900; margin-top: 12px; letter-spacing: 2px; background: linear-gradient(90deg, var(--blue), var(--cyan)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; text-align: center;">SMART BMS</div>
@@ -365,9 +376,10 @@ button:active{transform:scale(0.98)}
     <div id="bms-list" class="bms-list"></div>
   </div>
   
-  <div class="card" style="max-width:440px; width:100%; display:flex; flex-direction:column; gap:12px; padding:16px;">
-    <button class="btn-card-action" onclick="mostrarPaginaConta()">Configurações da Conta</button>
-    <button class="btn-card-action" onclick="sair()">Sair</button>
+  <!-- CORREÇÃO: Bloco expandido em 100% cobrindo a tela inteira de forma responsiva -->
+  <div class="card" style="width: 100%; display: flex; flex-direction: column; gap: 12px; padding: 16px; box-sizing: border-box;">
+    <button class="btn-card-action" style="width: 100%; margin: 0;" onclick="mostrarPaginaConta()">Configurações da Conta</button>
+    <button class="btn-card-action" style="width: 100%; margin: 0;" onclick="sair()">Sair</button>
   </div>
 
   <div class="footer-link">
