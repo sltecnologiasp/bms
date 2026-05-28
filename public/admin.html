@@ -396,7 +396,6 @@ function closeBmsModal(){
 function renderAdminDashboard(){
   if(!activeBmsCode) return;
   
-  // SOLUÇÃO 1: Consulta a rota individual detalhada para atualizar os valores de SOC e Tensão ao vivo na tela interna do admin
   fetch(API + '?action=data&code=' + activeBmsCode, { headers: authHeaders() })
   .then(r => r.json())
   .then(d => {
@@ -523,15 +522,12 @@ async function carregarTudo(){
 
   if(!activeBmsCode) {
     atualizarHTMLListaBms();
-  } else {
-    renderAdminDashboard();
   }
 }
 
 function atualizarHTMLListaBms() {
   document.getElementById('lista').innerHTML = bmsList.map(b=>{
     const dono = b.user_id? `<span class="badge badge-orange">Vinculada</span>` : `<span class="badge badge-green">Disponível</span>`;
-    // Pega o status direto processado nativamente pela nova rota da API
     const statusClass = b.online ? 'on' : 'off';
     const statusText = b.online ? 'Online' : 'Offline';
 
@@ -584,7 +580,16 @@ async function setupInicial() {
 }
 if(adminToken === 'admin_ok') setupInicial();
 
-setInterval(()=>{if(adminToken && document.getElementById('painel').classList.contains('active'))carregarTudo()},5000);
+// LOOP INTELIGENTE CORRIGIDO: Monitora de forma síncrona dependendo de qual tela está aberta na sua visão
+setInterval(()=>{
+  if(!adminToken) return;
+  
+  if(document.getElementById('painel').classList.contains('active')) {
+    carregarTudo();
+  } else if(document.getElementById('dashAdmin').classList.contains('active')) {
+    renderAdminDashboard();
+  }
+}, 5000);
 </script>
 </body>
 </html>
