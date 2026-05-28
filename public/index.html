@@ -127,42 +127,39 @@ input::placeholder{
 }
 .pass-toggle:hover{opacity:.9}
 
+/* BOTÕES PADRÃO DO SISTEMA (GRADIENTE AZUL E CIANO VIBRANTE) */
 button{background:linear-gradient(90deg,var(--blue),var(--cyan));color:#fff;font-weight:700;cursor:pointer;margin-top:12px;box-shadow:0 4px 20px rgba(0,128,255,0.25)}
 button:active{transform:scale(0.98)}
 
 .btn-sec{background:transparent;border:1px solid var(--cyan);color:var(--cyan);box-shadow:none;font-weight:700}
 
-/* Ajuste dos botões secundários para cards integrados */
+/* Botões do Bloco Inferior herdam o mesmo gradiente vibrante */
 .btn-card-action {
-  background: transparent;
-  border: 1px solid var(--input-border);
-  color: var(--text-main);
-  box-shadow: none;
+  background: linear-gradient(90deg,var(--blue),var(--cyan));
+  color: #fff;
   font-weight: 700;
   margin-top: 0;
-}
-.btn-card-action:hover {
-  border-color: var(--cyan);
-  background: var(--input-bg);
+  box-shadow: 0 4px 20px rgba(0,128,255,0.15);
 }
 
 .btn-danger{background:rgba(255,68,68,0.05);border:1px solid var(--red);color:var(--red);box-shadow:none;font-weight:700}
 .btn-danger:hover{background:rgba(255,68,68,0.15)}
 
-.bms-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px;width:100%;margin-top:8px}
+/* ELEMENTOS DA LISTA DE DISPOSITIVOS */
+.bms-list{display:flex;flex-direction:column;gap:12px;width:100%;margin-top:8px}
 .bms-item{
-  background:var(--card-bg);
-  border:1px solid var(--card-border);
-  border-radius:16px;
-  padding:20px 16px;
-  text-align:center;
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  justify-content:center;
-  min-height:180px;
-  cursor:pointer;
-  box-shadow: var(--neon-glow);
+  background: var(--bg);
+  border: 1px solid var(--input-border);
+  border-radius: 16px;
+  padding: 20px 16px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 160px;
+  cursor: pointer;
+  transition: border-color 0.2s;
 }
 .bms-item:hover{border-color:var(--cyan)}
 .bms-item h3{color:var(--text-main);font-size:19px;font-weight:800;margin-bottom:4px;width:100%}
@@ -338,15 +335,16 @@ button:active{transform:scale(0.98)}
     <button onclick="addBms()">ADICIONAR DISPOSITIVO</button>
   </div>
   
-  <div class="card" style="background:transparent;border:none;box-shadow:none;padding:0">
-    <div class="label">Meus Dispositivos</div>
+  <!-- CARDS DOS DISPOSITIVOS ENVELOPADOS DENTRO DO BLOCO PRINCIPAL -->
+  <div class="card">
+    <div class="label" style="margin-bottom:12px">Meus Dispositivos</div>
     <div id="bms-list" class="bms-list"></div>
   </div>
   
-  <!-- NOVO BLOCO AGRUPADOR DE AÇÕES NO FINAL DA TELA -->
-  <div class="card" style="max-width:440px; width:100%; display:flex; flex-direction:column; gap:10px; padding:16px;">
+  <!-- BLOCO DE AÇÕES COM BOTÕES DE ALTO CONTRASTE (GRADIENTE) -->
+  <div class="card" style="max-width:440px; width:100%; display:flex; flex-direction:column; gap:12px; padding:16px;">
     <button class="btn-card-action" onclick="mostrarPaginaConta()">Configurações da Conta</button>
-    <button class="btn-card-action" style="color:var(--red);" onclick="sair()">Sair</button>
+    <button class="btn-card-action" onclick="sair()">Sair</button>
   </div>
 
   <div class="footer-link">
@@ -359,7 +357,6 @@ button:active{transform:scale(0.98)}
   <div class="title" style="font-size:clamp(28px,6vw,34px);margin-bottom:4px">SMART BMS</div>
   <div class="user-info">Configurações de Segurança</div>
 
-  <!-- GERENCIAR CONTA COM BOTÃO DE SUPORTE NO WHATSAPP ADICIONADO -->
   <div class="card" style="max-width:440px; width:100%">
     <div class="label" style="margin-bottom:16px">Gerenciar Minha Conta</div>
     <button class="btn-sec" style="margin-top:0" onclick="abrirModalSenha()">ALTERAR MINHA SENHA</button>
@@ -872,7 +869,7 @@ function carregarLista(){
     var el = document.getElementById('bms-list');
     if(!el) return;
     if(!lista || !lista.length){
-      el.innerHTML = '<p style="grid-column:1/-1;text-align:center;color:var(--text-muted);padding:30px;font-size:14px">Nenhuma BMS monitorada</p>';
+      el.innerHTML = '<p style="text-align:center;color:var(--text-muted);padding:20px;font-size:14px">Nenhuma BMS monitorada</p>';
       return;
     }
     var html = '';
