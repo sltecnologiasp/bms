@@ -243,11 +243,17 @@ button.logout{margin-top:4px;background:transparent;border:1px solid rgba(255,68
 
 <script>
 const API = '/api/bms';
-let adminToken = sessionStorage.getItem('admin_token');
+// CORREÇÃO: Utilizando localStorage para manter a sessão estável e evitar quedas aleatórias
+let adminToken = localStorage.getItem('admin_token');
 let bmsList = [];
 let activeBmsCode = null;
 
-if(adminToken === 'admin_ok') showPainel();
+// Inicializa o painel caso o token esteja salvo e ativo
+if(adminToken === 'admin_ok') {
+  window.addEventListener('DOMContentLoaded', () => {
+    showPainel();
+  });
+}
 
 async function adminLogin(){
   const user = document.getElementById('user').value;
@@ -260,7 +266,7 @@ async function adminLogin(){
     const d = await r.json();
     if(d.ok){
       adminToken = d.token;
-      sessionStorage.setItem('admin_token', adminToken);
+      localStorage.setItem('admin_token', adminToken);
       showPainel();
     }else{
       errorEl.textContent = d.error || 'Credenciais inválidas';
@@ -279,7 +285,7 @@ function showPainel(){
   document.getElementById('dashAdmin').classList.remove('active');
   document.getElementById('painel').classList.add('active');
   document.getElementById('painel').style.display = 'flex';
-  carregarTudo();
+  setupInicial();
 }
 
 function mostrarClientes(){
@@ -295,14 +301,14 @@ function voltarPainel(){
   document.getElementById('clientesPage').style.display = 'none';
   document.getElementById('painel').classList.add('active');
   document.getElementById('painel').style.display = 'flex';
+  carregarTudo();
 }
 
 function adminLogout(){
-  sessionStorage.removeItem('admin_token');
+  localStorage.removeItem('admin_token');
   location.reload();
 }
 
-// RESTAURADO: Função de cabeçalho original necessária para ler o Banco de Dados
 function authHeaders(){
   return {'Content-Type':'application/json','Authorization':'Bearer '+adminToken};
 }
@@ -372,7 +378,6 @@ function closeBmsModal(){
   document.getElementById('painel').style.display = 'flex';
   carregarTudo();
 }
-
 function renderAdminDashboard(){
   if(!activeBmsCode) return;
   const bms = bmsList.find(b => b.code === activeBmsCode);
@@ -510,7 +515,6 @@ async function carregarTudo(){
   }
 }
 
-// RESTAURADO: Mantido o ID original '#lista' para correta injeção dos dados vindo do DB
 function atualizarHTMLListaBms() {
   document.getElementById('lista').innerHTML = bmsList.map(b=>{
     const online = b.updated_at && (Date.now() - new Date(b.updated_at).getTime() < 10000);
@@ -556,13 +560,9 @@ async function listarUsers(){
 }
 
 async function setupInicial() {
+  await carregarTudo();
   await listarUsers();
-  const r = await fetch(API+'?action=admin_list_master',{headers:authHeaders()});
-  const d = await r.json();
-  bmsList = d;
-  atualizarHTMLListaBms();
 }
-if(adminToken === 'admin_ok') setupInicial();
 
 setInterval(()=>{if(adminToken && document.getElementById('painel').classList.contains('active'))carregarTudo()},5000);
 </script>
