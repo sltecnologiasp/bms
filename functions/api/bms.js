@@ -324,7 +324,7 @@ export async function onRequest({ request, env }) {
       return json(withOnline);
     }
 
-    // ROTA COMPARTILHADA (DATA DETALHADA)
+    // ROTA COMPARTILHADA (DATA DETALHADA) - SUPORTA USER E ADMIN
     if (action === 'data' && request.method === 'GET') {
       const code = url.searchParams.get('code');
       if (!code) return json({ ok: false, error: 'Code obrigatório' }, 400);
@@ -338,9 +338,36 @@ export async function onRequest({ request, env }) {
       return json({...data, online, cells: JSON.parse(data.cells || '[]')});
     }
 
+    // ALTERAR SENHA POR DENTRO DO PAINEL DE CLIENTES
+    if (action === 'user_change_password' && request.method === 'POST') {
+      if (!userId) return json({ ok: false, error: 'Login necessário' }, 401);
+      const { senhaAtual, novaSenha } = await request.json();
+      
+      const hashAtual = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(senhaAtual));
+      const senha_atual_hash = Array.from(new Uint8Array(hashAtual)).map(b => b.toString(16).padStart(2, '0')).join('');
+      
+      const user = await env.DB.prepare('SELECT id FROM users WHERE id = ? AND senha_hash = ?').bind(userId, senha_atual_hash).first();
+      if (!user) return json({ ok: false, error: 'Senha atual incorreta' }, 400);
+      
+      const hashNova = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(novaSenha));
+      const nova_senha_hash = Array.from(new Uint8Array(hashNova)).map(b => b.toString(16).padStart(2, '0')).join('');
+      
+      await env.DB.prepare('UPDATE users SET senha_hash = ? WHERE id = ?').bind(nova_senha_hash, userId).run();
+      return json({ ok: true });
+    }
+  // EXCLUIR A PRÓPRIA CONTA LOGADA PELO PAINEL
+    if (action === 'user_delete_self' && request.method === 'DELETE') {
+      if (!userId) return json({ ok: false, error: 'Login necessário' }, 401);
+      
+      await env.DB.prepare('UPDATE bms_master SET user_id = NULL WHERE user_id = ?').bind(userId).run();
+      await env.DB.prepare('DELETE FROM user_bms WHERE user_id = ?').bind(userId).run();
+      await env.DB.prepare('DELETE FROM users WHERE id = ?').bind(userId).run();
+      
+      return json({ ok: true });
+    }
+
     return json({ error: 'Not found' }, 404);
   } catch (e) {
     return json({ ok: false, error: e.message }, 500);
   }
-  }
-                                
+}
