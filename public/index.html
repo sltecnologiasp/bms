@@ -10,7 +10,7 @@
 :root{--bg:#05070d;--cyan:#00ffff;--blue:#0080ff;--green:#00ff88;--red:#ff4444;--orange:#ffaa00}
 body{font-family:'Inter',sans-serif;background:var(--bg);color:#fff;min-height:100vh;width:100%;overflow-x:hidden}
 
-/* Containers principais ajustados para esticar no desktop com limite elegante */
+/* Containers principais originais esticando no desktop */
 #login,#dash,#lista,#cadastro{
   position:relative;
   z-index:1;
@@ -34,7 +34,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:#fff;min-height:1
 .user-info{color:#6b7c96;font-size:14px;text-align:center;margin-bottom:16px;font-weight:500}
 .user-info span{color:#fff;font-weight:600}
 
-/* Cards modificados para expandirem e preencherem toda a largura útil horizontal */
+/* Cards expansíveis */
 .card{
   background:rgba(13,20,35,0.65);
   border:1px solid rgba(0,255,255,.08);
@@ -46,10 +46,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:#fff;min-height:1
   box-shadow:0 8px 32px rgba(0,0,0,0.4);
 }
 
-/* Telas de login e cadastro mantêm proporção visual ideal */
 #login .card,#cadastro .card { width:100%; max-width:500px; }
-
-/* Lista e Painel expandidos para 100% da largura, mantendo o design original intacto */
 #lista .card, #dash .card { width:100%; max-width:100%; }
 
 .label{font-size:11px;letter-spacing:1px;opacity:.5;text-transform:uppercase;text-align:center;width:100%;margin-bottom:6px;font-weight:600}
@@ -58,7 +55,7 @@ input,select{background:rgba(0,0,0,.4);color:#fff;border:1px solid rgba(255,255,
 input:focus{border-color:rgba(0,255,255,0.4);background:rgba(0,0,0,.6)}
 input::placeholder{color:rgba(255,255,255,.25)}
 
-/* Container dos Olhinhos perfeitamente embutido */
+/* Container dos Olhinhos */
 .pass-wrapper{position:relative;width:100%}
 .pass-wrapper input{padding-right:50px}
 .pass-toggle{position:absolute;right:16px;top:16px;cursor:pointer;opacity:.3;font-size:18px;user-select:none;transition:opacity .2s}
@@ -96,7 +93,6 @@ button:active{transform:scale(0.98)}
 .bar{height:12px;background:rgba(255,255,255,.06);border-radius:999px;overflow:hidden}
 .bar-fill{height:100%;width:0%;border-radius:999px;background:linear-gradient(90deg,#00ff88,#00ffff);transition:width.8s ease}
 
-/* Grid de informações gerais expandido para acompanhar a tela */
 .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;width:100%;max-width:100%;margin-top:0 !important;margin-bottom:12px !important}
 .grid .card{width:100%;height:100px;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:12px;margin:0 !important}
 .value{font-size:clamp(22px,4vw,30px);font-weight:800;margin-top:8px;line-height:1;width:100%;text-align:center;font-variant-numeric:tabular-nums}
@@ -122,10 +118,14 @@ button:active{transform:scale(0.98)}
 
 .hidden{display:none!important}
 .erro{background:rgba(255,68,68,.1);border:1px solid var(--red);border-radius:12px;padding:14px;margin-top:16px;color:var(--red);font-size:14px}
+
+/* Estilos de links de navegação adicionais */
 .link-cadastro{margin-top:20px;text-align:center;color:#6b7c96;cursor:pointer;font-size:14px}
 .link-cadastro span{color:var(--cyan);text-decoration:underline}
+.link-esqueceu{display:block;text-align:right;font-size:12px;color:rgba(255,255,255,0.4);margin-top:8px;cursor:pointer;text-decoration:none;transition:color 0.2s}
+.link-esqueceu:hover{color:var(--cyan)}
 
-/* Estilo do Rodapé: Link em Azul Ciano com quebra de linha organizada */
+/* Estilo do Rodapé */
 .footer-link{font-size:11px;margin-top:24px;text-align:center;letter-spacing:1px;line-height:1.6}
 .footer-link a{color:var(--cyan);text-decoration:none;font-weight:600;transition:opacity 0.2s;}
 .footer-link a:hover{opacity:0.8;text-decoration:underline;}
@@ -148,6 +148,8 @@ button:active{transform:scale(0.98)}
       <input id="senha" type="password" placeholder="••••••••">
       <span class="pass-toggle" onclick="togglePass('senha', this)">👁️‍🗨️</span>
     </div>
+    
+    <span class="link-esqueceu" onclick="recuperarSenha()">Esqueceu sua senha?</span>
     
     <button onclick="login()">ENTRAR</button>
     <p class="link-cadastro" onclick="mostrarCadastro()">Ainda não tem conta? <span>Cadastre-se</span></p>
@@ -365,6 +367,37 @@ function login(){
   });
 }
 
+// LOGICA DE RECUPERAÇÃO DE SENHA: Coleta o e-mail e dispara para o Worker
+function recuperarSenha() {
+  var emailAtual = document.getElementById('email').value.trim();
+  var email = prompt("Digite o e-mail da sua conta para receber as instruções de recuperação:", emailAtual);
+  
+  if (email === null) return; // Clicou em cancelar
+  email = email.trim();
+  
+  if (!email) {
+    alert("Por favor, digite um e-mail válido.");
+    return;
+  }
+  
+  fetch(API + '?action=recover', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email: email })
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(d) {
+    if (d.ok) {
+      alert("Se o e-mail estiver cadastrado, um link de recuperação será enviado em instantes.");
+    } else {
+      alert("Erro: " + (d.error || "Não foi possível processar a solicitação."));
+    }
+  })
+  .catch(function(err) {
+    alert("Erro de conexão: " + err.message);
+  });
+}
+
 function cadastrar(){
   var btn = document.getElementById('btn-cadastrar');
   if (btn && btn.disabled) return;
@@ -464,7 +497,6 @@ function mostrarLista(){
   INT = setInterval(carregarLista, 3000);
 }
 
-// CARREGAR LISTA: Preserva o seu layout adaptável original por completo
 function carregarLista(){
   fetch(API + '?action=user_bms', {
     headers:{'Authorization':'Bearer '+TOKEN}
