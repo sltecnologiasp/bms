@@ -198,6 +198,14 @@ export async function onRequest({ request, env }) {
       }
     }
 
+    // VERIFICAÇÃO ADICIONAL DE SEGURANÇA PARA USUÁRIOS
+    if (!isAdmin && userId) {
+      const userCheck = await env.DB.prepare('SELECT id FROM users WHERE id = ?').bind(userId).first();
+      if (!userCheck) {
+        return json({ ok: false, error: 'Sessão inválida ou usuário removido' }, 401);
+      }
+    }
+
     // ==========================================
     // ROTAS PROTEGIDAS - EXCLUSIVAS DO ADMIN
     // ==========================================
@@ -212,7 +220,6 @@ export async function onRequest({ request, env }) {
           LEFT JOIN users u ON u.id = bm.user_id
         `).all();
         
-        // Trata os dados das células que estão salvos em string JSON
         const data = (results || []).map(item => ({
           ...item,
           cells: JSON.parse(item.cells || '[]')
@@ -265,7 +272,6 @@ export async function onRequest({ request, env }) {
       if (action === 'delete_user' && request.method === 'DELETE') {
         const id = url.searchParams.get('id');
         if (!id) return json({ ok: false, error: 'ID inválido' }, 400);
-        // Desvincula as BMS dele antes de apagar
         await env.DB.prepare('UPDATE bms_master SET user_id = NULL WHERE user_id = ?').bind(id).run();
         await env.DB.prepare('DELETE FROM user_bms WHERE user_id = ?').bind(id).run();
         await env.DB.prepare('DELETE FROM users WHERE id = ?').bind(id).run();
@@ -318,7 +324,7 @@ export async function onRequest({ request, env }) {
       return json(withOnline);
     }
 
-    // ROTA COMPARTILHADA (DATA DETALHADA) - SUPORTA USER E ADMIN
+    // ROTA COMPARTILHADA (DATA DETALHADA)
     if (action === 'data' && request.method === 'GET') {
       const code = url.searchParams.get('code');
       if (!code) return json({ ok: false, error: 'Code obrigatório' }, 400);
@@ -336,4 +342,5 @@ export async function onRequest({ request, env }) {
   } catch (e) {
     return json({ ok: false, error: e.message }, 500);
   }
-}
+  }
+                                
