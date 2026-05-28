@@ -55,7 +55,17 @@ input::placeholder{color:rgba(255,255,255,.25)}
 
 .pass-wrapper{position:relative;width:100%}
 .pass-wrapper input{padding-right:50px}
-.pass-toggle{position:absolute;right:16px;top:16px;cursor:pointer;opacity:.3;font-size:18px;user-select:none;transition:opacity .2s}
+.pass-toggle{
+  position:absolute;
+  right:16px;
+  top:16px;
+  cursor:pointer;
+  opacity:.3;
+  font-size:18px;
+  user-select:none;
+  transition:opacity .2s;
+  filter: grayscale(100%); /* Garante que o olhinho fique preto e branco */
+}
 .pass-toggle:hover{opacity:.7}
 
 button{background:linear-gradient(90deg,var(--blue),var(--cyan));color:#fff;font-weight:700;cursor:pointer;margin-top:12px;box-shadow:0 4px 20px rgba(0,128,255,0.25)}
@@ -93,7 +103,7 @@ button:active{transform:scale(0.98)}
 .grid .card{width:100%;height:100px;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:12px;margin:0 !important}
 .value{font-size:clamp(22px,4vw,30px);font-weight:800;margin-top:8px;line-height:1;width:100%;text-align:center;font-variant-numeric:tabular-nums}
 
-.status-badge{display:inline-flex;align-items:center;gap:8px;padding:10px 20px;border-radius999px;font-weight:700;font-size:14px;margin-top:10px}
+.status-badge{display:inline-flex;align-items:center;gap:8px;padding:10px 20px;border-radius:999px;font-weight:700;font-size:14px;margin-top:10px}
 .status-badge.on{background:rgba(0,255,136,.08);color:var(--green);border:1px solid rgba(0,0,0,136,.2)}
 .status-badge.off{background:rgba(255,68,68,.08);color:var(--red);border:1px solid rgba(255,68,68,.2)}
 
@@ -140,7 +150,7 @@ button:active{transform:scale(0.98)}
     <div class="label" style="margin-top:16px">Senha</div>
     <div class="pass-wrapper">
       <input id="senha" type="password" placeholder="••••••••">
-      <span class="pass-toggle" onclick="togglePass('senha', this)">👁️‍عون</span>
+      <span class="pass-toggle" onclick="togglePass('senha', this)">👁️</span>
     </div>
     
     <span class="link-esqueceu" onclick="recuperarSenha()">Esqueceu sua senha?</span>
@@ -168,13 +178,13 @@ button:active{transform:scale(0.98)}
     <div class="label" style="margin-top:16px">Senha</div>
     <div class="pass-wrapper">
       <input id="cad-senha" type="password" placeholder="••••••••">
-      <span class="pass-toggle" onclick="togglePass('cad-senha', this)">👁️‍عون</span>
+      <span class="pass-toggle" onclick="togglePass('cad-senha', this)">👁️</span>
     </div>
 
     <div class="label" style="margin-top:16px">Confirmar Senha</div>
     <div class="pass-wrapper">
       <input id="cad-confirmar-senha" type="password" placeholder="••••••••">
-      <span class="pass-toggle" onclick="togglePass('cad-confirmar-senha', this)">👁️‍عون</span>
+      <span class="pass-toggle" onclick="togglePass('cad-confirmar-senha', this)">👁️</span>
     </div>
     
     <button id="btn-cadastrar" onclick="cadastrar()">CADASTRAR</button>
@@ -348,7 +358,7 @@ function togglePass(inputId, iconEl) {
     iconEl.style.opacity = ".8";
   } else {
     input.type = "password";
-    iconEl.textContent = "👁️‍عون"; 
+    iconEl.textContent = "👁️"; 
     iconEl.style.opacity = ".3";
   }
 }
@@ -463,7 +473,6 @@ function salvarNovaSenha() {
     if (errBox) { errBox.textContent = "Erro: " + err.message; errBox.classList.remove('hidden'); }
   });
 }
-
 function cadastrar(){
   var btn = document.getElementById('btn-cadastrar');
   if (btn && btn.disabled) return;
