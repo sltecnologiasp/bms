@@ -16,7 +16,9 @@ export async function onRequest({ request, env }) {
   });
 
   try {
-    // ROTAS PÚBLICAS
+    // ==========================================
+    // ROTAS PÚBLICAS (NÃO EXIGEM TOKEN / LOGIN)
+    // ==========================================
 
     // ROTA 1: VERIFICAÇÃO DE E-MAIL (QUANDO O CLIENTE CLICA NO LINK)
     if (action === 'verify_email' && request.method === 'GET') {
@@ -54,8 +56,8 @@ export async function onRequest({ request, env }) {
       `, { headers: { 'Content-Type': 'text/html; charset=utf-8' } });
     }
 
-    // ROTA 2: CADASTRO COM DISPARO DO RESEND
-    if (action === 'register' && request.method === 'POST') {
+    // ROTA 2: CADASTRO COM DISPARO DO RESEND (Suporta 'register' ou 'register_user')
+    if ((action === 'register' || action === 'register_user') && request.method === 'POST') {
       const { nome, email, resignation, senha } = await request.json();
       const userEmail = (email || resignation || '').trim().toLowerCase();
       if (!nome || !userEmail || !senha) return json({ ok: false, error: 'Dados inválidos' }, 400);
@@ -91,7 +93,7 @@ export async function onRequest({ request, env }) {
                 <div style="text-align: center; margin: 36px 0;">
                   <a href="${verifyLink}" style="background: linear-gradient(90deg, #0080ff, #00ffff); color: #ffffff; padding: 16px 32px; text-decoration: none; border-radius: 12px; font-weight: bold; font-size: 16px;">ATIVAR MINHA CONTA</a>
                 </div>
-                <p style="text-align: center; color: #6b7c96; font-size: 12px; margin-top: 32px;">Se você não se cadastrou em nosso system, por favor, ignore este e-mail.</p>
+                <p style="text-align: center; color: #6b7c96; font-size: 12px; margin-top: 32px;">Se você não se cadastrou em nosso sistema, por favor, ignore este e-mail.</p>
               </div>
             `
           })
@@ -100,7 +102,50 @@ export async function onRequest({ request, env }) {
 
       return json({ ok: true });
     }
-        // ROTA 3: LOGIN CORRIGIDO COM VALIDAÇÃO DE CONTA ATIVA
+
+    // NOVA ROTA INJETADA: RECUPERAÇÃO DE SENHA PÚBLICA (Evita o erro de Não Autorizado)
+    if (action === 'recover_user' && request.method === 'POST') {
+      const { email } = await request.json();
+      const cleanEmail = (email || '').trim().toLowerCase();
+      if (!cleanEmail) return json({ ok: false, error: 'E-mail obrigatório' }, 400);
+
+      // Verifica se o usuário existe
+      const user = await env.DB.prepare('SELECT id, nome FROM users WHERE email = ?').bind(cleanEmail).first();
+      
+      // Por segurança, respondemos "ok: true" mesmo se não existir (evita que descubram e-mails cadastrados)
+      if (!user) return json({ ok: true });
+
+      // Como o seu sistema usa uma rota genérica, o ideal é direcionar o cliente para falar com o seu suporte ou gerar um token temporário
+      if (env.RESEND_API_KEY) {
+        await fetch('https://api.resend.com/emails', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${env.RESEND_API_KEY}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            from: 'SMART BMS <nao-responda@bms.app.br>',
+            to: cleanEmail,
+            subject: 'Recuperação de Senha - SMART BMS',
+            html: `
+              <div style="font-family: sans-serif; max-width: 600px; margin: auto; padding: 24px; background: #05070d; color: #ffffff; border-radius: 12px; border: 1px solid rgba(0,255,255,0.1);">
+                <h2 style="color: #00ffff; text-align: center; margin-top: 0;">SMART BMS</h2>
+                <h3 style="text-align: center; color: #fff;">Olá, ${user.nome}!</h3>
+                <p style="text-align: center; color: #a1aab8; line-height: 1.6;">Recebemos uma solicitação de redefinição de senha para a sua conta.</p>
+                <p style="text-align: center; color: #a1aab8; line-height: 1.6;">Para redefinir sua credencial ou receber suporte com o acesso, por favor entre em contato direto com o nosso suporte técnico da <strong>SL TECNOLOGIA</strong>.</p>
+                <div style="text-align: center; margin: 36px 0;">
+                  <a href="https://wa.me/5515991355393" target="_blank" style="background: #00ff88; color: #05070d; padding: 16px 32px; text-decoration: none; border-radius: 12px; font-weight: bold; font-size: 16px;">FALAR COM SUPORTE</a>
+                </div>
+              </div>
+            `
+          })
+        }).catch(err => console.log('Erro ao enviar e-mail de recuperação:', err));
+      }
+
+      return json({ ok: true });
+    }
+
+    // ROTA 3: LOGIN CORRIGIDO COM VALIDAÇÃO DE CONTA ATIVA
     if (action === 'login' && request.method === 'POST') {
       const { email, senha } = await request.json();
       const cleanEmail = (email || '').trim().toLowerCase();
@@ -117,7 +162,6 @@ export async function onRequest({ request, env }) {
       }
 
       const token = btoa(`user:${user.id}:${Date.now()}`);
-      // Retorno estruturado para que o index.html salve corretamente as credenciais do usuário
       return json({ ok: true, token, user: { id: user.id, nome: user.nome, email: user.email } });
     }
 
@@ -142,7 +186,9 @@ export async function onRequest({ request, env }) {
       return json({ ok: true });
     }
 
-    // VERIFICA TOKEN DAS ROTAS AUTENTICADAS
+    // ==========================================
+    // BARREIRA DE SEGURANÇA (VERIFICA TOKEN DAS ROTAS AUTENTICADAS)
+    // ==========================================
     const auth = request.headers.get('Authorization');
     if (!auth?.startsWith('Bearer ')) return json({ ok: false, error: 'Não autorizado' }, 401);
     const token = auth.slice(7);
@@ -162,7 +208,10 @@ export async function onRequest({ request, env }) {
         return json({ ok: false, error: 'Token inválido' }, 401);
       }
     }
-        // ROTAS COM TOKEN
+
+    // ==========================================
+    // ROTAS PROTEGIDAS (EXIGEM TOKEN VÁLIDO)
+    // ==========================================
     if (action === 'add_bms' && request.method === 'POST') {
       if (!userId) return json({ ok: false, error: 'Login necessário' }, 401);
 
