@@ -47,11 +47,25 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:#fff;min-height:1
 #login .card,#cadastro .card,#redefinir .card,#configuracoesPage .card { width:100%; max-width:500px; }
 #lista .card, #dash .card { width:100%; max-width:100%; }
 
-.label{font-size:11px;letter-spacing:1px;opacity:.5;text-transform:uppercase;text-align:center;width:100%;margin-bottom:6px;font-weight:600}
+.label{font-size:11px;letter-spacing:1px;opacity:.7;text-transform:uppercase;text-align:center;width:100%;margin-bottom:6px;font-weight:700;color:#a1aab8}
+
 input,select,button{width:100%;padding:16px;border-radius:14px;border:none;outline:none;font-size:16px;transition:all 0.2s ease}
-input,select{background:rgba(0,0,0,.4);color:#fff;border:1px solid rgba(255,255,255,.08);text-align:center}
-input:focus{border-color:rgba(0,255,255,0.4);background:rgba(0,0,0,.6)}
-input::placeholder{color:rgba(255,255,255,.25)}
+input,select{
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  text-align: center;
+  font-weight: 600;
+}
+input:focus{
+  border-color: var(--cyan);
+  background: rgba(255, 255, 255, 0.15);
+  box-shadow: 0 0 10px rgba(0, 255, 255, 0.2);
+}
+input::placeholder{
+  color: rgba(255, 255, 255, 0.5) !important;
+  opacity: 1 !important;
+}
 
 .pass-wrapper{position:relative;width:100%}
 .pass-wrapper input{padding-right:50px}
@@ -60,31 +74,24 @@ input::placeholder{color:rgba(255,255,255,.25)}
   right:16px;
   top:16px;
   cursor:pointer;
-  opacity:.3;
+  opacity:.5;
   font-size:18px;
   user-select:none;
   transition:opacity .2s;
   filter: grayscale(100%);
 }
-.pass-toggle:hover{opacity:.7}
+.pass-toggle:hover{opacity:.9}
 
-/* ESTILIZAÇÃO DOS BOTÕES ATUALIZADA */
 button{background:linear-gradient(90deg,var(--blue),var(--cyan));color:#fff;font-weight:700;cursor:pointer;margin-top:12px;box-shadow:0 4px 20px rgba(0,128,255,0.25)}
 button:active{transform:scale(0.98)}
 
-.btn-sec{background:transparent;border:1px solid rgba(0,255,255,.25);color:var(--cyan);box-shadow:none}
-
-/* Botão de Configurações sutil e integrado */
-.btn-config{background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);color:#a1aab8;width:100%;max-width:440px;margin-top:16px;box-shadow:none}
-.btn-config:hover{background:rgba(255,255,255,0.06);color:#fff;border-color:rgba(255,255,255,0.15)}
-
-/* Botão Sair limpo, sem bordas agressivas */
-.logout{margin-top:8px;background:transparent;border:1px solid rgba(255,255,255,0.05);color:#a1aab8;width:100%;max-width:440px;box-shadow:none}
-.logout:hover{background:rgba(255,68,68,0.08);color:var(--red);border-color:rgba(255,68,68,0.2)}
-
-/* Botão de Perigo dentro das configurações */
-.btn-danger{background:rgba(255,68,68,.05);border:1px solid rgba(255,68,68,.15);color:var(--red);box-shadow:none}
-.btn-danger:hover{background:rgba(255,68,68,.12);border-color:var(--red)}
+.btn-sec{background:transparent;border:1px solid rgba(0,255,255,.35);color:var(--cyan);box-shadow:none;font-weight:700}
+.btn-config{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.12);color:#ced4da;width:100%;max-width:440px;margin-top:16px;box-shadow:none}
+.btn-config:hover{background:rgba(255,255,255,0.08);color:#fff;border-color:rgba(255,255,255,0.25)}
+.logout{margin-top:8px;background:transparent;border:1px solid rgba(255,255,255,0.08);color:#ced4da;width:100%;max-width:440px;box-shadow:none}
+.logout:hover{background:rgba(255,68,68,0.1);color:var(--red);border-color:rgba(255,68,68,0.3)}
+.btn-danger{background:rgba(255,68,68,0.08);border:1px solid rgba(255,68,68,0.25);color:var(--red);box-shadow:none}
+.btn-danger:hover{background:rgba(255,68,68,0.15);border-color:var(--red)}
 
 .bms-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;width:100%;margin-top:8px}
 .bms-item{background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.05);border-radius:16px;padding:16px;text-align:left;position:relative;display:flex;flex-direction:column;justify-content:space-between;min-height:120px;cursor:pointer}
@@ -139,7 +146,7 @@ button:active{transform:scale(0.98)}
 
 .link-cadastro{margin-top:20px;text-align:center;color:#6b7c96;cursor:pointer;font-size:14px}
 .link-cadastro span{color:var(--cyan);text-decoration:underline}
-.link-esqueceu{display:block;text-align:right;font-size:12px;color:rgba(255,255,255,0.4);margin-top:8px;cursor:pointer;text-decoration:none;transition:color 0.2s}
+.link-esqueceu{display:block;text-align:right;font-size:12px;color:rgba(255,255,255,0.5);margin-top:8px;cursor:pointer;text-decoration:none;transition:color 0.2s}
 .link-esqueceu:hover{color:var(--cyan)}
 
 .footer-link{font-size:11px;margin-top:24px;text-align:center;letter-spacing:1px;line-height:1.6}
@@ -149,8 +156,6 @@ button:active{transform:scale(0.98)}
 
 .footer-voltar{width:100%;display:flex;justify-content:center;margin-top:0px!important;margin-bottom:8px}
 .footer-voltar button{width:100%;max-width:320px;margin-top:0px}
-
-@media(max-width:640px){.grid{grid-template-columns:repeat(2,1fr)}.diff{grid-template-columns:repeat(2,1fr)}}
 </style>
 </head>
 <body>
@@ -474,7 +479,7 @@ async function salvarAlteracaoSenha() {
       body: JSON.stringify({ senhaAtual, novaSenha })
     });
     
-    if(r.status === 401) { sair(); return; }
+    if(r.status === 401) { sairSemConfirmacao(); return; }
     const d = await r.json();
     
     if(d.ok) {
@@ -508,7 +513,7 @@ async function excluirMinhaConta() {
     
     if(r.ok) {
       alert('Sua conta foi excluída com sucesso. Obrigado por usar nosso sistema!');
-      sair();
+      sairSemConfirmacao();
     } else {
       alert('Não foi possível excluir a conta no momento.');
     }
@@ -734,7 +739,7 @@ function carregarLista(){
   .then(function(r){
     if(r && r.status === 401){
       alert('Sua conta ou sessão não está mais ativa no sistema.');
-      sair();
+      sairSemConfirmacao();
       return;
     }
     return r ? r.json() : [];
@@ -771,7 +776,7 @@ function removerBms(code, nome){
     headers:{'Authorization':'Bearer '+TOKEN}
   })
   .then(function(r){
-    if(r && r.status === 401){ alert('Sua conta ou sessão não está mais ativa.'); sair(); return; }
+    if(r && r.status === 401){ alert('Sua conta ou sessão não está mais ativa.'); sairSemConfirmacao(); return; }
     return r.json();
   })
   .then(function(d){
@@ -799,7 +804,7 @@ function addBms(){
     body:JSON.stringify({code:code,nome:nome || code})
   })
   .then(function(r){
-    if(r && r.status === 401){ alert('Sua conta ou sessão não está mais ativa.'); sair(); return; }
+    if(r && r.status === 401){ alert('Sua conta ou sessão não está mais ativa.'); sairSemConfirmacao(); return; }
     return r.json();
   })
   .then(function(d){
@@ -895,7 +900,7 @@ function atualizar(){
   .then(function(r){
     if(r && r.status === 401){
       alert('Sua conta ou sessão não está mais ativa no sistema.');
-      sair();
+      sairSemConfirmacao();
       return;
     }
     if(!r || !r.ok) return;
@@ -927,7 +932,14 @@ function atualizar(){
   }).catch(function(err){ console.error(err); });
 }
 
+/* BOTÃO SAIR COM CONFIRMAÇÃO DE SEGURANÇA */
 function sair(){
+  if(!confirm('Deseja realmente sair do painel?')) return;
+  sairSemConfirmacao();
+}
+
+/* Função interna para limpar o token sem alertar redundâncias */
+function sairSemConfirmacao(){
   clearInterval(INT);
   localStorage.removeItem('bms_token');
   localStorage.removeItem('bms_user');
