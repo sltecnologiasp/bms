@@ -188,7 +188,7 @@ button.logout:hover{background:rgba(231,29,54,0.08);color:var(--red);border-colo
     <div class="label">Cadastrar BMS no Sistema</div>
     <input id="code" placeholder="SL000000000000" maxlength="14" style="margin-top:8px">
     <button class="btn-clientes" onclick="cad()">CADASTRAR BMS MASTER</button>
-    <button class="btn-sec" onclick="gerarECadastrar()">GERAR CÓDIGO ALEATÓRIO</button>
+    <button class="btn-sec" onclick="generarECadastrar()">GERAR CÓDIGO ALEATÓRIO</button>
     <button class="btn-clientes" style="margin-top:24px" onclick="mostrarClientes()">VER CLIENTES CADASTRADOS</button>
     <p id="msg" style="text-align:center;margin-top:12px;font-size:14px;font-weight:600"></p>
   </div>
@@ -393,30 +393,36 @@ function closeBmsModal(){
   carregarTudo();
 }
 
-function checarOnline(dataBms) {
-  if (!dataBms) return false;
+// SOLUÇÃO DE CONTROLE CLIENTE-ADMIN CROSS-CHECK
+function checarOnline(bms) {
+  if (!bms) return false;
   
-  // SOLUÇÃO DEFINITIVA: Tenta ler o timestamp da última telemetria recebida no servidor
-  const timestampStr = dataBms.updated_at || dataBms.created_at;
+  // Se a propriedade nativa explícita do backend disser falso, respeitamos imediatamente
+  if (bms.hasOwnProperty('online') && bms.online === false) {
+    return false;
+  }
+  
+  // Se o dispositivo foi desligado e parou de atualizar o SOC e a Tensão no Admin,
+  // ou se os dados vierem zerados de campo, consideramos Offline na hora.
+  if (bms.user_id && (!bms.voltage || bms.voltage === 0 || bms.soc === 0)) {
+    return false;
+  }
+
+  const timestampStr = bms.updated_at || bms.created_at;
   if (!timestampStr) return false;
 
   const bmsTime = new Date(timestampStr).getTime();
   const agora = Date.now();
 
-  // Se a última comunicação guardada faz mais de 12 segundos, força o status Offline
-  if (agora - bmsTime > 12000) {
+  // Trava de segurança: Se a diferença de requisição de listagem passar do timeout
+  if (agora - bmsTime > 12000 && bms.online === undefined) {
     return false;
-  }
-  
-  // Fallback complementar caso a API envie uma propriedade booleana direta de atividade externa
-  if (dataBms.hasOwnProperty('online')) {
-    return !!dataBms.online;
   }
 
   return true;
 }
 
-function renderAdminDashboard(){
+  function renderAdminDashboard(){
   if(!activeBmsCode) return;
   const bms = bmsList.find(b => b.code === activeBmsCode);
   if(!bms) return;
