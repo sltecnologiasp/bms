@@ -393,37 +393,15 @@ function closeBmsModal(){
   carregarTudo();
 }
 
-// SOLUÇÃO INJETADA PARA VERIFICAÇÃO INDIVIDUAL COM A ROTA PRECISA DO CLIENTE
-async function verificarStatusBmsIndividual(code, elementoStatus) {
-  try {
-    const r = await fetch(API + '?action=data&code=' + code, { headers: authHeaders() });
-    if (!r.ok) return;
-    const d = await r.json();
-    
-    // Atualiza dinamicamente o card com base na resposta de telemetria em tempo real
-    if (d && d.online) {
-      elementoStatus.textContent = 'Online';
-      elementoStatus.className = 'status on';
-    } else {
-      elementoStatus.textContent = 'Offline';
-      elementoStatus.className = 'status off';
-    }
-  } catch(e) {
-    elementoStatus.textContent = 'Offline';
-    elementoStatus.className = 'status off';
-  }
-}
-
 function renderAdminDashboard(){
   if(!activeBmsCode) return;
-  const bms = bmsList.find(b => b.code === activeBmsCode);
-  if(!bms) return;
-
-  // No painel interno estendemos a mesma lógica direta em tempo real
+  
+  // SOLUÇÃO 1: Consulta a rota individual detalhada para atualizar os valores de SOC e Tensão ao vivo na tela interna do admin
   fetch(API + '?action=data&code=' + activeBmsCode, { headers: authHeaders() })
   .then(r => r.json())
   .then(d => {
     const online = d && d.online;
+    const bms = bmsList.find(b => b.code === activeBmsCode) || {};
     
     document.getElementById('modalBmsDono').innerHTML = bms.user_id ? 
       `<span class="badge badge-orange">Vinculada: ${bms.dono_nome || bms.dono_email}</span>` : 
@@ -440,10 +418,12 @@ function renderAdminDashboard(){
       document.getElementById('adminVolt').textContent = '0.00V';
       document.getElementById('adminCorr').textContent = '0.0A';
       document.getElementById('adminTemp').textContent = '0.0°C';
+      
       document.getElementById('adminSocValor').textContent = '0%';
       document.getElementById('adminSocBarTxt').textContent = '0%';
       document.getElementById('adminSocBar').style.width = '0%';
       document.getElementById('adminSocGauge').style.background = 'var(--gauge-empty)';
+      
       renderAdminCells([]);
     } else {
       document.getElementById('adminSoc').textContent = socVal + '%';
@@ -456,6 +436,7 @@ function renderAdminDashboard(){
       document.getElementById('adminSocBar').style.width = socVal + '%';
       const deg = socVal * 3.6;
       document.getElementById('adminSocGauge').style.background = `conic-gradient(var(--green) 0deg, var(--cyan) ${deg}deg, var(--gauge-empty) ${deg}deg)`;
+      
       renderAdminCells(d.cells || []);
     }
   });
@@ -550,11 +531,15 @@ async function carregarTudo(){
 function atualizarHTMLListaBms() {
   document.getElementById('lista').innerHTML = bmsList.map(b=>{
     const dono = b.user_id? `<span class="badge badge-orange">Vinculada</span>` : `<span class="badge badge-green">Disponível</span>`;
+    // Pega o status direto processado nativamente pela nova rota da API
+    const statusClass = b.online ? 'on' : 'off';
+    const statusText = b.online ? 'Online' : 'Offline';
+
     return `
     <div class="card" onclick="viewBmsDetails('${b.code}')">
       <div class="card-top">
         <div style="text-align:center">
-          <span id="status-card-${b.code}" class="status off">Carregando...</span>
+          <span class="status ${statusClass}">${statusText}</span>
         </div>
         <div class="card-code">${b.code}</div>
         <div style="text-align:center">${dono}</div>
@@ -562,14 +547,6 @@ function atualizarHTMLListaBms() {
       <button class="del" onclick="del('${b.code}')">EXCLUIR</button>
     </div>
   `}).join('') || '<div class="card card-empty"><div>Nenhuma BMS cadastrada no sistema</div></div>';
-
-  // Dispara a checagem individual ultra rápida em segundo plano para cada card ativo
-  bmsList.forEach(b => {
-    const elStatus = document.getElementById(`status-card-${b.code}`);
-    if (elStatus) {
-      verificarStatusBmsIndividual(b.code, elStatus);
-    }
-  });
 }
 
 async function listarUsers(){
@@ -607,7 +584,7 @@ async function setupInicial() {
 }
 if(adminToken === 'admin_ok') setupInicial();
 
-setInterval(()=>{if(adminToken && document.getElementById('painel').classList.contains('active'))carregarTudo()}, 5000);
+setInterval(()=>{if(adminToken && document.getElementById('painel').classList.contains('active'))carregarTudo()},5000);
 </script>
 </body>
 </html>
