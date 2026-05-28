@@ -50,7 +50,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text-main);
 }
 
 .title{font-size:clamp(32px,7vw,54px);font-weight:900;margin-bottom:4px;letter-spacing:2px;background:linear-gradient(90deg,var(--blue),var(--cyan));-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-align:center;width:100%}
-.user-info{color:var(--text-muted);font-size:14px;text-align:center;margin-bottom:16px;font-weight:500}
+.user-info{color:var(--text-muted);font-size:14px;text-align:center;margin-bottom:16px;font-weight:500;width:100%}
 
 .card{
   background:var(--card-bg);
@@ -96,6 +96,13 @@ button.del:hover{background:rgba(231,29,54,0.08);color:var(--red);border-color:v
 button.edit{background:transparent;border:1px solid var(--cyan);color:var(--cyan);font-size:13px;padding:12px;margin-top:auto;box-shadow:none;font-weight:700}
 button.edit:hover{background:rgba(0,180,216,0.08)}
 
+/* Novos botões de gerenciamento de vínculo na lista de usuários */
+button.vincular{background:transparent;border:1px solid var(--green);color:var(--green);font-size:13px;padding:12px;margin-top:6px;box-shadow:none;font-weight:700}
+button.vincular:hover{background:rgba(46,196,182,0.08)}
+
+button.desvincular{background:transparent;border:1px solid var(--orange);color:var(--orange);font-size:13px;padding:12px;margin-top:6px;box-shadow:none;font-weight:700}
+button.desvincular:hover{background:rgba(255,159,28,0.08)}
+
 button.voltar{background:transparent;border:1px solid var(--green);color:var(--green);max-width:520px;margin-top:8px;box-shadow:none;font-weight:700}
 button.voltar:hover{background:rgba(46,196,182,0.08)}
 
@@ -118,7 +125,7 @@ button.logout:hover{background:rgba(231,29,54,0.08);color:var(--red);border-colo
   cursor:pointer;
   box-shadow: var(--neon-glow);
 }
-#listaUsers .card { cursor:default; min-height:180px; max-width:100% }
+#listaUsers .card { cursor:default; min-height:220px; max-width:100% }
 #lista .card:hover{border-color:var(--cyan)}
 
 .card-empty{grid-column:1/-1;min-height:180px;display:flex;align-items:center;justify-content:center;color:var(--text-muted);font-size:14px}
@@ -211,6 +218,7 @@ button.logout:hover{background:rgba(231,29,54,0.08);color:var(--red);border-colo
   
   <button class="voltar" onclick="voltarPainel()">← VOLTAR AO PAINEL</button>
 </div>
+
 <div id="dashAdmin">
   <div class="title" style="font-size:clamp(28px,6vw,32px);margin-bottom:4px">SMART BMS</div>
   <div style="text-align:center; margin-bottom:16px;">
@@ -281,9 +289,19 @@ button.logout:hover{background:rgba(231,29,54,0.08);color:var(--red);border-colo
 const API = '/api/bms';
 let adminToken = sessionStorage.getItem('admin_token');
 let bmsList = [];
-let activeBmsCode = null;
+let activeBmsCode = sessionStorage.getItem('admin_active_bms_code');
+let activeScreen = sessionStorage.getItem('admin_active_screen') || 'painel';
 
-if(adminToken === 'admin_ok') showPainel();
+// Gerenciamento de persistência de tela ao atualizar a página
+if(adminToken === 'admin_ok') {
+  if (activeScreen === 'dashAdmin' && activeBmsCode) {
+    showDashAdmin(activeBmsCode);
+  } else if (activeScreen === 'clientesPage') {
+    showClientesPage();
+  } else {
+    showPainelPage();
+  }
+}
 
 async function adminLogin(){
   const user = document.getElementById('user').value;
@@ -297,7 +315,7 @@ async function adminLogin(){
     if(d.ok){
       adminToken = d.token;
       sessionStorage.setItem('admin_token', adminToken);
-      showPainel();
+      showPainelPage();
     }else{
       errorEl.textContent = d.error || 'Credenciais inválidas';
       errorEl.classList.remove('hidden');
@@ -307,33 +325,66 @@ async function adminLogin(){
     errorEl.classList.remove('hidden');
   }
 }
-function showPainel(){
+
+function showPainelPage(){
+  activeScreen = 'painel';
+  sessionStorage.setItem('admin_active_screen', 'painel');
+  
   document.getElementById('login').style.display = 'none';
   document.getElementById('clientesPage').style.display = 'none';
+  document.getElementById('clientesPage').classList.remove('active');
   document.getElementById('dashAdmin').style.display = 'none';
   document.getElementById('dashAdmin').classList.remove('active');
+  
   document.getElementById('painel').classList.add('active');
   document.getElementById('painel').style.display = 'flex';
   carregarTudo();
 }
 
-function mostrarClientes(){
+function showClientesPage(){
+  activeScreen = 'clientesPage';
+  sessionStorage.setItem('admin_active_screen', 'clientesPage');
+  
+  document.getElementById('login').style.display = 'none';
   document.getElementById('painel').classList.remove('active');
   document.getElementById('painel').style.display = 'none';
+  document.getElementById('dashAdmin').classList.remove('active');
+  document.getElementById('dashAdmin').style.display = 'none';
+  
   document.getElementById('clientesPage').classList.add('active');
   document.getElementById('clientesPage').style.display = 'flex';
   listarUsers();
 }
 
-function voltarPainel(){
+function showDashAdmin(code) {
+  activeBmsCode = code;
+  activeScreen = 'dashAdmin';
+  sessionStorage.setItem('admin_active_bms_code', code);
+  sessionStorage.setItem('admin_active_screen', 'dashAdmin');
+  
+  document.getElementById('login').style.display = 'none';
+  document.getElementById('painel').classList.remove('active');
+  document.getElementById('painel').style.display = 'none';
   document.getElementById('clientesPage').classList.remove('active');
   document.getElementById('clientesPage').style.display = 'none';
-  document.getElementById('painel').classList.add('active');
-  document.getElementById('painel').style.display = 'flex';
+  
+  document.getElementById('dashAdmin').classList.add('active');
+  document.getElementById('dashAdmin').style.display = 'flex';
+  
+  document.getElementById('modalBmsTitle').textContent = code;
+  renderAdminDashboard();
+}
+
+function mostrarClientes(){
+  showClientesPage();
+}
+
+function voltarPainel(){
+  showPainelPage();
 }
 
 function adminLogout(){
-  sessionStorage.removeItem('admin_token');
+  sessionStorage.clear();
   location.reload();
 }
 
@@ -374,23 +425,66 @@ async function del(code){
 }
 
 function viewBmsDetails(code){
-  activeBmsCode = code;
-  document.getElementById('painel').classList.remove('active');
-  document.getElementById('painel').style.display = 'none';
-  document.getElementById('dashAdmin').classList.add('active');
-  document.getElementById('dashAdmin').style.display = 'flex';
-  
-  document.getElementById('modalBmsTitle').textContent = code;
-  renderAdminDashboard();
+  showDashAdmin(code);
 }
 
 function closeBmsModal(){
   activeBmsCode = null;
-  document.getElementById('dashAdmin').classList.remove('active');
-  document.getElementById('dashAdmin').style.display = 'none';
-  document.getElementById('painel').classList.add('active');
-  document.getElementById('painel').style.display = 'flex';
-  carregarTudo();
+  sessionStorage.removeItem('admin_active_bms_code');
+  showPainelPage();
+}
+
+// Novas Funções de vínculo manual direto pela lista de clientes
+async function vincularBmsManual(userId, nomeCliente) {
+  let code = prompt(`Digite o código da BMS (14 caracteres) para vincular à conta de ${nomeCliente}:`);
+  if (!code) return;
+  code = code.trim().toUpperCase();
+  
+  if (!code.startsWith('SL') || code.length !== 14) {
+    alert('Código inválido! Deve ser no formato SL seguido de 12 números.');
+    return;
+  }
+
+  try {
+    const r = await fetch(API + '?action=admin_force_bind', {
+      method: 'POST',
+      headers: authHeaders(),
+      body: JSON.stringify({ userId, code })
+    });
+    const d = await r.json();
+    if (d.ok) {
+      alert('BMS vinculada com sucesso!');
+      listarUsers();
+    } else {
+      alert('Erro: ' + d.error);
+    }
+  } catch (e) {
+    alert('Erro de comunicação com o servidor.');
+  }
+}
+
+async function desvincularBmsManual(userId, nomeCliente) {
+  let code = prompt(`Digite o código da BMS que deseja REMOVER da conta de ${nomeCliente}:`);
+  if (!code) return;
+  code = code.trim().toUpperCase();
+
+  if (!confirm(`Tem certeza que deseja desvincular a BMS ${code} do cliente ${nomeCliente}?`)) return;
+
+  try {
+    const r = await fetch(API + `?action=admin_force_unbind&userId=${userId}&code=${code}`, {
+      method: 'DELETE',
+      headers: authHeaders()
+    });
+    const d = await r.json();
+    if (d.ok) {
+      alert('BMS desvinculada com sucesso!');
+      listarUsers();
+    } else {
+      alert('Erro: ' + d.error);
+    }
+  } catch (e) {
+    alert('Erro de comunicação com o servidor.');
+  }
 }
 
 function renderAdminDashboard(){
@@ -515,18 +609,17 @@ async function deletarUser(id, nome){
 }
 
 async function carregarTudo(){
+  if (!adminToken) return;
   const rBms = await fetch(API+'?action=admin_list_master',{headers:authHeaders()});
   const dBms = await rBms.json();
   
-  // MODIFICADO AQUI: Ordenamento prioritário por status online/offline primeiro
   bmsList = dBms.sort((a, b) => {
     if (a.online && !b.online) return -1;
     if (!a.online && b.online) return 1;
-    // Sub-ordenação secundária: se os status forem iguais, ordena pela comunicação mais recente
     return (b.updated_at ? new Date(b.updated_at).getTime() : 0) - (a.updated_at ? new Date(a.updated_at).getTime() : 0);
   });
 
-  if(!activeBmsCode) {
+  if(activeScreen === 'painel') {
     atualizarHTMLListaBms();
   }
 }
@@ -552,6 +645,7 @@ function atualizarHTMLListaBms() {
 }
 
 async function listarUsers(){
+  if (!adminToken) return;
   const r = await fetch(API+'?action=all_users',{headers:authHeaders()});
   if(r.status===401){adminLogout();return;}
   const d = await r.json();
@@ -573,25 +667,27 @@ async function listarUsers(){
         <button class="edit" onclick="editarUser(${u.id},'${u.nome}','${u.email}')">EDITAR</button>
         <button class="del" onclick="deletarUser(${u.id},'${u.nome}')">EXCLUIR</button>
       </div>
+      <!-- ADICIONADO: Opções de gerenciar vínculo manuais direto na conta do usuário -->
+      <button class="vincular" onclick="vincularBmsManual(${u.id}, '${u.nome}')">+ VINCULAR BMS</button>
+      <button class="desvincular" onclick="desvincularBmsManual(${u.id}, '${u.nome}')">- DESVINCULAR BMS</button>
     </div>
   `).join('') || '<div class="card card-empty"><div>Nenhum cliente cadastrado</div></div>';
 }
 
 async function setupInicial() {
-  await listarUsers();
-  const r = await fetch(API+'?action=admin_list_master',{headers:authHeaders()});
-  const d = await r.json();
-  bmsList = d;
-  atualizarHTMLListaBms();
+  await carregarTudo();
+  if (activeScreen === 'clientesPage') {
+    await listarUsers();
+  }
 }
 if(adminToken === 'admin_ok') setupInicial();
 
 setInterval(()=>{
   if(!adminToken) return;
   
-  if(document.getElementById('painel').classList.contains('active')) {
+  if(activeScreen === 'painel') {
     carregarTudo();
-  } else if(document.getElementById('dashAdmin').classList.contains('active')) {
+  } else if(activeScreen === 'dashAdmin') {
     renderAdminDashboard();
   }
 }, 5000);
