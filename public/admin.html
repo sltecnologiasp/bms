@@ -169,7 +169,7 @@ button.logout:hover{background:rgba(231,29,54,0.08);color:var(--red);border-colo
 
 <div id="login">
   <div class="title">SMART BMS</div>
-  <div class="user-info">Acesso administrative</div>
+  <div class="user-info">Acesso administrativo</div>
   <div class="card">
     <div class="label">Usuário</div>
     <input id="user" placeholder="administrador" autocomplete="username" value="administrador">
@@ -392,12 +392,36 @@ function closeBmsModal(){
   document.getElementById('painel').style.display = 'flex';
   carregarTudo();
 }
+
+function checarOnline(dataBms) {
+  if (!dataBms) return false;
+  
+  // SOLUÇÃO DEFINITIVA: Tenta ler o timestamp da última telemetria recebida no servidor
+  const timestampStr = dataBms.updated_at || dataBms.created_at;
+  if (!timestampStr) return false;
+
+  const bmsTime = new Date(timestampStr).getTime();
+  const agora = Date.now();
+
+  // Se a última comunicação guardada faz mais de 12 segundos, força o status Offline
+  if (agora - bmsTime > 12000) {
+    return false;
+  }
+  
+  // Fallback complementar caso a API envie uma propriedade booleana direta de atividade externa
+  if (dataBms.hasOwnProperty('online')) {
+    return !!dataBms.online;
+  }
+
+  return true;
+}
+
 function renderAdminDashboard(){
   if(!activeBmsCode) return;
   const bms = bmsList.find(b => b.code === activeBmsCode);
   if(!bms) return;
 
-  const online = bms.updated_at && (Date.now() - new Date(bms.updated_at).getTime() < 10000);
+  const online = checarOnline(bms);
   
   document.getElementById('modalBmsDono').innerHTML = bms.user_id ? 
     `<span class="badge badge-orange">Vinculada: ${bms.dono_nome || bms.dono_email}</span>` : 
@@ -515,9 +539,8 @@ async function carregarTudo(){
   const dBms = await rBms.json();
   
   bmsList = dBms.sort((a,b) => {
-    const now = Date.now(); // CAPTURA O TEMPO ATUAL CORRETAMENTE A CADA LOOP
-    const aOnline = a.updated_at && (now - new Date(a.updated_at).getTime() < 10000);
-    const bOnline = b.updated_at && (now - new Date(b.updated_at).getTime() < 10000);
+    const aOnline = checarOnline(a);
+    const bOnline = checarOnline(b);
     if (aOnline && !bOnline) return -1;
     if (!aOnline && bOnline) return 1;
     return (b.updated_at ? new Date(b.updated_at).getTime() : 0) - (a.updated_at ? new Date(a.updated_at).getTime() : 0);
@@ -531,9 +554,8 @@ async function carregarTudo(){
 }
 
 function atualizarHTMLListaBms() {
-  const now = Date.now(); // CAPTURA O TEMPO DINÂMICO AQUI TAMBÉM
   document.getElementById('lista').innerHTML = bmsList.map(b=>{
-    const online = b.updated_at && (now - new Date(b.updated_at).getTime() < 10000);
+    const online = checarOnline(b);
     const dono = b.user_id? `<span class="badge badge-orange">Vinculada</span>` : `<span class="badge badge-green">Disponível</span>`;
     return `
     <div class="card" onclick="viewBmsDetails('${b.code}')">
