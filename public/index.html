@@ -974,7 +974,6 @@ function voltar(){
   mostrarLista();
 }
 
-// CORREÇÃO EXECUTADA AQUI: Adicionado o "V" e formatado com 2 casas decimais (ex: 3.26V)
 function renderCelulas(cels){
   var container = document.getElementById('celulas');
   if(!container) return;
@@ -1002,10 +1001,10 @@ function renderCelulas(cels){
   var max = Math.max.apply(null, vals);
   var dif = max - min;
   
-  // O sumário (Min, Max, Diferença) mantém as 3 casas originais para precisão técnica de balanceamento
-  document.getElementById('celMin').textContent = min.toFixed(3)+'V';
-  document.getElementById('celMax').textContent = max.toFixed(3)+'V';
-  document.getElementById('celDif').textContent = dif.toFixed(3)+'V';
+  // MODIFICADO AQUI: Sumário (Min, Max, Diferença) agora formatado uniformemente com 2 casas decimais (ex: 3.31V)
+  document.getElementById('celMin').textContent = min.toFixed(2)+'V';
+  document.getElementById('celMax').textContent = max.toFixed(2)+'V';
+  document.getElementById('celDif').textContent = dif.toFixed(2)+'V';
   document.getElementById('celTot').textContent = cels.length;
   
   var html = '';
@@ -1015,7 +1014,6 @@ function renderCelulas(cels){
     if(val < 3.2 || val > 4.2) cls = 'crit';
     else if(val < 3.4 || val > 4.15) cls = 'warn';
     
-    // Formata o bloco individual da célula para exibir ex: "3.34V" (2 casas decimais com a unidade de medida)
     html += '<div class="cell '+cls+'"><div class="cell-num">C'+(i+1)+'</div><div class="cell-val">'+val.toFixed(2)+'V</div></div>';
   }
   container.innerHTML = html;
