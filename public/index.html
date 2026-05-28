@@ -22,7 +22,6 @@
   --cell-bg: #f8fafc;
   --cell-border: #e2e8f0;
   
-  /* Brilho neon sutil adaptado para o modo claro */
   --neon-glow: 0 0 12px rgba(0, 180, 216, 0.12);
   
   --cyan: #00b4d8;
@@ -46,7 +45,6 @@
   --cell-bg: rgba(0, 0, 0, .3);
   --cell-border: rgba(255, 255, 255, .04);
   
-  /* Brilho neon sutil adaptado para o modo escuro */
   --neon-glow: 0 0 15px rgba(0, 255, 255, 0.2);
   
   --cyan: #00ffff;
@@ -89,7 +87,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text-main);
   width:100%;
   margin-top: 0 !important;
   margin-bottom: 12px !important;
-  box-shadow: var(--neon-glow); /* Neon aplicado */
+  box-shadow: var(--neon-glow);
 }
 
 #login .card,#cadastro .card,#redefinir .card,#configuracoesPage .card { width:100%; max-width:500px; }
@@ -134,14 +132,13 @@ button:active{transform:scale(0.98)}
 
 .btn-sec{background:transparent;border:1px solid var(--cyan);color:var(--cyan);box-shadow:none;font-weight:700}
 
-/* PADRONIZAÇÃO DOS BOTÕES INFERIORES COM NEON */
 .btn-config, .logout {
   background: var(--card-bg);
   border: 1px solid var(--card-border);
   color: var(--text-main);
   width: 100%;
   max-width: 440px;
-  box-shadow: var(--neon-glow); /* Neon aplicado */
+  box-shadow: var(--neon-glow);
   font-weight: 700;
 }
 .btn-config { margin-top: 16px; }
@@ -168,7 +165,7 @@ button:active{transform:scale(0.98)}
   justify-content:center;
   min-height:180px;
   cursor:pointer;
-  box-shadow: var(--neon-glow); /* Neon aplicado */
+  box-shadow: var(--neon-glow);
 }
 .bms-item:hover{border-color:var(--cyan)}
 .bms-item h3{color:var(--text-main);font-size:19px;font-weight:800;margin-bottom:4px;width:100%}
@@ -201,7 +198,7 @@ button:active{transform:scale(0.98)}
 .gauge{width:min(220px,55vw);height:min(220px,55vw);margin:auto;border-radius:50%;background:conic-gradient(var(--green) 0deg,var(--cyan) 180deg,var(--gauge-empty) 180deg);position:relative;box-shadow:0 0 30px rgba(0,255,255,.05);transition:background.8s ease}
 .gauge::before{content:'';position:absolute;inset:16px;border-radius:50%;background:var(--bg);transition: background 0.3s}
 .gauge-inner{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;align-items:center;z-index:2}
-.gauge-value{font-size:clamp(36px,9vw,52px);font-weight:900;color:var(--green)}
+.gauge-value{font-size:clamp(36px,9vw,52px);font-weight:900;color(--green)}
 .gauge-label{opacity:.6;letter-spacing:1.5px;font-size:11px;color:var(--text-main)}
 .bar-wrap{margin-top:16px}
 .bar-label{display:flex;justify-content:space-between;margin-bottom:6px;font-size:13px;opacity:.8}
@@ -243,7 +240,7 @@ button:active{transform:scale(0.98)}
 .footer-link{font-size:11px;margin-top:24px;text-align:center;letter-spacing:1px;line-height:1.6}
 .footer-link a{color:var(--blue);text-decoration:none;font-weight:600;transition:opacity 0.2s;}
 .footer-link a:hover{opacity:0.8;text-decoration:underline;}
-.footer-link span{color(--text-muted);opacity:0.6;display:block;margin-top:4px;}
+.footer-link span{color:var(--text-muted);opacity:0.6;display:block;margin-top:4px;}
 
 .footer-voltar{width:100%;display:flex;justify-content:center;margin-top:0px!important;margin-bottom:8px}
 .footer-voltar button{width:100%;max-width:320px;margin-top:0px}
@@ -362,20 +359,17 @@ button:active{transform:scale(0.98)}
   <div class="user-info">Configurações de Segurança</div>
 
   <div class="card" style="max-width:440px; width:100%">
-    <div class="label" style="margin-bottom:12px">Visual do Aplicativo</div>
-    <select id="theme-selector" onchange="alterarTema(this.value)">
-      <option value="light">☀️ Modo Claro (Padrão)</option>
-      <option value="dark">🌙 Modo Escuro</option>
-    </select>
-  </div>
-
-  <div class="card" style="max-width:440px; width:100%">
     <div class="label" style="margin-bottom:16px">Gerenciar Minha Conta</div>
     <button class="btn-sec" style="margin-top:0" onclick="abrirModalSenha()">ALTERAR MINHA SENHA</button>
     <button class="btn-danger" style="margin-top:12px" onclick="excluirMinhaConta()">EXCLUIR CONTA DEFINITIVAMENTE</button>
   </div>
 
-  <button class="btn-sec" style="max-width:440px; width:100%; border-color:var(--input-border); color:var(--text-main)" onclick="voltarParaLista()">← VOLTAR À LISTA</button>
+  <div class="card" style="max-width:440px; width:100%">
+    <div class="label" style="margin-bottom:12px">Visual do Aplicativo</div>
+    <button id="theme-toggle-btn" class="btn-sec" style="margin-top:0" onclick="alternarTemaDireto()"></button>
+  </div>
+
+  <button class="btn-sec" style="max-width:440px; width:100%" onclick="voltarParaLista()">Voltar</button>
   <div class="footer-link">
     <a href="https://wa.me/5515991355393" target="_blank">SL TECNOLOGIA</a>
     <span>© Todos os direitos reservados</span>
@@ -463,12 +457,29 @@ var INT = null;
 
 try{USER = JSON.parse(localStorage.getItem('bms_user')||'null');}catch(e){}
 
+// GERENCIAMENTO ATUALIZADO DO TEMA EM UM CLIQUE
 var temaSalvo = localStorage.getItem('bms_theme') || 'light';
 document.documentElement.setAttribute('data-theme', temaSalvo);
 
-function alterarTema(tema) {
-  document.documentElement.setAttribute('data-theme', tema);
-  localStorage.setItem('bms_theme', tema);
+function atualizarBotaoTema() {
+  const btn = document.getElementById('theme-toggle-btn');
+  if(!btn) return;
+  if(temaSalvo === 'light') {
+    btn.innerHTML = '☀️ Modo Claro';
+  } else {
+    btn.innerHTML = '🌙 Modo Escuro';
+  }
+}
+
+function alternarTemaDireto() {
+  if(temaSalvo === 'light') {
+    temaSalvo = 'dark';
+  } else {
+    temaSalvo = 'light';
+  }
+  document.documentElement.setAttribute('data-theme', temaSalvo);
+  localStorage.setItem('bms_theme', temaSalvo);
+  atualizarBotaoTema();
 }
 
 function esconderTudo(){
@@ -481,9 +492,7 @@ function esconderTudo(){
 }
 
 window.onload = function(){
-  if(document.getElementById('theme-selector')) {
-    document.getElementById('theme-selector').value = temaSalvo;
-  }
+  atualizarBotaoTema();
 
   const urlParams = new URLSearchParams(window.location.search);
   const resetToken = urlParams.get('reset_token');
@@ -545,6 +554,7 @@ function mostrarPaginaConta() {
   clearInterval(INT);
   esconderTudo();
   document.getElementById('configuracoesPage').classList.remove('hidden');
+  atualizarBotaoTema();
 }
 
 function voltarParaLista() {
