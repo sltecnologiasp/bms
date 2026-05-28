@@ -10,7 +10,6 @@
 :root{--bg:#05070d;--cyan:#00ffff;--blue:#0080ff;--green:#00ff88;--red:#ff4444;--orange:#ffaa00}
 body{font-family:'Inter',sans-serif;background:var(--bg);color:#fff;min-height:100vh;width:100%;overflow-x:hidden}
 
-/* Containers principais originais esticando no desktop */
 #login,#dash,#lista,#cadastro,#redefinir{
   position:relative;
   z-index:1;
@@ -34,7 +33,6 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:#fff;min-height:1
 .user-info{color:#6b7c96;font-size:14px;text-align:center;margin-bottom:16px;font-weight:500}
 .user-info span{color:#fff;font-weight:600}
 
-/* Cards expansíveis */
 .card{
   background:rgba(13,20,35,0.65);
   border:1px solid rgba(0,255,255,.08);
@@ -55,7 +53,6 @@ input,select{background:rgba(0,0,0,.4);color:#fff;border:1px solid rgba(255,255,
 input:focus{border-color:rgba(0,255,255,0.4);background:rgba(0,0,0,.6)}
 input::placeholder{color:rgba(255,255,255,.25)}
 
-/* Container dos Olhinhos */
 .pass-wrapper{position:relative;width:100%}
 .pass-wrapper input{padding-right:50px}
 .pass-toggle{position:absolute;right:16px;top:16px;cursor:pointer;opacity:.3;font-size:18px;user-select:none;transition:opacity .2s}
@@ -81,7 +78,6 @@ button:active{transform:scale(0.98)}
 .logout{margin-top:4px;background:transparent;border:1px solid rgba(255,68,68,.2);color:var(--red);width:100%;max-width:440px;box-shadow:none}
 .logout:hover{background:rgba(255,68,68,.05)}
 
-.gauge-wrap{width:100%;margin-top:0 !important;margin-bottom:0 !important}
 .gauge-card{padding:20px;min-height:260px}
 .gauge{width:min(220px,55vw);height:min(220px,55vw);margin:auto;border-radius:50%;background:conic-gradient(#00ff88 0deg,#00ffff 180deg,rgba(255,255,255,.08) 180deg);position:relative;box-shadow:0 0 30px rgba(0,255,255,.1);transition:background.8s ease}
 .gauge::before{content:'';position:absolute;inset:16px;border-radius:50%;background:#05070d}
@@ -97,7 +93,7 @@ button:active{transform:scale(0.98)}
 .grid .card{width:100%;height:100px;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:12px;margin:0 !important}
 .value{font-size:clamp(22px,4vw,30px);font-weight:800;margin-top:8px;line-height:1;width:100%;text-align:center;font-variant-numeric:tabular-nums}
 
-.status-badge{display:inline-flex;align-items:center;gap:8px;padding:10px 20px;border-radius:999px;font-weight:700;font-size:14px;margin-top:10px}
+.status-badge{display:inline-flex;align-items:center;gap:8px;padding:10px 20px;border-radius999px;font-weight:700;font-size:14px;margin-top:10px}
 .status-badge.on{background:rgba(0,255,136,.08);color:var(--green);border:1px solid rgba(0,0,0,136,.2)}
 .status-badge.off{background:rgba(255,68,68,.08);color:var(--red);border:1px solid rgba(255,68,68,.2)}
 
@@ -144,7 +140,7 @@ button:active{transform:scale(0.98)}
     <div class="label" style="margin-top:16px">Senha</div>
     <div class="pass-wrapper">
       <input id="senha" type="password" placeholder="••••••••">
-      <span class="pass-toggle" onclick="togglePass('senha', this)">👁️‍🗨️</span>
+      <span class="pass-toggle" onclick="togglePass('senha', this)">👁️‍عون</span>
     </div>
     
     <span class="link-esqueceu" onclick="recuperarSenha()">Esqueceu sua senha?</span>
@@ -172,13 +168,13 @@ button:active{transform:scale(0.98)}
     <div class="label" style="margin-top:16px">Senha</div>
     <div class="pass-wrapper">
       <input id="cad-senha" type="password" placeholder="••••••••">
-      <span class="pass-toggle" onclick="togglePass('cad-senha', this)">👁️‍🗨️</span>
+      <span class="pass-toggle" onclick="togglePass('cad-senha', this)">👁️‍عون</span>
     </div>
 
     <div class="label" style="margin-top:16px">Confirmar Senha</div>
     <div class="pass-wrapper">
       <input id="cad-confirmar-senha" type="password" placeholder="••••••••">
-      <span class="pass-toggle" onclick="togglePass('cad-confirmar-senha', this)">👁️‍🗨️</span>
+      <span class="pass-toggle" onclick="togglePass('cad-confirmar-senha', this)">👁️‍عون</span>
     </div>
     
     <button id="btn-cadastrar" onclick="cadastrar()">CADASTRAR</button>
@@ -198,13 +194,13 @@ button:active{transform:scale(0.98)}
     <div class="label">Nova Senha</div>
     <div class="pass-wrapper">
       <input id="nova-senha" type="password" placeholder="••••••••">
-      <span class="pass-toggle" onclick="togglePass('nova-senha', this)">👁️‍🗨️</span>
+      <span class="pass-toggle" onclick="togglePass('nova-senha', this)">👁️</span>
     </div>
 
     <div class="label" style="margin-top:16px">Confirmar Nova Senha</div>
     <div class="pass-wrapper">
       <input id="nova-senha-confirmar" type="password" placeholder="••••••••">
-      <span class="pass-toggle" onclick="togglePass('nova-senha-confirmar', this)">👁️‍🗨️</span>
+      <span class="pass-toggle" onclick="togglePass('nova-senha-confirmar', this)">👁️</span>
     </div>
     
     <button onclick="salvarNovaSenha()">SALVAR NOVA SENHA</button>
@@ -304,7 +300,6 @@ window.onload = function(){
   const urlParams = new URLSearchParams(window.location.search);
   const resetToken = urlParams.get('reset_token');
 
-  // CAPTURA DO LINK: Se vier o token de reset no link do e-mail, força abertura da tela de Nova Senha
   if (resetToken) {
     esconderTudo();
     document.getElementById('redefinir').classList.remove('hidden');
@@ -353,7 +348,7 @@ function togglePass(inputId, iconEl) {
     iconEl.style.opacity = ".8";
   } else {
     input.type = "password";
-    iconEl.textContent = "👁️‍🗨️"; 
+    iconEl.textContent = "👁️‍عون"; 
     iconEl.style.opacity = ".3";
   }
 }
@@ -388,7 +383,7 @@ function login(){
       mostrarLista();
     }else{
       if (e) {
-        e.textContent = d.error || 'Erro ao fazer login';
+        e.textContent = d.error || 'E-mail ou senha incorretos';
         e.classList.remove('hidden');
       }
     }
@@ -431,7 +426,6 @@ function recuperarSenha() {
   });
 }
 
-// LOGICA AUTÔNOMA: Grava a nova senha usando o token da URL
 function salvarNovaSenha() {
   const urlParams = new URLSearchParams(window.location.search);
   const token = urlParams.get('reset_token');
@@ -460,7 +454,7 @@ function salvarNovaSenha() {
   .then(function(d) {
     if (d.ok) {
       alert("Senha alterada com sucesso! Você já pode realizar o login.");
-      window.location.href = "/"; // Remove o token da URL e joga pro login limpo
+      window.location.href = "/"; 
     } else {
       if (errBox) { errBox.textContent = d.error || "Erro ao redefinir."; errBox.classList.remove('hidden'); }
     }
@@ -574,10 +568,15 @@ function carregarLista(){
     headers:{'Authorization':'Bearer '+TOKEN}
   })
   .then(function(r){
-    if(r && r.status === 401){sair();return;}
+    if(r && r.status === 401){
+      alert('Sua conta ou sessão não está mais ativa no sistema.');
+      sair();
+      return;
+    }
     return r ? r.json() : [];
   })
   .then(function(lista){
+    if(!lista) return;
     var el = document.getElementById('bms-list');
     if(!el) return;
     if(!lista || !lista.length){
@@ -607,8 +606,12 @@ function removerBms(code, nome){
     method:'DELETE',
     headers:{'Authorization':'Bearer '+TOKEN}
   })
-  .then(function(r){return r.json();})
+  .then(function(r){
+    if(r && r.status === 401){ alert('Sua conta ou sessão não está mais ativa.'); sair(); return; }
+    return r.json();
+  })
   .then(function(d){
+    if(!d) return;
     if(d.ok){
       carregarLista();
     }else{
@@ -631,8 +634,12 @@ function addBms(){
     headers:{'Content-Type':'application/json','Authorization':'Bearer '+TOKEN},
     body:JSON.stringify({code:code,nome:nome || code})
   })
-  .then(function(r){return r.json();})
+  .then(function(r){
+    if(r && r.status === 401){ alert('Sua conta ou sessão não está mais ativa.'); sair(); return; }
+    return r.json();
+  })
   .then(function(d){
+    if(!d) return;
     if(d.ok){
       document.getElementById('bms-code').value = '';
       document.getElementById('bms-nome').value = '';
@@ -715,13 +722,18 @@ function atualizarGauge(soc){
   bar.style.width = soc + '%';
   gauge.style.background = 'conic-gradient(#00ff88 0deg,#00ffff '+deg+'deg,rgba(255,255,255,.08) '+deg+'deg)';
 }
+
 function atualizar(){
   if(!CODIGO) return;
   fetch(API+'?action=data&code='+CODIGO, {
     headers:{'Authorization':'Bearer '+TOKEN}
   })
   .then(function(r){
-    if(r && r.status === 401){sair();return;}
+    if(r && r.status === 401){
+      alert('Sua conta ou sessão não está mais ativa no sistema.');
+      sair();
+      return;
+    }
     if(!r || !r.ok) return;
     return r.json();
   })
