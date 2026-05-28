@@ -127,13 +127,11 @@ input::placeholder{
 }
 .pass-toggle:hover{opacity:.9}
 
-/* BOTÕES PADRÃO DO SISTEMA (GRADIENTE AZUL E CIANO VIBRANTE) */
 button{background:linear-gradient(90deg,var(--blue),var(--cyan));color:#fff;font-weight:700;cursor:pointer;margin-top:12px;box-shadow:0 4px 20px rgba(0,128,255,0.25)}
 button:active{transform:scale(0.98)}
 
 .btn-sec{background:transparent;border:1px solid var(--cyan);color:var(--cyan);box-shadow:none;font-weight:700}
 
-/* Botões do Bloco Inferior herdam o mesmo gradiente vibrante */
 .btn-card-action {
   background: linear-gradient(90deg,var(--blue),var(--cyan));
   color: #fff;
@@ -145,7 +143,6 @@ button:active{transform:scale(0.98)}
 .btn-danger{background:rgba(255,68,68,0.05);border:1px solid var(--red);color:var(--red);box-shadow:none;font-weight:700}
 .btn-danger:hover{background:rgba(255,68,68,0.15)}
 
-/* ELEMENTOS DA LISTA DE DISPOSITIVOS */
 .bms-list{display:flex;flex-direction:column;gap:12px;width:100%;margin-top:8px}
 .bms-item{
   background: var(--bg);
@@ -199,9 +196,32 @@ button:active{transform:scale(0.98)}
 .bar{height:12px;background:var(--gauge-empty);border-radius:999px;overflow:hidden}
 .bar-fill{height:100%;width:0%;border-radius:999px;background:linear-gradient(90deg,var(--green),var(--cyan));transition:width.8s ease}
 
-.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;width:100%;max-width:100%;margin-top:0 !important;margin-bottom:12px !important}
-.grid .card{width:100%;height:100px;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:12px;margin:0 !important}
-.value{font-size:clamp(22px,4vw,30px);font-weight:800;margin-top:8px;line-height:1;width:100%;text-align:center;font-variant-numeric:tabular-nums}
+.grid{
+  display:grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap:12px;
+  width:100%;
+  max-width:100%;
+  margin-top:0 !important;
+  margin-bottom:12px !important
+}
+.grid .card{
+  width:100%;
+  height:100px;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
+  padding:12px;
+  margin:0 !important
+}
+.value{font-size:clamp(22px,4.5vw,28px);font-weight:800;margin-top:6px;line-height:1;width:100%;text-align:center;font-variant-numeric:tabular-nums}
+
+@media (min-width: 600px) {
+  .grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
 
 .status-badge{display:inline-flex;align-items:center;gap:8px;padding:10px 20px;border-radius:999px;font-weight:700;font-size:14px;margin-top:10px}
 .status-badge.on{background:rgba(46,196,182,.1);color:var(--green);border:1px solid var(--green)}
@@ -335,13 +355,11 @@ button:active{transform:scale(0.98)}
     <button onclick="addBms()">ADICIONAR DISPOSITIVO</button>
   </div>
   
-  <!-- CARDS DOS DISPOSITIVOS ENVELOPADOS DENTRO DO BLOCO PRINCIPAL -->
   <div class="card">
     <div class="label" style="margin-bottom:12px">Meus Dispositivos</div>
     <div id="bms-list" class="bms-list"></div>
   </div>
   
-  <!-- BLOCO DE AÇÕES COM BOTÕES DE ALTO CONTRASTE (GRADIENTE) -->
   <div class="card" style="max-width:440px; width:100%; display:flex; flex-direction:column; gap:12px; padding:16px;">
     <button class="btn-card-action" onclick="mostrarPaginaConta()">Configurações da Conta</button>
     <button class="btn-card-action" onclick="sair()">Sair</button>
@@ -956,6 +974,7 @@ function voltar(){
   mostrarLista();
 }
 
+// CORREÇÃO EXECUTADA AQUI: Adicionado o "V" e formatado com 2 casas decimais (ex: 3.26V)
 function renderCelulas(cels){
   var container = document.getElementById('celulas');
   if(!container) return;
@@ -982,17 +1001,22 @@ function renderCelulas(cels){
   var min = Math.min.apply(null, vals);
   var max = Math.max.apply(null, vals);
   var dif = max - min;
+  
+  // O sumário (Min, Max, Diferença) mantém as 3 casas originais para precisão técnica de balanceamento
   document.getElementById('celMin').textContent = min.toFixed(3)+'V';
   document.getElementById('celMax').textContent = max.toFixed(3)+'V';
   document.getElementById('celDif').textContent = dif.toFixed(3)+'V';
   document.getElementById('celTot').textContent = cels.length;
+  
   var html = '';
   for(var i=0;i<cels.length;i++){
     var val = parseFloat(cels[i]);
     var cls = 'ok';
     if(val < 3.2 || val > 4.2) cls = 'crit';
     else if(val < 3.4 || val > 4.15) cls = 'warn';
-    html += '<div class="cell '+cls+'"><div class="cell-num">C'+(i+1)+'</div><div class="cell-val">'+val.toFixed(3)+'</div></div>';
+    
+    // Formata o bloco individual da célula para exibir ex: "3.34V" (2 casas decimais com a unidade de medida)
+    html += '<div class="cell '+cls+'"><div class="cell-num">C'+(i+1)+'</div><div class="cell-val">'+val.toFixed(2)+'V</div></div>';
   }
   container.innerHTML = html;
 }
