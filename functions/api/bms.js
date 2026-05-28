@@ -210,19 +210,22 @@ export async function onRequest({ request, env }) {
     // ROTAS PROTEGIDAS - EXCLUSIVAS DO ADMIN
     // ==========================================
     if (isAdmin) {
-      // LISTAR TODAS AS BMS PARA O ADMIN
+      // LISTAR TODAS AS BMS PARA O ADMIN (CORRIGIDO COM STATUS ONLINE EM TEMPO REAL)
       if (action === 'admin_list_master' && request.method === 'GET') {
         const { results } = await env.DB.prepare(`
-          SELECT bm.code, bm.user_id, b.soc, b.voltage, b.current, b.temp, b.cells, b.updated_at,
+          SELECT bm.code, bm.user_id, b.soc, b.voltage, b.current, b.temp, b.cells, 
+                 datetime(b.updated_at) || 'Z' as updated_at,
                  u.nome as dono_nome, u.email as dono_email
           FROM bms_master bm
           LEFT JOIN bms b ON b.code = bm.code
           LEFT JOIN users u ON u.id = bm.user_id
         `).all();
         
+        const now = Date.now();
         const data = (results || []).map(item => ({
           ...item,
-          cells: JSON.parse(item.cells || '[]')
+          cells: JSON.parse(item.cells || '[]'),
+          online: item.updated_at && (now - new Date(item.updated_at).getTime() < 5000)
         }));
         return json(data);
       }
@@ -355,7 +358,8 @@ export async function onRequest({ request, env }) {
       await env.DB.prepare('UPDATE users SET senha_hash = ? WHERE id = ?').bind(nova_senha_hash, userId).run();
       return json({ ok: true });
     }
-  // EXCLUIR A PRÓPRIA CONTA LOGADA PELO PAINEL
+
+    // EXCLUIR A PRÓPRIA CONTA LOGADA PELO PAINEL
     if (action === 'user_delete_self' && request.method === 'DELETE') {
       if (!userId) return json({ ok: false, error: 'Login necessário' }, 401);
       
