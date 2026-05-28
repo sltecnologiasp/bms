@@ -10,7 +10,6 @@
 :root{--bg:#05070d;--cyan:#00ffff;--blue:#0080ff;--green:#00ff88;--red:#ff4444;--orange:#ffaa00}
 body{font-family:'Inter',sans-serif;background:var(--bg);color:#fff;min-height:100vh;width:100%;overflow-x:hidden}
 
-/* Containers principais originais esticando no desktop */
 #login,#dash,#lista,#cadastro{
   position:relative;
   z-index:1;
@@ -34,7 +33,6 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:#fff;min-height:1
 .user-info{color:#6b7c96;font-size:14px;text-align:center;margin-bottom:16px;font-weight:500}
 .user-info span{color:#fff;font-weight:600}
 
-/* Cards expansíveis */
 .card{
   background:rgba(13,20,35,0.65);
   border:1px solid rgba(0,255,255,.08);
@@ -55,7 +53,6 @@ input,select{background:rgba(0,0,0,.4);color:#fff;border:1px solid rgba(255,255,
 input:focus{border-color:rgba(0,255,255,0.4);background:rgba(0,0,0,.6)}
 input::placeholder{color:rgba(255,255,255,.25)}
 
-/* Container dos Olhinhos */
 .pass-wrapper{position:relative;width:100%}
 .pass-wrapper input{padding-right:50px}
 .pass-toggle{position:absolute;right:16px;top:16px;cursor:pointer;opacity:.3;font-size:18px;user-select:none;transition:opacity .2s}
@@ -93,7 +90,7 @@ button:active{transform:scale(0.98)}
 .bar{height:12px;background:rgba(255,255,255,.06);border-radius:999px;overflow:hidden}
 .bar-fill{height:100%;width:0%;border-radius:999px;background:linear-gradient(90deg,#00ff88,#00ffff);transition:width.8s ease}
 
-.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;width:100%;max-width:100%;margin-top:0 !important;margin-bottom:12px !important}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;width:100%;max-width:100%;margin-top:0 !important;margin-bottom:12px !important}
 .grid .card{width:100%;height:100px;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:12px;margin:0 !important}
 .value{font-size:clamp(22px,4vw,30px);font-weight:800;margin-top:8px;line-height:1;width:100%;text-align:center;font-variant-numeric:tabular-nums}
 
@@ -119,13 +116,11 @@ button:active{transform:scale(0.98)}
 .hidden{display:none!important}
 .erro{background:rgba(255,68,68,.1);border:1px solid var(--red);border-radius:12px;padding:14px;margin-top:16px;color:var(--red);font-size:14px}
 
-/* Links adicionais */
 .link-cadastro{margin-top:20px;text-align:center;color:#6b7c96;cursor:pointer;font-size:14px}
 .link-cadastro span{color:var(--cyan);text-decoration:underline}
 .link-esqueceu{display:block;text-align:right;font-size:12px;color:rgba(255,255,255,0.4);margin-top:8px;cursor:pointer;text-decoration:none;transition:color 0.2s}
 .link-esqueceu:hover{color:var(--cyan)}
 
-/* Estilo do Rodapé */
 .footer-link{font-size:11px;margin-top:24px;text-align:center;letter-spacing:1px;line-height:1.6}
 .footer-link a{color:var(--cyan);text-decoration:none;font-weight:600;transition:opacity 0.2s;}
 .footer-link a:hover{opacity:0.8;text-decoration:underline;}
@@ -367,6 +362,7 @@ function login(){
   });
 }
 
+// CORREÇÃO DA ROTA: Direcionando para a ação pública do Worker correspondente
 function recuperarSenha() {
   var emailAtual = document.getElementById('email').value.trim();
   var email = prompt("Digite o e-mail da sua conta para receber as instruções de recuperação:", emailAtual);
@@ -379,9 +375,9 @@ function recuperarSenha() {
     return;
   }
   
-  fetch(API + '?action=recover', {
+  fetch(API + '?action=recover_user', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' }, // Sem headers restritos para evitar erro de autorização
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ email: email })
   })
   .then(function(r) { return r.json(); })
@@ -397,6 +393,7 @@ function recuperarSenha() {
   });
 }
 
+// CORREÇÃO DA ROTA: Ajustado para o endpoint público correto da sua API
 function cadastrar(){
   var btn = document.getElementById('btn-cadastrar');
   if (btn && btn.disabled) return;
@@ -456,7 +453,7 @@ function cadastrar(){
     }
   }
 
-  fetch(API + '?action=register', {
+  fetch(API + '?action=register_user', {
     method:'POST',
     headers:{'Content-Type':'application/json'},
     body:JSON.stringify({nome:nome, email:email, senha:senha})
