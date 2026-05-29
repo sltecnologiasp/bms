@@ -34,6 +34,8 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text-main);
   position:relative;
   z-index:1;
   width:100%;
+  max-width:1100px;
+  margin:0 auto;
   min-height:100vh;
   padding:24px 12px;
   display:none;
@@ -46,7 +48,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text-main);
 
 #painel, #clientesPage, #dashAdmin {
   height: auto;
-  margin: auto 0;
+  margin: auto auto;
 }
 
 .title{font-size:clamp(32px,7vw,54px);font-weight:900;margin-bottom:4px;letter-spacing:2px;background:linear-gradient(90deg,var(--blue),var(--cyan));-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-align:center;width:100%}
@@ -63,7 +65,8 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text-main);
   box-shadow: var(--neon-glow);
 }
 #login .card, .card-cadastro { max-width:440px }
-#painel .card, #clientesPage .card, #dashAdmin .card { max-width:520px }
+#clientesPage .card, #dashAdmin .card { max-width:520px }
+#painel .card-cadastro { margin: 0 auto 12px auto !important; }
 
 input,select,button{width:100%;padding:16px;border-radius:14px;border:none;outline:none;font-size:16px;transition:all 0.2s ease}
 input,select{
@@ -88,7 +91,7 @@ button:active{transform:scale(0.98)}
 .btn-sec{background:transparent;border:1px solid var(--cyan);color:var(--cyan);box-shadow:none}
 .btn-clientes{background:transparent;border:1px solid var(--green);color:var(--green);box-shadow:none}
 
-button.del{background:transparent;border:1px solid var(--input-border);color:var(--text-muted);font-size:13px;padding:12px;box-shadow:none;font-weight:700}
+button.del{background:transparent;border:1px solid var(--input-border);color:var(--text-muted);font-size:12px;padding:10px;box-shadow:none;font-weight:700;width:100%}
 button.del:hover{background:rgba(231,29,54,0.08);color:var(--red);border-color:var(--red)}
 
 button.edit{background:transparent;border:1px solid var(--cyan);color:var(--cyan);font-size:13px;padding:12px;margin-top:auto;box-shadow:none;font-weight:700}
@@ -103,23 +106,29 @@ button.desvincular:hover{background:rgba(255,159,28,0.08)}
 button.voltar{background:transparent;border:1px solid var(--green);color:var(--green);max-width:520px;margin-top:8px;box-shadow:none;font-weight:700}
 button.voltar:hover{background:rgba(46,196,182,0.08)}
 
-button.logout{margin-top:4px;background:transparent;border:1px solid var(--input-border);color:var(--text-muted);max-width:440px;box-shadow:none;font-weight:700}
+button.logout{margin-top:16px;background:transparent;border:1px solid var(--input-border);color:var(--text-muted);max-width:440px;box-shadow:none;font-weight:700}
 button.logout:hover{background:rgba(231,29,54,0.08);color:var(--red);border-color:var(--red)}
 
-/* AJUSTADO: Alinhamento fluido e empilhado em formato de lista responsiva idêntico ao cliente */
-.grid{display:flex;flex-direction:column;gap:12px;width:100%;max-width:520px;margin:0 auto;margin-top:8px}
+/* CORREÇÃO: Grade responsiva que exibe 2x2 no celular e 4x4 em telas grandes */
+.grid{
+  display:grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap:12px;
+  width:100%;
+  margin-top:8px
+}
 
 #lista .card {
   background:var(--card-bg);
   border:1px solid var(--card-border);
   border-radius:16px;
-  padding:16px;
+  padding:14px;
   margin:0 !important;
   display:flex;
   flex-direction:column;
   align-items:center;
-  justify-content:center;
-  min-height:150px;
+  justify-content:space-between;
+  min-height:160px;
   cursor:pointer;
   box-shadow: var(--neon-glow);
   width:100%;
@@ -129,17 +138,17 @@ button.logout:hover{background:rgba(231,29,54,0.08);color:var(--red);border-colo
 
 .card-empty{grid-column:1/-1;min-height:180px;display:flex;align-items:center;justify-content:center;color:var(--text-muted);font-size:14px}
 
-.status{display:inline-flex;align-items:center;justify-content:center;gap:6px;font-size:12px;font-weight:700}
-.status::before{content:'';width:8px;height:8px;border-radius:50%;display:inline-block}
+.status{display:inline-flex;align-items:center;justify-content:center;gap:6px;font-size:11px;font-weight:700}
+.status::before{content:'';width:7px;height:7px;border-radius:50%;display:inline-block}
 .status.on{color:var(--green)}.status.on::before{background:var(--green);box-shadow:0 0 8px var(--green)}
 .status.off{color:var(--red)}.status.off::before{background:var(--red);box-shadow:0 0 8px var(--red)}
 
-.badge{display:inline-block;padding:4px 10px;border-radius:8px;font-size:11px;font-weight:700;margin-top:8px;text-align:center}
+.badge{display:inline-block;padding:4px 8px;border-radius:6px;font-size:10px;font-weight:700;margin-top:4px;text-align:center;max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .badge-green{background:rgba(46,196,182,0.1);color:var(--green);border:1px solid var(--green)}
 .badge-orange{background:rgba(255,159,28,0.1);color:var(--orange);border:1px solid var(--orange)}
 
-.card-code{font-size:17px;font-weight:800;font-family:monospace;color:var(--text-main);margin:8px 0;text-align:center;letter-spacing:0.5px}
-.card-top{display:flex;flex-direction:column;justify-content:flex-start;width:100%}
+.card-code{font-size:13px;font-weight:800;font-family:monospace;color:var(--text-main);margin:6px 0;text-align:center;letter-spacing:0.2px;word-break:break-all}
+.card-top{display:flex;flex-direction:column;justify-content:flex-start;align-items:center;width:100%}
 
 .cells{display:grid;grid-template-columns:repeat(auto-fill,minmax(85px,1fr));gap:12px;margin-top:16px;width:100%}
 .cell{background:var(--cell-bg);border-radius:12px;padding:10px 6px;border:1px solid var(--cell-border);display:flex;flex-direction:column;align-items:center;justify-content:center}
@@ -164,10 +173,11 @@ button.logout:hover{background:rgba(231,29,54,0.08);color:var(--red);border-colo
 .erro{background:rgba(231,29,54,0.1);border:1px solid var(--red);border-radius:12px;padding:14px;margin-top:16px;color:var(--red);font-size:14px}
 .erro.hidden{display:none!important}
 
-/* Ajuste específico para grades internas do dashboard de telemetria */
 .dash-grid { display:grid; grid-template-columns:repeat(2, 1fr); gap:12px; width:100% }
 
+/* CORREÇÃO: Media Query para telas maiores (tablets e computadores) expandir para 4x4 */
 @media(min-width:600px){
+  .grid { grid-template-columns: repeat(4, 1fr); }
   .dash-grid { grid-template-columns:repeat(4,1fr) }
 }
 </style>
@@ -176,7 +186,7 @@ button.logout:hover{background:rgba(231,29,54,0.08);color:var(--red);border-colo
 
 <div id="login">
   <div class="title">SMART BMS</div>
-  <div class="user-info">Acesso administrative</div>
+  <div class="user-info">Acesso administrativo</div>
   <div class="card">
     <div class="label">Usuário</div>
     <input id="user" placeholder="administrador" autocomplete="username" value="administrador">
@@ -195,13 +205,13 @@ button.logout:hover{background:rgba(231,29,54,0.08);color:var(--red);border-colo
     <div class="label">Cadastrar BMS no Sistema</div>
     <input id="code" placeholder="SL000000000000" maxlength="14" style="margin-top:8px">
     <button class="btn-clientes" onclick="cad()">CADASTRAR BMS MASTER</button>
-    <button class="btn-sec" onclick="gerarECadastrar()">GERAR CÓDIGO ALEATÓRIO</button>
+    <button class="btn-sec" onclick="generarECadastrar()">GERAR CÓDIGO ALEATÓRIO</button>
     <button class="btn-clientes" style="margin-top:24px" onclick="mostrarClientes()">VER CLIENTES CADASTRADOS</button>
     <p id="msg" style="text-align:center;margin-top:12px;font-size:14px;font-weight:600"></p>
   </div>
 
-  <!-- MODIFICADO: Bloco unificado com largura total alinhado com as caixas superiores -->
-  <div style="width:100%; max-width:520px; display:flex; flex-direction:column; margin-bottom:12px">
+  <!-- CORREÇÃO: Container que se estende de ponta a ponta na tela de forma adaptável -->
+  <div style="width:100%; display:flex; flex-direction:column; margin-bottom:12px">
     <div class="label" style="margin-bottom:8px">Todas as BMS do Sistema</div>
     <div id="lista" class="grid"></div>
   </div>
@@ -430,7 +440,7 @@ function gerarCodigoAleatorio(){
   return 'SL' + numeros;
 }
 
-async function gerarECadastrar(){
+async function generarECadastrar(){
   const code = gerarCodigoAleatorio();
   document.getElementById('code').value = code;
   await cad();
@@ -706,21 +716,21 @@ async function carregarTudo(){
   }
 }
 
-/* MODIFICADO: Layout dos itens da lista de BMS ajustado para bloco único horizontal idêntico ao painel do cliente */
+/* CORREÇÃO: Estrutura interna compacta e otimizada para visualização em grade quadricular uniforme */
 function atualizarHTMLListaBms() {
   document.getElementById('lista').innerHTML = bmsList.map(b=>{
-    const dono = b.user_id? `<span class="badge badge-orange">Vinculada: ${b.dono_nome || b.dono_email}</span>` : `<span class="badge badge-green">Disponível</span>`;
+    const dono = b.user_id? `<span class="badge badge-orange">Vinculada</span>` : `<span class="badge badge-green">Disponível</span>`;
     const statusClass = b.online ? 'on' : 'off';
     const statusText = b.online ? 'Online' : 'Offline';
 
     return `
-    <div class="card" onclick="viewBmsDetails('${b.code}')" style="padding: 20px 16px; min-height: auto; align-items: stretch;">
-      <div class="card-top" style="align-items: center; text-align: center;">
-        <span class="status ${statusClass}" style="margin-bottom: 6px;">${statusText}</span>
-        <div class="card-code" style="margin: 4px 0 6px 0; font-size: 18px;">${b.code}</div>
-        <div style="margin-bottom: 12px;">${dono}</div>
+    <div class="card" onclick="viewBmsDetails('${b.code}')" style="padding: 12px 8px; justify-content: space-between;">
+      <div class="card-top">
+        <span class="status ${statusClass}">${statusText}</span>
+        <div class="card-code">${b.code}</div>
+        <div>${dono}</div>
       </div>
-      <button class="del" style="margin-top: 4px; padding: 12px; border-radius: 10px;" onclick="del('${b.code}')">EXCLUIR DISPOSITIVO</button>
+      <button class="del" onclick="del('${b.code}')">EXCLUIR</button>
     </div>
   `}).join('') || '<div class="card card-empty"><div>Nenhuma BMS cadastrada no sistema</div></div>';
 }
