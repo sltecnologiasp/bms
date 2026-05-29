@@ -141,15 +141,34 @@ export async function onRequest({ request, env }) {
       return json({ ok: true });
     }
 
-    // ROTA 5: LOGIN USER
+    // CORRIGIDO - ROTA 5: LOGIN USER COM VERIFICAÇÃO SEPARADA DE E-MAIL E SENHA
     if (action === 'login' && request.method === 'POST') {
       const { email, senha } = await request.json();
       const cleanEmail = (email || '').trim().toLowerCase();
+
+      // Passo 1: Busca apenas pelo e-mail do cliente
+      const user = await env.DB.prepare('SELECT id, nome, email, senha_hash, email_verificado FROM users WHERE email = ?').bind(cleanEmail).first();
+      
+      // Se não achar o e-mail, barra imediatamente informando o cliente
+      if (!user) {
+        return json({ ok: false, error: 'E-mail não cadastrado' }, 401);
+      }
+
+      // Passo 2: O e-mail existe! Vamos gerar o hash da senha digitada para validar
       const hash = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(senha));
       const senha_hash = Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2, '0')).join('');
-      const user = await env.DB.prepare('SELECT id, nome, email, email_verificado FROM users WHERE email = ? AND senha_hash = ?').bind(cleanEmail, senha_hash).first();
-      if (!user) return json({ ok: false, error: 'E-mail ou senha incorretos' }, 401);
-      if (user.email_verificado === 0) return json({ ok: false, error: 'Confirme seu e-mail na caixa de entrada antes de acessar.' }, 403);
+
+      // Compara o hash gerado com o armazenado no banco
+      if (user.senha_hash !== senha_hash) {
+        return json({ ok: false, error: 'Senha incorreta' }, 401);
+      }
+
+      // Passo 3: Valida se ele já ativou a conta pelo e-mail do Resend
+      if (user.email_verificado === 0) {
+        return json({ ok: false, error: 'Confirme seu e-mail na caixa de entrada antes de acessar.' }, 403);
+      }
+
+      // Tudo perfeito, gera a sessão JWT Base64 e concede o acesso
       const token = btoa(`user:${user.id}:${Date.now()}`);
       return json({ ok: true, token, user: { id: user.id, nome: user.nome, email: user.email } });
     }
@@ -198,7 +217,6 @@ export async function onRequest({ request, env }) {
       }
     }
 
-    // VERIFICAÇÃO ADICIONAL DE SEGURANÇA PARA USUÁRIOS
     if (!isAdmin && userId) {
       const userCheck = await env.DB.prepare('SELECT id FROM users WHERE id = ?').bind(userId).first();
       if (!userCheck) {
@@ -210,7 +228,6 @@ export async function onRequest({ request, env }) {
     // ROTAS PROTEGIDAS - EXCLUSIVAS DO ADMIN
     // ==========================================
     if (isAdmin) {
-      // LISTAR TODAS AS BMS PARA O ADMIN (CORRIGIDO COM STATUS ONLINE EM TEMPO REAL)
       if (action === 'admin_list_master' && request.method === 'GET') {
         const { results } = await env.DB.prepare(`
           SELECT bm.code, bm.user_id, b.soc, b.voltage, b.current, b.temp, b.cells, 
@@ -230,7 +247,6 @@ export async function onRequest({ request, env }) {
         return json(data);
       }
 
-      // CADASTRAR NOVA BMS MASTER NO SISTEMA
       if (action === 'admin_add_master' && request.method === 'POST') {
         const { code } = await request.json();
         if (!code) return json({ ok: false, error: 'Código inválido' }, 400);
@@ -242,7 +258,6 @@ export async function onRequest({ request, env }) {
         }
       }
 
-      // DELETAR BMS MASTER
       if (action === 'deletar' && request.method === 'DELETE') {
         const code = url.searchParams.get('code');
         if (!code) return json({ ok: false, error: 'Código inválido' }, 400);
@@ -252,7 +267,6 @@ export async function onRequest({ request, env }) {
         return json({ ok: true });
       }
 
-      // LISTAR TODOS OS CLIENTES
       if (action === 'all_users' && request.method === 'GET') {
         const { results } = await env.DB.prepare(`
           SELECT u.id, u.nome, u.email, u.created_at, COUNT(bm.id) as bms_count
@@ -264,14 +278,12 @@ export async function onRequest({ request, env }) {
         return json(results || []);
       }
 
-      // EDITAR CLIENTE
       if (action === 'edit_user' && request.method === 'POST') {
         const { id, nome, email } = await request.json();
         await env.DB.prepare('UPDATE users SET nome = ?, email = ? WHERE id = ?').bind(nome, email.trim().toLowerCase(), id).run();
         return json({ ok: true });
       }
 
-      // EXCLUIR CLIENTE
       if (action === 'delete_user' && request.method === 'DELETE') {
         const id = url.searchParams.get('id');
         if (!id) return json({ ok: false, error: 'ID inválido' }, 400);
@@ -327,7 +339,6 @@ export async function onRequest({ request, env }) {
       return json(withOnline);
     }
 
-    // ROTA COMPARTILHADA (DATA DETALHADA) - SUPORTA USER E ADMIN
     if (action === 'data' && request.method === 'GET') {
       const code = url.searchParams.get('code');
       if (!code) return json({ ok: false, error: 'Code obrigatório' }, 400);
@@ -341,7 +352,6 @@ export async function onRequest({ request, env }) {
       return json({...data, online, cells: JSON.parse(data.cells || '[]')});
     }
 
-    // ALTERAR SENHA POR DENTRO DO PAINEL DE CLIENTES
     if (action === 'user_change_password' && request.method === 'POST') {
       if (!userId) return json({ ok: false, error: 'Login necessário' }, 401);
       const { senhaAtual, novaSenha } = await request.json();
@@ -359,7 +369,6 @@ export async function onRequest({ request, env }) {
       return json({ ok: true });
     }
 
-    // EXCLUIR A PRÓPRIA CONTA LOGADA PELO PAINEL
     if (action === 'user_delete_self' && request.method === 'DELETE') {
       if (!userId) return json({ ok: false, error: 'Login necessário' }, 401);
       
