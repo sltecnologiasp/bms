@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <title>SMART BMS</title>
 
+<!-- Tags obrigatórias para o WhatsApp mostrar o card com foto -->
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://bms.app.br/">
 <meta property="og:title" content="SMART BMS">
@@ -269,6 +270,20 @@ button:active{transform:scale(0.98)}
 
 .footer-voltar{width:100%;display:flex;justify-content:center;margin-top:0px!important;margin-bottom:8px}
 .footer-voltar button{width:100%;max-width:320px;margin-top:0px}
+
+/* NOVO: Estilos da cortina CSS animada para abrir e fechar os dispositivos suavemente */
+.cortina-wrapper {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.4s ease-out, opacity 0.3s ease;
+  opacity: 0;
+  width: 100%;
+}
+.cortina-wrapper.aberta {
+  max-height: 2000px; /* Altura máxima para permitir que a lista cresça conforme adiciona itens */
+  opacity: 1;
+  transition: max-height 0.6s ease-in, opacity 0.4s ease;
+}
 </style>
 </head>
 <body>
@@ -368,11 +383,17 @@ button:active{transform:scale(0.98)}
     <input id="bms-code" placeholder="SL000000000000" maxlength="14" style="margin-top:8px">
     <input id="bms-nome" placeholder="Nome Ex: Bateria Casa" style="margin-top:12px">
     <button onclick="addBms()">ADICIONAR DISPOSITIVO</button>
+    
+    <!-- NOVO BOTÃO: Posicionado logo abaixo do botão Adicionar Dispositivo, na mesma cor -->
+    <button id="btn-toggle-cortina" onclick="toggleCortinaDispositivos()">MOSTRAR DISPOSITIVOS</button>
   </div>
   
-  <div class="card">
-    <div class="label" style="margin-bottom:12px">Meus Dispositivos</div>
-    <div id="bms-list" class="bms-list"></div>
+  <!-- NOVO WRAPPER: Envolve o card de lista de dispositivos com o efeito cortina -->
+  <div id="cortina-dispositivos" class="cortina-wrapper">
+    <div class="card">
+      <div class="label" style="margin-bottom:12px">Meus Dispositivos</div>
+      <div id="bms-list" class="bms-list"></div>
+    </div>
   </div>
   
   <div class="card" style="width:100%; display:flex; flex-direction:column; gap:12px; padding:16px; box-sizing:border-box;">
@@ -491,11 +512,9 @@ var INT = null;
 var CRONOMETRO_CADASTRO = null;
 var ESCUTA_ATIVACAO = null;
 
-// Variáveis de controle para os timers de desaparecimento automático das mensagens
 var TIMEOUT_ERRO_LOGIN = null;
 var TIMEOUT_ERRO_CADASTRO = null;
 
-// CORREÇÃO: Variável global que gerencia o travamento da tela de cadastro contra recarregamento acidental
 var CADASTRO_ATIVO = false;
 
 try{USER = JSON.parse(localStorage.getItem('bms_user')||'null');}catch(e){}
@@ -503,7 +522,6 @@ try{USER = JSON.parse(localStorage.getItem('bms_user')||'null');}catch(e){}
 var temaSalvo = localStorage.getItem('bms_theme') || 'light';
 document.documentElement.setAttribute('data-theme', temaSalvo);
 
-// CORREÇÃO: Listener nativo que intercepta qualquer tentativa de atualizar/fechar a aba se a tela de cadastro estiver ativa
 window.addEventListener('beforeunload', function(e) {
   if (CADASTRO_ATIVO) {
     e.preventDefault();
@@ -562,7 +580,6 @@ window.onload = function(){
 };
 
 function mostrarLogin(){
-  // Desativa a flag de proteção para o navegador permitir o carregamento nas outras telas
   CADASTRO_ATIVO = false;
   limparControlesCadastro();
   clearInterval(INT);
@@ -572,7 +589,6 @@ function mostrarLogin(){
 }
 
 function mostrarCadastro(){
-  // CORREÇÃO: Trava o navegador ao entrar na tela de cadastro
   CADASTRO_ATIVO = true;
   clearInterval(INT);
   esconderTudo();
@@ -680,7 +696,6 @@ function login(){
     if (e) { 
       e.textContent = 'Preencha e-mail e senha'; 
       e.classList.remove('hidden'); 
-      // CORREÇÃO: Remove o aviso de e-mail/senha em branco após 3 segundos
       TIMEOUT_ERRO_LOGIN = setTimeout(function() { e.classList.add('hidden'); }, 3000);
     }
     return;
@@ -703,7 +718,6 @@ function login(){
       if (e) {
         e.textContent = d.error || 'Erro ao realizar login';
         e.classList.remove('hidden');
-        // CORREÇÃO: Remove o aviso de erro do banco após exatamente 3 segundos
         TIMEOUT_ERRO_LOGIN = setTimeout(function() { e.classList.add('hidden'); }, 3000);
       }
     }
@@ -780,7 +794,6 @@ function cadastrar(){
     if (e) { 
       e.textContent = 'Preencha todos os campos'; 
       e.classList.remove('hidden'); 
-      // CORREÇÃO: Limpa campos em branco após 3 segundos
       TIMEOUT_ERRO_CADASTRO = setTimeout(function() { e.classList.add('hidden'); }, 3000);
     }
     return;
@@ -790,7 +803,6 @@ function cadastrar(){
     if (e) { 
       e.textContent = 'As senhas não coincidem!'; 
       e.classList.remove('hidden'); 
-      // CORREÇÃO: Limpa erro de incompatibilidade de senhas após 3 segundos
       TIMEOUT_ERRO_CADASTRO = setTimeout(function() { e.classList.add('hidden'); }, 3000);
     }
     return;
@@ -808,17 +820,15 @@ function cadastrar(){
     } else { 
       if (e) { 
         if(d.error === 'E-mail já cadastrado') {
-          // Nota: O botão de reenvio manual fica fixo para permitir a interação caso necessário
           e.innerHTML = 'E-mail já cadastrado. <br><button onclick="reenviarEmailAtivacao(\''+email+'\')" style="padding:10px 14px; font-size:12px; margin-top:8px; border-radius:10px; font-weight:700; color:#fff; cursor:pointer; border:none; background:linear-gradient(90deg,var(--orange),var(--red)); box-shadow:0 4px 12px rgba(255,159,28,0.2);">REENVIAR LINK DE ATIVAÇÃO</button>';
           e.classList.remove('hidden');
-        } else if(d.error === 'E-mail já cadastrado e confirmado') {
+        } else if(d.error === 'E-mail já cadastrado e confirmed') {
           alert('Este e-mail já está verificado e ativo no sistema!');
           mostrarLogin();
           return;
         } else {
           e.textContent = d.error; 
           e.classList.remove('hidden');
-          // CORREÇÃO: Remove outros erros genéricos após 3 segundos
           TIMEOUT_ERRO_CADASTRO = setTimeout(function() { e.classList.add('hidden'); }, 3000);
         }
       } 
@@ -858,8 +868,6 @@ function iniciarCronometroEspera(email) {
       btn.setAttribute('data-action', 'resend');
       btn.style.background = 'linear-gradient(90deg, var(--orange), var(--red))';
       btn.textContent = 'REENVIAR LINK DE ATIVAÇÃO';
-      
-      // CORREÇÃO: O aviso verde que indica o envio limpa após o cronômetro zerar, liberando o botão de reenvio limpo
       e.classList.add('hidden');
       restaurarEstilosErroOriginal();
     } else {
@@ -932,12 +940,36 @@ function restaurarBotaoCadastroOriginal() {
   }
 }
 
+// NOVO: Função que manipula o abre e fecha da cortina de forma fluida
+function toggleCortinaDispositivos() {
+  var cortina = document.getElementById('cortina-dispositivos');
+  var btn = document.getElementById('btn-toggle-cortina');
+  
+  if (!cortina || !btn) return;
+  
+  if (cortina.classList.contains('aberta')) {
+    cortina.classList.remove('aberta');
+    btn.textContent = 'MOSTRAR DISPOSITIVOS';
+  } else {
+    cortina.classList.add('aberta');
+    btn.textContent = 'OCULTAR DISPOSITIVOS';
+  }
+}
+
+// AJUSTADO: Ao fazer o login ou carregar a lista, a cortina sempre inicia fechada e oculta
 function mostrarLista(){
   clearInterval(INT);
   localStorage.removeItem('bms_codigo_ativo');
   esconderTudo();
   document.getElementById('lista').classList.remove('hidden');
   document.getElementById('user-nome').textContent = USER ? USER.nome : 'Usuário';
+  
+  // Garante que ao entrar no painel a cortina inicie sempre fechada
+  var cortina = document.getElementById('cortina-dispositivos');
+  var btn = document.getElementById('btn-toggle-cortina');
+  if(cortina) cortina.classList.remove('aberta');
+  if(btn) btn.textContent = 'MOSTRAR DISPOSITIVOS';
+
   carregarLista();
   INT = setInterval(carregarLista, 3000);
 }
@@ -991,6 +1023,13 @@ function addBms(){
     if(d.ok){
       document.getElementById('bms-code').value = '';
       document.getElementById('bms-nome').value = '';
+      
+      // Auto expande a cortina ao cadastrar uma nova para o cliente ver o dispositivo entrando na lista
+      var cortina = document.getElementById('cortina-dispositivos');
+      var btn = document.getElementById('btn-toggle-cortina');
+      if(cortina) cortina.classList.add('aberta');
+      if(btn) btn.textContent = 'OCULTAR DISPOSITIVOS';
+      
       carregarLista();
     } else { alert('Erro: ' + d.error); }
   });
