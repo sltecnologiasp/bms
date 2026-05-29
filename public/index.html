@@ -32,9 +32,7 @@
   --gauge-empty: #e2e8f0;
   --cell-bg: #f8fafc;
   --cell-border: #e2e8f0;
-  
   --neon-glow: 0 0 12px rgba(0, 180, 216, 0.12);
-  
   --cyan: #00b4d8;
   --blue: #0077b6;
   --green: #2ec4b6;
@@ -55,9 +53,7 @@
   --gauge-empty: rgba(255, 255, 255, .08);
   --cell-bg: rgba(0, 0, 0, .3);
   --cell-border: rgba(255, 255, 255, .04);
-  
   --neon-glow: 0 0 15px rgba(0, 255, 255, 0.2);
-  
   --cyan: #00ffff;
   --blue: #0080ff;
   --green: #00ff88;
@@ -197,7 +193,7 @@ button:active{transform:scale(0.98)}
 }
 
 .gauge-card{padding:20px;min-height:260px}
-.gauge(width:min(220px,55vw);height:min(220px,55vw);margin:auto;border-radius:50%;background:conic-gradient(var(--green) 0deg,var(--cyan) 180deg,var(--gauge-empty) 180deg);position:relative;box-shadow:0 0 30px rgba(0,255,255,.05);transition:background.8s ease}
+.gauge{width:min(220px,55vw);height:min(220px,55vw);margin:auto;border-radius:50%;background:conic-gradient(var(--green) 0deg,var(--cyan) 180deg,var(--gauge-empty) 180deg);position:relative;box-shadow:0 0 30px rgba(0,255,255,.05);transition:background.8s ease}
 .gauge::before{content:'';position:absolute;inset:16px;border-radius:50%;background:var(--bg);transition: background 0.3s}
 .gauge-inner{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;align-items:center;z-index:2}
 .gauge-value{font-size:clamp(36px,9vw,52px);font-weight:900;color:var(--green)}
@@ -275,7 +271,7 @@ button:active{transform:scale(0.98)}
 
 <div id="login">
   <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; margin-bottom: 24px; width: 100%;">
-    <img src="1000229030.png" alt="Logo BMS" style="width: 100px; height: 100px; object-fit: contain; border-radius: 50%; box-shadow: 0 4px 15px rgba(0, 180, 216, 0.2); background: var(--card-bg); padding: 8px; transition: transform 0.3s ease;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+    <img src="1000229030.png" alt="Logo BMS" style="width: 100px; height: 100px; object-fit: contain; border-radius: 50%; box-shadow: 0 4px 15px rgba(0, 180, 216, 0.2); background: var(--card-bg); padding: 8px; transition: transform 0.3s ease;">
     <div style="font-size: clamp(32px, 7vw, 48px); font-weight: 900; margin-top: 12px; letter-spacing: 2px; background: linear-gradient(90deg, var(--blue), var(--cyan)); -webkit-background-clip: text;-webkit-text-fill-color: transparent; text-align: center;">SMART BMS</div>
     <div class="user-info" style="margin-bottom:0; margin-top: 4px;">Gerenciamento Avançado</div>
   </div>
