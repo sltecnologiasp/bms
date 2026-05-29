@@ -199,7 +199,7 @@ button:active{transform:scale(0.98)}
 }
 
 .gauge-card{padding:20px;min-height:260px}
-.gauge{width:min(220px,55vw);height:min(220px,55vw);margin:auto;border-radius:50%;background:conic-gradient(var(--green) 0deg,var(--cyan) 180deg,var(--gauge-empty) 180deg);position:relative;box-shadow:0 0 30px rgba(0,255,255,.05);transition:background.8s ease}
+.gauge(width:min(220px,55vw);height:min(220px,55vw);margin:auto;border-radius:50%;background:conic-gradient(var(--green) 0deg,var(--cyan) 180deg,var(--gauge-empty) 180deg);position:relative;box-shadow:0 0 30px rgba(0,255,255,.05);transition:background.8s ease}
 .gauge::before{content:'';position:absolute;inset:16px;border-radius:50%;background:var(--bg);transition: background 0.3s}
 .gauge-inner{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;align-items:center;z-index:2}
 .gauge-value{font-size:clamp(36px,9vw,52px);font-weight:900;color:var(--green)}
@@ -289,7 +289,6 @@ button:active{transform:scale(0.98)}
   transition: max-height 0.6s ease-in, opacity 0.4s ease;
 }
 
-/* NOVO: CSS do bloco de entrada alinhado com o botão do QR Code baseado na sua imagem */
 .qr-input-row {
   display: flex;
   align-items: center;
@@ -435,6 +434,7 @@ button:active{transform:scale(0.98)}
     
     <input id="bms-nome" placeholder="Nome Ex: Bateria Casa" style="margin-top:12px">
     <button onclick="addBms()">ADICIONAR DISPOSITIVO</button>
+    
     <button id="btn-toggle-cortina" class="hidden" onclick="toggleCortinaDispositivos()">MOSTRAR DISPOSITIVOS</button>
   </div>
   
@@ -554,9 +554,7 @@ button:active{transform:scale(0.98)}
 <div id="modalScannerCamera" class="modal">
   <div class="modal-content small" style="max-width: 440px; padding: 20px;">
     <h2 style="text-align:center;margin-bottom:12px;font-size:18px;font-weight:900;background:linear-gradient(90deg,var(--blue),var(--cyan));-webkit-background-clip:text;-webkit-text-fill-color:transparent">Escanear QR Code</h2>
-    
     <div id="reader-camera" style="width: 100%; background: #000; border-radius: 14px; overflow: hidden; box-shadow: inset 0 0 10px rgba(0,0,0,0.5);"></div>
-    
     <button class="btn-sec" style="margin-top:16px;" onclick="fecharScannerCamera()">FECHAR CÂMERA</button>
   </div>
 </div>
@@ -577,7 +575,6 @@ var TIMEOUT_ERRO_CADASTRO = null;
 var CADASTRO_ATIVO = false;
 var USAR_CONTROLE_CORTINA = false;
 
-// Instância global do leitor de código
 var SCANNER_CAMERA_OBJ = null;
 
 try{USER = JSON.parse(localStorage.getItem('bms_user')||'null');}catch(e){}
@@ -641,27 +638,20 @@ window.onload = function(){
   }
 };
 
-// Centraliza a formatação para ser usada no teclado e na câmera de forma padronizada
 function formatarBmsTextInput(inputElement) {
   if(!inputElement.value.startsWith('SL')) inputElement.value = 'SL';
   inputElement.value = 'SL' + inputElement.value.slice(2).replace(/[^0-9]/g,'').slice(0,12);
 }
 
-// NOVO: Função que ativa a câmera traseira do celular e escuta a leitura do QR Code
 function abrirScannerCamera() {
   document.getElementById('modalScannerCamera').classList.add('active');
-  
-  // Instancia a biblioteca configurando a caixa de leitura
   SCANNER_CAMERA_OBJ = new Html5Qrcode("reader-camera");
-  
   const config = { fps: 15, qrbox: { width: 230, height: 230 } };
   
-  // Força o uso da câmera traseira ({ facingMode: "environment" })
   SCANNER_CAMERA_OBJ.start(
     { facingMode: "environment" }, 
     config,
     function(textResult) {
-      // Sucesso na leitura! Injeta o resultado no input, formata e desliga
       var bmsInput = document.getElementById('bms-code');
       if(bmsInput) {
         bmsInput.value = textResult.trim().toUpperCase();
@@ -669,16 +659,13 @@ function abrirScannerCamera() {
       }
       fecharScannerCamera();
     },
-    function(error) {
-      // Falha de foco/leitura contínua: ignorada silenciosamente para continuar lendo
-    }
+    function(error) {}
   ).catch(function(err) {
     alert("Câmera bloqueada ou não encontrada. Verifique as permissões do seu navegador.");
     fecharScannerCamera();
   });
 }
 
-// NOVO: Desliga os sensores físicos da câmera e fecha a modal com segurança
 function fecharScannerCamera() {
   document.getElementById('modalScannerCamera').classList.remove('active');
   if(SCANNER_CAMERA_OBJ) {
@@ -1082,6 +1069,7 @@ function mostrarLista(){
   INT = setInterval(carregarLista, 3000);
 }
 
+// CORREÇÃO INSTALADA: Ordenação nativa (Online em primeiro) e gatilho de cortina ajustado para > 4
 function carregarLista(){
   fetch(API + '?action=user_bms', { headers: {'Authorization':'Bearer '+TOKEN} })
   .then(function(r){
@@ -1094,7 +1082,8 @@ function carregarLista(){
     var cortina = document.getElementById('cortina-dispositivos');
     var btn = document.getElementById('btn-toggle-cortina');
     
-    if (lista.length > 3) {
+    // CORREÇÃO: O botão de Mostrar/Ocultar só nasce de 5 dispositivos para cima (> 4)
+    if (lista.length > 4) {
       if (!USAR_CONTROLE_CORTINA) {
         USAR_CONTROLE_CORTINA = true;
         if(cortina) cortina.classList.remove('aberta');
@@ -1108,6 +1097,13 @@ function carregarLista(){
       if(cortina) cortina.classList.add('aberta');
       if(btn) btn.classList.add('hidden');
     }
+
+    // CORREÇÃO: Algoritmo de ordenação que joga as baterias com online=true sempre para o topo
+    lista.sort(function(a, b) {
+      if (a.online && !b.online) return -1;
+      if (!a.online && b.online) return 1;
+      return 0;
+    });
 
     var el = document.getElementById('bms-list');
     if(!el) return;
