@@ -271,7 +271,7 @@ button:active{transform:scale(0.98)}
 .footer-voltar{width:100%;display:flex;justify-content:center;margin-top:0px!important;margin-bottom:8px}
 .footer-voltar button{width:100%;max-width:320px;margin-top:0px}
 
-/* NOVO: Estilos da cortina CSS animada para abrir e fechar os dispositivos suavemente */
+/* Estilos da cortina CSS animada */
 .cortina-wrapper {
   max-height: 0;
   overflow: hidden;
@@ -280,7 +280,7 @@ button:active{transform:scale(0.98)}
   width: 100%;
 }
 .cortina-wrapper.aberta {
-  max-height: 2000px; /* Altura máxima para permitir que a lista cresça conforme adiciona itens */
+  max-height: 2000px;
   opacity: 1;
   transition: max-height 0.6s ease-in, opacity 0.4s ease;
 }
@@ -362,7 +362,7 @@ button:active{transform:scale(0.98)}
     <div class="label" style="margin-top:16px">Confirmar Nova Senha</div>
     <div class="pass-wrapper">
       <input id="nova-senha-confirmar" type="password" placeholder="••••••••">
-      <span class="pass-toggle" onclick="togglePass('nova-senha-confirmar', this)">👁</span>
+      <span class="pass-toggle" onclick="nova-senha-confirmar', this)">👁</span>
     </div>
     
     <button onclick="salvarNovaSenha()">SALVAR NOVA SENHA</button>
@@ -384,11 +384,10 @@ button:active{transform:scale(0.98)}
     <input id="bms-nome" placeholder="Nome Ex: Bateria Casa" style="margin-top:12px">
     <button onclick="addBms()">ADICIONAR DISPOSITIVO</button>
     
-    <!-- NOVO BOTÃO: Posicionado logo abaixo do botão Adicionar Dispositivo, na mesma cor -->
-    <button id="btn-toggle-cortina" onclick="toggleCortinaDispositivos()">MOSTRAR DISPOSITIVOS</button>
+    <!-- AJUSTADO: Botão inicia oculto (hidden) e só aparece via JS se o cliente tiver mais de 3 dispositivos -->
+    <button id="btn-toggle-cortina" class="hidden" onclick="toggleCortinaDispositivos()">MOSTRAR DISPOSITIVOS</button>
   </div>
   
-  <!-- NOVO WRAPPER: Envolve o card de lista de dispositivos com o efeito cortina -->
   <div id="cortina-dispositivos" class="cortina-wrapper">
     <div class="card">
       <div class="label" style="margin-bottom:12px">Meus Dispositivos</div>
@@ -516,6 +515,9 @@ var TIMEOUT_ERRO_LOGIN = null;
 var TIMEOUT_ERRO_CADASTRO = null;
 
 var CADASTRO_ATIVO = false;
+
+// Flag interna para saber se o controle inteligente de cortina deve rodar (ativado apenas se > 3 itens)
+var USAR_CONTROLE_CORTINA = false;
 
 try{USER = JSON.parse(localStorage.getItem('bms_user')||'null');}catch(e){}
 
@@ -731,7 +733,7 @@ function login(){
   });
 }
 
-function recuperarSenha() {
+function recoverSenha() {
   var emailAtual = document.getElementById('email').value.trim();
   var email = prompt("Digite o seu e-mail cadastrado:", emailAtual);
   if (email === null || !email.trim()) return;
@@ -940,7 +942,6 @@ function restaurarBotaoCadastroOriginal() {
   }
 }
 
-// NOVO: Função que manipula o abre e fecha da cortina de forma fluida
 function toggleCortinaDispositivos() {
   var cortina = document.getElementById('cortina-dispositivos');
   var btn = document.getElementById('btn-toggle-cortina');
@@ -956,7 +957,7 @@ function toggleCortinaDispositivos() {
   }
 }
 
-// AJUSTADO: Ao fazer o login ou carregar a lista, a cortina sempre inicia fechada e oculta
+// CORREÇÃO: Reseta as flags para que a lista inicie aberta e o botão suma até a API responder
 function mostrarLista(){
   clearInterval(INT);
   localStorage.removeItem('bms_codigo_ativo');
@@ -964,16 +965,19 @@ function mostrarLista(){
   document.getElementById('lista').classList.remove('hidden');
   document.getElementById('user-nome').textContent = USER ? USER.nome : 'Usuário';
   
-  // Garante que ao entrar no painel a cortina inicie sempre fechada
   var cortina = document.getElementById('cortina-dispositivos');
   var btn = document.getElementById('btn-toggle-cortina');
-  if(cortina) cortina.classList.remove('aberta');
-  if(btn) btn.textContent = 'MOSTRAR DISPOSITIVOS';
+  
+  // Por segurança, inicia aberto por padrão e com o botão oculto até contarmos os itens
+  if(cortina) cortina.classList.add('aberta');
+  if(btn) btn.classList.add('hidden');
+  USAR_CONTROLE_CORTINA = false;
 
   carregarLista();
   INT = setInterval(carregarLista, 3000);
 }
 
+// CORREÇÃO: Lógica inteligente adicionada dentro da resposta da API
 function carregarLista(){
   fetch(API + '?action=user_bms', { headers: {'Authorization':'Bearer '+TOKEN} })
   .then(function(r){
@@ -982,6 +986,28 @@ function carregarLista(){
   })
   .then(function(lista){
     if(!lista) return;
+    
+    var cortina = document.getElementById('cortina-dispositivos');
+    var btn = document.getElementById('btn-toggle-cortina');
+    
+    // CHECAGEM DINÂMICA: Se o cliente tem MAIS que 3 dispositivos
+    if (lista.length > 3) {
+      if (!USAR_CONTROLE_CORTINA) {
+        // Primeira execução após o login: ativa o controle, esconde a lista (cortina) e exibe o botão
+        USAR_CONTROLE_CORTINA = true;
+        if(cortina) cortina.classList.remove('aberta');
+        if(btn) {
+          btn.classList.remove('hidden');
+          btn.textContent = 'MOSTRAR DISPOSITIVOS';
+        }
+      }
+    } else {
+      // Se tiver 3 ou menos, desliga o controle de cortina, deixa ela aberta e some com o botão
+      USAR_CONTROLE_CORTINA = false;
+      if(cortina) cortina.classList.add('aberta');
+      if(btn) btn.classList.add('hidden');
+    }
+
     var el = document.getElementById('bms-list');
     if(!el) return;
     if(!lista.length){
@@ -1024,7 +1050,7 @@ function addBms(){
       document.getElementById('bms-code').value = '';
       document.getElementById('bms-nome').value = '';
       
-      // Auto expande a cortina ao cadastrar uma nova para o cliente ver o dispositivo entrando na lista
+      // Quando ele cadastrar o 4º dispositivo, força a cortina a abrir para ele ver o item novo surgir
       var cortina = document.getElementById('cortina-dispositivos');
       var btn = document.getElementById('btn-toggle-cortina');
       if(cortina) cortina.classList.add('aberta');
