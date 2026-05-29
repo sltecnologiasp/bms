@@ -179,9 +179,38 @@ button.logout:hover{background:rgba(231,29,54,0.08);color:var(--red);border-colo
 
 .dash-grid { display:grid; grid-template-columns:repeat(2, 1fr); gap:12px; width:100% }
 
+/* NOVO: Estilos do Bloco de Filtros Alinhados */
+.filter-row {
+  display: flex;
+  gap: 8px;
+  width: 100%;
+  margin-top: 4px;
+}
+.filter-row button {
+  flex: 1;
+  padding: 12px 6px;
+  font-size: 11px;
+  border-radius: 12px;
+  margin-top: 0;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  background: var(--input-bg);
+  border: 1px solid var(--input-border);
+  color: var(--text-muted);
+  box-shadow: none;
+  white-space: nowrap;
+}
+.filter-row button.active {
+  background: linear-gradient(90deg, var(--blue), var(--cyan));
+  color: #fff;
+  border-color: transparent;
+  box-shadow: 0 4px 15px rgba(0, 128, 255, 0.15);
+}
+
 @media(min-width:600px){
   .grid { grid-template-columns: repeat(4, 1fr); }
   .dash-grid { grid-template-columns:repeat(4,1fr) }
+  .filter-row button { font-size: 13px; padding: 14px; }
 }
 </style>
 </head>
@@ -189,7 +218,7 @@ button.logout:hover{background:rgba(231,29,54,0.08);color:var(--red);border-colo
 
 <div id="login">
   <div class="title">SMART BMS</div>
-  <div class="user-info">Acesso administrativo</div>
+  <div class="user-info">Acesso administrative</div>
   <div class="card">
     <div class="label">Usuário</div>
     <input id="user" placeholder="administrador" autocomplete="username" value="administrador">
@@ -213,8 +242,17 @@ button.logout:hover{background:rgba(231,29,54,0.08);color:var(--red);border-colo
     <p id="msg" style="text-align:center;margin-top:12px;font-size:14px;font-weight:600"></p>
   </div>
 
+  <div class="card" style="padding: 12px; display: flex; flex-direction: column; gap: 8px;">
+    <div class="label">Filtrar Visualização das BMS</div>
+    <div class="filter-row">
+      <button id="btn-filter-todas" class="active" onclick="alterarFiltroBms('todas')">TODAS (<span id="count-todas">0</span>)</button>
+      <button id="btn-filter-disponiveis" onclick="alterarFiltroBms('disponiveis')">DISPONÍVEIS (<span id="count-disponiveis">0</span>)</button>
+      <button id="btn-filter-online" onclick="alterarFiltroBms('online')">ONLINE (<span id="count-online">0</span>)</button>
+    </div>
+  </div>
+
   <div style="width:100%; display:flex; flex-direction:column; margin-bottom:12px">
-    <div class="label" style="margin-bottom:8px">Todas as BMS do Sistema</div>
+    <div class="label" style="margin-bottom:8px" id="label-lista-titulo">Todas as BMS do Sistema</div>
     <div id="lista" class="grid"></div>
   </div>
   
@@ -333,7 +371,9 @@ let bmsList = [];
 let activeBmsCode = sessionStorage.getItem('admin_active_bms_code');
 let activeScreen = sessionStorage.getItem('admin_active_screen') || 'painel';
 
-// Variáveis de controle para os timers das mensagens temporárias de administrador
+// NOVO: Variável de controle do filtro ativo
+let filtroAtivo = 'todas';
+
 let TIMEOUT_ADMIN_LOGIN = null;
 let TIMEOUT_ADMIN_MSG = null;
 
@@ -470,7 +510,6 @@ async function cad(){
     carregarTudo();
   }
   
-  // Limpa o aviso de sucesso ou falha do cadastro da BMS após 3 segundos
   TIMEOUT_ADMIN_MSG = setTimeout(() => { msgEl.textContent = ''; }, 3000);
 }
 
@@ -730,13 +769,56 @@ async function carregarTudo(){
     return (b.updated_at ? new Date(b.updated_at).getTime() : 0) - (a.updated_at ? new Date(a.updated_at).getTime() : 0);
   });
 
+  // NOVO: Atualiza as contagens numéricas nos botões de filtro em tempo real
+  atualizarContadoresFiltro();
+
   if(activeScreen === 'painel') {
     atualizarHTMLListaBms();
   }
 }
 
+// NOVO: Calcula as quantidades baseadas nos status das baterias retornadas do banco
+function atualizarContadoresFiltro() {
+  const totalTodas = bmsList.length;
+  const totalDisponiveis = bmsList.filter(b => !b.user_id).length;
+  const totalOnline = bmsList.filter(b => b.online).length;
+
+  document.getElementById('count-todas').textContent = totalTodas;
+  document.getElementById('count-disponiveis').textContent = totalDisponiveis;
+  document.getElementById('count-online').textContent = totalOnline;
+}
+
+// NOVO: Altera a flag de filtragem e atualiza os estilos dos botões ativos
+function alterarFiltroBms(novoFiltro) {
+  filtroAtivo = novoFiltro;
+  
+  document.getElementById('btn-filter-todas').classList.remove('active');
+  document.getElementById('btn-filter-disponiveis').classList.remove('active');
+  document.getElementById('btn-filter-online').classList.remove('active');
+  
+  document.getElementById('btn-filter-' + novoFiltro).classList.add('active');
+  
+  const titulos = {
+    'todas': 'Todas as BMS do Sistema',
+    'disponiveis': 'BMS Disponíveis (Livres)',
+    'online': 'BMS Conectadas (Online)'
+  };
+  document.getElementById('label-lista-titulo').textContent = titulos[novoFiltro];
+  
+  atualizarHTMLListaBms();
+}
+
+// AJUSTADO: Modificado para aplicar o filtro de visualização sob a bmsList
 function atualizarHTMLListaBms() {
-  document.getElementById('lista').innerHTML = bmsList.map(b=>{
+  let bmsFiltradas = bmsList;
+  
+  if (filtroAtivo === 'disponiveis') {
+    bmsFiltradas = bmsList.filter(b => !b.user_id);
+  } else if (filtroAtivo === 'online') {
+    bmsFiltradas = bmsList.filter(b => b.online);
+  }
+
+  document.getElementById('lista').innerHTML = bmsFiltradas.map(b=>{
     const dono = b.user_id? `<span class="badge badge-orange">Vinculada</span>` : `<span class="badge badge-green">Disponível</span>`;
     const statusClass = b.online ? 'on' : 'off';
     const statusText = b.online ? 'Online' : 'Offline';
@@ -750,7 +832,7 @@ function atualizarHTMLListaBms() {
       </div>
       <button class="del" onclick="del('${b.code}')">EXCLUIR</button>
     </div>
-  `}).join('') || '<div class="card card-empty"><div>Nenhuma BMS cadastrada no sistema</div></div>';
+  `}).join('') || `<div class="card card-empty"><div>Nenhuma BMS encontrada neste filtro (${filtroAtivo})</div></div>`;
 }
 
 async function listarUsers(){
