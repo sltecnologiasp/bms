@@ -199,7 +199,7 @@ button:active{transform:scale(0.98)}
 }
 
 .gauge-card{padding:20px;min-height:260px}
-.gauge(width:min(220px,55vw);height:min(220px,55vw);margin:auto;border-radius:50%;background:conic-gradient(var(--green) 0deg,var(--cyan) 180deg,var(--gauge-empty) 180deg);position:relative;box-shadow:0 0 30px rgba(0,255,255,.05);transition:background.8s ease}
+.gauge{width:min(220px,55vw);height:min(220px,55vw);margin:auto;border-radius:50%;background:conic-gradient(var(--green) 0deg,var(--cyan) 180deg,var(--gauge-empty) 180deg);position:relative;box-shadow:0 0 30px rgba(0,255,255,.05);transition:background.8s ease}
 .gauge::before{content:'';position:absolute;inset:16px;border-radius:50%;background:var(--bg);transition: background 0.3s}
 .gauge-inner{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;align-items:center;z-index:2}
 .gauge-value{font-size:clamp(36px,9vw,52px);font-weight:900;color:var(--green)}
@@ -434,7 +434,6 @@ button:active{transform:scale(0.98)}
     
     <input id="bms-nome" placeholder="Nome Ex: Bateria Casa" style="margin-top:12px">
     <button onclick="addBms()">ADICIONAR DISPOSITIVO</button>
-    
     <button id="btn-toggle-cortina" class="hidden" onclick="toggleCortinaDispositivos()">MOSTRAR DISPOSITIVOS</button>
   </div>
   
@@ -1069,7 +1068,6 @@ function mostrarLista(){
   INT = setInterval(carregarLista, 3000);
 }
 
-// CORREÇÃO INSTALADA: Ordenação nativa (Online em primeiro) e gatilho de cortina ajustado para > 4
 function carregarLista(){
   fetch(API + '?action=user_bms', { headers: {'Authorization':'Bearer '+TOKEN} })
   .then(function(r){
@@ -1082,7 +1080,7 @@ function carregarLista(){
     var cortina = document.getElementById('cortina-dispositivos');
     var btn = document.getElementById('btn-toggle-cortina');
     
-    // CORREÇÃO: O botão de Mostrar/Ocultar só nasce de 5 dispositivos para cima (> 4)
+    // Regra da cortina inteligente ativando estritamente acima de 4 itens (> 4)
     if (lista.length > 4) {
       if (!USAR_CONTROLE_CORTINA) {
         USAR_CONTROLE_CORTINA = true;
@@ -1098,7 +1096,7 @@ function carregarLista(){
       if(btn) btn.classList.add('hidden');
     }
 
-    // CORREÇÃO: Algoritmo de ordenação que joga as baterias com online=true sempre para o topo
+    // Regra de ordenação automática: Online sobe para o topo
     lista.sort(function(a, b) {
       if (a.online && !b.online) return -1;
       if (!a.online && b.online) return 1;
