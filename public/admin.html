@@ -2,7 +2,8 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<!-- BLOQUEIO DE ZOOM: Configuração estrita para impedir o zoom automático em qualquer celular -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Admin BMS</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
 <style>
@@ -64,11 +65,14 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text-main);
   margin-bottom: 12px !important;
   box-shadow: var(--neon-glow);
 }
-#login .card, .card-cadastro { max-width:440px }
-#clientesPage .card, #dashAdmin .card { max-width:520px }
-#painel .card-cadastro { margin: 0 auto 12px auto !important; }
+#login .card, #clientesPage .card, #dashAdmin .card { width:100%; max-width:520px }
+#login .card { max-width:440px }
 
-input,select,button{width:100%;padding:16px;border-radius:14px;border:none;outline:none;font-size:16px;transition:all 0.2s ease}
+/* AJUSTADO: O bloco de cadastro agora é 100% fluido e alinha com os blocos de baixo */
+.card-cadastro { width: 100%; max-width: 100% !important; margin: 0 auto 12px auto !important; }
+
+/* AJUSTADO: Fonte mínima de 16px para proibir nativamente o zoom de foco dos navegadores móveis */
+input,select,button{width:100%;padding:16px;border-radius:14px;border:none;outline:none;font-size:16px;font-family:inherit;transition:all 0.2s ease}
 input,select{
   background:var(--input-bg);
   color:var(--input-text);
@@ -76,7 +80,7 @@ input,select{
   text-align:center;
   font-weight:600;
 }
-input{ font-family:monospace; letter-spacing:1px; }
+input{ font-family:monospace; letter-spacing:1px; font-size:16px; }
 input:focus,select:focus{
   border-color:var(--cyan);
   box-shadow: 0 0 10px rgba(0, 255, 255, 0.2);
@@ -109,7 +113,6 @@ button.voltar:hover{background:rgba(46,196,182,0.08)}
 button.logout{margin-top:16px;background:transparent;border:1px solid var(--input-border);color:var(--text-muted);max-width:440px;box-shadow:none;font-weight:700}
 button.logout:hover{background:rgba(231,29,54,0.08);color:var(--red);border-color:var(--red)}
 
-/* CORREÇÃO: Grade responsiva que exibe 2x2 no celular e 4x4 em telas grandes */
 .grid{
   display:grid;
   grid-template-columns: repeat(2, 1fr);
@@ -175,7 +178,6 @@ button.logout:hover{background:rgba(231,29,54,0.08);color:var(--red);border-colo
 
 .dash-grid { display:grid; grid-template-columns:repeat(2, 1fr); gap:12px; width:100% }
 
-/* CORREÇÃO: Media Query para telas maiores (tablets e computadores) expandir para 4x4 */
 @media(min-width:600px){
   .grid { grid-template-columns: repeat(4, 1fr); }
   .dash-grid { grid-template-columns:repeat(4,1fr) }
@@ -201,6 +203,7 @@ button.logout:hover{background:rgba(231,29,54,0.08);color:var(--red);border-colo
   <div class="title" style="font-size:clamp(28px,6vw,32px);margin-bottom:4px">SMART BMS</div>
   <div class="user-info">Painel Administrativo</div>
 
+  <!-- MODIFICADO: Card de Cadastro ajustado de ponta a ponta na tela inteira -->
   <div class="card card-cadastro">
     <div class="label">Cadastrar BMS no Sistema</div>
     <input id="code" placeholder="SL000000000000" maxlength="14" style="margin-top:8px">
@@ -210,7 +213,6 @@ button.logout:hover{background:rgba(231,29,54,0.08);color:var(--red);border-colo
     <p id="msg" style="text-align:center;margin-top:12px;font-size:14px;font-weight:600"></p>
   </div>
 
-  <!-- CORREÇÃO: Container que se estende de ponta a ponta na tela de forma adaptável -->
   <div style="width:100%; display:flex; flex-direction:column; margin-bottom:12px">
     <div class="label" style="margin-bottom:8px">Todas as BMS do Sistema</div>
     <div id="lista" class="grid"></div>
@@ -551,7 +553,7 @@ function fecharModalDesvincular() {
 
 async function confirmarDesvinculoManual() {
   const userId = document.getElementById('desvincularUserId').value;
-  const code = document.getElementById('selectBmsVinculadas').value;
+  const code = document.getElementById('selectBmsVinculadas');
   
   if (!code) {
     alert('Selecione a BMS que deseja desvincular.');
@@ -716,7 +718,6 @@ async function carregarTudo(){
   }
 }
 
-/* CORREÇÃO: Estrutura interna compacta e otimizada para visualização em grade quadricular uniforme */
 function atualizarHTMLListaBms() {
   document.getElementById('lista').innerHTML = bmsList.map(b=>{
     const dono = b.user_id? `<span class="badge badge-orange">Vinculada</span>` : `<span class="badge badge-green">Disponível</span>`;
