@@ -20,7 +20,7 @@ export async function onRequest({ request, env }) {
     // ROTAS PÚBLICAS (NÃO EXIGEM TOKEN / LOGIN)
     // ==========================================
 
-    // ROTA 1: VERIFICAÇÃO DE E-MAIL[cite: 1]
+    // ROTA 1: VERIFICAÇÃO DE E-MAIL
     if (action === 'verify_email' && request.method === 'GET') {
       const token = url.searchParams.get('token');
       if (!token) return new Response('Token inválido', { status: 400 });
@@ -52,7 +52,7 @@ export async function onRequest({ request, env }) {
       `, { headers: { 'Content-Type': 'text/html; charset=utf-8' } });
     }
 
-    // ROTA 2: CADASTRO COM DISPARO DO RESEND[cite: 1]
+    // ROTA 2: CADASTRO COM DISPARO DO RESEND
     if ((action === 'register' || action === 'register_user') && request.method === 'POST') {
       const { nome, email, resignation, senha } = await request.json();
       const userEmail = (email || resignation || '').trim().toLowerCase();
@@ -96,7 +96,7 @@ export async function onRequest({ request, env }) {
       return json({ ok: true });
     }
 
-    // ROTA ADICIONAL: REENVIO DE LINK DE ATIVAÇÃO[cite: 1]
+    // ROTA ADICIONAL: REENVIO DE LINK DE ATIVAÇÃO
     if (action === 'resend_verification' && request.method === 'POST') {
       const { email } = await request.json();
       const userEmail = (email || '').trim().toLowerCase();
@@ -133,7 +133,7 @@ export async function onRequest({ request, env }) {
       return json({ ok: true });
     }
 
-    // CORREÇÃO INSTALADA: ROTA DE MONITORAMENTO DA ATIVAÇÃO EM TEMPO REAL
+    // ROTA DE MONITORAMENTO DA ATIVAÇÃO EM TEMPO REAL
     if (action === 'check_activation' && request.method === 'GET') {
       const email = url.searchParams.get('email');
       if (!email) return json({ ok: false, error: 'E-mail obrigatório' }, 400);
@@ -144,7 +144,7 @@ export async function onRequest({ request, env }) {
       return json({ ok: true, activated: user.email_verificado === 1 });
     }
 
-    // ROTA 3: DISPARAR E-MAIL DE RECUPERAÇÃO AUTÔNOMO[cite: 1]
+    // ROTA 3: DISPARAR E-MAIL DE RECUPERAÇÃO AUTÔNOMO
     if (action === 'recover_user' && request.method === 'POST') {
       const { email } = await request.json();
       const cleanEmail = (email || '').trim().toLowerCase();
@@ -182,7 +182,7 @@ export async function onRequest({ request, env }) {
       return json({ ok: true });
     }
 
-    // ROTA 4: SALVAR NOVA SENHA REDEFINIDA SOZINHO[cite: 1]
+    // ROTA 4: SALVAR NOVA SENHA REDEFINIDA SOZINHO
     if (action === 'reset_password' && request.method === 'POST') {
       const { token, novaSenha } = await request.json();
       if (!token || !novaSenha) return json({ ok: false, error: 'Dados incompletos' }, 400);
@@ -197,7 +197,7 @@ export async function onRequest({ request, env }) {
       return json({ ok: true });
     }
 
-    // ROTA 5: LOGIN USER[cite: 1]
+    // ROTA 5: LOGIN USER
     if (action === 'login' && request.method === 'POST') {
       const { email, senha } = await request.json();
       const cleanEmail = (email || '').trim().toLowerCase();
@@ -223,14 +223,14 @@ export async function onRequest({ request, env }) {
       return json({ ok: true, token, user: { id: user.id, nome: user.nome, email: user.email } });
     }
 
-    // ROTA 6: LOGIN ADMIN[cite: 1]
+    // ROTA 6: LOGIN ADMIN
     if (action === 'login_admin' && request.method === 'POST') {
       const { user, password } = await request.json();
       if (user === 'administrador' && password === '426240637') return json({ ok: true, token: 'admin_ok' });
       return json({ ok: false, error: 'Credenciais inválidas' }, 401);
     }
 
-    // ROTA 7: UPDATE TELEMETRIA DA EQUIPE/BMS[cite: 1]
+    // ROTA 7: UPDATE TELEMETRIA DA EQUIPE/BMS
     if (action === 'update' && request.method === 'POST') {
       const { code, soc, voltage, current, temp, cells } = await request.json();
       if (!code) return json({ ok: false, error: 'Code obrigatório' }, 400);
@@ -245,7 +245,7 @@ export async function onRequest({ request, env }) {
     }
 
     // ==========================================
-    // BARREIRA DE SEGURANÇA (TOKEN)[cite: 1]
+    // BARREIRA DE SEGURANÇA (TOKEN)
     // ==========================================
     const auth = request.headers.get('Authorization');
     if (!auth?.startsWith('Bearer ')) return json({ ok: false, error: 'Não autorizado' }, 401);
@@ -275,9 +275,10 @@ export async function onRequest({ request, env }) {
     }
 
     // ==========================================
-    // ROTAS PROTEGIDAS - EXCLUSIVAS DO ADMIN[cite: 1]
+    // ROTAS PROTEGIDAS - EXCLUSIVAS DO ADMIN
     // ==========================================
     if (isAdmin) {
+      // LISTAR DISPOSITIVOS NO ADMIN COM NOME DO DONO
       if (action === 'admin_list_master' && request.method === 'GET') {
         const { results } = await env.DB.prepare(`
           SELECT bm.code, bm.user_id, b.soc, b.voltage, b.current, b.temp, b.cells, 
@@ -295,6 +296,39 @@ export async function onRequest({ request, env }) {
           online: item.updated_at && (now - new Date(item.updated_at).getTime() < 5000)
         }));
         return json(data);
+      }
+
+      // NOVO: AÇÃO PARA VINCULAR MANUALMENTE CORRIGIDA
+      if (action === 'admin_force_bind' && request.method === 'POST') {
+        const { userId, code } = await request.json();
+        if (!userId || !code) return json({ ok: false, error: 'Dados incompletos' }, 400);
+
+        // 1. Vincula o user_id no bms_master
+        await env.DB.prepare('UPDATE bms_master SET user_id = ? WHERE code = ?').bind(userId, code).run();
+        
+        // 2. Garante que o dispositivo exista na tabela principal de telemetria
+        await env.DB.prepare('INSERT OR IGNORE INTO bms (code, nome) VALUES (?, ?)').bind(code, code).run();
+        
+        // 3. Insere o vínculo na tabela user_bms para aparecer para o cliente
+        await env.DB.prepare('INSERT OR IGNORE INTO user_bms (user_id, bms_code, bms_nome) VALUES (?, ?, ?)')
+          .bind(userId, code, code).run();
+
+        return json({ ok: true });
+      }
+
+      // NOVO: AÇÃO PARA DESVINCULAR MANUALMENTE CORRIGIDA
+      if (action === 'admin_force_unbind' && request.method === 'DELETE') {
+        const userId = url.searchParams.get('userId');
+        const code = url.searchParams.get('code');
+        if (!userId || !code) return json({ ok: false, error: 'Parâmetros incompletos' }, 400);
+
+        // 1. Remove o dono da tabela bms_master
+        await env.DB.prepare('UPDATE bms_master SET user_id = NULL WHERE code = ? AND user_id = ?').bind(code, userId).run();
+        
+        // 2. Apaga o vínculo da tabela relacional do cliente
+        await env.DB.prepare('DELETE FROM user_bms WHERE user_id = ? AND bms_code = ?').bind(userId, code).run();
+
+        return json({ ok: true });
       }
 
       if (action === 'admin_add_master' && request.method === 'POST') {
@@ -318,7 +352,7 @@ export async function onRequest({ request, env }) {
       }
 
       if (action === 'all_users' && request.method === 'GET') {
-        const { results } = await env.DB.prepare(`
+        const { results } = await env.DB.prepare suicide(`
           SELECT u.id, u.nome, u.email, u.created_at, COUNT(bm.id) as bms_count
           FROM users u
           LEFT JOIN bms_master bm ON bm.user_id = u.id
@@ -345,7 +379,7 @@ export async function onRequest({ request, env }) {
     }
 
     // ==========================================
-    // ROTAS PROTEGIDAS - EXCLUSIVAS DO USUÁRIO[cite: 1]
+    // ROTAS PROTEGIDAS - EXCLUSIVAS DO USUÁRIO
     // ==========================================
     if (action === 'add_bms' && request.method === 'POST') {
       if (!userId) return json({ ok: false, error: 'Login necessário' }, 401);
@@ -389,6 +423,7 @@ export async function onRequest({ request, env }) {
       return json(withOnline);
     }
 
+    // ROTA COMPARTILHADA (SUPORTA USER E ADMIN)
     if (action === 'data' && request.method === 'GET') {
       const code = url.searchParams.get('code');
       if (!code) return json({ ok: false, error: 'Code obrigatório' }, 400);
