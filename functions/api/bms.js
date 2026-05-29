@@ -20,7 +20,7 @@ export async function onRequest({ request, env }) {
     // ROTAS PÚBLICAS (NÃO EXIGEM TOKEN / LOGIN)
     // ==========================================
 
-    // ROTA 1: VERIFICAÇÃO DE E-MAIL
+    // ROTA 1: VERIFICAÇÃO DE E-MAIL[cite: 1]
     if (action === 'verify_email' && request.method === 'GET') {
       const token = url.searchParams.get('token');
       if (!token) return new Response('Token inválido', { status: 400 });
@@ -52,13 +52,12 @@ export async function onRequest({ request, env }) {
       `, { headers: { 'Content-Type': 'text/html; charset=utf-8' } });
     }
 
-    // ROTA 2: CADASTRO COM DISPARO DO RESEND (ATUALIZADA)
+    // ROTA 2: CADASTRO COM DISPARO DO RESEND[cite: 1]
     if ((action === 'register' || action === 'register_user') && request.method === 'POST') {
       const { nome, email, resignation, senha } = await request.json();
       const userEmail = (email || resignation || '').trim().toLowerCase();
       if (!nome || !userEmail || !senha) return json({ ok: false, error: 'Dados inválidos' }, 400);
       
-      // CORREÇÃO: Checa se o usuário já existe e verifica se a conta está ativa ou pendente
       const exists = await env.DB.prepare('SELECT email_verificado FROM users WHERE email = ?').bind(userEmail).first();
       if (exists) {
         if (exists.email_verificado === 1) {
@@ -97,7 +96,7 @@ export async function onRequest({ request, env }) {
       return json({ ok: true });
     }
 
-    // NOVA ROTA: REENVIO DE LINK DE ATIVAÇÃO
+    // ROTA ADICIONAL: REENVIO DE LINK DE ATIVAÇÃO[cite: 1]
     if (action === 'resend_verification' && request.method === 'POST') {
       const { email } = await request.json();
       const userEmail = (email || '').trim().toLowerCase();
@@ -134,7 +133,18 @@ export async function onRequest({ request, env }) {
       return json({ ok: true });
     }
 
-    // ROTA 3: DISPARAR E-MAIL DE RECUPERAÇÃO AUTÔNOMO
+    // CORREÇÃO INSTALADA: ROTA DE MONITORAMENTO DA ATIVAÇÃO EM TEMPO REAL
+    if (action === 'check_activation' && request.method === 'GET') {
+      const email = url.searchParams.get('email');
+      if (!email) return json({ ok: false, error: 'E-mail obrigatório' }, 400);
+      
+      const user = await env.DB.prepare('SELECT email_verificado FROM users WHERE email = ?').bind(email.trim().toLowerCase()).first();
+      
+      if (!user) return json({ ok: false, activated: false });
+      return json({ ok: true, activated: user.email_verificado === 1 });
+    }
+
+    // ROTA 3: DISPARAR E-MAIL DE RECUPERAÇÃO AUTÔNOMO[cite: 1]
     if (action === 'recover_user' && request.method === 'POST') {
       const { email } = await request.json();
       const cleanEmail = (email || '').trim().toLowerCase();
@@ -172,7 +182,7 @@ export async function onRequest({ request, env }) {
       return json({ ok: true });
     }
 
-    // ROTA 4: SALVAR NOVA SENHA REDEFINIDA SOZINHO
+    // ROTA 4: SALVAR NOVA SENHA REDEFINIDA SOZINHO[cite: 1]
     if (action === 'reset_password' && request.method === 'POST') {
       const { token, novaSenha } = await request.json();
       if (!token || !novaSenha) return json({ ok: false, error: 'Dados incompletos' }, 400);
@@ -187,19 +197,17 @@ export async function onRequest({ request, env }) {
       return json({ ok: true });
     }
 
-    // ROTA 5: LOGIN USER (DUPLA CHECAGEM SEPARADA)
+    // ROTA 5: LOGIN USER[cite: 1]
     if (action === 'login' && request.method === 'POST') {
       const { email, senha } = await request.json();
       const cleanEmail = (email || '').trim().toLowerCase();
 
-      // Passo 1: Busca o usuário apenas pelo e-mail
       const user = await env.DB.prepare('SELECT id, nome, email, senha_hash, email_verificado FROM users WHERE email = ?').bind(cleanEmail).first();
       
       if (!user) {
         return json({ ok: false, error: 'E-mail não cadastrado' }, 401);
       }
 
-      // Passo 2: Valida o hash da senha
       const hash = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(senha));
       const senha_hash = Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2, '0')).join('');
 
@@ -215,14 +223,14 @@ export async function onRequest({ request, env }) {
       return json({ ok: true, token, user: { id: user.id, nome: user.nome, email: user.email } });
     }
 
-    // ROTA 6: LOGIN ADMIN
+    // ROTA 6: LOGIN ADMIN[cite: 1]
     if (action === 'login_admin' && request.method === 'POST') {
       const { user, password } = await request.json();
       if (user === 'administrador' && password === '426240637') return json({ ok: true, token: 'admin_ok' });
       return json({ ok: false, error: 'Credenciais inválidas' }, 401);
     }
 
-    // ROTA 7: UPDATE TELEMETRIA DA EQUIPE/BMS
+    // ROTA 7: UPDATE TELEMETRIA DA EQUIPE/BMS[cite: 1]
     if (action === 'update' && request.method === 'POST') {
       const { code, soc, voltage, current, temp, cells } = await request.json();
       if (!code) return json({ ok: false, error: 'Code obrigatório' }, 400);
@@ -237,7 +245,7 @@ export async function onRequest({ request, env }) {
     }
 
     // ==========================================
-    // BARREIRA DE SEGURANÇA (TOKEN)
+    // BARREIRA DE SEGURANÇA (TOKEN)[cite: 1]
     // ==========================================
     const auth = request.headers.get('Authorization');
     if (!auth?.startsWith('Bearer ')) return json({ ok: false, error: 'Não autorizado' }, 401);
@@ -267,7 +275,7 @@ export async function onRequest({ request, env }) {
     }
 
     // ==========================================
-    // ROTAS PROTEGIDAS - EXCLUSIVAS DO ADMIN
+    // ROTAS PROTEGIDAS - EXCLUSIVAS DO ADMIN[cite: 1]
     // ==========================================
     if (isAdmin) {
       if (action === 'admin_list_master' && request.method === 'GET') {
@@ -337,7 +345,7 @@ export async function onRequest({ request, env }) {
     }
 
     // ==========================================
-    // ROTAS PROTEGIDAS - EXCLUSIVAS DO USUÁRIO
+    // ROTAS PROTEGIDAS - EXCLUSIVAS DO USUÁRIO[cite: 1]
     // ==========================================
     if (action === 'add_bms' && request.method === 'POST') {
       if (!userId) return json({ ok: false, error: 'Login necessário' }, 401);
