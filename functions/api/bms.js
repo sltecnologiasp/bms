@@ -88,6 +88,43 @@ export async function onRequest({ request, env }) {
       return json({ ok: true });
     }
 
+    // CORREÇÃO ADICIONADA: NOVA ROTA PARA REENVIAR LINK DE ATIVAÇÃO DE FORMA INDEPENDENTE
+    if (action === 'resend_verification' && request.method === 'POST') {
+      const { email } = await request.json();
+      const userEmail = (email || '').trim().toLowerCase();
+      if (!userEmail) return json({ ok: false, error: 'E-mail inválido' }, 400);
+
+      const user = await env.DB.prepare('SELECT id, nome, email_verificado FROM users WHERE email = ?').bind(userEmail).first();
+      
+      if (!user) return json({ ok: false, error: 'E-mail não encontrado no sistema' }, 404);
+      if (user.email_verificado === 1) return json({ ok: false, error: 'Este e-mail já está verificado e ativo.' }, 400);
+
+      const novo_token = crypto.randomUUID();
+      await env.DB.prepare('UPDATE users SET token_verificacao = ? WHERE id = ?').bind(novo_token, user.id).run();
+
+      if (env.RESEND_API_KEY) {
+        const verifyLink = `${url.origin}${url.pathname}?action=verify_email&token=${novo_token}`;
+        await fetch('https://api.resend.com/emails', {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${env.RESEND_API_KEY}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            from: 'SMART BMS <nao-responda@bms.app.br>',
+            to: userEmail,
+            subject: 'Novo link de ativação - SMART BMS',
+            html: `
+              <div style="font-family: sans-serif; max-width: 600px; margin: auto; padding: 24px; background: #05070d; color: #ffffff; border-radius: 12px; border: 1px solid rgba(0,255,255,0.1);">
+                <h2 style="color: #00ffff; text-align: center; margin-top: 0;">SMART BMS</h2>
+                <h3 style="text-align: center; color: #fff;">Olá, ${user.nome}!</h3>
+                <p style="text-align: center; color: #a1aab8; line-height: 1.6;">Aqui está o seu novo link solicitado para ativar a conta. Clique no botão abaixo:</p>
+                <div style="text-align: center; margin: 36px 0;"><a href="${verifyLink}" style="background: linear-gradient(90deg, #0080ff, #00ffff); color: #ffffff; padding: 16px 32px; text-decoration: none; border-radius: 12px; font-weight: bold; font-size: 16px;">ATIVAR MINHA CONTA</a></div>
+              </div>
+            `
+          })
+        }).catch(err => console.log('Erro ao reenviar e-mail:', err));
+      }
+      return json({ ok: true });
+    }
+
     // ROTA 3: DISPARAR E-MAIL DE RECUPERAÇÃO AUTÔNOMO
     if (action === 'recover_user' && request.method === 'POST') {
       const { email } = await request.json();
@@ -141,34 +178,28 @@ export async function onRequest({ request, env }) {
       return json({ ok: true });
     }
 
-    // CORRIGIDO - ROTA 5: LOGIN USER COM VERIFICAÇÃO SEPARADA DE E-MAIL E SENHA
+    // CORRIGIDO - ROTA 5: LOGIN USER COM VERIFICAÇÃO SEPARADA E PRECISA
     if (action === 'login' && request.method === 'POST') {
       const { email, senha } = await request.json();
       const cleanEmail = (email || '').trim().toLowerCase();
 
-      // Passo 1: Busca apenas pelo e-mail do cliente
       const user = await env.DB.prepare('SELECT id, nome, email, senha_hash, email_verificado FROM users WHERE email = ?').bind(cleanEmail).first();
       
-      // Se não achar o e-mail, barra imediatamente informando o cliente
       if (!user) {
         return json({ ok: false, error: 'E-mail não cadastrado' }, 401);
       }
 
-      // Passo 2: O e-mail existe! Vamos gerar o hash da senha digitada para validar
       const hash = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(senha));
       const senha_hash = Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2, '0')).join('');
 
-      // Compara o hash gerado com o armazenado no banco
       if (user.senha_hash !== senha_hash) {
         return json({ ok: false, error: 'Senha incorreta' }, 401);
       }
 
-      // Passo 3: Valida se ele já ativou a conta pelo e-mail do Resend
       if (user.email_verificado === 0) {
         return json({ ok: false, error: 'Confirme seu e-mail na caixa de entrada antes de acessar.' }, 403);
       }
 
-      // Tudo perfeito, gera a sessão JWT Base64 e concede o acesso
       const token = btoa(`user:${user.id}:${Date.now()}`);
       return json({ ok: true, token, user: { id: user.id, nome: user.nome, email: user.email } });
     }
