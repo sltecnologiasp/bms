@@ -286,7 +286,7 @@ button:active{transform:scale(0.98)}
       <span class="pass-toggle" onclick="togglePass('senha', this)">👁</span>
     </div>
     
-    <span class="link-esqueceu" onclick="recuperarSenha()">Esqueceu sua senha?</span>
+    <span class="link-esqueceu" onclick="recoverSenha()">Esqueceu sua senha?</span>
     
     <button onclick="login()">ENTRAR</button>
     <p class="link-cadastro" onclick="mostrarCadastro()">Ainda não tem conta? <span>Cadastre-se</span></p>
@@ -321,7 +321,7 @@ button:active{transform:scale(0.98)}
     </div>
     
     <button id="btn-cadastrar" onclick="cadastrar()">CADASTRAR</button>
-    <button class="btn-sec" onclick="mostrarLogin()">VOLTAR</button>
+    <button id="btn-cad-voltar" class="btn-sec" onclick="mostrarLogin()">VOLTAR</button>
     <div id="erro-cad" class="erro hidden"></div>
   </div>
   <div class="footer-link">
@@ -395,7 +395,7 @@ button:active{transform:scale(0.98)}
 
   <div class="card" style="max-width:440px; width:100%">
     <div class="label" style="margin-bottom:12px">Visual do Aplicativo</div>
-    <button id="theme-toggle-btn" class="btn-sec" style="margin-top:0" onclick="alternarTemaDireto()"></button>
+    <button id="theme-toggle-btn" class="btn-sec" style="margin-top:0" onclick="alternarThemeDireto()"></button>
   </div>
 
   <button class="btn-sec" style="max-width:440px; width:100%" onclick="voltarParaLista()">Voltar</button>
@@ -484,6 +484,10 @@ var USER = null;
 var CODIGO = localStorage.getItem('bms_codigo_ativo');
 var INT = null;
 
+// Variáveis de controle para o cronômetro e escuta de ativação em tempo real
+var CRONOMETRO_CADASTRO = null;
+var ESCUTA_ATIVACAO = null;
+
 try{USER = JSON.parse(localStorage.getItem('bms_user')||'null');}catch(e){}
 
 var temaSalvo = localStorage.getItem('bms_theme') || 'light';
@@ -495,7 +499,7 @@ function atualizarBotaoTema() {
   btn.innerHTML = (temaSalvo === 'light') ? '☀️ Modo Claro' : '🌙 Modo Escuro';
 }
 
-function alternarTemaDireto() {
+function alternarThemeDireto() {
   temaSalvo = (temaSalvo === 'light') ? 'dark' : 'light';
   document.documentElement.setAttribute('data-theme', temaSalvo);
   localStorage.setItem('bms_theme', temaSalvo);
@@ -539,6 +543,7 @@ window.onload = function(){
 };
 
 function mostrarLogin(){
+  limparControlesCadastro();
   clearInterval(INT);
   localStorage.removeItem('bms_codigo_ativo');
   esconderTudo();
@@ -549,6 +554,7 @@ function mostrarCadastro(){
   clearInterval(INT);
   esconderTudo();
   document.getElementById('cadastro').classList.remove('hidden');
+  restaurarBotaoCadastroOriginal();
 }
 
 function togglePass(inputId, iconEl) {
@@ -676,7 +682,7 @@ function login(){
   });
 }
 
-function recuperarSenha() {
+function recoverSenha() {
   var emailAtual = document.getElementById('email').value.trim();
   var email = prompt("Digite o seu e-mail cadastrado:", emailAtual);
   if (email === null || !email.trim()) return;
@@ -719,7 +725,9 @@ function salvarNovaSenha() {
   });
 }
 
+// CORREÇÃO: Nova dinâmica de cadastro com cronômetro e escuta em tempo real da ativação
 function cadastrar(){
+  var btn = document.getElementById('btn-cadastrar');
   var nome = document.getElementById('cad-nome').value.trim();
   var email = document.getElementById('cad-email').value.trim();
   var senha = document.getElementById('cad-senha').value;
@@ -727,6 +735,12 @@ function cadastrar(){
   var e = document.getElementById('erro-cad');
   
   if (e) e.classList.add('hidden');
+  
+  // Se o botão virou "REENVIAR LINK", redireciona para a função de reenvio direto
+  if(btn.getAttribute('data-action') === 'resend') {
+    reenviarEmailAtivacao(email);
+    return;
+  }
   
   if(!nome || !email || !senha || !confirmarSenha){
     if (e) { e.textContent = 'Preencha todos os campos'; e.classList.remove('hidden'); }
@@ -746,12 +760,12 @@ function cadastrar(){
   .then(function(r){return r.json();})
   .then(function(d){
     if(d.ok){
-      alert('Conta criada! Verifique seu e-mail para ativar.');
-      mostrarLogin();
+      // Caso de Sucesso: Ativa o cronômetro visual e inicia a escuta em background
+      iniciarCronometroEspera(email);
     } else { 
       if (e) { 
         if(d.error === 'E-mail já cadastrado') {
-          e.innerHTML = 'E-mail já cadastrado. <br><button onclick="reenviarEmailAtivacao(\''+email+'\')" style="padding:10px 14px; font-size:12px; margin-top:8px; border-radius:10px; font-weight:700; color:#fff; cursor:pointer; border:none; background:linear-gradient(90deg,var(--orange),var(--red)); box-shadow:0 4px 12px rgba(255,159,28,0.2);">REENVIAR LINK DE ATIVAÇÃO</button>';
+          e.innerHTML = 'E-mail já cadastrado e pendente de ativação. <br><button onclick="reenviarEmailAtivacao(\''+email+'\')" style="padding:10px 14px; font-size:12px; margin-top:8px; border-radius:10px; font-weight:700; color:#fff; cursor:pointer; border:none; background:linear-gradient(90deg,var(--orange),var(--red)); box-shadow:0 4px 12px rgba(255,159,28,0.2);">REENVIAR LINK DE ATIVAÇÃO</button>';
         } else if(d.error === 'E-mail já cadastrado e confirmado') {
           alert('Este e-mail já está verificado e ativo no sistema!');
           mostrarLogin();
@@ -768,6 +782,53 @@ function cadastrar(){
   });
 }  
 
+// CORREÇÃO: Função que gerencia os 60 segundos e fica checando se a conta foi ativada
+function iniciarCronometroEspera(email) {
+  var btn = document.getElementById('btn-cadastrar');
+  var e = document.getElementById('erro-cad');
+  var tempoRestante = 60;
+  
+  limparControlesCadastro();
+  
+  e.textContent = 'Link de confirmação enviado! Ative sua conta no e-mail.';
+  e.style.color = 'var(--green)';
+  e.style.background = 'rgba(46,196,182,0.1)';
+  e.style.borderColor = 'var(--green)';
+  e.classList.remove('hidden');
+  
+  btn.disabled = true;
+  btn.style.background = 'var(--text-muted)';
+  btn.textContent = 'AGUARDANDO ATIVAÇÃO (' + tempoRestante + 's)';
+  
+  // 1. Cronômetro regressivo no botão
+  CRONOMETRO_CADASTRO = setInterval(function() {
+    tempoRestante--;
+    if(tempoRestante <= 0) {
+      clearInterval(CRONOMETRO_CADASTRO);
+      btn.disabled = false;
+      btn.setAttribute('data-action', 'resend');
+      btn.style.background = 'linear-gradient(90deg, var(--orange), var(--red))';
+      btn.textContent = 'REENVIAR LINK DE ATIVAÇÃO';
+    } else {
+      btn.textContent = 'AGUARDANDO ATIVAÇÃO (' + tempoRestante + 's)';
+    }
+  }, 1000);
+  
+  // 2. Escuta contínua de segundo plano perguntando à API se o e-mail mudou para 1 (ativado)
+  ESCUTA_ATIVACAO = setInterval(function() {
+    fetch(API + '?action=check_activation&email=' + encodeURIComponent(email))
+    .then(function(r) { return r.json(); })
+    .then(function(d) {
+      if(d.ok && d.activated) {
+        // CONCLUÍDO! O cliente ativou a conta, limpa tudo e joga ele para o login automaticamente
+        limparControlesCadastro();
+        alert('Sua conta foi ativada com sucesso! Faça seu login.');
+        mostrarLogin();
+      }
+    });
+  }, 3000); // Roda a cada 3 segundos
+}
+
 function reenviarEmailAtivacao(email) {
   var e = document.getElementById('erro-cad');
   if(!email) return alert('Insira o e-mail primeiro.');
@@ -780,9 +841,9 @@ function reenviarEmailAtivacao(email) {
   .then(function(r) { return r.json(); })
   .then(function(d) {
     if (d.ok) {
-      alert('Novo link de ativação enviado para ' + email + '! Verifique sua caixa de entrada.');
-      if (e) e.classList.add('hidden');
-      mostrarLogin();
+      alert('Novo link de ativação enviado! Verifique sua caixa de entrada.');
+      // Reinicia o fluxo de contagem regressiva para o novo e-mail disparado
+      iniciarCronometroEspera(email);
     } else {
       alert('Erro: ' + d.error);
     }
@@ -790,6 +851,28 @@ function reenviarEmailAtivacao(email) {
   .catch(function(err) {
     alert('Erro de conexão: ' + err.message);
   });
+}
+
+function limparControlesCadastro() {
+  clearInterval(CRONOMETRO_CADASTRO);
+  clearInterval(ESCUTA_ATIVACAO);
+}
+
+function restaurarBotaoCadastroOriginal() {
+  var btn = document.getElementById('btn-cadastrar');
+  var e = document.getElementById('erro-cad');
+  if(btn) {
+    btn.disabled = false;
+    btn.removeAttribute('data-action');
+    btn.style.background = 'linear-gradient(90deg,var(--blue),var(--cyan))';
+    btn.textContent = 'CADASTRAR';
+  }
+  if(e) {
+    e.classList.add('hidden');
+    e.style.color = '';
+    e.style.background = '';
+    e.style.borderColor = '';
+  }
 }
 
 function mostrarLista(){
