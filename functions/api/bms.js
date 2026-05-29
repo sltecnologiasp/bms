@@ -52,13 +52,22 @@ export async function onRequest({ request, env }) {
       `, { headers: { 'Content-Type': 'text/html; charset=utf-8' } });
     }
 
-    // ROTA 2: CADASTRO COM DISPARO DO RESEND
+    // ROTA 2: CADASTRO COM DISPARO DO RESEND (ATUALIZADA)
     if ((action === 'register' || action === 'register_user') && request.method === 'POST') {
       const { nome, email, resignation, senha } = await request.json();
       const userEmail = (email || resignation || '').trim().toLowerCase();
       if (!nome || !userEmail || !senha) return json({ ok: false, error: 'Dados inválidos' }, 400);
-      const exists = await env.DB.prepare('SELECT id FROM users WHERE email = ?').bind(userEmail).first();
-      if (exists) return json({ ok: false, error: 'E-mail já cadastrado' }, 400);
+      
+      // CORREÇÃO: Checa se o usuário já existe e verifica se a conta está ativa ou pendente
+      const exists = await env.DB.prepare('SELECT email_verificado FROM users WHERE email = ?').bind(userEmail).first();
+      if (exists) {
+        if (exists.email_verificado === 1) {
+          return json({ ok: false, error: 'E-mail já cadastrado e confirmado' }, 400);
+        } else {
+          return json({ ok: false, error: 'E-mail já cadastrado' }, 400);
+        }
+      }
+
       const hash = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(senha));
       const senha_hash = Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2, '0')).join('');
       const token_verificacao = crypto.randomUUID();
@@ -88,7 +97,7 @@ export async function onRequest({ request, env }) {
       return json({ ok: true });
     }
 
-    // CORREÇÃO ADICIONADA: NOVA ROTA PARA REENVIAR LINK DE ATIVAÇÃO DE FORMA INDEPENDENTE
+    // NOVA ROTA: REENVIO DE LINK DE ATIVAÇÃO
     if (action === 'resend_verification' && request.method === 'POST') {
       const { email } = await request.json();
       const userEmail = (email || '').trim().toLowerCase();
@@ -178,17 +187,19 @@ export async function onRequest({ request, env }) {
       return json({ ok: true });
     }
 
-    // CORRIGIDO - ROTA 5: LOGIN USER COM VERIFICAÇÃO SEPARADA E PRECISA
+    // ROTA 5: LOGIN USER (DUPLA CHECAGEM SEPARADA)
     if (action === 'login' && request.method === 'POST') {
       const { email, senha } = await request.json();
       const cleanEmail = (email || '').trim().toLowerCase();
 
+      // Passo 1: Busca o usuário apenas pelo e-mail
       const user = await env.DB.prepare('SELECT id, nome, email, senha_hash, email_verificado FROM users WHERE email = ?').bind(cleanEmail).first();
       
       if (!user) {
         return json({ ok: false, error: 'E-mail não cadastrado' }, 401);
       }
 
+      // Passo 2: Valida o hash da senha
       const hash = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(senha));
       const senha_hash = Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2, '0')).join('');
 
