@@ -157,6 +157,8 @@ button:active{transform:scale(0.98)}
 .btn-danger:hover{background:rgba(255,68,68,0.15)}
 
 .bms-list{display:flex;flex-direction:column;gap:12px;width:100%;margin-top:8px}
+
+/* MODIFICADO: Transição de tamanho e animação de entrada adicionadas ao Card da BMS */
 .bms-item{
   background: var(--bg);
   border: 1px solid var(--input-border);
@@ -169,15 +171,28 @@ button:active{transform:scale(0.98)}
   justify-content: center;
   min-height: 160px;
   cursor: pointer;
-  transition: border-color 0.2s;
+  transition: border-color 0.2s ease, transform 0.2s ease;
+  animation: subirCard 0.4s ease-out forwards;
 }
-.bms-item:hover{border-color:var(--cyan)}
+.bms-item:hover{
+  border-color:var(--cyan);
+  transform: translateY(-2px);
+}
+.bms-item:active{
+  transform: scale(0.97);
+}
 .bms-item h3{color:var(--text-main);font-size:19px;font-weight:800;margin-bottom:4px;width:100%}
 .bms-item p{color:var(--text-muted);font-size:13px;font-family:monospace;margin-bottom:8px;width:100%}
 
 .status-dot{display:inline-flex;align-items:center;justify-content:center;gap:6px;font-size:12px;font-weight:700;margin-bottom:14px;width:100%}
 .status-dot::before{content:'';width:8px;height:8px;border-radius:50%;display:inline-block}
-.status-dot.on{color:var(--green)}.status-dot.on::before{background:var(--green);box-shadow:0 0 8px var(--green)}
+
+/* MODIFICADO: LED Online agora pulsa simulando atividade de rede em tempo real */
+.status-dot.on{color:var(--green)}
+.status-dot.on::before{
+  background:var(--green);
+  animation: pulsoLed 2s infinite ease-in-out;
+}
 .status-dot.off{color:var(--red)}.status-dot.off::before{background:var(--red);box-shadow:0 0 8px var(--red)}
 
 .bms-item .btn-item-del{
@@ -325,6 +340,17 @@ button:active{transform:scale(0.98)}
   fill: none;
   stroke: var(--blue);
   stroke-width: 2;
+}
+
+/* NOVO: Engenharia das animações CSS Puro */
+@keyframes subirCard {
+  from { opacity: 0; transform: translateY(15px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes pulsoLed {
+  0% { transform: scale(1); opacity: 1; box-shadow: 0 0 8px var(--green); }
+  50% { transform: scale(1.18); opacity: 0.7; box-shadow: 0 0 14px var(--green); }
+  100% { transform: scale(1); opacity: 1; box-shadow: 0 0 8px var(--green); }
 }
 </style>
 </head>
@@ -1080,7 +1106,6 @@ function carregarLista(){
     var cortina = document.getElementById('cortina-dispositivos');
     var btn = document.getElementById('btn-toggle-cortina');
     
-    // Regra da cortina inteligente ativando estritamente acima de 4 itens (> 4)
     if (lista.length > 4) {
       if (!USAR_CONTROLE_CORTINA) {
         USAR_CONTROLE_CORTINA = true;
@@ -1096,7 +1121,6 @@ function carregarLista(){
       if(btn) btn.classList.add('hidden');
     }
 
-    // Regra de ordenação automática: Online sobe para o topo
     lista.sort(function(a, b) {
       if (a.online && !b.online) return -1;
       if (!a.online && b.online) return 1;
