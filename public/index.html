@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <title>SMART BMS</title>
 
-<!-- Tags obrigatórias para o WhatsApp mostrar o card com foto -->
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://bms.app.br/">
 <meta property="og:title" content="SMART BMS">
@@ -17,6 +16,8 @@
 <meta property="og:image:type" content="image/png">
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 
@@ -214,26 +215,30 @@ button:active{transform:scale(0.98)}
   gap:12px;
   width:100%;
   max-width:100%;
-  margin-top:0 !important;
-  margin-bottom:12px !important
+  margin-top:8px
 }
-.grid .card{
-  width:100%;
-  height:100px;
+
+#lista, #listaUsers { width: 100% }
+#listaUsers { display: flex; flex-direction: column; gap: 12px; }
+
+#lista .card {
+  background:var(--card-bg);
+  border:1px solid var(--card-border);
+  border-radius:16px;
+  padding:14px;
+  margin:0 !important;
   display:flex;
   flex-direction:column;
-  justify-content:center;
   align-items:center;
-  padding:12px;
-  margin:0 !important
+  justify-content:space-between;
+  min-height:160px;
+  cursor:pointer;
+  box-shadow: var(--neon-glow);
+  width:100%;
 }
-.value{font-size:clamp(22px,4.5vw,28px);font-weight:800;margin-top:6px;line-height:1;width:100%;text-align:center;font-variant-numeric:tabular-nums}
+#lista .card:hover{border-color:var(--cyan)}
 
-@media (min-width: 600px) {
-  .grid {
-    grid-template-columns: repeat(4, 1fr);
-  }
-}
+.card-empty{grid-column:1/-1;min-height:180px;display:flex;align-items:center;justify-content:center;color:var(--text-muted);font-size:14px}
 
 .status-badge{display:inline-flex;align-items:center;gap:8px;padding:10px 20px;border-radius:999px;font-weight:700;font-size:14px;margin-top:10px}
 .status-badge.on{background:rgba(46,196,182,.1);color:var(--green);border:1px solid var(--green)}
@@ -271,7 +276,6 @@ button:active{transform:scale(0.98)}
 .footer-voltar{width:100%;display:flex;justify-content:center;margin-top:0px!important;margin-bottom:8px}
 .footer-voltar button{width:100%;max-width:320px;margin-top:0px}
 
-/* Estilos da cortina CSS animada */
 .cortina-wrapper {
   max-height: 0;
   overflow: hidden;
@@ -283,6 +287,45 @@ button:active{transform:scale(0.98)}
   max-height: 2000px;
   opacity: 1;
   transition: max-height 0.6s ease-in, opacity 0.4s ease;
+}
+
+/* NOVO: CSS do bloco de entrada alinhado com o botão do QR Code baseado na sua imagem */
+.qr-input-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 8px;
+  width: 100%;
+}
+.qr-input-row input {
+  flex: 1;
+  margin-top: 0 !important;
+}
+.btn-qr-scan {
+  width: 54px;
+  height: 54px;
+  min-width: 54px;
+  padding: 0;
+  margin-top: 0 !important;
+  background: rgba(0, 180, 216, 0.08);
+  border: 1px solid var(--card-border);
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: none;
+  transition: background 0.2s;
+}
+.btn-qr-scan:hover {
+  background: rgba(0, 180, 216, 0.15);
+}
+.btn-qr-scan svg {
+  width: 24px;
+  height: 24px;
+  fill: none;
+  stroke: var(--blue);
+  stroke-width: 2;
 }
 </style>
 </head>
@@ -362,7 +405,7 @@ button:active{transform:scale(0.98)}
     <div class="label" style="margin-top:16px">Confirmar Nova Senha</div>
     <div class="pass-wrapper">
       <input id="nova-senha-confirmar" type="password" placeholder="••••••••">
-      <span class="pass-toggle" onclick="nova-senha-confirmar', this)">👁</span>
+      <span class="pass-toggle" onclick="togglePass('nova-senha-confirmar', this)">👁</span>
     </div>
     
     <button onclick="salvarNovaSenha()">SALVAR NOVA SENHA</button>
@@ -380,11 +423,18 @@ button:active{transform:scale(0.98)}
   
   <div class="card">
     <div class="label">Adicionar dispositivo</div>
-    <input id="bms-code" placeholder="SL000000000000" maxlength="14" style="margin-top:8px">
+    
+    <div class="qr-input-row">
+      <input id="bms-code" placeholder="SL000000000000" maxlength="14">
+      <button class="btn-qr-scan" onclick="abrirScannerCamera()" title="Escanear QR Code">
+        <svg viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M3 7V5a2 2 0 012-2h2m10 0h2a2 2 0 012 2v2m0 10v2a2 2 0 01-2 2h-2M7 21H5a2 2 0 01-2-2v-2M12 7v10m-3-5h6" />
+        </svg>
+      </button>
+    </div>
+    
     <input id="bms-nome" placeholder="Nome Ex: Bateria Casa" style="margin-top:12px">
     <button onclick="addBms()">ADICIONAR DISPOSITIVO</button>
-    
-    <!-- AJUSTADO: Botão inicia oculto (hidden) e só aparece via JS se o cliente tiver mais de 3 dispositivos -->
     <button id="btn-toggle-cortina" class="hidden" onclick="toggleCortinaDispositivos()">MOSTRAR DISPOSITIVOS</button>
   </div>
   
@@ -501,6 +551,16 @@ button:active{transform:scale(0.98)}
   </div>
 </div>
 
+<div id="modalScannerCamera" class="modal">
+  <div class="modal-content small" style="max-width: 440px; padding: 20px;">
+    <h2 style="text-align:center;margin-bottom:12px;font-size:18px;font-weight:900;background:linear-gradient(90deg,var(--blue),var(--cyan));-webkit-background-clip:text;-webkit-text-fill-color:transparent">Escanear QR Code</h2>
+    
+    <div id="reader-camera" style="width: 100%; background: #000; border-radius: 14px; overflow: hidden; box-shadow: inset 0 0 10px rgba(0,0,0,0.5);"></div>
+    
+    <button class="btn-sec" style="margin-top:16px;" onclick="fecharScannerCamera()">FECHAR CÂMERA</button>
+  </div>
+</div>
+
 <script>
 var API = '/api/bms';
 var TOKEN = localStorage.getItem('bms_token');
@@ -515,9 +575,10 @@ var TIMEOUT_ERRO_LOGIN = null;
 var TIMEOUT_ERRO_CADASTRO = null;
 
 var CADASTRO_ATIVO = false;
-
-// Flag interna para saber se o controle inteligente de cortina deve rodar (ativado apenas se > 3 itens)
 var USAR_CONTROLE_CORTINA = false;
+
+// Instância global do leitor de código
+var SCANNER_CAMERA_OBJ = null;
 
 try{USER = JSON.parse(localStorage.getItem('bms_user')||'null');}catch(e){}
 
@@ -575,11 +636,57 @@ window.onload = function(){
   var bmsInput = document.getElementById('bms-code');
   if(bmsInput){
     bmsInput.oninput = function(e){
-      if(!e.target.value.startsWith('SL')) e.target.value = 'SL';
-      e.target.value = 'SL' + e.target.value.slice(2).replace(/[^0-9]/g,'').slice(0,12);
+      formatarBmsTextInput(e.target);
     };
   }
 };
+
+// Centraliza a formatação para ser usada no teclado e na câmera de forma padronizada
+function formatarBmsTextInput(inputElement) {
+  if(!inputElement.value.startsWith('SL')) inputElement.value = 'SL';
+  inputElement.value = 'SL' + inputElement.value.slice(2).replace(/[^0-9]/g,'').slice(0,12);
+}
+
+// NOVO: Função que ativa a câmera traseira do celular e escuta a leitura do QR Code
+function abrirScannerCamera() {
+  document.getElementById('modalScannerCamera').classList.add('active');
+  
+  // Instancia a biblioteca configurando a caixa de leitura
+  SCANNER_CAMERA_OBJ = new Html5Qrcode("reader-camera");
+  
+  const config = { fps: 15, qrbox: { width: 230, height: 230 } };
+  
+  // Força o uso da câmera traseira ({ facingMode: "environment" })
+  SCANNER_CAMERA_OBJ.start(
+    { facingMode: "environment" }, 
+    config,
+    function(textResult) {
+      // Sucesso na leitura! Injeta o resultado no input, formata e desliga
+      var bmsInput = document.getElementById('bms-code');
+      if(bmsInput) {
+        bmsInput.value = textResult.trim().toUpperCase();
+        formatarBmsTextInput(bmsInput);
+      }
+      fecharScannerCamera();
+    },
+    function(error) {
+      // Falha de foco/leitura contínua: ignorada silenciosamente para continuar lendo
+    }
+  ).catch(function(err) {
+    alert("Câmera bloqueada ou não encontrada. Verifique as permissões do seu navegador.");
+    fecharScannerCamera();
+  });
+}
+
+// NOVO: Desliga os sensores físicos da câmera e fecha a modal com segurança
+function fecharScannerCamera() {
+  document.getElementById('modalScannerCamera').classList.remove('active');
+  if(SCANNER_CAMERA_OBJ) {
+    SCANNER_CAMERA_OBJ.stop().then(function() {
+      document.getElementById('reader-camera').innerHTML = "";
+    }).catch(function(e){});
+  }
+}
 
 function mostrarLogin(){
   CADASTRO_ATIVO = false;
@@ -957,7 +1064,6 @@ function toggleCortinaDispositivos() {
   }
 }
 
-// CORREÇÃO: Reseta as flags para que a lista inicie aberta e o botão suma até a API responder
 function mostrarLista(){
   clearInterval(INT);
   localStorage.removeItem('bms_codigo_ativo');
@@ -968,7 +1074,6 @@ function mostrarLista(){
   var cortina = document.getElementById('cortina-dispositivos');
   var btn = document.getElementById('btn-toggle-cortina');
   
-  // Por segurança, inicia aberto por padrão e com o botão oculto até contarmos os itens
   if(cortina) cortina.classList.add('aberta');
   if(btn) btn.classList.add('hidden');
   USAR_CONTROLE_CORTINA = false;
@@ -977,7 +1082,6 @@ function mostrarLista(){
   INT = setInterval(carregarLista, 3000);
 }
 
-// CORREÇÃO: Lógica inteligente adicionada dentro da resposta da API
 function carregarLista(){
   fetch(API + '?action=user_bms', { headers: {'Authorization':'Bearer '+TOKEN} })
   .then(function(r){
@@ -990,10 +1094,8 @@ function carregarLista(){
     var cortina = document.getElementById('cortina-dispositivos');
     var btn = document.getElementById('btn-toggle-cortina');
     
-    // CHECAGEM DINÂMICA: Se o cliente tem MAIS que 3 dispositivos
     if (lista.length > 3) {
       if (!USAR_CONTROLE_CORTINA) {
-        // Primeira execução após o login: ativa o controle, esconde a lista (cortina) e exibe o botão
         USAR_CONTROLE_CORTINA = true;
         if(cortina) cortina.classList.remove('aberta');
         if(btn) {
@@ -1002,7 +1104,6 @@ function carregarLista(){
         }
       }
     } else {
-      // Se tiver 3 ou menos, desliga o controle de cortina, deixa ela aberta e some com o botão
       USAR_CONTROLE_CORTINA = false;
       if(cortina) cortina.classList.add('aberta');
       if(btn) btn.classList.add('hidden');
@@ -1050,7 +1151,6 @@ function addBms(){
       document.getElementById('bms-code').value = '';
       document.getElementById('bms-nome').value = '';
       
-      // Quando ele cadastrar o 4º dispositivo, força a cortina a abrir para ele ver o item novo surgir
       var cortina = document.getElementById('cortina-dispositivos');
       var btn = document.getElementById('btn-toggle-cortina');
       if(cortina) cortina.classList.add('aberta');
