@@ -352,7 +352,7 @@ export async function onRequest({ request, env }) {
       }
 
       if (action === 'all_users' && request.method === 'GET') {
-        const { results } = await env.DB.prepare suicide(`
+        const { results } = await env.DB.prepare(`
           SELECT u.id, u.nome, u.email, u.created_at, COUNT(bm.id) as bms_count
           FROM users u
           LEFT JOIN bms_master bm ON bm.user_id = u.id
