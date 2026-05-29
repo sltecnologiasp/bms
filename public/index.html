@@ -32,7 +32,9 @@
   --gauge-empty: #e2e8f0;
   --cell-bg: #f8fafc;
   --cell-border: #e2e8f0;
+  
   --neon-glow: 0 0 12px rgba(0, 180, 216, 0.12);
+  
   --cyan: #00b4d8;
   --blue: #0077b6;
   --green: #2ec4b6;
@@ -53,7 +55,9 @@
   --gauge-empty: rgba(255, 255, 255, .08);
   --cell-bg: rgba(0, 0, 0, .3);
   --cell-border: rgba(255, 255, 255, .04);
+  
   --neon-glow: 0 0 15px rgba(0, 255, 255, 0.2);
+  
   --cyan: #00ffff;
   --blue: #0080ff;
   --green: #00ff88;
@@ -484,14 +488,29 @@ var USER = null;
 var CODIGO = localStorage.getItem('bms_codigo_ativo');
 var INT = null;
 
-// Variáveis de controle para o cronômetro e escuta de ativação em tempo real
 var CRONOMETRO_CADASTRO = null;
 var ESCUTA_ATIVACAO = null;
+
+// Variáveis de controle para os timers de desaparecimento automático das mensagens
+var TIMEOUT_ERRO_LOGIN = null;
+var TIMEOUT_ERRO_CADASTRO = null;
+
+// CORREÇÃO: Variável global que gerencia o travamento da tela de cadastro contra recarregamento acidental
+var CADASTRO_ATIVO = false;
 
 try{USER = JSON.parse(localStorage.getItem('bms_user')||'null');}catch(e){}
 
 var temaSalvo = localStorage.getItem('bms_theme') || 'light';
 document.documentElement.setAttribute('data-theme', temaSalvo);
+
+// CORREÇÃO: Listener nativo que intercepta qualquer tentativa de atualizar/fechar a aba se a tela de cadastro estiver ativa
+window.addEventListener('beforeunload', function(e) {
+  if (CADASTRO_ATIVO) {
+    e.preventDefault();
+    e.returnValue = 'Você está na tela de cadastro. Para sair com segurança, use o botão VOLTAR.';
+    return e.returnValue;
+  }
+});
 
 function atualizarBotaoTema() {
   const btn = document.getElementById('theme-toggle-btn');
@@ -543,6 +562,8 @@ window.onload = function(){
 };
 
 function mostrarLogin(){
+  // Desativa a flag de proteção para o navegador permitir o carregamento nas outras telas
+  CADASTRO_ATIVO = false;
   limparControlesCadastro();
   clearInterval(INT);
   localStorage.removeItem('bms_codigo_ativo');
@@ -551,6 +572,8 @@ function mostrarLogin(){
 }
 
 function mostrarCadastro(){
+  // CORREÇÃO: Trava o navegador ao entrar na tela de cadastro
+  CADASTRO_ATIVO = true;
   clearInterval(INT);
   esconderTudo();
   document.getElementById('cadastro').classList.remove('hidden');
@@ -648,12 +671,18 @@ async function excluirMinhaConta() {
 function login(){
   var e = document.getElementById('erro');
   if (e) e.classList.add('hidden');
+  clearTimeout(TIMEOUT_ERRO_LOGIN);
   
   var email = document.getElementById('email').value.trim();
   var senha = document.getElementById('senha').value;
   
   if(!email || !senha){
-    if (e) { e.textContent = 'Preencha e-mail e senha'; e.classList.remove('hidden'); }
+    if (e) { 
+      e.textContent = 'Preencha e-mail e senha'; 
+      e.classList.remove('hidden'); 
+      // CORREÇÃO: Remove o aviso de e-mail/senha em branco após 3 segundos
+      TIMEOUT_ERRO_LOGIN = setTimeout(function() { e.classList.add('hidden'); }, 3000);
+    }
     return;
   }
   
@@ -674,15 +703,21 @@ function login(){
       if (e) {
         e.textContent = d.error || 'Erro ao realizar login';
         e.classList.remove('hidden');
+        // CORREÇÃO: Remove o aviso de erro do banco após exatamente 3 segundos
+        TIMEOUT_ERRO_LOGIN = setTimeout(function() { e.classList.add('hidden'); }, 3000);
       }
     }
   })
   .catch(function(err){
-    if (e) { e.textContent = 'Erro: ' + err.message; e.classList.remove('hidden'); }
+    if (e) { 
+      e.textContent = 'Erro: ' + err.message; 
+      e.classList.remove('hidden'); 
+      TIMEOUT_ERRO_LOGIN = setTimeout(function() { e.classList.add('hidden'); }, 3000);
+    }
   });
 }
 
-function recoverSenha() {
+function recuperarSenha() {
   var emailAtual = document.getElementById('email').value.trim();
   var email = prompt("Digite o seu e-mail cadastrado:", emailAtual);
   if (email === null || !email.trim()) return;
@@ -725,7 +760,6 @@ function salvarNovaSenha() {
   });
 }
 
-// CORREÇÃO: Nova dinâmica de cadastro com cronômetro e escuta em tempo real da ativação
 function cadastrar(){
   var btn = document.getElementById('btn-cadastrar');
   var nome = document.getElementById('cad-nome').value.trim();
@@ -735,20 +769,30 @@ function cadastrar(){
   var e = document.getElementById('erro-cad');
   
   if (e) e.classList.add('hidden');
+  clearTimeout(TIMEOUT_ERRO_CADASTRO);
   
-  // Se o botão virou "REENVIAR LINK", redireciona para a função de reenvio direto
   if(btn.getAttribute('data-action') === 'resend') {
     reenviarEmailAtivacao(email);
     return;
   }
   
   if(!nome || !email || !senha || !confirmarSenha){
-    if (e) { e.textContent = 'Preencha todos os campos'; e.classList.remove('hidden'); }
+    if (e) { 
+      e.textContent = 'Preencha todos os campos'; 
+      e.classList.remove('hidden'); 
+      // CORREÇÃO: Limpa campos em branco após 3 segundos
+      TIMEOUT_ERRO_CADASTRO = setTimeout(function() { e.classList.add('hidden'); }, 3000);
+    }
     return;
   }
 
   if (senha !== confirmarSenha) {
-    if (e) { e.textContent = 'As senhas não coincidem!'; e.classList.remove('hidden'); }
+    if (e) { 
+      e.textContent = 'As senhas não coincidem!'; 
+      e.classList.remove('hidden'); 
+      // CORREÇÃO: Limpa erro de incompatibilidade de senhas após 3 segundos
+      TIMEOUT_ERRO_CADASTRO = setTimeout(function() { e.classList.add('hidden'); }, 3000);
+    }
     return;
   }
 
@@ -760,29 +804,35 @@ function cadastrar(){
   .then(function(r){return r.json();})
   .then(function(d){
     if(d.ok){
-      // Caso de Sucesso: Ativa o cronômetro visual e inicia a escuta em background
       iniciarCronometroEspera(email);
     } else { 
       if (e) { 
         if(d.error === 'E-mail já cadastrado') {
-          e.innerHTML = 'E-mail já cadastrado e pendente de ativação. <br><button onclick="reenviarEmailAtivacao(\''+email+'\')" style="padding:10px 14px; font-size:12px; margin-top:8px; border-radius:10px; font-weight:700; color:#fff; cursor:pointer; border:none; background:linear-gradient(90deg,var(--orange),var(--red)); box-shadow:0 4px 12px rgba(255,159,28,0.2);">REENVIAR LINK DE ATIVAÇÃO</button>';
+          // Nota: O botão de reenvio manual fica fixo para permitir a interação caso necessário
+          e.innerHTML = 'E-mail já cadastrado. <br><button onclick="reenviarEmailAtivacao(\''+email+'\')" style="padding:10px 14px; font-size:12px; margin-top:8px; border-radius:10px; font-weight:700; color:#fff; cursor:pointer; border:none; background:linear-gradient(90deg,var(--orange),var(--red)); box-shadow:0 4px 12px rgba(255,159,28,0.2);">REENVIAR LINK DE ATIVAÇÃO</button>';
+          e.classList.remove('hidden');
         } else if(d.error === 'E-mail já cadastrado e confirmado') {
           alert('Este e-mail já está verificado e ativo no sistema!');
           mostrarLogin();
           return;
         } else {
           e.textContent = d.error; 
+          e.classList.remove('hidden');
+          // CORREÇÃO: Remove outros erros genéricos após 3 segundos
+          TIMEOUT_ERRO_CADASTRO = setTimeout(function() { e.classList.add('hidden'); }, 3000);
         }
-        e.classList.remove('hidden'); 
       } 
     }
   })
   .catch(function(err){
-    if (e) { e.textContent = 'Erro: ' + err.message; e.classList.remove('hidden'); }
+    if (e) { 
+      e.textContent = 'Erro: ' + err.message; 
+      e.classList.remove('hidden'); 
+      TIMEOUT_ERRO_CADASTRO = setTimeout(function() { e.classList.add('hidden'); }, 3000);
+    }
   });
 }  
 
-// CORREÇÃO: Função que gerencia os 60 segundos e fica checando se a conta foi ativada
 function iniciarCronometroEspera(email) {
   var btn = document.getElementById('btn-cadastrar');
   var e = document.getElementById('erro-cad');
@@ -800,7 +850,6 @@ function iniciarCronometroEspera(email) {
   btn.style.background = 'var(--text-muted)';
   btn.textContent = 'AGUARDANDO ATIVAÇÃO (' + tempoRestante + 's)';
   
-  // 1. Cronômetro regressivo no botão
   CRONOMETRO_CADASTRO = setInterval(function() {
     tempoRestante--;
     if(tempoRestante <= 0) {
@@ -809,24 +858,26 @@ function iniciarCronometroEspera(email) {
       btn.setAttribute('data-action', 'resend');
       btn.style.background = 'linear-gradient(90deg, var(--orange), var(--red))';
       btn.textContent = 'REENVIAR LINK DE ATIVAÇÃO';
+      
+      // CORREÇÃO: O aviso verde que indica o envio limpa após o cronômetro zerar, liberando o botão de reenvio limpo
+      e.classList.add('hidden');
+      restaurarEstilosErroOriginal();
     } else {
       btn.textContent = 'AGUARDANDO ATIVAÇÃO (' + tempoRestante + 's)';
     }
   }, 1000);
   
-  // 2. Escuta contínua de segundo plano perguntando à API se o e-mail mudou para 1 (ativado)
   ESCUTA_ATIVACAO = setInterval(function() {
     fetch(API + '?action=check_activation&email=' + encodeURIComponent(email))
     .then(function(r) { return r.json(); })
     .then(function(d) {
       if(d.ok && d.activated) {
-        // CONCLUÍDO! O cliente ativou a conta, limpa tudo e joga ele para o login automaticamente
         limparControlesCadastro();
         alert('Sua conta foi ativada com sucesso! Faça seu login.');
         mostrarLogin();
       }
     });
-  }, 3000); // Roda a cada 3 segundos
+  }, 3000);
 }
 
 function reenviarEmailAtivacao(email) {
@@ -842,7 +893,6 @@ function reenviarEmailAtivacao(email) {
   .then(function(d) {
     if (d.ok) {
       alert('Novo link de ativação enviado! Verifique sua caixa de entrada.');
-      // Reinicia o fluxo de contagem regressiva para o novo e-mail disparado
       iniciarCronometroEspera(email);
     } else {
       alert('Erro: ' + d.error);
@@ -858,6 +908,15 @@ function limparControlesCadastro() {
   clearInterval(ESCUTA_ATIVACAO);
 }
 
+function restaurarEstilosErroOriginal() {
+  var e = document.getElementById('erro-cad');
+  if(e) {
+    e.style.color = '';
+    e.style.background = '';
+    e.style.borderColor = '';
+  }
+}
+
 function restaurarBotaoCadastroOriginal() {
   var btn = document.getElementById('btn-cadastrar');
   var e = document.getElementById('erro-cad');
@@ -869,9 +928,7 @@ function restaurarBotaoCadastroOriginal() {
   }
   if(e) {
     e.classList.add('hidden');
-    e.style.color = '';
-    e.style.background = '';
-    e.style.borderColor = '';
+    restaurarEstilosErroOriginal();
   }
 }
 
@@ -1002,14 +1059,14 @@ function atualizar(){
     if(st) { st.textContent = d.online?'Online':'Offline'; st.className = 'status-badge ' + (d.online?'on':'off'); }
     
     if(!d.online){
-      if(document.getElementById('soc')) document.getElementById('soc').textContent = '0%';
-      if(document.getElementById('volt')) document.getElementById('volt').textContent = '0.00V';
+      document.getElementById('soc').textContent = '0%';
+      document.getElementById('volt').textContent = '0.00V';
       atualizarGauge(0); renderCelulas([]);
     }else{
-      if(document.getElementById('soc')) document.getElementById('soc').textContent = d.soc.toFixed(0)+'%';
-      if(document.getElementById('volt')) document.getElementById('volt').textContent = d.voltage.toFixed(2)+'V';
-      if(document.getElementById('corr')) document.getElementById('corr').textContent = d.current.toFixed(1)+'A';
-      if(document.getElementById('temp')) document.getElementById('temp').textContent = d.temp.toFixed(1)+'°C';
+      document.getElementById('soc').textContent = d.soc.toFixed(0)+'%';
+      document.getElementById('volt').textContent = d.voltage.toFixed(2)+'V';
+      document.getElementById('corr').textContent = d.current.toFixed(1)+'A';
+      document.getElementById('temp').textContent = d.temp.toFixed(1)+'°C';
       renderCelulas(d.cells); atualizarGauge(parseInt(d.soc || 0));
     }
   });
