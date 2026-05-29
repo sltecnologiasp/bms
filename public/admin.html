@@ -2,7 +2,6 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<!-- BLOQUEIO DE ZOOM: Configuração estrita para impedir o zoom automático em qualquer celular -->
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Admin BMS</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
@@ -65,13 +64,12 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text-main);
   margin-bottom: 12px !important;
   box-shadow: var(--neon-glow);
 }
-#login .card, #clientesPage .card, #dashAdmin .card { width:100%; max-width:520px }
-#login .card { max-width:440px }
 
-/* AJUSTADO: O bloco de cadastro agora é 100% fluido e alinha com os blocos de baixo */
+/* Ajustado para cobrir a tela inteira em qualquer dispositivo de forma unificada */
+#login .card { max-width:440px }
+#dashAdmin .card { width:100%; max-width:520px }
 .card-cadastro { width: 100%; max-width: 100% !important; margin: 0 auto 12px auto !important; }
 
-/* AJUSTADO: Fonte mínima de 16px para proibir nativamente o zoom de foco dos navegadores móveis */
 input,select,button{width:100%;padding:16px;border-radius:14px;border:none;outline:none;font-size:16px;font-family:inherit;transition:all 0.2s ease}
 input,select{
   background:var(--input-bg);
@@ -107,7 +105,7 @@ button.vincular:hover{background:rgba(46,196,182,0.08)}
 button.desvincular{background:transparent;border:1px solid var(--orange);color:var(--orange);font-size:13px;padding:12px;margin-top:6px;box-shadow:none;font-weight:700}
 button.desvincular:hover{background:rgba(255,159,28,0.08)}
 
-button.voltar{background:transparent;border:1px solid var(--green);color:var(--green);max-width:520px;margin-top:8px;box-shadow:none;font-weight:700}
+button.voltar{background:transparent;border:1px solid var(--green);color:var(--green);width:100%;max-width:100%;margin-top:8px;box-shadow:none;font-weight:700}
 button.voltar:hover{background:rgba(46,196,182,0.08)}
 
 button.logout{margin-top:16px;background:transparent;border:1px solid var(--input-border);color:var(--text-muted);max-width:440px;box-shadow:none;font-weight:700}
@@ -120,6 +118,10 @@ button.logout:hover{background:rgba(231,29,54,0.08);color:var(--red);border-colo
   width:100%;
   margin-top:8px
 }
+
+/* CORREÇÃO: Lista de Usuários agora ocupa 100% de largura fluida */
+#lista, #listaUsers { width: 100% }
+#listaUsers { display: flex; flex-direction: column; gap: 12px; }
 
 #lista .card {
   background:var(--card-bg);
@@ -136,7 +138,7 @@ button.logout:hover{background:rgba(231,29,54,0.08);color:var(--red);border-colo
   box-shadow: var(--neon-glow);
   width:100%;
 }
-#listaUsers .card { background:var(--card-bg); border:1px solid var(--card-border); border-radius:20px; padding:20px; cursor:default; width:100%; max-width:100% }
+#listaUsers .card { background:var(--card-bg); border:1px solid var(--card-border); border-radius:20px; padding:20px; cursor:default; width:100%; max-width:100% !important }
 #lista .card:hover{border-color:var(--cyan)}
 
 .card-empty{grid-column:1/-1;min-height:180px;display:flex;align-items:center;justify-content:center;color:var(--text-muted);font-size:14px}
@@ -203,7 +205,6 @@ button.logout:hover{background:rgba(231,29,54,0.08);color:var(--red);border-colo
   <div class="title" style="font-size:clamp(28px,6vw,32px);margin-bottom:4px">SMART BMS</div>
   <div class="user-info">Painel Administrativo</div>
 
-  <!-- MODIFICADO: Card de Cadastro ajustado de ponta a ponta na tela inteira -->
   <div class="card card-cadastro">
     <div class="label">Cadastrar BMS no Sistema</div>
     <input id="code" placeholder="SL000000000000" maxlength="14" style="margin-top:8px">
@@ -225,8 +226,8 @@ button.logout:hover{background:rgba(231,29,54,0.08);color:var(--red);border-colo
   <div class="title" style="font-size:clamp(28px,6vw,32px);margin-bottom:4px">SMART BMS</div>
   <div class="user-info">Clientes Cadastrados</div>
   
-  <div class="card" style="background:transparent;border:none;box-shadow:none;padding:0; width:100%">
-    <div id="listaUsers" style="display:flex; flex-direction:column; gap:12px; width:100%; max-width:520px; margin:0 auto;"></div>
+  <div style="background:transparent; border:none; box-shadow:none; padding:0; width:100%">
+    <div id="listaUsers"></div>
   </div>
   
   <button class="voltar" onclick="voltarPainel()">← VOLTAR AO PAINEL</button>
@@ -553,7 +554,7 @@ function fecharModalDesvincular() {
 
 async function confirmarDesvinculoManual() {
   const userId = document.getElementById('desvincularUserId').value;
-  const code = document.getElementById('selectBmsVinculadas');
+  const code = document.getElementById('selectBmsVinculadas').value;
   
   if (!code) {
     alert('Selecione a BMS que deseja desvincular.');
