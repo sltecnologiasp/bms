@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <title>SMART BMS</title>
 
-<!-- Tags obrigatórias para o WhatsApp mostrar o card com foto -->
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://bms.app.br/">
 <meta property="og:title" content="SMART BMS">
@@ -724,7 +723,7 @@ function salvarNovaSenha() {
   });
 }
 
-// CORREÇÃO: Função cadastrar ajustada com suporte ao reenvio inteligente
+/* CORRIGIDO: Funções de cadastro com tratamento dinâmico para reenvio e redirecionamentos fluídos */
 function cadastrar(){
   var nome = document.getElementById('cad-nome').value.trim();
   var email = document.getElementById('cad-email').value.trim();
@@ -756,9 +755,14 @@ function cadastrar(){
       mostrarLogin();
     } else { 
       if (e) { 
-        // Se o erro do Worker acusar e-mail já existente, cria o botão dinâmico de reenvio
         if(d.error === 'E-mail já cadastrado') {
+          // Caso 1: E-mail cadastrado mas ainda não ativado (Injeta o botão de reenvio)
           e.innerHTML = 'E-mail já cadastrado. <br><button onclick="reenviarEmailAtivacao(\''+email+'\')" style="padding:10px 14px; font-size:12px; margin-top:8px; border-radius:10px; font-weight:700; color:#fff; cursor:pointer; border:none; background:linear-gradient(90deg,var(--orange),var(--red)); box-shadow:0 4px 12px rgba(255,159,28,0.2);">REENVIAR LINK DE ATIVAÇÃO</button>';
+        } else if(d.error === 'E-mail já cadastrado e confirmado') {
+          // Caso 2: Novo comportamento. E-mail ativo -> Dá o aviso em pop-up e joga pro login
+          alert('Este e-mail já está verificado e ativo no sistema!');
+          mostrarLogin();
+          return;
         } else {
           e.textContent = d.error; 
         }
@@ -770,18 +774,6 @@ function cadastrar(){
     if (e) { e.textContent = 'Erro: ' + err.message; e.classList.remove('hidden'); }
   });
 }  
-
-// CORREÇÃO: Chamada direta para a nova rota da API do Cloudflare Workers
-function abrirDash(code){
-  clearInterval(INT);
-  CODIGO = code;
-  localStorage.setItem('bms_codigo_ativo', code);
-  esconderTudo();
-  document.getElementById('dash').classList.remove('hidden');
-  document.getElementById('bms-titulo').textContent = code;
-  atualizar();
-  INT = setInterval(atualizar, 3000);
-}
 
 function reenviarEmailAtivacao(email) {
   var e = document.getElementById('erro-cad');
@@ -795,8 +787,10 @@ function reenviarEmailAtivacao(email) {
   .then(function(r) { return r.json(); })
   .then(function(d) {
     if (d.ok) {
+      // CORREÇÃO: Alerta e redireciona imediatamente para a tela de Login
       alert('Novo link de ativação enviado para ' + email + '! Verifique sua caixa de entrada.');
       if (e) e.classList.add('hidden');
+      mostrarLogin();
     } else {
       alert('Erro: ' + d.error);
     }
@@ -804,6 +798,17 @@ function reenviarEmailAtivacao(email) {
   .catch(function(err) {
     alert('Erro de conexão: ' + err.message);
   });
+}
+
+function abrirDash(code){
+  clearInterval(INT);
+  CODIGO = code;
+  localStorage.setItem('bms_codigo_ativo', code);
+  esconderTudo();
+  document.getElementById('dash').classList.remove('hidden');
+  document.getElementById('bms-titulo').textContent = code;
+  atualizar();
+  INT = setInterval(atualizar, 3000);
 }
 
 function voltar(){ clearInterval(INT); localStorage.removeItem('bms_codigo_ativo'); mostrarLista(); }
