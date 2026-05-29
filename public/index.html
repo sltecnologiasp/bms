@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <title>SMART BMS</title>
 
-<!-- Tags obrigatórias para o WhatsApp mostrar o card com foto -->
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://bms.app.br/">
 <meta property="og:title" content="SMART BMS">
@@ -194,7 +193,8 @@ button:active{transform:scale(0.98)}
 .bms-item .btn-item-del:hover{
   background:rgba(255,68,68,0.08);
   color:var(--red);
-  border-color:var(--red)}
+  border-color:var(--red);
+}
 
 .gauge-card{padding:20px;min-height:260px}
 .gauge{width:min(220px,55vw);height:min(220px,55vw);margin:auto;border-radius:50%;background:conic-gradient(var(--green) 0deg,var(--cyan) 180deg,var(--gauge-empty) 180deg);position:relative;box-shadow:0 0 30px rgba(0,255,255,.05);transition:background.8s ease}
@@ -274,10 +274,9 @@ button:active{transform:scale(0.98)}
 <body>
 
 <div id="login">
-  <!-- Bloco da Logo Estilizada com o texto integrado embaixo -->
   <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; margin-bottom: 24px; width: 100%;">
     <img src="1000229030.png" alt="Logo BMS" style="width: 100px; height: 100px; object-fit: contain; border-radius: 50%; box-shadow: 0 4px 15px rgba(0, 180, 216, 0.2); background: var(--card-bg); padding: 8px; transition: transform 0.3s ease;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
-    <div style="font-size: clamp(32px, 7vw, 48px); font-weight: 900; margin-top: 12px; letter-spacing: 2px; background: linear-gradient(90deg, var(--blue), var(--cyan)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; text-align: center;">SMART BMS</div>
+    <div style="font-size: clamp(32px, 7vw, 48px); font-weight: 900; margin-top: 12px; letter-spacing: 2px; background: linear-gradient(90deg, var(--blue), var(--cyan)); -webkit-background-clip: text;-webkit-text-fill-color: transparent; text-align: center;">SMART BMS</div>
     <div class="user-info" style="margin-bottom:0; margin-top: 4px;">Gerenciamento Avançado</div>
   </div>
 
@@ -376,10 +375,9 @@ button:active{transform:scale(0.98)}
     <div id="bms-list" class="bms-list"></div>
   </div>
   
-  <!-- CORREÇÃO: Bloco expandido em 100% cobrindo a tela inteira de forma responsiva -->
-  <div class="card" style="width: 100%; display: flex; flex-direction: column; gap: 12px; padding: 16px; box-sizing: border-box;">
-    <button class="btn-card-action" style="width: 100%; margin: 0;" onclick="mostrarPaginaConta()">Configurações da Conta</button>
-    <button class="btn-card-action" style="width: 100%; margin: 0;" onclick="sair()">Sair</button>
+  <div class="card" style="width:100%; display:flex; flex-direction:column; gap:12px; padding:16px; box-sizing:border-box;">
+    <button class="btn-card-action" onclick="mostrarPaginaConta()">Configurações da Conta</button>
+    <button class="btn-card-action" onclick="sair()">Sair</button>
   </div>
 
   <div class="footer-link">
@@ -498,19 +496,11 @@ document.documentElement.setAttribute('data-theme', temaSalvo);
 function atualizarBotaoTema() {
   const btn = document.getElementById('theme-toggle-btn');
   if(!btn) return;
-  if(temaSalvo === 'light') {
-    btn.innerHTML = '☀️ Modo Claro';
-  } else {
-    btn.innerHTML = '🌙 Modo Escuro';
-  }
+  btn.innerHTML = (temaSalvo === 'light') ? '☀️ Modo Claro' : '🌙 Modo Escuro';
 }
 
 function alternarTemaDireto() {
-  if(temaSalvo === 'light') {
-    temaSalvo = 'dark';
-  } else {
-    temaSalvo = 'light';
-  }
+  temaSalvo = (temaSalvo === 'light') ? 'dark' : 'light';
   document.documentElement.setAttribute('data-theme', temaSalvo);
   localStorage.setItem('bms_theme', temaSalvo);
   atualizarBotaoTema();
@@ -527,7 +517,6 @@ function esconderTudo(){
 
 window.onload = function(){
   atualizarBotaoTema();
-
   const urlParams = new URLSearchParams(window.location.search);
   const resetToken = urlParams.get('reset_token');
 
@@ -538,11 +527,7 @@ window.onload = function(){
   }
 
   if(TOKEN && USER){
-    if(CODIGO){
-      abrirDash(CODIGO);
-    }else{
-      mostrarLista();
-    }
+    if(CODIGO){ abrirDash(CODIGO); } else { mostrarLista(); }
   }else{
     esconderTudo();
     document.getElementById('login').classList.remove('hidden');
@@ -575,11 +560,9 @@ function togglePass(inputId, iconEl) {
   if (!input) return;
   if (input.type === "password") {
     input.type = "text";
-    iconEl.textContent = "👁️"; 
     iconEl.style.opacity = ".8";
   } else {
     input.type = "password";
-    iconEl.textContent = "👁️"; 
     iconEl.style.opacity = ".3";
   }
 }
@@ -591,9 +574,7 @@ function mostrarPaginaConta() {
   atualizarBotaoTema();
 }
 
-function voltarParaLista() {
-  mostrarLista();
-}
+function voltarParaLista() { mostrarLista(); }
 
 function abrirModalSenha() {
   document.getElementById('change-senha-atual').value = '';
@@ -603,9 +584,7 @@ function abrirModalSenha() {
   document.getElementById('modalSenha').classList.add('active');
 }
 
-function fecharModalSenha() {
-  document.getElementById('modalSenha').classList.remove('active');
-}
+function fecharModalSenha() { document.getElementById('modalSenha').classList.remove('active'); }
 
 async function salvarAlteracaoSenha() {
   const senhaAtual = document.getElementById('change-senha-atual').value;
@@ -614,13 +593,11 @@ async function salvarAlteracaoSenha() {
   const errBox = document.getElementById('erro-change-senha');
   
   errBox.classList.add('hidden');
-
   if(!senhaAtual || !novaSenha || !confirmarSenha) {
     errBox.textContent = 'Preencha todos os campos.';
     errBox.classList.remove('hidden');
     return;
   }
-
   if(novaSenha !== confirmarSenha) {
     errBox.textContent = 'As novas senhas não coincidem!';
     errBox.classList.remove('hidden');
@@ -633,10 +610,8 @@ async function salvarAlteracaoSenha() {
       headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + TOKEN },
       body: JSON.stringify({ senhaAtual, novaSenha })
     });
-    
     if(r.status === 401) { sairSemConfirmacao(); return; }
     const d = await r.json();
-    
     if(d.ok) {
       alert('Senha alterada com sucesso!');
       fecharModalSenha();
@@ -652,29 +627,20 @@ async function salvarAlteracaoSenha() {
 }
 
 async function excluirMinhaConta() {
-  if(!confirm('ATENÇÃO: Você tem certeza que deseja deletar sua conta permanentemente?\n\nIsso removerá seus dados e desvinculará todas as suas baterias.')) return;
-  
-  const confirmacao = prompt('Para confirmar a exclusão definitiva, digite "CONCORDO" em letras maiúsculas:');
-  if(confirmacao !== "CONCORDO") {
-    alert('Exclusão cancelada. Texto de confirmação inválido.');
-    return;
-  }
+  if(!confirm('ATENÇÃO: Deseja deletar sua conta permanentemente?')) return;
+  const confirmacao = prompt('Para confirmar, digite "CONCORDO":');
+  if(confirmacao !== "CONCORDO") return;
 
   try {
     const r = await fetch(API + '?action=user_delete_self', {
       method: 'DELETE',
       headers: { 'Authorization': 'Bearer ' + TOKEN }
     });
-    
     if(r.ok) {
-      alert('Sua conta foi excluída com sucesso. Obrigado por usar nosso sistema!');
+      alert('Sua conta foi excluída com sucesso.');
       sairSemConfirmacao();
-    } else {
-      alert('Não foi possível excluir a conta no momento.');
     }
-  } catch(err) {
-    alert('Erro ao tentar se comunicar com o servidor.');
-  }
+  } catch(err) { alert('Erro ao se comunicar com o servidor.'); }
 }
 
 function login(){
@@ -685,10 +651,7 @@ function login(){
   var senha = document.getElementById('senha').value;
   
   if(!email || !senha){
-    if (e) {
-      e.textContent = 'Preencha e-mail e senha';
-      e.classList.remove('hidden');
-    }
+    if (e) { e.textContent = 'Preencha e-mail e senha'; e.classList.remove('hidden'); }
     return;
   }
   
@@ -707,46 +670,29 @@ function login(){
       mostrarLista();
     }else{
       if (e) {
-        e.textContent = d.error || 'E-mail ou senha incorretos';
+        e.textContent = d.error || 'Erro ao realizar login';
         e.classList.remove('hidden');
       }
     }
   })
   .catch(function(err){
-    if (e) {
-      e.textContent = 'Erro: ' + err.message;
-      e.classList.remove('hidden');
-    }
+    if (e) { e.textContent = 'Erro: ' + err.message; e.classList.remove('hidden'); }
   });
 }
 
 function recuperarSenha() {
   var emailAtual = document.getElementById('email').value.trim();
-  var email = prompt("Digite o e-mail da sua conta para receber as instruções de recuperação:", emailAtual);
-  
-  if (email === null) return;
-  email = email.trim();
-  
-  if (!email) {
-    alert("Por favor, digite um e-mail válido.");
-    return;
-  }
+  var email = prompt("Digite o seu e-mail cadastrado:", emailAtual);
+  if (email === null || !email.trim()) return;
   
   fetch(API + '?action=recover_user', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email: email })
+    body: JSON.stringify({ email: email.trim() })
   })
   .then(function(r) { return r.json(); })
   .then(function(d) {
-    if (d.ok) {
-      alert("Se o e-mail estiver cadastrado, um link de recuperação será enviado em instantes.");
-    } else {
-      alert("Erro: " + (d.error || "Não foi possível processar a solicitação."));
-    }
-  })
-  .catch(function(err) {
-    alert("Erro de conexão: " + err.message);
+    alert(d.ok ? "Link de recuperação enviado com sucesso." : "Erro: " + d.error);
   });
 }
 
@@ -758,12 +704,6 @@ function salvarNovaSenha() {
   const errBox = document.getElementById('erro-redefinir');
 
   if (errBox) errBox.classList.add('hidden');
-
-  if (!novaSenha || !confirmarSenha) {
-    if (errBox) { errBox.textContent = "Preencha todos os campos."; errBox.classList.remove('hidden'); }
-    return;
-  }
-
   if (novaSenha !== confirmarSenha) {
     if (errBox) { errBox.textContent = "As senhas não coincidem!"; errBox.classList.remove('hidden'); }
     return;
@@ -777,21 +717,14 @@ function salvarNovaSenha() {
   .then(function(r) { return r.json(); })
   .then(function(d) {
     if (d.ok) {
-      alert("Senha alterada com sucesso! Você já pode realizar o login.");
+      alert("Senha alterada com sucesso!");
       window.location.href = "/"; 
-    } else {
-      if (errBox) { errBox.textContent = d.error || "Erro ao redefinir."; errBox.classList.remove('hidden'); }
-    }
-  })
-  .catch(function(err) {
-    if (errBox) { errBox.textContent = "Erro: " + err.message; errBox.classList.remove('hidden'); }
+    } else { if (errBox) { errBox.textContent = d.error; errBox.classList.remove('hidden'); } }
   });
 }
 
 function cadastrar(){
   var btn = document.getElementById('btn-cadastrar');
-  if (btn && btn.disabled) return;
-
   var nome = document.getElementById('cad-nome').value.trim();
   var email = document.getElementById('cad-email').value.trim();
   var senha = document.getElementById('cad-senha').value;
@@ -799,52 +732,9 @@ function cadastrar(){
   var e = document.getElementById('erro-cad');
   
   if (e) e.classList.add('hidden');
-  
-  if(!nome || !email || !senha || !confirmarSenha){
-    if (e) {
-      e.textContent = 'Preencha todos os campos';
-      e.classList.remove('hidden');
-    }
-    return;
-  }
-
   if (senha !== confirmarSenha) {
-    if (e) {
-      e.textContent = 'As senhas não coincidem!';
-      e.classList.remove('hidden');
-    }
+    if (e) { e.textContent = 'As senhas não coincidem!'; e.classList.remove('hidden'); }
     return;
-  }
-
-  if (btn) {
-    btn.disabled = true;
-    btn.style.opacity = '0.5';
-    btn.style.cursor = 'not-allowed';
-    var tempo = 60;
-    btn.textContent = 'AGUARDE ' + tempo + 's';
-    
-    window.cadastroTimer = setInterval(function() {
-      tempo--;
-      btn.textContent = 'AGUARDE ' + tempo + 's';
-      
-      if (tempo <= 0) {
-        clearInterval(window.cadastroTimer);
-        btn.disabled = false;
-        btn.textContent = 'CADASTRAR';
-        btn.style.opacity = '1';
-        btn.style.cursor = 'pointer';
-      }
-    }, 1000);
-  }
-
-  function resetBotao() {
-    if (window.cadastroTimer) clearInterval(window.cadastroTimer);
-    if (btn) {
-      btn.disabled = false;
-      btn.textContent = 'CADASTRAR';
-      btn.style.opacity = '1';
-      btn.style.cursor = 'pointer';
-    }
   }
 
   fetch(API + '?action=register_user', {
@@ -857,22 +747,7 @@ function cadastrar(){
     if(d.ok){
       alert('Conta criada! Verifique seu e-mail para ativar.');
       mostrarLogin();
-      if (document.getElementById('email')) document.getElementById('email').value = email;
-      if (document.getElementById('senha')) document.getElementById('senha').value = senha;
-    }else{
-      resetBotao();
-      if (e) {
-        e.textContent = d.error || "Erro ao cadastrar.";
-        e.classList.remove('hidden');
-      }
-    }
-  })
-  .catch(function(err){
-    resetBotao();
-    if (e) {
-      e.textContent = 'Erro: ' + err.message;
-      e.classList.remove('hidden');
-    }
+    } else { if (e) { e.textContent = d.error; e.classList.remove('hidden'); } }
   });
 }  
 
@@ -881,29 +756,22 @@ function mostrarLista(){
   localStorage.removeItem('bms_codigo_ativo');
   esconderTudo();
   document.getElementById('lista').classList.remove('hidden');
-  document.getElementById('user-nome').textContent = USER? USER.nome : 'Usuário';
-  
+  document.getElementById('user-nome').textContent = USER ? USER.nome : 'Usuário';
   carregarLista();
   INT = setInterval(carregarLista, 3000);
 }
 
 function carregarLista(){
-  fetch(API + '?action=user_bms', {
-    headers:{'Authorization':'Bearer '+TOKEN}
-  })
+  fetch(API + '?action=user_bms', { headers: {'Authorization':'Bearer '+TOKEN} })
   .then(function(r){
-    if(r && r.status === 401){
-      alert('Sua conta ou sessão não está mais activa no sistema.');
-      sairSemConfirmacao();
-      return;
-    }
+    if(r && r.status === 401){ sairSemConfirmacao(); return; }
     return r ? r.json() : [];
   })
   .then(function(lista){
     if(!lista) return;
     var el = document.getElementById('bms-list');
     if(!el) return;
-    if(!lista || !lista.length){
+    if(!lista.length){
       el.innerHTML = '<p style="text-align:center;color:var(--text-muted);padding:20px;font-size:14px">Nenhuma BMS monitorada</p>';
       return;
     }
@@ -918,59 +786,32 @@ function carregarLista(){
       html += '</div>';
     }
     el.innerHTML = html;
-  }).catch(function(err){ console.error(err); });
+  });
 }
 
 function removerBms(code, nome){
-  if(!confirm(`Remover o dispositivo "${nome || code}" da sua conta?\n\nEsta ação exigirá um novo vínculo caso queira monitorá-lo novamente.`)) return;
-
-  fetch(API+`?action=remove_bms&code=${code}`,{
-    method:'DELETE',
-    headers:{'Authorization':'Bearer '+TOKEN}
-  })
-  .then(function(r){
-    if(r && r.status === 401){ alert('Sua conta ou sessão não está mais ativa.'); sairSemConfirmacao(); return; }
-    return r.json();
-  })
-  .then(function(d){
-    if(!d) return;
-    if(d.ok){
-      carregarLista();
-    }else{
-      alert('Erro: ' + d.error);
-    }
-  });
+  if(!confirm(`Remover o dispositivo "${nome || code}"?`)) return;
+  fetch(API+`?action=remove_bms&code=${code}`,{ method:'DELETE', headers:{'Authorization':'Bearer '+TOKEN} })
+  .then(function() { carregarLista(); });
 }
 
 function addBms(){
   var code = document.getElementById('bms-code').value.trim();
   var nome = document.getElementById('bms-nome').value.trim();
-
-  if(!code || code.length!== 14){
-    alert('Código inválido. Use SL + 12 numbers');
-    return;
-  }
+  if(code.length !== 14) return alert('Código inválido.');
 
   fetch(API + '?action=add_bms', {
     method:'POST',
     headers:{'Content-Type':'application/json','Authorization':'Bearer '+TOKEN},
     body:JSON.stringify({code:code,nome:nome || code})
   })
-  .then(function(r){
-    if(r && r.status === 401){ alert('Sua conta ou sessão não está mais ativa.'); sairSemConfirmacao(); return; }
-    return r.json();
-  })
+  .then(function(r){ return r.json(); })
   .then(function(d){
-    if(!d) return;
     if(d.ok){
       document.getElementById('bms-code').value = '';
       document.getElementById('bms-nome').value = '';
       carregarLista();
-    }else{
-      alert('Erro: ' + d.error);
-      document.getElementById('bms-code').value = '';
-      document.getElementById('bms-nome').value = '';
-    }
+    } else { alert('Erro: ' + d.error); }
   });
 }
 
@@ -985,21 +826,13 @@ function abrirDash(code){
   INT = setInterval(atualizar, 3000);
 }
 
-function voltar(){
-  clearInterval(INT);
-  localStorage.removeItem('bms_codigo_ativo');
-  mostrarLista();
-}
+function voltar(){ clearInterval(INT); localStorage.removeItem('bms_codigo_ativo'); mostrarLista(); }
 
 function renderCelulas(cels){
   var container = document.getElementById('celulas');
   if(!container) return;
   if(!cels || cels.length === 0){
-    container.innerHTML = '<div style="grid-column:1/-1;text-align:center;opacity:.3;padding:10px;font-size:13px">Sem dados das células</div>';
-    document.getElementById('celMin').textContent = '0.00V';
-    document.getElementById('celMax').textContent = '0.00V';
-    document.getElementById('celDif').textContent = '0.00V';
-    document.getElementById('celTot').textContent = '0';
+    container.innerHTML = '<div style="grid-column:1/-1;text-align:center;opacity:.3;padding:10px;font-size:13px">Sem dados</div>';
     return;
   }
   var vals = [];
@@ -1007,29 +840,18 @@ function renderCelulas(cels){
     var v = parseFloat(cels[i]);
     if(v > 0) vals.push(v);
   }
-  if(vals.length === 0){
-    document.getElementById('celMin').textContent = '0.00V';
-    document.getElementById('celMax').textContent = '0.00V';
-    document.getElementById('celDif').textContent = '0.00V';
-    document.getElementById('celTot').textContent = '0';
-    return;
-  }
   var min = Math.min.apply(null, vals);
   var max = Math.max.apply(null, vals);
-  var dif = max - min;
   
   document.getElementById('celMin').textContent = min.toFixed(2)+'V';
   document.getElementById('celMax').textContent = max.toFixed(2)+'V';
-  document.getElementById('celDif').textContent = dif.toFixed(2)+'V';
+  document.getElementById('celDif').textContent = (max - min).toFixed(2)+'V';
   document.getElementById('celTot').textContent = cels.length;
   
   var html = '';
   for(var i=0;i<cels.length;i++){
     var val = parseFloat(cels[i]);
-    var cls = 'ok';
-    if(val < 3.2 || val > 4.2) cls = 'crit';
-    else if(val < 3.4 || val > 4.15) cls = 'warn';
-    
+    var cls = (val < 3.2 || val > 4.2) ? 'crit' : (val < 3.4 || val > 4.15) ? 'warn' : 'ok';
     html += '<div class="cell '+cls+'"><div class="cell-num">C'+(i+1)+'</div><div class="cell-val">'+val.toFixed(2)+'V</div></div>';
   }
   container.innerHTML = html;
@@ -1039,67 +861,38 @@ function atualizarGauge(soc){
   var gauge = document.getElementById('socGauge');
   var valor = document.getElementById('socValor');
   var bar = document.getElementById('socBar');
-  var txt = document.getElementById('socBarTxt');
-  if(!gauge || !valor || !bar || !txt) return;
-  var deg = soc * 3.6;
+  if(!gauge || !valor || !bar) return;
   valor.textContent = soc + '%';
-  txt.textContent = soc + '%';
+  document.getElementById('socBarTxt').textContent = soc + '%';
   bar.style.width = soc + '%';
-  gauge.style.background = 'conic-gradient(var(--green) 0deg,var(--cyan) '+deg+'deg,var(--gauge-empty) '+deg+'deg)';
+  gauge.style.background = 'conic-gradient(var(--green) 0deg,var(--cyan) '+(soc * 3.6)+'deg,var(--gauge-empty) '+(soc * 3.6)+'deg)';
 }
 
 function atualizar(){
   if(!CODIGO) return;
-  fetch(API+'?action=data&code='+CODIGO, {
-    headers:{'Authorization':'Bearer '+TOKEN}
-  })
-  .then(function(r){
-    if(r && r.status === 401){
-      alert('Sua conta ou sessão não está mais activa no sistema.');
-      sairSemConfirmacao();
-      return;
-    }
-    if(!r || !r.ok) return;
-    return r.json();
-  })
+  fetch(API+'?action=data&code='+CODIGO, { headers:{'Authorization':'Bearer '+TOKEN} })
+  .then(function(r){ return r ? r.json() : null; })
   .then(function(d){
     if(!d) return;
     var st = document.getElementById('status');
-    if(st) {
-      st.textContent = d.online?'Online':'Offline';
-      st.className = 'status-badge ' + (d.online?'on':'off');
-    }
+    if(st) { st.textContent = d.online?'Online':'Offline'; st.className = 'status-badge ' + (d.online?'on':'off'); }
     
     if(!d.online){
       if(document.getElementById('soc')) document.getElementById('soc').textContent = '0%';
       if(document.getElementById('volt')) document.getElementById('volt').textContent = '0.00V';
-      if(document.getElementById('corr')) document.getElementById('corr').textContent = '0.0A';
-      if(document.getElementById('temp')) document.getElementById('temp').textContent = '0.0°C';
-      atualizarGauge(0);
-      renderCelulas([]);
+      atualizarGauge(0); renderCelulas([]);
     }else{
-      if(document.getElementById('soc')) document.getElementById('soc').textContent = (d.soc?d.soc.toFixed(0):0)+'%';
-      if(document.getElementById('volt')) document.getElementById('volt').textContent = (d.voltage?d.voltage.toFixed(2):0)+'V';
-      if(document.getElementById('corr')) document.getElementById('corr').textContent = (d.current?d.current.toFixed(1):0)+'A';
-      if(document.getElementById('temp')) document.getElementById('temp').textContent = (d.temp?d.temp.toFixed(1):0)+'°C';
-      renderCelulas(d.cells);
-      atualizarGauge(parseInt(d.soc || 0));
+      if(document.getElementById('soc')) document.getElementById('soc').textContent = d.soc.toFixed(0)+'%';
+      if(document.getElementById('volt')) document.getElementById('volt').textContent = d.voltage.toFixed(2)+'V';
+      if(document.getElementById('corr')) document.getElementById('corr').textContent = d.current.toFixed(1)+'A';
+      if(document.getElementById('temp')) document.getElementById('temp').textContent = d.temp.toFixed(1)+'°C';
+      renderCelulas(d.cells); atualizarGauge(parseInt(d.soc || 0));
     }
-  }).catch(function(err){ console.error(err); });
+  });
 }
 
-function sair(){
-  if(!confirm('Deseja realmente sair do painel?')) return;
-  sairSemConfirmacao();
-}
-
-function sairSemConfirmacao(){
-  clearInterval(INT);
-  localStorage.removeItem('bms_token');
-  localStorage.removeItem('bms_user');
-  localStorage.removeItem('bms_codigo_ativo');
-  location.reload();
-}
+function sair(){ if(confirm('Deseja realmente sair?')) sairSemConfirmacao(); }
+function sairSemConfirmacao(){ clearInterval(INT); localStorage.removeItem('bms_token'); localStorage.removeItem('bms_user'); localStorage.removeItem('bms_codigo_ativo'); location.reload(); }
 </script>
 </body>
 </html>
