@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <title>SMART BMS</title>
 
+<!-- Tags obrigatórias para o WhatsApp mostrar o card com foto -->
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://bms.app.br/">
 <meta property="og:title" content="SMART BMS">
@@ -255,7 +256,7 @@ button:active{transform:scale(0.98)}
 .modal-content{width:100%;max-width:440px;background:var(--input-bg);border:1px solid var(--input-border);border-radius:24px;padding:24px;position:relative;box-shadow:0 20px 50px rgba(0,0,0,0.15)}
 
 .hidden{display:none!important}
-.erro{background:rgba(231,29,54,.1);border:1px solid var(--red);border-radius:12px;padding:14px;margin-top:16px;color:var(--red);font-size:14px}
+.erro{background:rgba(231,29,54,.1);border:1px solid var(--red);border-radius:12px;padding:14px;margin-top:16px;color:var(--red);font-size:14px;text-align:center;}
 
 .link-cadastro{margin-top:20px;text-align:center;color:var(--text-muted);cursor:pointer;font-size:14px}
 .link-cadastro span{color:var(--blue);text-decoration:underline}
@@ -723,8 +724,8 @@ function salvarNovaSenha() {
   });
 }
 
+// CORREÇÃO: Função cadastrar ajustada com suporte ao reenvio inteligente
 function cadastrar(){
-  var btn = document.getElementById('btn-cadastrar');
   var nome = document.getElementById('cad-nome').value.trim();
   var email = document.getElementById('cad-email').value.trim();
   var senha = document.getElementById('cad-senha').value;
@@ -732,6 +733,12 @@ function cadastrar(){
   var e = document.getElementById('erro-cad');
   
   if (e) e.classList.add('hidden');
+  
+  if(!nome || !email || !senha || !confirmarSenha){
+    if (e) { e.textContent = 'Preencha todos os campos'; e.classList.remove('hidden'); }
+    return;
+  }
+
   if (senha !== confirmarSenha) {
     if (e) { e.textContent = 'As senhas não coincidem!'; e.classList.remove('hidden'); }
     return;
@@ -747,74 +754,24 @@ function cadastrar(){
     if(d.ok){
       alert('Conta criada! Verifique seu e-mail para ativar.');
       mostrarLogin();
-    } else { if (e) { e.textContent = d.error; e.classList.remove('hidden'); } }
+    } else { 
+      if (e) { 
+        // Se o erro do Worker acusar e-mail já existente, cria o botão dinâmico de reenvio
+        if(d.error === 'E-mail já cadastrado') {
+          e.innerHTML = 'E-mail já cadastrado. <br><button onclick="reenviarEmailAtivacao(\''+email+'\')" style="padding:10px 14px; font-size:12px; margin-top:8px; border-radius:10px; font-weight:700; color:#fff; cursor:pointer; border:none; background:linear-gradient(90deg,var(--orange),var(--red)); box-shadow:0 4px 12px rgba(255,159,28,0.2);">REENVIAR LINK DE ATIVAÇÃO</button>';
+        } else {
+          e.textContent = d.error; 
+        }
+        e.classList.remove('hidden'); 
+      } 
+    }
+  })
+  .catch(function(err){
+    if (e) { e.textContent = 'Erro: ' + err.message; e.classList.remove('hidden'); }
   });
 }  
 
-function mostrarLista(){
-  clearInterval(INT);
-  localStorage.removeItem('bms_codigo_ativo');
-  esconderTudo();
-  document.getElementById('lista').classList.remove('hidden');
-  document.getElementById('user-nome').textContent = USER ? USER.nome : 'Usuário';
-  carregarLista();
-  INT = setInterval(carregarLista, 3000);
-}
-
-function carregarLista(){
-  fetch(API + '?action=user_bms', { headers: {'Authorization':'Bearer '+TOKEN} })
-  .then(function(r){
-    if(r && r.status === 401){ sairSemConfirmacao(); return; }
-    return r ? r.json() : [];
-  })
-  .then(function(lista){
-    if(!lista) return;
-    var el = document.getElementById('bms-list');
-    if(!el) return;
-    if(!lista.length){
-      el.innerHTML = '<p style="text-align:center;color:var(--text-muted);padding:20px;font-size:14px">Nenhuma BMS monitorada</p>';
-      return;
-    }
-    var html = '';
-    for(var i=0;i<lista.length;i++){
-      var b = lista[i];
-      html += '<div class="bms-item" onclick="abrirDash(\''+b.code+'\')">';
-      html += '<h3>'+b.nome+'</h3>';
-      html += '<p>'+b.code+'</p>';
-      html += '<span class="status-dot '+(b.online?'on':'off')+'">'+(b.online?'Online':'Offline')+'</span>';
-      html += '<button class="btn-item-del" onclick="event.stopPropagation();removerBms(\''+b.code+'\',\''+b.nome+'\')">Excluir Dispositivo</button>';
-      html += '</div>';
-    }
-    el.innerHTML = html;
-  });
-}
-
-function removerBms(code, nome){
-  if(!confirm(`Remover o dispositivo "${nome || code}"?`)) return;
-  fetch(API+`?action=remove_bms&code=${code}`,{ method:'DELETE', headers:{'Authorization':'Bearer '+TOKEN} })
-  .then(function() { carregarLista(); });
-}
-
-function addBms(){
-  var code = document.getElementById('bms-code').value.trim();
-  var nome = document.getElementById('bms-nome').value.trim();
-  if(code.length !== 14) return alert('Código inválido.');
-
-  fetch(API + '?action=add_bms', {
-    method:'POST',
-    headers:{'Content-Type':'application/json','Authorization':'Bearer '+TOKEN},
-    body:JSON.stringify({code:code,nome:nome || code})
-  })
-  .then(function(r){ return r.json(); })
-  .then(function(d){
-    if(d.ok){
-      document.getElementById('bms-code').value = '';
-      document.getElementById('bms-nome').value = '';
-      carregarLista();
-    } else { alert('Erro: ' + d.error); }
-  });
-}
-
+// CORREÇÃO: Chamada direta para a nova rota da API do Cloudflare Workers
 function abrirDash(code){
   clearInterval(INT);
   CODIGO = code;
@@ -824,6 +781,29 @@ function abrirDash(code){
   document.getElementById('bms-titulo').textContent = code;
   atualizar();
   INT = setInterval(atualizar, 3000);
+}
+
+function reenviarEmailAtivacao(email) {
+  var e = document.getElementById('erro-cad');
+  if(!email) return alert('Insira o e-mail primeiro.');
+
+  fetch(API + '?action=resend_verification', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email: email })
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(d) {
+    if (d.ok) {
+      alert('Novo link de ativação enviado para ' + email + '! Verifique sua caixa de entrada.');
+      if (e) e.classList.add('hidden');
+    } else {
+      alert('Erro: ' + d.error);
+    }
+  })
+  .catch(function(err) {
+    alert('Erro de conexão: ' + err.message);
+  });
 }
 
 function voltar(){ clearInterval(INT); localStorage.removeItem('bms_codigo_ativo'); mostrarLista(); }
