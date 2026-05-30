@@ -262,7 +262,7 @@ button:active{transform:scale(0.98)}
 .bar{height:12px;background:var(--gauge-empty);border-radius:999px;overflow:hidden}
 .bar-fill{height:100%;width:0%;border-radius:999px;background:linear-gradient(90deg,var(--green),var(--cyan));transition:width.8s ease}
 
-/* ENVELOPE DO STATUS TOTALMENTE LIVRE DE SVG COORDENADO FIXO */
+/* ENVELOPE DE STATUS ADAPTADO COM ANIMAÇÕES PREMIUM DE FLUXO */
 .status-envelope-card {
   background: var(--card-bg);
   border: 1px solid var(--card-border);
@@ -273,7 +273,7 @@ button:active{transform:scale(0.98)}
   position: relative;
   display: flex;
   flex-direction: column;
-  gap: 20px; /* Vão perfeito para as pontes simuladas */
+  gap: 22px; /* Garante o espaçamento exato para as pontes */
 }
 
 .bms-master-id-title {
@@ -288,7 +288,7 @@ button:active{transform:scale(0.98)}
 .status-triple-grid {
   display: grid !important;
   grid-template-columns: repeat(3, 1fr) !important;
-  gap: 12px !important; /* Espaçamento real para os braços laterais */
+  gap: 12px !important;
   width: 100% !important;
   max-width: 100% !important;
   position: relative;
@@ -340,37 +340,37 @@ button:active{transform:scale(0.98)}
   color: var(--red) !important;
 }
 
-/* SISTEMA DINÂMICO DE LINHAS DE FLUXO VIA CSS (A PROVA DE QUEBRAS) */
-/* Braço Esquerdo (Inversor -> Smart BMS) */
+/* SISTEMA ANTI-QUEBRA DE LINHA CORRENTE (PONTE EM CSS ESTRUTURAL) */
 #cardInversor:before {
   content: '';
   position: absolute;
   bottom: 100%;
   left: 50%;
-  width: calc(50% + 14px); /* Encontra dinamicamente o meio do grid */
+  width: calc(50% + 14px);
   height: 14px;
   border-top: 1.5px dashed var(--card-border);
   border-left: 1.5px dashed var(--card-border);
   border-top-left-radius: 8px;
   pointer-events: none;
-  transform: translateX(0);
+  opacity: 0;
+  transition: opacity 0.4s ease, border-color 0.4s ease;
 }
-/* Braço Direito (Bateria -> Smart BMS) */
+
 #cardBateria:before {
   content: '';
   position: absolute;
   bottom: 100%;
   right: 50%;
-  width: calc(50% + 14px); /* Encontra dinamicamente o meio do grid */
+  width: calc(50% + 14px);
   height: 14px;
   border-top: 1.5px dashed var(--card-border);
   border-right: 1.5px dashed var(--card-border);
   border-top-right-radius: 8px;
   pointer-events: none;
-  transform: translateX(0);
+  opacity: 0;
+  transition: opacity 0.4s ease, border-color 0.4s ease;
 }
 
-/* Descidas centrais bem unidas no topo do card do meio (Smart BMS) */
 #cardBms:before, #cardBms:after {
   content: '';
   position: absolute;
@@ -378,28 +378,76 @@ button:active{transform:scale(0.98)}
   height: 14px;
   border-left: 1.5px dashed var(--card-border);
   pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.4s ease, border-color 0.4s ease;
 }
-/* Alinhamento perfeito no centro com vão reduzido */
 #cardBms:before { left: calc(50% - 4px); }
 #cardBms:after { left: calc(50% + 4px); }
 
-/* ESTADOS ATIVOS COM ANIMAÇÃO SEGUROS */
-.ponte-esquerda-ativa#cardInversor:before {
-  border-color: var(--green);
-  filter: drop-shadow(0 0 2px var(--green));
-}
-.ponte-esquerda-ativa ~ #cardBms:before {
-  border-color: var(--green);
+/* INJEÇÃO DAS SETAS DINÂMICAS VIA ELEMENTOS INDEPENDENTES */
+.status-triple-grid:before, .status-triple-grid:after {
+  font-size: 11px;
+  color: var(--green);
+  position: absolute;
+  bottom: 100%;
+  z-index: 5;
+  opacity: 0;
+  pointer-events: none;
   filter: drop-shadow(0 0 2px var(--green));
 }
 
-.ponte-direita-ativa#cardBateria:before {
+/* Animações CSS lineares e calmas para o trajeto das setas */
+@keyframes correrEsquerda {
+  0% { bottom: 82px; left: calc(16.6% - 2px); content: '➤'; }
+  35% { bottom: 94px; left: calc(16.6% - 2px); content: '➤'; }
+  45% { bottom: 94px; left: calc(16.6() + 4px); content: '➤'; }
+  90% { bottom: 94px; left: calc(50% - 8px); content: '➤'; }
+  100% { bottom: 82px; left: calc(50% - 8px); content: '▼'; }
+}
+
+@keyframes correrDireita {
+  0% { bottom: 82px; right: calc(16.6% - 2px); content: '◄'; }
+  35% { bottom: 94px; right: calc(16.6% - 2px); content: '◄'; }
+  45% { bottom: 94px; right: calc(16.6% + 4px); content: '◄'; }
+  90% { bottom: 94px; right: calc(50% - 8px); content: '◄'; }
+  100% { bottom: 82px; right: calc(50% - 8px); content: '▼'; }
+}
+
+/* ATIVAÇÃO COMPLETA: ACENDE O NEON, CORRE OS TRACINHOS E DISPARA AS SETAS */
+@keyframes deslizarLinha {
+  to { stroke-dashoffset: -20; }
+}
+
+.ponte-esquerda-ativa#cardInversor:before {
+  opacity: 1;
   border-color: var(--green);
-  filter: drop-shadow(0 0 2px var(--green));
+  filter: drop-shadow(0 0 3px var(--green));
+}
+.ponte-esquerda-ativa ~ #cardBms:before {
+  opacity: 1;
+  border-color: var(--green);
+  filter: drop-shadow(0 0 3px var(--green));
+}
+/* Liga a seta esquerda */
+.bms-rodando-esquerda:before {
+  opacity: 1 !important;
+  animation: correrEsquerda 3s infinite linear;
+}
+
+.ponte-direita-ativa#cardBateria:before {
+  opacity: 1;
+  border-color: var(--green);
+  filter: drop-shadow(0 0 3px var(--green));
 }
 .ponte-direita-ativa ~ #cardBms:after {
+  opacity: 1;
   border-color: var(--green);
-  filter: drop-shadow(0 0 2px var(--green));
+  filter: drop-shadow(0 0 3px var(--green));
+}
+/* Liga a seta direita */
+.bms-rodando-direita:after {
+  opacity: 1 !important;
+  animation: correrDireita 3s infinite linear;
 }
 
 .grid{
@@ -707,7 +755,7 @@ button:active{transform:scale(0.98)}
   <div class="status-envelope-card">
     <div id="bms-titulo" class="bms-master-id-title">SL------------</div>
 
-    <div class="status-triple-grid">
+    <div id="gradeStatusContainer" class="status-triple-grid">
       <div id="cardInversor" class="card triple-inactive">
         <span class="status-title">Inversor</span>
         <span id="txtInversor" class="status-text">Desconectado</span>
@@ -1481,15 +1529,17 @@ function atualizar(){
     var txtBms = document.getElementById('txtBms');
     var cardBat = document.getElementById('cardBateria');
     var txtBat = document.getElementById('txtBateria');
+    var containerStatus = document.getElementById('gradeStatusContainer');
 
     if(!d.online){
       gerenciarLayoutStatus(cardBms, txtBms, false, "Online", "Offline");
       gerenciarLayoutStatus(cardInv, txtInv, false, "Conectado", "Desconectado");
       gerenciarLayoutStatus(cardBat, txtBat, false, "Conectada", "Desconectada");
 
-      // Desativa as pontes removendo as classes de ativação
+      // Sistema offline: Remove braços de neon e remove as setas correndo
       cardInv.classList.remove("ponte-esquerda-ativa");
       cardBat.classList.remove("ponte-direita-ativa");
+      containerStatus.classList.remove("bms-rodando-esquerda", "bms-rodando-direita");
 
       // Zera dados do Inversor
       document.getElementById('invPotencia').textContent = '0W';
@@ -1513,17 +1563,21 @@ function atualizar(){
       var batAtiva = (d.bateria_conectada !== undefined) ? d.bateria_conectada : true;
       gerenciarLayoutStatus(cardBat, txtBat, batAtiva, "Conectada", "Desconectada");
 
-      // Gerenciamento lógico visual das pontes CSS com base no estado real
+      // Gerencia individualmente a ativação dos braços e das setas horizontais
       if(invAtivo) {
         cardInv.classList.add("ponte-esquerda-ativa");
+        containerStatus.classList.add("bms-rodando-esquerda");
       } else {
         cardInv.classList.remove("ponte-esquerda-ativa");
+        containerStatus.classList.remove("bms-rodando-esquerda");
       }
 
       if(batAtiva) {
         cardBat.classList.add("ponte-direita-ativa");
+        containerStatus.classList.add("bms-rodando-direita");
       } else {
         cardBat.classList.remove("ponte-direita-ativa");
+        containerStatus.classList.remove("bms-rodando-direita");
       }
 
       // Atualiza Bloco do Inversor
