@@ -17,6 +17,7 @@
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
 <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.0.1/mqttws31.min.js" type="text/javascript"></script>
 
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
@@ -211,12 +212,6 @@ button:active{transform:scale(0.98)}
   box-shadow: var(--neon-glow);
 }
 .bms-item:hover{border-color:var(--cyan)}
-
-@../../..keyframes neonSuave {
-  0% { border-color: var(--green); box-shadow: 0 0 4px var(--neon-pulse-color); }
-  50% { border-color: var(--cyan); box-shadow: 0 0 12px var(--neon-pulse-color), 0 0 4px var(--green); }
-  100% { border-color: var(--green); box-shadow: 0 0 4px var(--neon-pulse-color); }
-}
 
 .bms-item.online-active {
   animation: neonSuave 2s infinite ease-in-out !important;
@@ -472,6 +467,12 @@ button:active{transform:scale(0.98)}
   fill: none;
   stroke: var(--blue);
   stroke-width: 2;
+}
+
+@keyframes neonSuave {
+  0% { border-color: var(--green); box-shadow: 0 0 4px var(--neon-pulse-color); }
+  50% { border-color: var(--cyan); box-shadow: 0 0 12px var(--neon-pulse-color), 0 0 4px var(--green); }
+  100% { border-color: var(--green); box-shadow: 0 0 4px var(--neon-pulse-color); }
 }
 </style>
 </head>
@@ -736,6 +737,8 @@ var TOKEN = localStorage.getItem('bms_token');
 var USER = null;
 var CODIGO = localStorage.getItem('bms_codigo_ativo');
 var INT = null;
+// VARIÁVEL DO CLIENTE MQTT ADICIONADA
+var MQTT_CLIENT = null; 
 
 var CRONOMETRO_CADASTRO = null;
 var ESCUTA_ATIVACAO = null;
@@ -849,6 +852,7 @@ function fecharScannerCamera() {
 function mostrarLogin(){
   CADASTRO_ATIVO = false;
   limparControlesCadastro();
+  fecharMqttAnterior(); // Limpa escuta se houver
   clearInterval(INT);
   localStorage.removeItem('bms_codigo_ativo');
   esconderTudo();
@@ -857,6 +861,7 @@ function mostrarLogin(){
 
 function mostrarCadastro(){
   CADASTRO_ATIVO = true;
+  fecharMqttAnterior(); // Limpa escuta se houver
   clearInterval(INT);
   esconderTudo();
   document.getElementById('cadastro').classList.remove('hidden');
@@ -876,6 +881,7 @@ function togglePass(inputId, iconEl) {
 }
 
 function mostrarPaginaConta() {
+  fecharMqttAnterior(); // Limpa escuta se houver
   clearInterval(INT);
   esconderTudo();
   document.getElementById('configuracoesPage').classList.remove('hidden');
@@ -1223,6 +1229,7 @@ function toggleCortinaDispositivos() {
 }
 
 function mostrarLista(){
+  fecharMqttAnterior(); // Limpa conexões antigas
   clearInterval(INT);
   localStorage.removeItem('bms_codigo_ativo');
   esconderTudo();
@@ -1237,23 +1244,147 @@ function mostrarLista(){
   USAR_CONTROLE_CORTINA = false;
 
   carregarLista();
-  // CORREÇÃO CRÍTICA DE SEGUNDOS: Sincronizado para atualizar a lista a cada 2 segundos
   INT = setInterval(carregarLista, 2000); 
 }
 
+// FECHA O CLIENTE MQTT COM SEGURANÇA SE ELE JÁ ESTIVER ATIVO
+function fecharMqttAnterior() {
+  if (MQTT_CLIENT) {
+    try {
+      MQTT_CLIENT.disconnect();
+      console.log("[MQTT WEB] Desconectado da escuta anterior.");
+    } catch(e) {}
+    MQTT_CLIENT = null;
+  }
+}
+
+// NOVA FUNÇÃO ENTRADA DO DASHBOARD UTILIZANDO MOTOR MQTT
 function abrirDash(code){
   clearInterval(INT);
+  fecharMqttAnterior(); // Evita conexões duplicadas travando o navegador
+  
   CODIGO = code;
   localStorage.setItem('bms_codigo_ativo', code);
   esconderTudo();
   document.getElementById('dash').classList.remove('hidden');
   document.getElementById('bms-titulo').textContent = code;
-  atualizar();
-  // CORREÇÃO CRÍTICA DE SEGUNDOS: Sincronizado para puxar a telemetria a cada 2 segundos
-  INT = setInterval(atualizar, 2000); 
+
+  // Renderiza layout em estado neutro/offline inicial enquanto conecta
+  configurarInterfaceEstadoOffline();
+
+  // CONECTA VIA WEBSOCKETS NO BROKER HIVEMQ (PORTA SEGURA 8000)
+  const hostMqtt = "broker.hivemq.com";
+  const portaMqtt = 8000;
+  const clientRandomId = "sl_user_web_" + Math.floor(Math.random() * 10000);
+
+  MQTT_CLIENT = new Paho.MQTT.Client(hostMqtt, Number(portaMqtt), clientRandomId);
+
+  MQTT_CLIENT.onConnectionLost = function (responseObject) {
+    console.log("[MQTT WEB] Conexão com o servidor perdida: ", responseObject.errorMessage);
+    configurarInterfaceEstadoOffline();
+  };
+
+  MQTT_CLIENT.onMessageArrived = function (message) {
+    try {
+      // Recebe o JSON instantâneo expelido pela placa a cada 2 segundos
+      const d = JSON.parse(message.payloadString);
+      processarERenderizarDadosMqtt(d);
+    } catch (err) {
+      console.error("[MQTT WEB] Falha ao processar payload JSON:", err);
+    }
+  };
+
+  MQTT_CLIENT.connect({
+    onSuccess: function () {
+      console.log("[MQTT WEB] Conectado ao Broker! Ouvindo canal do dispositivo: " + CODIGO);
+      // Inscreve na escuta do canal específico da placa
+      MQTT_CLIENT.subscribe("sl_bms/" + CODIGO + "/telemetria");
+    },
+    onFailure: function (err) {
+      console.error("[MQTT WEB] Falha crítica de conexão:", err);
+      configurarInterfaceEstadoOffline();
+    },
+    useSSL: false // Deixar false para a porta 8000 WebSocket aberta da HiveMQ
+  });
 }
 
-function voltar(){ clearInterval(INT); localStorage.removeItem('bms_codigo_ativo'); mostrarLista(); }
+function configurarInterfaceEstadoOffline() {
+  var cardInv = document.getElementById('cardInversor');
+  var txtInv = document.getElementById('txtInversor');
+  var cardBms = document.getElementById('cardBms');
+  var txtBms = document.getElementById('txtBms');
+  var cardBat = document.getElementById('cardBateria');
+  var txtBat = document.getElementById('txtBateria');
+
+  gerenciarLayoutStatus(cardBms, txtBms, false, "Online", "Offline");
+  gerenciarLayoutStatus(cardInv, txtInv, false, "Conectado", "Desconectado");
+  gerenciarLayoutStatus(cardBat, txtBat, false, "Conectada", "Desconectada");
+
+  document.getElementById('invPotencia').textContent = '0W';
+  document.getElementById('invTensaoAC').textContent = '0.0V';
+  document.getElementById('invFrequencia').textContent = '0.0Hz';
+  document.getElementById('invGeracaoDia').textContent = '0.0kWh';
+
+  document.getElementById('soc').textContent = '0%';
+  document.getElementById('volt').textContent = '0.00V';
+  document.getElementById('corr').textContent = '0.0A';
+  document.getElementById('temp').textContent = '0.0°C';
+  atualizarGauge(0); 
+  renderCelulas([]);
+}
+
+function processarERenderizarDadosMqtt(d) {
+  var cardInv = document.getElementById('cardInversor');
+  var txtInv = document.getElementById('txtInversor');
+  var cardBms = document.getElementById('cardBms');
+  var txtBms = document.getElementById('txtBms');
+  var cardBat = document.getElementById('cardBateria');
+  var txtBat = document.getElementById('txtBateria');
+
+  // Se o dado chegou no MQTT, a BMS está obrigatoriamente Online
+  gerenciarLayoutStatus(cardBms, txtBms, true, "Online", "Offline");
+  
+  var invAtivo = (d.inversor_conectado !== undefined) ? d.inversor_conectado : true;
+  gerenciarLayoutStatus(cardInv, txtInv, invAtivo, "Conectado", "Desconectado");
+
+  var batAtiva = (d.bateria_conectada !== undefined) ? d.bateria_conectada : true;
+  gerenciarLayoutStatus(cardBat, txtBat, batAtiva, "Conectada", "Desconectada");
+
+  if(!invAtivo) {
+    document.getElementById('invPotencia').textContent = '0W';
+    document.getElementById('invTensaoAC').textContent = '0.0V';
+    document.getElementById('invFrequencia').textContent = '0.0Hz';
+    document.getElementById('invGeracaoDia').textContent = '0.0kWh';
+  } else {
+    document.getElementById('invPotencia').textContent = Number(d.inv_potencia).toFixed(0) + 'W';
+    document.getElementById('invTensaoAC').textContent = Number(d.inv_tensao_ac).toFixed(1) + 'V';
+    document.getElementById('invFrequencia').textContent = Number(d.inv_frequencia).toFixed(1) + 'Hz';
+    document.getElementById('invGeracaoDia').textContent = Number(d.inv_geracao_dia).toFixed(2) + 'kWh';
+  }
+
+  if(!batAtiva) {
+    document.getElementById('soc').textContent = '0%';
+    document.getElementById('volt').textContent = '0.00V';
+    document.getElementById('corr').textContent = '0.0A';
+    document.getElementById('temp').textContent = '0.0°C';
+    atualizarGauge(0);
+    renderCelulas([]);
+  } else {
+    document.getElementById('soc').textContent = Number(d.soc).toFixed(0)+'%';
+    document.getElementById('volt').textContent = Number(d.voltage).toFixed(2)+'V';
+    document.getElementById('corr').textContent = Number(d.current).toFixed(1)+'A';
+    document.getElementById('temp').textContent = Number(d.temp).toFixed(1)+'°C';
+    renderCelulas(d.cells); 
+    atualizarGauge(parseInt(d.soc || 0));
+  }
+}
+
+function voltar(){ 
+  fecharMqttAnterior(); // Desconecta o MQTT ao sair
+  clearInterval(INT); 
+  localStorage.removeItem('bms_codigo_ativo'); 
+  mostrarLista(); 
+}
 
 function carregarLista(){
   fetch(API + '?action=user_bms', { headers: {'Authorization':'Bearer '+TOKEN} })
@@ -1394,104 +1525,25 @@ function atualizarGauge(soc){
 }
 
 function gerenciarLayoutStatus(elementoCard, elementoTxt, ativo, textoAtivo, textoInativo) {
+  if (!elementoCard || !elementoTxt) return;
   if (ativo) {
-    elementoCard.className = "card triple-active";
+    elementoCard.className = "card card-inner-item triple-active"; // Mantém classes do design original
     elementoTxt.textContent = textoAtivo;
   } else {
-    elementoCard.className = "card triple-inactive";
+    elementoCard.className = "card card-inner-item triple-inactive"; // Mantém classes do design original
     elementoTxt.textContent = textoInativo;
   }
 }
 
-var falhasSeguidas = 0; // CONTADOR DE TOLERÂNCIA ANTI-OSCILAÇÃO (10 SEGUNDOS)
-
-function atualizar(){
-  if(!CODIGO) return;
-  fetch(API+'?action=data&code='+CODIGO, { headers:{'Authorization':'Bearer '+TOKEN} })
-  .then(function(r){ return r ? r.json() : null; })
-  .then(function(d){
-    if(!d) {
-      falhasSeguidas++;
-      return;
-    }
-    
-    // Filtro de tolerância contra micro-oscilações de rede
-    if(!d.online){
-      falhasSeguidas++;
-      if(falhasSeguidas < 5) {
-        // Ignora a resposta offline temporária e mantém os dados anteriores na tela intactos
-        return;
-      }
-    } else {
-      falhasSeguidas = 0; // Conexão estável, reseta o contador de falhas
-    }
-    
-    var cardInv = document.getElementById('cardInversor');
-    var txtInv = document.getElementById('txtInversor');
-    var cardBms = document.getElementById('cardBms');
-    var txtBms = document.getElementById('txtBms');
-    var cardBat = document.getElementById('cardBateria');
-    var txtBat = document.getElementById('txtBateria');
-
-    if(!d.online){
-      gerenciarLayoutStatus(cardBms, txtBms, false, "Online", "Offline");
-      gerenciarLayoutStatus(cardInv, txtInv, false, "Conectado", "Desconectado");
-      gerenciarLayoutStatus(cardBat, txtBat, false, "Conectada", "Desconectada");
-
-      document.getElementById('invPotencia').textContent = '0W';
-      document.getElementById('invTensaoAC').textContent = '0.0V';
-      document.getElementById('invFrequencia').textContent = '0.0Hz';
-      document.getElementById('invGeracaoDia').textContent = '0.0kWh';
-
-      document.getElementById('soc').textContent = '0%';
-      document.getElementById('volt').textContent = '0.00V';
-      document.getElementById('corr').textContent = '0.0A';
-      document.getElementById('temp').textContent = '0.0°C';
-      atualizarGauge(0); 
-      renderCelulas([]);
-    } else {
-      CircleGauge = true;
-      gerenciarLayoutStatus(cardBms, txtBms, true, "Online", "Offline");
-      
-      var invAtivo = (d.inversor_conectado !== undefined) ? d.inversor_conectado : true;
-      gerenciarLayoutStatus(cardInv, txtInv, invAtivo, "Conectado", "Desconectado");
-
-      var batAtiva = (d.bateria_conectada !== undefined) ? d.bateria_conectada : true;
-      gerenciarLayoutStatus(cardBat, txtBat, batAtiva, "Conectada", "Desconectada");
-
-      if(!invAtivo) {
-        document.getElementById('invPotencia').textContent = '0W';
-        document.getElementById('invTensaoAC').textContent = '0.0V';
-        document.getElementById('invFrequencia').textContent = '0.0Hz';
-        document.getElementById('invGeracaoDia').textContent = '0.0kWh';
-      } else {
-        document.getElementById('invPotencia').textContent = (d.inv_potencia !== undefined ? d.inv_potencia.toFixed(0) : '0') + 'W';
-        document.getElementById('invTensaoAC').textContent = (d.inv_tensao_ac !== undefined ? d.inv_tensao_ac.toFixed(1) : '0.0') + 'V';
-        document.getElementById('invFrequencia').textContent = (d.inv_frequencia !== undefined ? d.inv_frequencia.toFixed(1) : '0.0') + 'Hz';
-        document.getElementById('invGeracaoDia').textContent = (d.inv_geracao_dia !== undefined ? d.inv_geracao_dia.toFixed(1) : '0.0') + 'kWh';
-      }
-
-      if(!batAtiva) {
-        document.getElementById('soc').textContent = '0%';
-        document.getElementById('volt').textContent = '0.00V';
-        document.getElementById('corr').textContent = '0.0A';
-        document.getElementById('temp').textContent = '0.0°C';
-        atualizarGauge(0);
-        renderCelulas([]);
-      } else {
-        document.getElementById('soc').textContent = d.soc.toFixed(0)+'%';
-        document.getElementById('volt').textContent = d.voltage.toFixed(2)+'V';
-        document.getElementById('corr').textContent = d.current.toFixed(1)+'A';
-        document.getElementById('temp').textContent = d.temp.toFixed(1)+'°C';
-        renderCelulas(d.cells); 
-        atualizarGauge(parseInt(d.soc || 0));
-      }
-    }
-  });
-}
-
 function sair(){ if(confirm('Deseja realmente sair?')) sairSemConfirmacao(); }
-function sairSemConfirmacao(){ clearInterval(INT); localStorage.removeItem('bms_token'); localStorage.removeItem('bms_user'); localStorage.removeItem('bms_codigo_ativo'); location.reload(); }
+function sairSemConfirmacao(){ 
+  fecharMqttAnterior(); // Desconecta segurança
+  clearInterval(INT); 
+  localStorage.removeItem('bms_token'); 
+  localStorage.removeItem('bms_user'); 
+  localStorage.removeItem('bms_codigo_ativo'); 
+  location.reload(); 
+}
 </script>
 </body>
 </html>
