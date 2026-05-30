@@ -36,6 +36,7 @@
   --cell-border: #e2e8f0;
   
   --neon-glow: 0 0 12px rgba(0, 180, 216, 0.12);
+  --neon-pulse-color: rgba(46, 196, 182, 0.4);
   
   --cyan: #00b4d8;
   --blue: #0077b6;
@@ -59,6 +60,7 @@
   --cell-border: rgba(255, 255, 255, .04);
   
   --neon-glow: 0 0 15px rgba(0, 255, 255, 0.2);
+  --neon-pulse-color: rgba(0, 255, 136, 0.5);
   
   --cyan: #00ffff;
   --blue: #0080ff;
@@ -80,12 +82,20 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text-main);
   flex-direction:column;
   align-items:center;
   justify-content:center;
-  padding:24px 12px;
+  padding:16px 12px;
 }
 
 #dash, #lista, #configuracoesPage {
   height: auto;
   margin: auto auto;
+}
+
+/* Força o painel do dashboard a aproximar e padronizar as distâncias */
+#dash {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 14px !important;
+  justify-content: flex-start !important;
 }
 
 .title{font-size:clamp(32px,7vw,54px);font-weight:900;margin-bottom:4px;letter-spacing:2px;background:linear-gradient(90deg,var(--blue),var(--cyan));-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-align:center;width:100%}
@@ -98,8 +108,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text-main);
   border-radius:20px;
   padding:20px;
   width:100%;
-  margin-top: 0 !important;
-  margin-bottom: 12px !important;
+  margin: 0 !important; /* Limpa margens antigas que afastavam os blocos */
   box-shadow: var(--neon-glow);
 }
 
@@ -157,9 +166,11 @@ button:active{transform:scale(0.98)}
 .btn-danger:hover{background:rgba(255,68,68,0.15)}
 
 .bms-list{display:flex;flex-direction:column;gap:12px;width:100%;margin-top:8px}
+
+/* Elementos da lista de dispositivos */
 .bms-item{
-  background: var(--bg);
-  border: 1px solid var(--input-border);
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
   border-radius: 16px;
   padding: 20px 16px;
   text-align: center;
@@ -169,9 +180,23 @@ button:active{transform:scale(0.98)}
   justify-content: center;
   min-height: 160px;
   cursor: pointer;
-  transition: border-color 0.2s;
+  transition: all 0.3s ease;
+  box-shadow: var(--neon-glow);
 }
 .bms-item:hover{border-color:var(--cyan)}
+
+/* ANIMAÇÃO NEON PULSANTE PARA DISPOSITIVOS ONLINE */
+@keyframes neonPulse {
+  0% { border-color: var(--green); box-shadow: 0 0 4px var(--neon-pulse-color); }
+  50% { border-color: var(--cyan); box-shadow: 0 0 16px var(--neon-pulse-color), 0 0 4px var(--green); }
+  100% { border-color: var(--green); box-shadow: 0 0 4px var(--neon-pulse-color); }
+}
+
+.bms-item.online-active {
+  animation: neonPulse 2s infinite ease-in-out !important;
+  border-width: 1.5px !important;
+}
+
 .bms-item h3{color:var(--text-main);font-size:19px;font-weight:800;margin-bottom:4px;width:100%}
 .bms-item p{color:var(--text-muted);font-size:13px;font-family:monospace;margin-bottom:8px;width:100%}
 
@@ -198,13 +223,13 @@ button:active{transform:scale(0.98)}
   border-color:var(--red);
 }
 
-.gauge-card{padding:20px;min-height:260px}
-.gauge{width:min(220px,55vw);height:min(220px,55vw);margin:auto;border-radius:50%;background:conic-gradient(var(--green) 0deg,var(--cyan) 180deg,var(--gauge-empty) 180deg);position:relative;box-shadow:0 0 30px rgba(0,255,255,.05);transition:background.8s ease}
+.gauge-card{padding:20px;min-height:240px;display:flex;flex-direction:column;gap:12px;justify-content:center}
+.gauge{width:min(200px,50vw);height:min(200px,50vw);margin:auto;border-radius:50%;background:conic-gradient(var(--green) 0deg,var(--cyan) 180deg,var(--gauge-empty) 180deg);position:relative;box-shadow:0 0 30px rgba(0,255,255,.05);transition:background.8s ease}
 .gauge::before{content:'';position:absolute;inset:16px;border-radius:50%;background:var(--bg);transition: background 0.3s}
 .gauge-inner{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;align-items:center;z-index:2}
 .gauge-value{font-size:clamp(36px,9vw,52px);font-weight:900;color:var(--green)}
 .gauge-label{opacity:.6;letter-spacing:1.5px;font-size:11px;color:var(--text-main)}
-.bar-wrap{margin-top:16px}
+.bar-wrap{margin-top:4px}
 .bar-label{display:flex;justify-content:space-between;margin-bottom:6px;font-size:13px;opacity:.8}
 .bar{height:12px;background:var(--gauge-empty);border-radius:999px;overflow:hidden}
 .bar-fill{height:100%;width:0%;border-radius:999px;background:linear-gradient(90deg,var(--green),var(--cyan));transition:width.8s ease}
@@ -215,19 +240,20 @@ button:active{transform:scale(0.98)}
   gap:12px;
   width:100%;
   max-width:100%;
-  margin-top:8px
+  margin-top:0px
 }
 
-/* CORREÇÃO DO CSS FIXA: Alinha absolutamente tudo dentro dos cards do grid */
+/* Centraliza os blocos internos de dados do Grid */
 .grid .card {
   display: flex !important;
   flex-direction: column !important;
   align-items: center !important;
   justify-content: center !important;
   text-align: center !important;
+  padding: 14px !important;
 }
 
-/* Força os textos numéricos da classe .value a ficarem no meio do card */
+/* Força os textos numéricos a ficarem no meio exato da caixa */
 .value {
   font-size: clamp(22px, 5.5vw, 28px);
   font-weight: 800;
@@ -259,15 +285,15 @@ button:active{transform:scale(0.98)}
 
 .card-empty{grid-column:1/-1;min-height:180px;display:flex;align-items:center;justify-content:center;color:var(--text-muted);font-size:14px}
 
-.status-badge{display:inline-flex;align-items:center;gap:8px;padding:10px 20px;border-radius:999px;font-weight:700;font-size:14px;margin-top:10px}
+.status-badge{display:inline-flex;align-items:center;gap:8px;padding:10px 20px;border-radius:999px;font-weight:700;font-size:14px;margin-top:0px}
 .status-badge.on{background:rgba(46,196,182,.1);color:var(--green);border:1px solid var(--green)}
 .status-badge.off{background:rgba(231,29,54,.1);color:var(--red);border:1px solid var(--red)}
 
-.diff{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:16px}
+.diff{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:12px}
 .diff-item{padding:10px 6px;border-radius:12px;background:var(--cell-bg);border:1px solid var(--cell-border);text-align:center}
 .diff-item span{display:block;margin-top:4px;font-size:clamp(16px,4.5vw,20px);font-weight:800;font-variant-numeric:tabular-nums}
 
-.cells{display:grid;grid-template-columns:repeat(auto-fill,minmax(85px,1fr));gap:12px;margin-top:16px;width:100%}
+.cells{display:grid;grid-template-columns:repeat(auto-fill,minmax(85px,1fr));gap:12px;margin-top:12px;width:100%}
 .cell{background:var(--cell-bg);border-radius:12px;padding:10px 6px;border:1px solid var(--cell-border);display:flex;flex-direction:column;align-items:center;justify-content:center}
 .cell-num{font-size:11px;opacity:.6;margin-bottom:2px}
 .cell-val{font-size:15px;font-weight:700;font-variant-numeric:tabular-nums;color:var(--text-main)}
@@ -292,7 +318,7 @@ button:active{transform:scale(0.98)}
 .footer-link a:hover{opacity:0.8;text-decoration:underline;}
 .footer-link span{color:var(--text-muted);opacity:0.6;display:block;margin-top:4px;}
 
-.footer-voltar{width:100%;display:flex;justify-content:center;margin-top:0px!important;margin-bottom:8px}
+.footer-voltar{width:100%;display:flex;justify-content:center;margin-top:4px!important;margin-bottom:8px}
 .footer-voltar button{width:100%;max-width:320px;margin-top:0px}
 
 .cortina-wrapper {
@@ -1084,7 +1110,7 @@ function mostrarLista(){
   USAR_CONTROLE_CORTINA = false;
 
   carregarLista();
-  INT = setInterval(carregarLista, 3000);
+  INT = setInterval(carregarLista, 10000); // INTERVALO: Configurado para 10 segundos
 }
 
 function abrirDash(code){
@@ -1095,7 +1121,7 @@ function abrirDash(code){
   document.getElementById('dash').classList.remove('hidden');
   document.getElementById('bms-titulo').textContent = code;
   atualizar();
-  INT = setInterval(atualizar, 3000);
+  INT = setInterval(atualizar, 10000); // INTERVALO: Configurado para 10 segundos
 }
 
 function voltar(){ clearInterval(INT); localStorage.removeItem('bms_codigo_ativo'); mostrarLista(); }
@@ -1142,7 +1168,9 @@ function carregarLista(){
     var html = '';
     for(var i=0;i<lista.length;i++){
       var b = lista[i];
-      html += '<div class="bms-item" onclick="abrirDash(\''+b.code+'\')">';
+      // Borda neon injetada via classe dinâmica condicional se estiver online
+      var onlineClass = b.online ? 'online-active' : '';
+      html += '<div class="bms-item '+onlineClass+'" onclick="abrirDash(\''+b.code+'\')">';
       html += '<h3>'+b.nome+'</h3>';
       html += '<p>'+b.code+'</p>';
       html += '<span class="status-dot '+(b.online?'on':'off')+'">'+(b.online?'Online':'Offline')+'</span>';
