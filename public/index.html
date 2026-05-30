@@ -737,7 +737,6 @@ var TOKEN = localStorage.getItem('bms_token');
 var USER = null;
 var CODIGO = localStorage.getItem('bms_codigo_ativo');
 var INT = null;
-// VARIÁVEL DO CLIENTE MQTT ADICIONADA
 var MQTT_CLIENT = null; 
 
 var CRONOMETRO_CADASTRO = null;
@@ -852,7 +851,7 @@ function fecharScannerCamera() {
 function mostrarLogin(){
   CADASTRO_ATIVO = false;
   limparControlesCadastro();
-  fecharMqttAnterior(); // Limpa escuta se houver
+  fecharMqttAnterior(); 
   clearInterval(INT);
   localStorage.removeItem('bms_codigo_ativo');
   esconderTudo();
@@ -861,7 +860,7 @@ function mostrarLogin(){
 
 function mostrarCadastro(){
   CADASTRO_ATIVO = true;
-  fecharMqttAnterior(); // Limpa escuta se houver
+  fecharMqttAnterior(); 
   clearInterval(INT);
   esconderTudo();
   document.getElementById('cadastro').classList.remove('hidden');
@@ -881,7 +880,7 @@ function togglePass(inputId, iconEl) {
 }
 
 function mostrarPaginaConta() {
-  fecharMqttAnterior(); // Limpa escuta se houver
+  fecharMqttAnterior(); 
   clearInterval(INT);
   esconderTudo();
   document.getElementById('configuracoesPage').classList.remove('hidden');
@@ -954,7 +953,7 @@ async function excluirMinhaConta() {
       alert('Sua conta foi excluída com sucesso.');
       sairSemConfirmacao();
     }
-  } catch(err) { alert('Erro ao se comunicar com o servidor.'); }
+  } catch(err) { alert('Erro ao se communicate com o servidor.'); }
 }
 
 function login(){
@@ -1229,7 +1228,7 @@ function toggleCortinaDispositivos() {
 }
 
 function mostrarLista(){
-  fecharMqttAnterior(); // Limpa conexões antigas
+  fecharMqttAnterior(); 
   clearInterval(INT);
   localStorage.removeItem('bms_codigo_ativo');
   esconderTudo();
@@ -1247,7 +1246,6 @@ function mostrarLista(){
   INT = setInterval(carregarLista, 2000); 
 }
 
-// FECHA O CLIENTE MQTT COM SEGURANÇA SE ELE JÁ ESTIVER ATIVO
 function fecharMqttAnterior() {
   if (MQTT_CLIENT) {
     try {
@@ -1258,10 +1256,9 @@ function fecharMqttAnterior() {
   }
 }
 
-// NOVA FUNÇÃO ENTRADA DO DASHBOARD UTILIZANDO MOTOR MQTT
 function abrirDash(code){
   clearInterval(INT);
-  fecharMqttAnterior(); // Evita conexões duplicadas travando o navegador
+  fecharMqttAnterior(); 
   
   CODIGO = code;
   localStorage.setItem('bms_codigo_ativo', code);
@@ -1269,42 +1266,45 @@ function abrirDash(code){
   document.getElementById('dash').classList.remove('hidden');
   document.getElementById('bms-titulo').textContent = code;
 
-  // Renderiza layout em estado neutro/offline inicial enquanto conecta
   configurarInterfaceEstadoOffline();
 
-  // CONECTA VIA WEBSOCKETS NO BROKER HIVEMQ (PORTA SEGURA 8000)
-  const hostMqtt = "broker.hivemq.com";
-  const portaMqtt = 8000;
+  // CREDENCIAIS DA SUA CLUSTER PRIVADA DA HIVEMQ
+  const hostMqtt = "965bd6abd6f54692b84d710cab8327b4.s1.eu.hivemq.cloud";
+  const portaMqtt = 8884; // Porta WebSocket com SSL obrigatória para HTTPS
+  const userMqtt = "hivemq.webclient.1780180118732";
+  const passMqtt = "q1.@lU6#tBxZO9Ss4,en";
+  
   const clientRandomId = "sl_user_web_" + Math.floor(Math.random() * 10000);
 
   MQTT_CLIENT = new Paho.MQTT.Client(hostMqtt, Number(portaMqtt), clientRandomId);
 
   MQTT_CLIENT.onConnectionLost = function (responseObject) {
-    console.log("[MQTT WEB] Conexão com o servidor perdida: ", responseObject.errorMessage);
+    console.log("[MQTT WEB] Conexão perdida: ", responseObject.errorMessage);
     configurarInterfaceEstadoOffline();
   };
 
   MQTT_CLIENT.onMessageArrived = function (message) {
     try {
-      // Recebe o JSON instantâneo expelido pela placa a cada 2 segundos
       const d = JSON.parse(message.payloadString);
       processarERenderizarDadosMqtt(d);
     } catch (err) {
-      console.error("[MQTT WEB] Falha ao processar payload JSON:", err);
+      console.error("[MQTT WEB] Erro no JSON recebido:", err);
     }
   };
 
+  // EXECUTA A CONEXÃO COM O SEU CADEADO DE SEGURANÇA SSL ATIVADO
   MQTT_CLIENT.connect({
+    userName: userMqtt,
+    password: passMqtt,
+    useSSL: true, // Garante o alinhamento com o HTTPS do seu site
     onSuccess: function () {
-      console.log("[MQTT WEB] Conectado ao Broker! Ouvindo canal do dispositivo: " + CODIGO);
-      // Inscreve na escuta do canal específico da placa
+      console.log("[MQTT WEB] Servidor SL TECNOLOGIA Conectado! Ouvindo canal: " + CODIGO);
       MQTT_CLIENT.subscribe("sl_bms/" + CODIGO + "/telemetria");
     },
     onFailure: function (err) {
-      console.error("[MQTT WEB] Falha crítica de conexão:", err);
+      console.error("[MQTT WEB] Falha na conexão privada:", err);
       configurarInterfaceEstadoOffline();
-    },
-    useSSL: false // Deixar false para a porta 8000 WebSocket aberta da HiveMQ
+    }
   });
 }
 
@@ -1341,7 +1341,6 @@ function processarERenderizarDadosMqtt(d) {
   var cardBat = document.getElementById('cardBateria');
   var txtBat = document.getElementById('txtBateria');
 
-  // Se o dado chegou no MQTT, a BMS está obrigatoriamente Online
   gerenciarLayoutStatus(cardBms, txtBms, true, "Online", "Offline");
   
   var invAtivo = (d.inversor_conectado !== undefined) ? d.inversor_conectado : true;
@@ -1380,7 +1379,7 @@ function processarERenderizarDadosMqtt(d) {
 }
 
 function voltar(){ 
-  fecharMqttAnterior(); // Desconecta o MQTT ao sair
+  fecharMqttAnterior(); 
   clearInterval(INT); 
   localStorage.removeItem('bms_codigo_ativo'); 
   mostrarLista(); 
@@ -1527,17 +1526,17 @@ function atualizarGauge(soc){
 function gerenciarLayoutStatus(elementoCard, elementoTxt, ativo, textoAtivo, textoInativo) {
   if (!elementoCard || !elementoTxt) return;
   if (ativo) {
-    elementoCard.className = "card card-inner-item triple-active"; // Mantém classes do design original
+    elementoCard.className = "card card-inner-item triple-active"; 
     elementoTxt.textContent = textoAtivo;
   } else {
-    elementoCard.className = "card card-inner-item triple-inactive"; // Mantém classes do design original
+    elementoCard.className = "card card-inner-item triple-inactive"; 
     elementoTxt.textContent = textoInativo;
   }
 }
 
 function sair(){ if(confirm('Deseja realmente sair?')) sairSemConfirmacao(); }
 function sairSemConfirmacao(){ 
-  fecharMqttAnterior(); // Desconecta segurança
+  fecharMqttAnterior(); 
   clearInterval(INT); 
   localStorage.removeItem('bms_token'); 
   localStorage.removeItem('bms_user'); 
