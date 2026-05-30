@@ -96,7 +96,7 @@ export async function onRequest({ request, env }) {
       return json({ ok: true });
     }
 
-    // ROTA REENVIO DE LINK DE ATIVAÇÃO
+    // ROTA ADICIONAL: REENVIO DE LINK DE ATIVAÇÃO
     if (action === 'resend_verification' && request.method === 'POST') {
       const { email } = await request.json();
       const userEmail = (email || '').trim().toLowerCase();
@@ -230,11 +230,12 @@ export async function onRequest({ request, env }) {
       return json({ ok: false, error: 'Credenciais inválidas' }, 401);
     }
 
-    // ROTA 7: UPDATE TELEMETRIA DA EQUIPE/BMS (SUPORTE REMOTO OTA GRATUITO INTEGRADO)
+    // ROTA 7: UPDATE TELEMETRIA DA EQUIPE/BMS (ADAPTADA PRO INVERSOR)
     if (action === 'update' && request.method === 'POST') {
       const body = await request.json();
       const { code, soc, voltage, current, temp, cells } = body;
       
+      // Mapeamento dos novos parâmetros do Inversor enviados pelo ESP32
       const inversor_conectado = body.inversor_conectado !== undefined ? (body.inversor_conectado ? 1 : 0) : 1;
       const bateria_conectada = body.bateria_conectada !== undefined ? (body.bateria_conectada ? 1 : 0) : 1;
       const inv_potencia = body.inv_potencia || 0;
@@ -244,11 +245,6 @@ export async function onRequest({ request, env }) {
 
       if (!code) return json({ ok: false, error: 'Code obrigatório' }, 400);
       
-      // 1. Busca se há alguma URL OTA pendente na tabela para esta placa antes de atualizar
-      const otaCheck = await env.DB.prepare('SELECT ota_url FROM bms WHERE code = ?').bind(code).first();
-      let pendingOtaUrl = otaCheck ? otaCheck.ota_url : null;
-
-      // 2. Grava a telemetria normal do ESP32
       await env.DB.prepare(`
         INSERT INTO bms (
           code, soc, voltage, current, temp, cells, online, updated_at,
@@ -266,19 +262,6 @@ export async function onRequest({ request, env }) {
         inversor_conectado, bateria_conectada, inv_potencia, inv_tensao_ac, inv_frequencia, inv_geracao_dia
       ).run();
       
-      // 3. Se houver OTA pendente, responde injetando o cabeçalho e limpa o agendamento no banco
-      if (pendingOtaUrl && pendingOtaUrl.length > 10) {
-        await env.DB.prepare("UPDATE bms SET ota_url = NULL WHERE code = ?").bind(code).run();
-        return new Response(JSON.stringify({ ok: true, ota_triggered: true }), {
-          status: 200,
-          headers: {
-            ...cors,
-            'Content-Type': 'application/json',
-            'x-update-url': pendingOtaUrl
-          }
-        });
-      }
-
       return json({ ok: true });
     }
 
@@ -316,28 +299,6 @@ export async function onRequest({ request, env }) {
     // ROTAS PROTEGIDAS - EXCLUSIVAS DO ADMIN
     // ==========================================
     if (isAdmin) {
-      // ROTA INTEGRADA: AGENDAMENTO OTA VIA UPLOAD DIRETO GRATUITO
-      if (action === 'admin_upload_ota' && request.method === 'POST') {
-        const formData = await request.formData();
-        const file = formData.get('firmware');
-        const code = formData.get('code');
-
-        if (!file || !code) return json({ ok: false, message: 'Dados incompletos' }, 400);
-
-        // Simulando geração de URL estática interna da sua própria estrutura de arquivos
-        // Salvamos apenas o link que aponta para o repositório público ou caminho relativo do bms.app.br
-        const linkFirmwareGratuito = `https://bms.app.br/firmwares/compiled_${code}.bin`;
-
-        // Tenta garantir que a coluna ota_url exista e salva o link de texto sem custo
-        try {
-          await env.DB.prepare("ALTER TABLE bms ADD COLUMN ota_url TEXT").run().catch(() => {});
-          await env.DB.prepare("UPDATE bms SET ota_url = ? WHERE code = ?").bind(linkFirmwareGratuito, code).run();
-          return json({ ok: true, url: linkFirmwareGratuito });
-        } catch (err) {
-          return json({ ok: false, message: err.message }, 500);
-        }
-      }
-
       // LISTAR DISPOSITIVOS NO ADMIN COM NOME DO DONO
       if (action === 'admin_list_master' && request.method === 'GET') {
         const { results } = await env.DB.prepare(`
@@ -475,6 +436,7 @@ export async function onRequest({ request, env }) {
       return json(withOnline);
     }
 
+    // ROTA COMPARTILHADA: RETORNO DE DADOS PRO CLIENTE (ADAPTADA COM OS NOVOS CAMPOS)
     if (action === 'data' && request.method === 'GET') {
       const code = url.searchParams.get('code');
       if (!code) return json({ ok: false, error: 'Code obrigatório' }, 400);
@@ -487,6 +449,7 @@ export async function onRequest({ request, env }) {
       
       const online = data.updated_at && (Date.now() - new Date(data.updated_at).getTime() < 5000);
       
+      // Mapeamento seguro para garantir integridade caso a tabela ainda não possua as colunas preenchidas
       return json({
         ...data,
         online,
@@ -508,7 +471,7 @@ export async function onRequest({ request, env }) {
       const senha_atual_hash = Array.from(new Uint8Array(hashAtual)).map(b => b.toString(16).padStart(2, '0')).join('');
       
       const user = await env.DB.prepare('SELECT id FROM users WHERE id = ? AND senha_hash = ?').bind(userId, senha_atual_hash).first();
-      if (!user) return json({ ok: false, error: 'Senha atual incorrecta' }, 400);
+      if (!user) return json({ ok: false, error: 'Senha atual incorreta' }, 400);
       
       const hashNova = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(novaSenha));
       const nova_senha_hash = Array.from(new Uint8Array(hashNova)).map(b => b.toString(16).padStart(2, '0')).join('');
