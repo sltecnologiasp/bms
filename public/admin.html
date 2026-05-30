@@ -51,6 +51,11 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text-main);
   margin: auto auto;
 }
 
+#dashAdmin.active {
+  gap: 5px !important;
+  justify-content: flex-start !important;
+}
+
 .title{font-size:clamp(32px,7vw,54px);font-weight:900;margin-bottom:4px;letter-spacing:2px;background:linear-gradient(90deg,var(--blue),var(--cyan));-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-align:center;width:100%}
 .user-info{color:var(--text-muted);font-size:14px;text-align:center;margin-bottom:16px;font-weight:500;width:100%}
 
@@ -66,8 +71,32 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text-main);
 }
 
 #login .card { max-width:440px }
-#dashAdmin .card { width:100%; max-width:520px }
+#dashAdmin .card { width:100%; max-width:100%; margin-bottom:0 !important; }
 .card-cadastro { width: 100%; max-width: 100% !important; margin: 0 auto 12px auto !important; }
+
+.card-wrapper-block {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 20px;
+  padding: 16px 14px 14px 14px;
+  width: 100%;
+  box-shadow: var(--neon-glow);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.section-block-title {
+  font-size: 11px;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  text-align: center;
+  width: 100%;
+  margin-top: 2px;
+  margin-bottom: 2px;
+  font-weight: 800;
+  color: var(--text-muted);
+}
 
 input,select,button{width:100%;padding:16px;border-radius:14px;border:none;outline:none;font-size:16px;font-family:inherit;transition:all 0.2s ease}
 input,select{
@@ -111,12 +140,33 @@ button.logout{margin-top:16px;background:transparent;border:1px solid var(--inpu
 button.logout:hover{background:rgba(231,29,54,0.08);color:var(--red);border-color:var(--red)}
 
 .grid{
-  display:grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap:12px;
-  width:100%;
-  max-width:100%;
-  margin-top:8px
+  display:grid !important;
+  grid-template-columns: repeat(2, 1fr) !important;
+  gap:5px !important; 
+  width:100% !important;
+  max-width:100% !important;
+  margin-top:0px !important;
+}
+
+.grid .card-inner-item {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  text-align: center !important;
+  padding: 12px !important;
+  background: var(--bg); 
+  border: 1px solid var(--card-border);
+  border-radius: 14px;
+}
+
+.value {
+  font-size: clamp(22px, 5.5vw, 28px);
+  font-weight: 800;
+  margin-top: 4px;
+  width: 100%;
+  text-align: center !important;
+  display: block !important;
 }
 
 #lista, #listaUsers { width: 100% }
@@ -128,6 +178,7 @@ button.logout:hover{background:rgba(231,29,54,0.08);color:var(--red);border-colo
   border-radius:16px;
   padding:14px;
   margin:0 !important;
+  margin-bottom:12px !important;
   display:flex;
   flex-direction:column;
   align-items:center;
@@ -154,32 +205,7 @@ button.logout:hover{background:rgba(231,29,54,0.08);color:var(--red);border-colo
 .card-code{font-size:13px;font-weight:800;font-family:monospace;color:var(--text-main);margin:6px 0;text-align:center;letter-spacing:0.2px;word-break:break-all}
 .card-top{display:flex;flex-direction:column;justify-content:flex-start;align-items:center;width:100%}
 
-.cells{display:grid;grid-template-columns:repeat(auto-fill,minmax(85px,1fr));gap:12px;margin-top:16px;width:100%}
-.cell{background:var(--cell-bg);border-radius:12px;padding:10px 6px;border:1px solid var(--cell-border);display:flex;flex-direction:column;align-items:center;justify-content:center}
-.cell-num{font-size:11px;opacity:.7;margin-bottom:2px;color:var(--text-muted)}
-.cell-val{font-size:15px;font-weight:700;font-variant-numeric:tabular-nums;color:var(--text-main)}
-.cell.ok{border-color:var(--green)}
-.cell.warn{border-color:var(--orange)}
-.cell.crit{border-color:var(--red)}
-
-.modal{display:none;position:fixed;inset:0;background:rgba(3,5,10,0.5);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);z-index:999;overflow-y:auto;padding:20px}
-.modal.active{display:flex;align-items:center;justify-content:center}
-.modal-content{width:100%;max-width:520px;background:var(--input-bg);border:1px solid var(--input-border);border-radius:24px;padding:24px;position:relative;box-shadow:0 20px 50px rgba(0,0,0,0.15)}
-.modal-content.small{max-width:420px}
-
-.data-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px}
-.data-item{text-align:center;background:var(--cell-bg);padding:10px;border-radius:12px;border:1px solid var(--cell-border)}
-.data-item .value{font-size:24px;font-weight:800;margin-top:4px}
-.btn-group{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px;width:100%}
-.btn-group button{margin-top:0}
-
-.value { font-variant-numeric: tabular-nums; }
-.erro{background:rgba(231,29,54,0.1);border:1px solid var(--red);border-radius:12px;padding:14px;margin-top:16px;color:var(--red);font-size:14px;text-align:center;}
-.erro.hidden{display:none!important}
-
-.dash-grid { display:grid; grid-template-columns:repeat(2, 1fr); gap:12px; width:100% }
-
-/* NOVO: Estilos do Bloco de Filtros Alinhados */
+/* Estilos do Bloco de Filtros Alinhados */
 .filter-row {
   display: flex;
   gap: 8px;
@@ -207,9 +233,117 @@ button.logout:hover{background:rgba(231,29,54,0.08);color:var(--red);border-colo
   box-shadow: 0 4px 15px rgba(0, 128, 255, 0.15);
 }
 
+/* COMPONENTES DO DASHBOARD IDENTICOS AO CLIENTE */
+.gauge-card{padding:15px;min-height:230px;display:flex;flex-direction:column;gap:10px;justify-content:center}
+.gauge{width:min(190px,48vw);height:min(190px,48vw);margin:auto;border-radius:50%;background:conic-gradient(var(--green) 0deg,var(--cyan) 180deg,var(--gauge-empty) 180deg);position:relative;box-shadow:0 0 30px rgba(0,255,255,.05);transition:background .8s ease}
+.gauge::before{content:'';position:absolute;inset:16px;border-radius:50%;background:var(--bg);transition: background 0.3s}
+.gauge-inner{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;align-items:center;z-index:2}
+.gauge-value{font-size:clamp(36px,9vw,52px);font-weight:900;color:var(--green)}
+.gauge-label{opacity:.6;letter-spacing:1.5px;font-size:11px;color:var(--text-main)}
+
+.bar-wrap{margin-top:2px}
+.bar-label{display:flex;justify-content:center;align-items:center;gap:6px;margin-bottom:6px;font-size:13px;font-weight:600;}
+.bar-label span:first-child { color: var(--text-main); }
+.bar-label span:last-child { color: var(--cyan); font-weight: 700; }
+.bar{height:12px;background:var(--gauge-empty);border-radius:999px;overflow:hidden}
+.bar-fill{height:100%;width:0%;border-radius:999px;background:linear-gradient(90deg,var(--green),var(--cyan));transition:width.8s ease}
+
+.status-envelope-card {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 20px;
+  padding: 16px 14px 14px 14px;
+  width: 100%;
+  box-shadow: var(--neon-glow);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.status-triple-grid {
+  display: grid !important;
+  grid-template-columns: repeat(3, 1fr) !important;
+  gap: 5px !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  position: relative;
+}
+
+.status-triple-grid .card {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  text-align: center !important;
+  padding: 10px 4px !important;
+  min-height: 80px !important;
+  background: var(--bg) !important; 
+  border: 1px solid var(--card-border) !important;
+  box-shadow: none !important;
+  transition: all 0.3s ease !important;
+}
+
+.status-triple-grid .status-title {
+  font-size: 10px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.5px !important;
+  text-transform: uppercase !important;
+  color: var(--text-muted) !important;
+  margin-bottom: 4px !important;
+}
+
+.status-triple-grid .status-text {
+  font-size: 13px !important;
+  font-weight: 800 !important;
+}
+
+.triple-active {
+  border-color: var(--green) !important;
+  background: var(--card-bg) !important;
+  box-shadow: 0 0 10px var(--neon-pulse-color) !important;
+}
+.triple-active .status-text {
+  color: var(--green) !important;
+}
+
+.triple-inactive {
+  border-color: var(--card-border) !important;
+}
+.triple-inactive .status-text {
+  color: var(--red) !important;
+}
+
+.diff {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 5px; 
+  margin-top: 8px;
+}
+.diff-item{padding:10px 6px;border-radius:12px;background:var(--cell-bg);border:1px solid var(--cell-border);text-align:center}
+.diff-item span{display:block;margin-top:4px;font-size:clamp(16px,4.5vw,20px);font-weight:800;font-variant-numeric:tabular-nums}
+
+.cells{display:grid;grid-template-columns:repeat(auto-fill,minmax(85px,1fr));gap:12px;margin-top:12px;width:100%}
+.cell{background:var(--cell-bg);border-radius:12px;padding:10px 6px;border:1px solid var(--cell-border);display:flex;flex-direction:column;align-items:center;justify-content:center}
+.cell-num{font-size:11px;opacity:.6;margin-bottom:2px;color:var(--text-muted)}
+.cell-val{font-size:15px;font-weight:700;font-variant-numeric:tabular-nums;color:var(--text-main)}
+.cell.ok{border-color:var(--green)}
+.cell.warn{border-color:var(--orange)}
+.cell.crit{border-color:var(--red)}
+
+.modal{display:none;position:fixed;inset:0;background:rgba(3,5,10,0.5);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);z-index:999;overflow-y:auto;padding:20px}
+.modal.active{display:flex;align-items:center;justify-content:center}
+.modal-content{width:100%;max-width:520px;background:var(--input-bg);border:1px solid var(--input-border);border-radius:24px;padding:24px;position:relative;box-shadow:0 20px 50px rgba(0,0,0,0.15)}
+.modal-content.small{max-width:420px}
+
+.data-item{text-align:center;background:var(--cell-bg);padding:10px;border-radius:12px;border:1px solid var(--cell-border)}
+.btn-group{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px;width:100%}
+.btn-group button{margin-top:0}
+
+.erro{background:rgba(231,29,54,0.1);border:1px solid var(--red);border-radius:12px;padding:14px;margin-top:16px;color:var(--red);font-size:14px;text-align:center;}
+.erro.hidden{display:none!important}
+
 @media(min-width:600px){
-  .grid { grid-template-columns: repeat(4, 1fr); }
-  .dash-grid { grid-template-columns:repeat(4,1fr) }
+  #lista { grid-template-columns: repeat(4, 1fr); display: grid !important; }
   .filter-row button { font-size: 13px; padding: 14px; }
 }
 </style>
@@ -218,7 +352,7 @@ button.logout:hover{background:rgba(231,29,54,0.08);color:var(--red);border-colo
 
 <div id="login">
   <div class="title">SMART BMS</div>
-  <div class="user-info">Acesso administrative</div>
+  <div class="user-info">Acesso Administrativo</div>
   <div class="card">
     <div class="label">Usuário</div>
     <input id="user" placeholder="administrador" autocomplete="username" value="administrador">
@@ -253,7 +387,7 @@ button.logout:hover{background:rgba(231,29,54,0.08);color:var(--red);border-colo
 
   <div style="width:100%; display:flex; flex-direction:column; margin-bottom:12px">
     <div class="label" style="margin-bottom:8px" id="label-lista-titulo">Todas as BMS do Sistema</div>
-    <div id="lista" class="grid"></div>
+    <div id="lista" style="display:flex; flex-direction:column; gap:12px; width:100%;"></div>
   </div>
   
   <button class="logout" onclick="adminLogout()">SAIR DO PAINEL ADMIN</button>
@@ -272,49 +406,71 @@ button.logout:hover{background:rgba(231,29,54,0.08);color:var(--red);border-colo
 
 <div id="dashAdmin">
   <div class="title" style="font-size:clamp(28px,6vw,32px);margin-bottom:4px">SMART BMS</div>
-  <div style="text-align:center; margin-bottom:16px;">
-    <div id="modalBmsTitle" style="font-size:18px; font-family:monospace; font-weight:700; letter-spacing:1px; color:var(--blue)">SL000000000000</div>
+  <div style="text-align:center; margin-bottom:12px; margin-top: -6px">
     <div id="modalBmsDono"></div>
   </div>
 
-  <div class="card" style="display:flex; flex-direction:column; align-items:center; padding:20px 12px;">
-    <div id="adminSocGauge" style="width:140px; height:140px; border-radius:50%; display:flex; align-items:center; justify-content:center; position:relative; margin-bottom:16px; background:var(--gauge-empty)">
-      <div style="position:absolute; inset:8px; background:var(--input-bg); border-radius:50%; display:flex; flex-direction:column; align-items:center; justify-content:center; z-index:2">
-        <div id="adminSocValor" style="font-size:28px; font-weight:900; color:var(--text-main)">0%</div>
-        <div style="font-size:8px; letter-spacing:1px; opacity:0.6; margin-top:2px; font-weight:700; color:var(--text-main)">STATE OF CHARGE</div>
+  <div class="card gauge-card">
+    <div class="gauge" id="adminSocGauge">
+      <div class="gauge-inner">
+        <div class="gauge-value" id="adminSocValor">0%</div>
+        <div class="gauge-label">STATE OF CHARGE</div>
       </div>
     </div>
-    <div style="width:100%; max-width:280px">
-      <div style="display:flex; justify-content:between; font-size:11px; opacity:0.8; margin-bottom:6px; font-weight:600">
-        <span style="flex:1; text-align:left">Bateria</span>
-        <span id="adminSocBarTxt">0%</span>
+    <div class="bar-wrap">
+      <div class="bar-label"><span>Bateria</span><span id="adminSocBarTxt">0%</span></div>
+      <div class="bar"><div class="bar-fill" id="adminSocBar"></div></div>
+    </div>
+  </div>
+
+  <div class="status-envelope-card">
+    <div id="modalBmsTitle" style="font-size:13px; font-weight:700; color:var(--text-muted); font-family:monospace; text-align:center; letter-spacing:1px; margin-bottom:0px">SL000000000000</div>
+    
+    <div class="status-triple-grid">
+      <div id="cardInversor" class="card triple-inactive">
+        <span class="status-title">Inversor</span>
+        <span id="txtInversor" class="status-text">Desconectado</span>
       </div>
-      <div style="width:100%; height:6px; background:var(--gauge-empty); border-radius:999px; overflow:hidden">
-        <div id="adminSocBar" style="width:0%; height:100%; background:linear-gradient(90deg, var(--green), var(--cyan)); transition:width 0.4s ease"></div>
+      <div id="cardBms" class="card triple-inactive">
+        <span class="status-title">Smart BMS</span>
+        <span id="txtBms" class="status-text">Offline</span>
+      </div>
+      <div id="cardBateria" class="card triple-inactive">
+        <span class="status-title">Bateria</span>
+        <span id="txtBateria" class="status-text">Desconectada</span>
       </div>
     </div>
   </div>
 
-  <div class="card" style="padding:12px; display:flex; justify-content:center;">
-    <span id="adminStatus" class="status off" style="font-size:13px; font-weight:700">Offline</span>
-  </div>
-
-  <div class="dash-grid" style="margin-bottom:12px">
-    <div class="card" style="margin:0 !important; padding:14px 8px;"><div class="label">SOC</div><div class="value" id="adminSoc" style="color:var(--green)">0%</div></div>
-    <div class="card" style="margin:0 !important; padding:14px 8px;"><div class="label">Tensão</div><div class="value" id="adminVolt" style="color:var(--cyan)">0.00V</div></div>
-    <div class="card" style="margin:0 !important; padding:14px 8px;"><div class="label">Corrente</div><div class="value" id="adminCorr" style="color:var(--orange)">0.0A</div></div>
-    <div class="card" style="margin:0 !important; padding:14px 8px;"><div class="label">Temperatura</div><div class="value" id="adminTemp" style="color:var(--red)">0.0°C</div></div>
-  </div>
-
-  <div class="card" style="padding:16px 12px">
-    <div class="label" style="margin-bottom:12px">Células - Tensão Individual</div>
-    <div style="display:grid; grid-template-columns:repeat(4, 1fr); gap:6px; background:var(--cell-bg); border:1px solid var(--cell-border); padding:10px; border-radius:12px; margin-bottom:14px; font-size:11px">
-      <div style="text-align:center; border-right:1px solid var(--cell-border)">Min<span id="adminCelMin" style="display:block; color:var(--green); font-weight:700; margin-top:2px">0.00V</span></div>
-      <div style="text-align:center; border-right:1px solid var(--cell-border)">Max<span id="adminCelMax" style="display:block; color:var(--orange); font-weight:700; margin-top:2px">0.00V</span></div>
-      <div style="text-align:center; border-right:1px solid var(--cell-border)">Delta<span id="adminCelDif" style="display:block; color:var(--red); font-weight:700; margin-top:2px">0.00V</span></div>
-      <div style="text-align:center">Total<span id="adminCelTot" style="display:block; color:var(--cyan); font-weight:700; margin-top:2px">0</span></div>
+  <div class="card-wrapper-block">
+    <div class="section-block-title">Informações do Inversor</div>
+    <div class="grid">
+      <div class="card-inner-item"><div class="label">Potência Ativa</div><div class="value" id="adminInvPotencia" style="color:var(--green)">0W</div></div>
+      <div class="card-inner-item"><div class="label">Tensão AC</div><div class="value" id="adminInvTensaoAC" style="color:var(--cyan)">0.0V</div></div>
+      <div class="card-inner-item"><div class="label">Frequência</div><div class="value" id="adminInvFrequencia" style="color:var(--orange)">0.0Hz</div></div>
+      <div class="card-inner-item"><div class="label">Geração do Dia</div><div class="value" id="adminInvGeracaoDia" style="color:var(--blue)">0.0kWh</div></div>
     </div>
-    <div id="adminCellsContent" class="cells" style="margin-top:0; gap:8px"></div>
+  </div>
+
+  <div class="card-wrapper-block">
+    <div class="section-block-title">Informações da Bateria</div>
+    <div class="grid">
+      <div class="card-inner-item"><div class="label">SOC</div><div class="value" id="adminSoc" style="color:var(--green)">0%</div></div>
+      <div class="card-inner-item"><div class="label">Tensão</div><div class="value" id="adminVolt" style="color:var(--cyan)">0.0V</div></div>
+      <div class="card-inner-item"><div class="label">Corrente</div><div class="value" id="adminCorr" style="color:var(--orange)">0.0A</div></div>
+      <div class="card-inner-item"><div class="label">Temperatura</div><div class="value" id="adminTemp" style="color:var(--red)">0°C</div></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="section-block-title">Células - Tensão Individual</div>
+    <div class="diff">
+      <div class="diff-item">Min<span id="adminCelMin" style="color:var(--green)">0.00V</span></div>
+      <div class="diff-item">Max<span id="adminCelMax" style="color:var(--orange)">0.00V</span></div>
+      <div class="diff-item">Diferença<span id="adminCelDif" style="color:var(--red)">0.00V</span></div>
+      <div class="diff-item">Total<span id="adminCelTot" style="color:var(--cyan)">0</span></div>
+    </div>
+    <div id="adminCellsContent" class="cells"></div>
   </div>
 
   <button class="voltar" style="width:100%; margin-top:4px; padding:18px" onclick="closeBmsModal()">← VOLTAR À LISTA</button>
@@ -371,7 +527,6 @@ let bmsList = [];
 let activeBmsCode = sessionStorage.getItem('admin_active_bms_code');
 let activeScreen = sessionStorage.getItem('admin_active_screen') || 'painel';
 
-// NOVO: Variável de controle do filtro ativo
 let filtroAtivo = 'todas';
 
 let TIMEOUT_ADMIN_LOGIN = null;
@@ -462,22 +617,10 @@ function showDashAdmin(code) {
   renderAdminDashboard();
 }
 
-function mostrarClientes(){
-  showClientesPage();
-}
-
-function voltarPainel(){
-  showPainelPage();
-}
-
-function adminLogout(){
-  sessionStorage.clear();
-  location.reload();
-}
-
-function authHeaders(){
-  return {'Content-Type':'application/json','Authorization':'Bearer '+adminToken};
-}
+function mostrarClientes(){ showClientesPage(); }
+function voltarPainel(){ showPainelPage(); }
+function adminLogout(){ sessionStorage.clear(); location.reload(); }
+function authHeaders(){ return {'Content-Type':'application/json','Authorization':'Bearer '+adminToken}; }
 
 document.getElementById('code').oninput = e => {
   if(!e.target.value.startsWith('SL')) e.target.value = 'SL';
@@ -520,9 +663,7 @@ async function del(code){
   carregarTudo();
 }
 
-function viewBmsDetails(code){
-  showDashAdmin(code);
-}
+function viewBmsDetails(code){ showDashAdmin(code); }
 
 function closeBmsModal(){
   activeBmsCode = null;
@@ -549,19 +690,13 @@ function abrirModalVincular(userId, nomeCliente) {
   document.getElementById('modalVincularBms').classList.add('active');
 }
 
-function fecharModalVincular() {
-  document.getElementById('modalVincularBms').classList.remove('active');
-}
+function fecharModalVincular() { document.getElementById('modalVincularBms').classList.remove('active'); }
 
 async function confirmarVinculoManual() {
   const userId = document.getElementById('vincularUserId').value;
   const code = document.getElementById('selectBmsDisponiveis').value;
   
-  if (!code) {
-    alert('Selecione uma BMS válida da lista.');
-    return;
-  }
-  
+  if (!code) { alert('Selecione uma BMS válida da lista.'); return; }
   if (!confirm(`Confirmar o vínculo da bateria ${code} para este cliente?`)) return;
 
   try {
@@ -576,12 +711,8 @@ async function confirmarVinculoManual() {
       fecharModalVincular();
       await carregarTudo();
       listarUsers();
-    } else {
-      alert('Erro: ' + d.error);
-    }
-  } catch (e) {
-    alert('Erro ao processar vínculo.');
-  }
+    } else { alert('Erro: ' + d.error); }
+  } catch (e) { alert('Erro ao processar vínculo.'); }
 }
 
 async function abrirModalDesvincular(userId, nomeCliente) {
@@ -603,19 +734,13 @@ async function abrirModalDesvincular(userId, nomeCliente) {
   document.getElementById('modalDesvincularBms').classList.add('active');
 }
 
-function fecharModalDesvincular() {
-  document.getElementById('modalDesvincularBms').classList.remove('active');
-}
+function fecharModalDesvincular() { document.getElementById('modalDesvincularBms').classList.remove('active'); }
 
 async function confirmarDesvinculoManual() {
   const userId = document.getElementById('desvincularUserId').value;
   const code = document.getElementById('selectBmsVinculadas').value;
   
-  if (!code) {
-    alert('Selecione a BMS que deseja desvincular.');
-    return;
-  }
-  
+  if (!code) { alert('Selecione a BMS que deseja desvincular.'); return; }
   if (!confirm(`⚠️ ALERTA DE SEGURANÇA:\n\nTem certeza que deseja apagar o vínculo e remover a BMS ${code} da conta deste cliente?`)) return;
 
   try {
@@ -629,11 +754,17 @@ async function confirmarDesvinculoManual() {
       fecharModalDesvincular();
       await carregarTudo();
       listarUsers();
-    } else {
-      alert('Erro: ' + d.error);
-    }
-  } catch (e) {
-    alert('Erro ao deletar vínculo.');
+    } else { alert('Erro: ' + d.error); }
+  } catch (e) { alert('Erro ao deletar vínculo.'); }
+}
+
+function gerenciarLayoutStatus(elementoCard, elementoTxt, ativo, textoAtivo, textoInativo) {
+  if (ativo) {
+    elementoCard.className = "card triple-active";
+    elementoTxt.textContent = textoAtivo;
+  } else {
+    elementoCard.className = "card triple-inactive";
+    elementoTxt.textContent = textoInativo;
   }
 }
 
@@ -647,38 +778,85 @@ function renderAdminDashboard(){
     const bms = bmsList.find(b => b.code === activeBmsCode) || {};
     
     document.getElementById('modalBmsDono').innerHTML = bms.user_id ? 
-      `<span class="badge badge-orange">Vinculada: ${bms.dono_nome || bms.dono_email}</span>` : 
-      `<span class="badge badge-green">Disponível</span>`;
-      
-    const st = document.getElementById('adminStatus');
-    st.textContent = online ? 'Online' : 'Offline';
-    st.className = 'status ' + (online ? 'on' : 'off');
+      `<span class="badge badge-orange" style="font-size:12px; padding:6px 12px;">Vinculada: ${bms.dono_nome || bms.dono_email}</span>` : 
+      `<span class="badge badge-green" style="font-size:12px; padding:6px 12px;">Disponível / Livre</span>`;
 
-    const socVal = d.soc ? parseInt(d.soc) : 0;
+    const cardInv = document.getElementById('cardInversor');
+    const txtInv = document.getElementById('txtInversor');
+    const cardBms = document.getElementById('cardBms');
+    const txtBms = document.getElementById('txtBms');
+    const cardBat = document.getElementById('cardBateria');
+    const txtBat = document.getElementById('txtBateria');
+
+    const adminSocGauge = document.getElementById('adminSocGauge');
+    const adminSocValor = document.getElementById('adminSocValor');
+    const adminSocBarTxt = document.getElementById('adminSocBarTxt');
+    const adminSocBar = document.getElementById('adminSocBar');
     
     if(!online){
+      gerenciarLayoutStatus(cardBms, txtBms, false, "Online", "Offline");
+      gerenciarLayoutStatus(cardInv, txtInv, false, "Conectado", "Desconectado");
+      gerenciarLayoutStatus(cardBat, txtBat, false, "Conectada", "Desconectada");
+
+      document.getElementById('adminInvPotencia').textContent = '0W';
+      document.getElementById('adminInvTensaoAC').textContent = '0.0V';
+      document.getElementById('adminInvFrequencia').textContent = '0.0Hz';
+      document.getElementById('adminInvGeracaoDia').textContent = '0.0kWh';
+
       document.getElementById('adminSoc').textContent = '0%';
-      document.getElementById('adminVolt').textContent = '0.00V';
+      document.getElementById('adminVolt').textContent = '0.0V';
       document.getElementById('adminCorr').textContent = '0.0A';
-      document.getElementById('adminTemp').textContent = '0.0°C';
+      document.getElementById('adminTemp').textContent = '0°C';
       
-      document.getElementById('adminSocValor').textContent = '0%';
-      document.getElementById('adminSocBarTxt').textContent = '0%';
-      document.getElementById('adminSocBar').style.width = '0%';
-      document.getElementById('adminSocGauge').style.background = 'var(--gauge-empty)';
+      adminSocValor.textContent = '0%';
+      adminSocBarTxt.textContent = '0%';
+      adminSocBar.style.width = '0%';
+      adminSocGauge.style.background = 'var(--gauge-empty)';
       
       renderAdminCells([]);
     } else {
-      document.getElementById('adminSoc').textContent = socVal + '%';
-      document.getElementById('adminVolt').textContent = (d.voltage ? d.voltage.toFixed(2) : '0.00') + 'V';
-      document.getElementById('adminCorr').textContent = (d.current ? d.current.toFixed(1) : '0.0') + 'A';
-      document.getElementById('adminTemp').textContent = (d.temp ? d.temp.toFixed(1) : '0.0') + '°C';
+      gerenciarLayoutStatus(cardBms, txtBms, true, "Online", "Offline");
       
-      document.getElementById('adminSocValor').textContent = socVal + '%';
-      document.getElementById('adminSocBarTxt').textContent = socVal + '%';
-      document.getElementById('adminSocBar').style.width = socVal + '%';
-      const deg = socVal * 3.6;
-      document.getElementById('adminSocGauge').style.background = `conic-gradient(var(--green) 0deg, var(--cyan) ${deg}deg, var(--gauge-empty) ${deg}deg)`;
+      const invAtivo = (d.inversor_conectado !== undefined) ? d.inversor_conectado : true;
+      gerenciarLayoutStatus(cardInv, txtInv, invAtivo, "Conectado", "Desconectado");
+
+      const batAtiva = (d.bateria_conectada !== undefined) ? d.bateria_conectada : true;
+      gerenciarLayoutStatus(cardBat, txtBat, batAtiva, "Conectada", "Desconectada");
+
+      if(!invAtivo) {
+        document.getElementById('adminInvPotencia').textContent = '0W';
+        document.getElementById('adminInvTensaoAC').textContent = '0.0V';
+        document.getElementById('adminInvFrequencia').textContent = '0.0Hz';
+        document.getElementById('adminInvGeracaoDia').textContent = '0.0kWh';
+      } else {
+        document.getElementById('adminInvPotencia').textContent = (d.inv_potencia !== undefined ? d.inv_potencia.toFixed(0) : '0') + 'W';
+        document.getElementById('adminInvTensaoAC').textContent = (d.inv_tensao_ac !== undefined ? d.inv_tensao_ac.toFixed(1) : '0.0') + 'V';
+        document.getElementById('adminInvFrequencia').textContent = (d.inv_frequencia !== undefined ? d.inv_frequencia.toFixed(1) : '0.0') + 'Hz';
+        document.getElementById('adminInvGeracaoDia').textContent = (d.inv_geracao_dia !== undefined ? d.inv_geracao_dia.toFixed(1) : '0.0') + 'kWh';
+      }
+
+      if(!batAtiva) {
+        document.getElementById('adminSoc').textContent = '0%';
+        document.getElementById('adminVolt').textContent = '0.0V';
+        document.getElementById('adminCorr').textContent = '0.0A';
+        document.getElementById('adminTemp').textContent = '0°C';
+        adminSocValor.textContent = '0%';
+        adminSocBarTxt.textContent = '0%';
+        adminSocBar.style.width = '0%';
+        adminSocGauge.style.background = 'var(--gauge-empty)';
+      } else {
+        const socVal = d.soc ? parseInt(d.soc) : 0;
+        document.getElementById('adminSoc').textContent = socVal + '%';
+        document.getElementById('adminVolt').textContent = (d.voltage ? d.voltage.toFixed(2) : '0.00') + 'V';
+        document.getElementById('adminCorr').textContent = (d.current ? d.current.toFixed(1) : '0.0') + 'A';
+        document.getElementById('adminTemp').textContent = (d.temp ? d.temp.toFixed(1) : '0.0') + '°C';
+        
+        adminSocValor.textContent = socVal + '%';
+        adminSocBarTxt.textContent = socVal + '%';
+        adminSocBar.style.width = socVal + '%';
+        const deg = socVal * 3.6;
+        adminSocGauge.style.background = `conic-gradient(var(--green) 0deg, var(--cyan) ${deg}deg, var(--gauge-empty) ${deg}deg)`;
+      }
       
       renderAdminCells(d.cells || []);
     }
@@ -688,7 +866,7 @@ function renderAdminDashboard(){
 function renderAdminCells(cells){
   const container = document.getElementById('adminCellsContent');
   if(!cells || cells.length === 0){
-    container.innerHTML = '<div style="grid-column:1/-1;text-align:center;opacity:.5;padding:10px;font-size:13px;color:var(--text-muted)">Sem dados das células</div>';
+    container.innerHTML = '<div style="grid-column:1/-1;text-align:center;opacity:.5;padding:10px;font-size:13px;color:var(--text-muted)">Sem dados</div>';
     document.getElementById('adminCelMin').textContent = '0.00V';
     document.getElementById('adminCelMax').textContent = '0.00V';
     document.getElementById('adminCelDif').textContent = '0.00V';
@@ -708,9 +886,9 @@ function renderAdminCells(cells){
   const max = Math.max.apply(null, vals);
   const dif = max - min;
 
-  document.getElementById('adminCelMin').textContent = min.toFixed(3) + 'V';
-  document.getElementById('adminCelMax').textContent = max.toFixed(3) + 'V';
-  document.getElementById('adminCelDif').textContent = dif.toFixed(3) + 'V';
+  document.getElementById('adminCelMin').textContent = min.toFixed(2) + 'V';
+  document.getElementById('adminCelMax').textContent = max.toFixed(2) + 'V';
+  document.getElementById('adminCelDif').textContent = dif.toFixed(2) + 'V';
   document.getElementById('adminCelTot').textContent = cells.length;
 
   container.innerHTML = cells.map((v, i) => {
@@ -718,7 +896,7 @@ function renderAdminCells(cells){
     let cls = 'ok';
     if(val < 3.2 || val > 4.2) cls = 'crit';
     else if(val < 3.4 || val > 4.15) cls = 'warn';
-    return `<div class="cell ${cls}" style="padding: 8px 4px;"><div class="cell-num" style="font-size:10px">C${i+1}</div><div class="cell-val" style="font-size:13px">${val.toFixed(3)}</div></div>`;
+    return `<div class="cell ${cls}"><div class="cell-num">C${i+1}</div><div class="cell-val">${val.toFixed(2)}V</div></div>`;
   }).join('');
 }
 
@@ -730,9 +908,7 @@ function editarUser(id, nome, email){
   document.getElementById('modalEditUser').classList.add('active');
 }
 
-function closeEditUser(){
-  document.getElementById('modalEditUser').classList.remove('active');
-}
+function closeEditUser(){ document.getElementById('modalEditUser').classList.remove('active'); }
 
 async function salvarUser(){
   const id = document.getElementById('editUserId').value;
@@ -769,7 +945,6 @@ async function carregarTudo(){
     return (b.updated_at ? new Date(b.updated_at).getTime() : 0) - (a.updated_at ? new Date(a.updated_at).getTime() : 0);
   });
 
-  // NOVO: Atualiza as contagens numéricas nos botões de filtro em tempo real
   atualizarContadoresFiltro();
 
   if(activeScreen === 'painel') {
@@ -777,7 +952,6 @@ async function carregarTudo(){
   }
 }
 
-// NOVO: Calcula as quantidades baseadas nos status das baterias retornadas do banco
 function atualizarContadoresFiltro() {
   const totalTodas = bmsList.length;
   const totalDisponiveis = bmsList.filter(b => !b.user_id).length;
@@ -788,7 +962,6 @@ function atualizarContadoresFiltro() {
   document.getElementById('count-online').textContent = totalOnline;
 }
 
-// NOVO: Altera a flag de filtragem e atualiza os estilos dos botões ativos
 function alterarFiltroBms(novoFiltro) {
   filtroAtivo = novoFiltro;
   
@@ -808,7 +981,6 @@ function alterarFiltroBms(novoFiltro) {
   atualizarHTMLListaBms();
 }
 
-// AJUSTADO: Modificado para aplicar o filtro de visualização sob a bmsList
 function atualizarHTMLListaBms() {
   let bmsFiltradas = bmsList;
   
@@ -824,15 +996,15 @@ function atualizarHTMLListaBms() {
     const statusText = b.online ? 'Online' : 'Offline';
 
     return `
-    <div class="card" onclick="viewBmsDetails('${b.code}')" style="padding: 12px 8px; justify-content: space-between;">
-      <div class="card-top">
+    <div class="card" onclick="viewBmsDetails('${b.code}')" style="padding: 12px 14px; flex-direction:row; align-items:center; justify-content: space-between; min-height:auto;">
+      <div style="display:flex; flex-direction:column; align-items:flex-start;">
         <span class="status ${statusClass}">${statusText}</span>
-        <div class="card-code">${b.code}</div>
+        <div class="card-code" style="margin:4px 0">${b.code}</div>
         <div>${dono}</div>
       </div>
-      <button class="del" onclick="del('${b.code}')">EXCLUIR</button>
+      <button class="del" style="width:auto; margin-top:0" onclick="del('${b.code}')">EXCLUIR</button>
     </div>
-  `}).join('') || `<div class="card card-empty"><div>Nenhuma BMS encontrada neste filtro (${filtroAtivo})</div></div>`;
+  `}).join('') || `<div class="card card-empty"><div>Nenhuma BMS encontrada neste filtro</div></div>`;
 }
 
 async function listarUsers(){
@@ -849,7 +1021,7 @@ async function listarUsers(){
           <div style="opacity:.6;font-size:13px;margin-top:4px;word-break:break-all;font-family:monospace;color:var(--text-muted)">${u.email}</div>
           <div style="opacity:.5;font-size:11px;margin-top:4px;color:var(--text-muted)">Cadastro: ${new Date(u.created_at).toLocaleDateString('pt-BR')}</div>
         </div>
-        <div class="data-item" style="text-align:left;display:flex;justify-content:space-between;align-items:center;padding:8px 12px">
+        <div class="data-item" style="text-align:left;display:flex;justify-content:space-between;align-items:center;padding:8px 12px;width:100%">
           <div class="label" style="text-align:left;margin:0">BMS Atreladas</div>
           <div class="value" style="color:var(--cyan);font-size:20px;margin:0">${u.bms_count}</div>
         </div>
@@ -858,8 +1030,8 @@ async function listarUsers(){
         <button class="edit" onclick="editarUser(${u.id},'${u.nome}','${u.email}')">EDITAR</button>
         <button class="del" onclick="deletarUser(${u.id},'${u.nome}')">EXCLUIR</button>
       </div>
-      <button class="vincular" onclick="abrirModalVincular(${u.id}, '${u.nome}')">+ VINCULAR BMS</button>
-      <button class="desvincular" onclick="abrirModalDesvincular(${u.id}, '${u.nome}')">- DESVINCULAR BMS</button>
+      <button class="vincular" onclick="abrirModalVincular(${u.id}, '${u.nome}')" style="width:100%">+ VINCULAR BMS</button>
+      <button class="desvincular" onclick="abrirModalDesvincular(${u.id}, '${u.nome}')" style="width:100%">- DESVINCULAR BMS</button>
     </div>
   `).join('') || '<div class="card card-empty"><div>Nenhum cliente cadastrado</div></div>';
 }
