@@ -119,6 +119,19 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text-main);
 #login .card,#cadastro .card,#redefinir .card,#configuracoesPage .card { width:100%; max-width:500px; }
 #lista .card, #dash .card { width:100%; max-width:100%; }
 
+/* Estilo específico para envelopar sub-blocos internos sem bordas excessivas */
+.card-wrapper-block {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 20px;
+  padding: 16px 14px 14px 14px;
+  width: 100%;
+  box-shadow: var(--neon-glow);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
 .label{font-size:11px;letter-spacing:1px;text-transform:uppercase;text-align:center;width:100%;margin-bottom:6px;font-weight:700;color:var(--text-muted)}
 
 .section-block-title {
@@ -127,7 +140,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text-main);
   text-transform: uppercase;
   text-align: center;
   width: 100%;
-  margin-top: 6px;
+  margin-top: 2px;
   margin-bottom: 2px;
   font-weight: 800;
   color: var(--text-muted);
@@ -308,13 +321,16 @@ button:active{transform:scale(0.98)}
   margin-top:0px !important;
 }
 
-.grid .card {
+.grid .card-inner-item {
   display: flex !important;
   flex-direction: column !important;
   align-items: center !important;
   justify-content: center !important;
   text-align: center !important;
   padding: 12px !important;
+  background: var(--bg); /* Fundo igual ao geral para destacar dentro do card pai */
+  border: 1px solid var(--card-border);
+  border-radius: 14px;
 }
 
 .value {
@@ -348,7 +364,12 @@ button:active{transform:scale(0.98)}
 
 .card-empty{grid-column:1/-1;min-height:180px;display:flex;align-items:center;justify-content:center;color:var(--text-muted);font-size:14px}
 
-.diff{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:12px}
+.diff {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 5px; /* Alinhado com o padrão compacto de 5px */
+  margin-top: 8px;
+}
 .diff-item{padding:10px 6px;border-radius:12px;background:var(--cell-bg);border:1px solid var(--cell-border);text-align:center}
 .diff-item span{display:block;margin-top:4px;font-size:clamp(16px,4.5vw,20px);font-weight:800;font-variant-numeric:tabular-nums}
 
@@ -612,20 +633,24 @@ button:active{transform:scale(0.98)}
     </div>
   </div>
 
-  <div class="section-block-title">Informações do Inversor</div>
-  <div class="grid">
-    <div class="card"><div class="label">Potência Ativa</div><div class="value" id="invPotencia" style="color:var(--green)">0W</div></div>
-    <div class="card"><div class="label">Tensão AC</div><div class="value" id="invTensaoAC" style="color:var(--cyan)">0.0V</div></div>
-    <div class="card"><div class="label">Frequência</div><div class="value" id="invFrequencia" style="color:var(--orange)">0.0Hz</div></div>
-    <div class="card"><div class="label">Geração do Dia</div><div class="value" id="invGeracaoDia" style="color:var(--blue)">0.0kWh</div></div>
+  <div class="card-wrapper-block">
+    <div class="section-block-title">Informações do Inversor</div>
+    <div class="grid">
+      <div class="card-inner-item"><div class="label">Potência Ativa</div><div class="value" id="invPotencia" style="color:var(--green)">0W</div></div>
+      <div class="card-inner-item"><div class="label">Tensão AC</div><div class="value" id="invTensaoAC" style="color:var(--cyan)">0.0V</div></div>
+      <div class="card-inner-item"><div class="label">Frequência</div><div class="value" id="invFrequencia" style="color:var(--orange)">0.0Hz</div></div>
+      <div class="card-inner-item"><div class="label">Geração do Dia</div><div class="value" id="invGeracaoDia" style="color:var(--blue)">0.0kWh</div></div>
+    </div>
   </div>
 
-  <div class="section-block-title">Informações da Bateria</div>
-  <div class="grid">
-    <div class="card"><div class="label">SOC</div><div class="value" id="soc" style="color:var(--green)">0%</div></div>
-    <div class="card"><div class="label">Tensão</div><div class="value" id="volt" style="color:var(--cyan)">0V</div></div>
-    <div class="card"><div class="label">Corrente</div><div class="value" id="corr" style="color:var(--orange)">0A</div></div>
-    <div class="card"><div class="label">Temperatura</div><div class="value" id="temp" style="color:var(--red)">0°C</div></div>
+  <div class="card-wrapper-block">
+    <div class="section-block-title">Informações da Bateria</div>
+    <div class="grid">
+      <div class="card-inner-item"><div class="label">SOC</div><div class="value" id="soc" style="color:var(--green)">0%</div></div>
+      <div class="card-inner-item"><div class="label">Tensão</div><div class="value" id="volt" style="color:var(--cyan)">0V</div></div>
+      <div class="card-inner-item"><div class="label">Corrente</div><div class="value" id="corr" style="color:var(--orange)">0A</div></div>
+      <div class="card-inner-item"><div class="label">Temperatura</div><div class="value" id="temp" style="color:var(--red)">0°C</div></div>
+    </div>
   </div>
 
   <div class="card">
