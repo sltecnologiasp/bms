@@ -249,7 +249,7 @@ button:active{transform:scale(0.98)}
 }
 
 .gauge-card{padding:15px;min-height:230px;display:flex;flex-direction:column;gap:10px;justify-content:center}
-.gauge(width:min(190px,48vw);height:min(190px,48vw);margin:auto;border-radius:50%;background:conic-gradient(var(--green) 0deg,var(--cyan) 180deg,var(--gauge-empty) 180deg);position:relative;box-shadow:0 0 30px rgba(0,255,255,.05);transition:background.8s ease}
+.gauge{width:min(190px,48vw);height:min(190px,48vw);margin:auto;border-radius:50%;background:conic-gradient(var(--green) 0deg,var(--cyan) 180deg,var(--gauge-empty) 180deg);position:relative;box-shadow:0 0 30px rgba(0,255,255,.05);transition:background.8s ease}
 .gauge::before{content:'';position:absolute;inset:16px;border-radius:50%;background:var(--bg);transition: background 0.3s}
 .gauge-inner{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;align-items:center;z-index:2}
 .gauge-value{font-size:clamp(36px,9vw,52px);font-weight:900;color:var(--green)}
@@ -262,17 +262,18 @@ button:active{transform:scale(0.98)}
 .bar{height:12px;background:var(--gauge-empty);border-radius:999px;overflow:hidden}
 .bar-fill{height:100%;width:0%;border-radius:999px;background:linear-gradient(90deg,var(--green),var(--cyan));transition:width.8s ease}
 
+/* ENVELOPE DO STATUS TOTALMENTE LIVRE DE SVG COORDENADO FIXO */
 .status-envelope-card {
   background: var(--card-bg);
   border: 1px solid var(--card-border);
   border-radius: 20px;
-  padding: 16px 12px 14px 12px;
+  padding: 16px 14px 16px 14px;
   width: 100%;
   box-shadow: var(--neon-glow);
   position: relative;
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 20px; /* Vão perfeito para as pontes simuladas */
 }
 
 .bms-master-id-title {
@@ -287,11 +288,10 @@ button:active{transform:scale(0.98)}
 .status-triple-grid {
   display: grid !important;
   grid-template-columns: repeat(3, 1fr) !important;
-  gap: 5px !important;
+  gap: 12px !important; /* Espaçamento real para os braços laterais */
   width: 100% !important;
   max-width: 100% !important;
   position: relative;
-  z-index: 2;
 }
 
 .status-triple-grid .card {
@@ -307,6 +307,7 @@ button:active{transform:scale(0.98)}
   border-radius: 14px !important;
   box-shadow: none !important;
   transition: all 0.3s ease !important;
+  position: relative;
 }
 
 .status-triple-grid .status-title {
@@ -339,31 +340,66 @@ button:active{transform:scale(0.98)}
   color: var(--red) !important;
 }
 
-/* CONTAINER SVG AJUSTADO PARA EVITAR INVASÃO E APROXIMAR AS LINHAS NO CENTRO */
-.flow-svg-container {
+/* SISTEMA DINÂMICO DE LINHAS DE FLUXO VIA CSS (A PROVA DE QUEBRAS) */
+/* Braço Esquerdo (Inversor -> Smart BMS) */
+#cardInversor:before {
+  content: '';
   position: absolute;
-  top: 36px; 
-  left: 0;
-  width: 100%;
-  height: 44px;
-  z-index: 3;
+  bottom: 100%;
+  left: 50%;
+  width: calc(50% + 14px); /* Encontra dinamicamente o meio do grid */
+  height: 14px;
+  border-top: 1.5px dashed var(--card-border);
+  border-left: 1.5px dashed var(--card-border);
+  border-top-left-radius: 8px;
+  pointer-events: none;
+  transform: translateX(0);
+}
+/* Braço Direito (Bateria -> Smart BMS) */
+#cardBateria:before {
+  content: '';
+  position: absolute;
+  bottom: 100%;
+  right: 50%;
+  width: calc(50% + 14px); /* Encontra dinamicamente o meio do grid */
+  height: 14px;
+  border-top: 1.5px dashed var(--card-border);
+  border-right: 1.5px dashed var(--card-border);
+  border-top-right-radius: 8px;
+  pointer-events: none;
+  transform: translateX(0);
+}
+
+/* Descidas centrais bem unidas no topo do card do meio (Smart BMS) */
+#cardBms:before, #cardBms:after {
+  content: '';
+  position: absolute;
+  bottom: 100%;
+  height: 14px;
+  border-left: 1.5px dashed var(--card-border);
   pointer-events: none;
 }
+/* Alinhamento perfeito no centro com vão reduzido */
+#cardBms:before { left: calc(50% - 4px); }
+#cardBms:after { left: calc(50% + 4px); }
 
-.trilha-ponte {
-  fill: none;
-  stroke: var(--card-border);
-  stroke-width: 1.5;
-  stroke-linecap: round;
-  stroke-dasharray: 2, 2.5;
-  opacity: 0;
-  transition: opacity 0.4s ease, stroke 0.4s ease, filter 0.4s ease;
+/* ESTADOS ATIVOS COM ANIMAÇÃO SEGUROS */
+.ponte-esquerda-ativa#cardInversor:before {
+  border-color: var(--green);
+  filter: drop-shadow(0 0 2px var(--green));
+}
+.ponte-esquerda-ativa ~ #cardBms:before {
+  border-color: var(--green);
+  filter: drop-shadow(0 0 2px var(--green));
 }
 
-.trilha-ponte.ativa {
-  opacity: 1;
-  stroke: var(--green);
-  filter: drop-shadow(0 0 3px var(--green));
+.ponte-direita-ativa#cardBateria:before {
+  border-color: var(--green);
+  filter: drop-shadow(0 0 2px var(--green));
+}
+.ponte-direita-ativa ~ #cardBms:after {
+  border-color: var(--green);
+  filter: drop-shadow(0 0 2px var(--green));
 }
 
 .grid{
@@ -670,29 +706,6 @@ button:active{transform:scale(0.98)}
 
   <div class="status-envelope-card">
     <div id="bms-titulo" class="bms-master-id-title">SL------------</div>
-
-    <div class="flow-svg-container">
-      <svg width="100%" height="100%" viewBox="0 0 300 44" preserveAspectRatio="none" style="overflow: visible;">
-        
-        <path id="path-left" class="trilha-ponte" d="M 50,32 L 50,14 A 10,10 0 0 1 60,4 L 136,4 A 10,10 0 0 1 146,14 L 146,32" />
-        
-        <path id="path-right" class="trilha-ponte" d="M 250,32 L 250,14 A 10,10 0 0 0 240,4 L 164,4 A 10,10 0 0 0 154,14 L 154,32" />
-
-        <g id="arrow-left" style="opacity: 0; transition: opacity 0.4s ease;">
-          <text font-size="12" fill="var(--green)" text-anchor="middle" dy="4">
-            ➤
-            <animateMotion dur="3s" repeatCount="indefinite" path="M 50,32 L 50,14 A 10,10 0 0 1 60,4 L 136,4 A 10,10 0 0 1 146,14 L 146,32" rotate="auto" />
-          </text>
-        </g>
-
-        <g id="arrow-right" style="opacity: 0; transition: opacity 0.4s ease;">
-          <text font-size="12" fill="var(--green)" text-anchor="middle" dy="4">
-            ➤
-            <animateMotion dur="3s" repeatCount="indefinite" path="M 250,32 L 250,14 A 10,10 0 0 0 240,4 L 164,4 A 10,10 0 0 0 154,14 L 154,32" rotate="auto" />
-          </text>
-        </g>
-      </svg>
-    </div>
 
     <div class="status-triple-grid">
       <div id="cardInversor" class="card triple-inactive">
@@ -1180,7 +1193,7 @@ function iniciarCronometroEspera(email) {
   btn.textContent = 'AGUARDANDO ATIVAÇÃO (' + tempoRestante + 's)';
   
   CRONOMETRO_CADASTRO = setInterval(function() {
-    tempoRestRestante--;
+    tempoRestante--;
     if(tempoRestante <= 0) {
       clearInterval(CRONOMETRO_CADASTRO);
       btn.disabled = false;
@@ -1445,10 +1458,12 @@ function atualizarGauge(soc){
 
 function gerenciarLayoutStatus(elementoCard, elementoTxt, ativo, textoAtivo, textoInativo) {
   if (ativo) {
-    elementoCard.className = "card triple-active";
+    elementoCard.classList.remove("triple-inactive");
+    elementoCard.classList.add("triple-active");
     elementoTxt.textContent = textoAtivo;
   } else {
-    elementoCard.className = "card triple-inactive";
+    elementoCard.classList.remove("triple-active");
+    elementoCard.classList.add("triple-inactive");
     elementoTxt.textContent = textoInativo;
   }
 }
@@ -1467,20 +1482,14 @@ function atualizar(){
     var cardBat = document.getElementById('cardBateria');
     var txtBat = document.getElementById('txtBateria');
 
-    var pLeft = document.getElementById('path-left');
-    var pRight = document.getElementById('path-right');
-    var aLeft = document.getElementById('arrow-left');
-    var aRight = document.getElementById('arrow-right');
-
     if(!d.online){
       gerenciarLayoutStatus(cardBms, txtBms, false, "Online", "Offline");
       gerenciarLayoutStatus(cardInv, txtInv, false, "Conectado", "Desconectado");
       gerenciarLayoutStatus(cardBat, txtBat, false, "Conectada", "Desconectada");
 
-      pLeft.className.baseVal = "trilha-ponte";
-      pRight.className.baseVal = "trilha-ponte";
-      aLeft.style.opacity = '0';
-      aRight.style.opacity = '0';
+      // Desativa as pontes removendo as classes de ativação
+      cardInv.classList.remove("ponte-esquerda-ativa");
+      cardBat.classList.remove("ponte-direita-ativa");
 
       // Zera dados do Inversor
       document.getElementById('invPotencia').textContent = '0W';
@@ -1504,20 +1513,17 @@ function atualizar(){
       var batAtiva = (d.bateria_conectada !== undefined) ? d.bateria_conectada : true;
       gerenciarLayoutStatus(cardBat, txtBat, batAtiva, "Conectada", "Desconectada");
 
+      // Gerenciamento lógico visual das pontes CSS com base no estado real
       if(invAtivo) {
-        pLeft.className.baseVal = "trilha-ponte ativa";
-        aLeft.style.opacity = '1';
+        cardInv.classList.add("ponte-esquerda-ativa");
       } else {
-        pLeft.className.baseVal = "trilha-ponte";
-        aLeft.style.opacity = '0';
+        cardInv.classList.remove("ponte-esquerda-ativa");
       }
 
       if(batAtiva) {
-        pRight.className.baseVal = "trilha-ponte ativa";
-        aRight.style.opacity = '1';
+        cardBat.classList.add("ponte-direita-ativa");
       } else {
-        pRight.className.baseVal = "trilha-ponte";
-        aRight.style.opacity = '0';
+        cardBat.classList.remove("ponte-direita-ativa");
       }
 
       // Atualiza Bloco do Inversor
