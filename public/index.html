@@ -82,7 +82,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text-main);
   flex-direction:column;
   align-items:center;
   justify-content:center;
-  padding:16px 12px;
+  padding:12px 12px;
 }
 
 #dash, #lista, #configuracoesPage {
@@ -90,11 +90,11 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text-main);
   margin: auto auto;
 }
 
-/* Força o painel do dashboard a aproximar e padronizar as distâncias */
+/* CONTAINER PRINCIPAL DO DASHBOARD: Blocos quase encostados */
 #dash {
   display: flex !important;
   flex-direction: column !important;
-  gap: 14px !important;
+  gap: 5px !important; /* Distância mínima e idêntica entre todos os blocos */
   justify-content: flex-start !important;
 }
 
@@ -108,7 +108,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text-main);
   border-radius:20px;
   padding:20px;
   width:100%;
-  margin: 0 !important; /* Limpa margens antigas que afastavam os blocos */
+  margin: 0 !important; /* Zera as margens externas para evitar buracos */
   box-shadow: var(--neon-glow);
 }
 
@@ -167,7 +167,6 @@ button:active{transform:scale(0.98)}
 
 .bms-list{display:flex;flex-direction:column;gap:12px;width:100%;margin-top:8px}
 
-/* Elementos da lista de dispositivos */
 .bms-item{
   background: var(--card-bg);
   border: 1px solid var(--card-border);
@@ -185,10 +184,10 @@ button:active{transform:scale(0.98)}
 }
 .bms-item:hover{border-color:var(--cyan)}
 
-/* ANIMAÇÃO NEON PULSANTE PARA DISPOSITIVOS ONLINE */
+/* ANIMAÇÃO NEON PULSANTE EXCLUSIVA PARA DISPOSITIVOS ONLINE */
 @keyframes neonPulse {
   0% { border-color: var(--green); box-shadow: 0 0 4px var(--neon-pulse-color); }
-  50% { border-color: var(--cyan); box-shadow: 0 0 16px var(--neon-pulse-color), 0 0 4px var(--green); }
+  50% { border-color: var(--cyan); box-shadow: 0 0 15px var(--neon-pulse-color), 0 0 4px var(--green); }
   100% { border-color: var(--green); box-shadow: 0 0 4px var(--neon-pulse-color); }
 }
 
@@ -223,37 +222,37 @@ button:active{transform:scale(0.98)}
   border-color:var(--red);
 }
 
-.gauge-card{padding:20px;min-height:240px;display:flex;flex-direction:column;gap:12px;justify-content:center}
-.gauge{width:min(200px,50vw);height:min(200px,50vw);margin:auto;border-radius:50%;background:conic-gradient(var(--green) 0deg,var(--cyan) 180deg,var(--gauge-empty) 180deg);position:relative;box-shadow:0 0 30px rgba(0,255,255,.05);transition:background.8s ease}
+.gauge-card{padding:15px;min-height:230px;display:flex;flex-direction:column;gap:10px;justify-content:center}
+.gauge{width:min(190px,48vw);height:min(190px,48vw);margin:auto;border-radius:50%;background:conic-gradient(var(--green) 0deg,var(--cyan) 180deg,var(--gauge-empty) 180deg);position:relative;box-shadow:0 0 30px rgba(0,255,255,.05);transition:background.8s ease}
 .gauge::before{content:'';position:absolute;inset:16px;border-radius:50%;background:var(--bg);transition: background 0.3s}
 .gauge-inner{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;align-items:center;z-index:2}
 .gauge-value{font-size:clamp(36px,9vw,52px);font-weight:900;color:var(--green)}
 .gauge-label{opacity:.6;letter-spacing:1.5px;font-size:11px;color:var(--text-main)}
-.bar-wrap{margin-top:4px}
+.bar-wrap{margin-top:2px}
 .bar-label{display:flex;justify-content:space-between;margin-bottom:6px;font-size:13px;opacity:.8}
 .bar{height:12px;background:var(--gauge-empty);border-radius:999px;overflow:hidden}
 .bar-fill{height:100%;width:0%;border-radius:999px;background:linear-gradient(90deg,var(--green),var(--cyan));transition:width.8s ease}
 
+/* CONFIGURAÇÃO DO GRID DOS ELEMENTOS DE LEITURA */
 .grid{
-  display:grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap:12px;
-  width:100%;
-  max-width:100%;
-  margin-top:0px
+  display:grid !important;
+  grid-template-columns: repeat(2, 1fr) !important;
+  gap:5px !important; /* Encosta as caixas horizontal e verticalmente */
+  width:100% !important;
+  max-width:100% !important;
+  margin-top:0px !important;
 }
 
-/* Centraliza os blocos internos de dados do Grid */
+/* Centralização absoluta dos valores do Grid */
 .grid .card {
   display: flex !important;
   flex-direction: column !important;
   align-items: center !important;
   justify-content: center !important;
   text-align: center !important;
-  padding: 14px !important;
+  padding: 12px !important;
 }
 
-/* Força os textos numéricos a ficarem no meio exato da caixa */
 .value {
   font-size: clamp(22px, 5.5vw, 28px);
   font-weight: 800;
@@ -1110,7 +1109,7 @@ function mostrarLista(){
   USAR_CONTROLE_CORTINA = false;
 
   carregarLista();
-  INT = setInterval(carregarLista, 10000); // INTERVALO: Configurado para 10 segundos
+  INT = setInterval(carregarLista, 10000); // REQUISITO: Atualização em 10 segundos
 }
 
 function abrirDash(code){
@@ -1121,7 +1120,7 @@ function abrirDash(code){
   document.getElementById('dash').classList.remove('hidden');
   document.getElementById('bms-titulo').textContent = code;
   atualizar();
-  INT = setInterval(atualizar, 10000); // INTERVALO: Configurado para 10 segundos
+  INT = setInterval(atualizar, 10000); // REQUISITO: Atualização em 10 segundos
 }
 
 function voltar(){ clearInterval(INT); localStorage.removeItem('bms_codigo_ativo'); mostrarLista(); }
@@ -1168,7 +1167,7 @@ function carregarLista(){
     var html = '';
     for(var i=0;i<lista.length;i++){
       var b = lista[i];
-      // Borda neon injetada via classe dinâmica condicional se estiver online
+      // Injeta dinamicamente a classe de pulsação neon apenas se a bateria responder como Online
       var onlineClass = b.online ? 'online-active' : '';
       html += '<div class="bms-item '+onlineClass+'" onclick="abrirDash(\''+b.code+'\')">';
       html += '<h3>'+b.nome+'</h3>';
