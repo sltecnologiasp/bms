@@ -36,7 +36,7 @@
   --cell-border: #e2e8f0;
   
   --neon-glow: 0 0 12px rgba(0, 180, 216, 0.12);
-  --neon-pulse-color: rgba(46, 196, 182, 0.4);
+  --neon-pulse-color: rgba(46, 196, 182, 0.3);
   
   --cyan: #00b4d8;
   --blue: #0077b6;
@@ -60,7 +60,7 @@
   --cell-border: rgba(255, 255, 255, .04);
   
   --neon-glow: 0 0 15px rgba(0, 255, 255, 0.2);
-  --neon-pulse-color: rgba(0, 255, 136, 0.5);
+  --neon-pulse-color: rgba(0, 255, 136, 0.4);
   
   --cyan: #00ffff;
   --blue: #0080ff;
@@ -92,7 +92,6 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text-main);
   display: block;
 }
 
-/* CONTAINER DASHBOARD */
 #dash:not(.hidden) {
   display: flex !important;
   flex-direction: column !important;
@@ -189,15 +188,15 @@ button:active{transform:scale(0.98)}
 }
 .bms-item:hover{border-color:var(--cyan)}
 
-/* ANIMAÇÃO NEON PULSANTE PADRONIZADA (VERDE) */
-@keyframes neonPulseVerde {
+/* ANIMAÇÃO DO NEON SUAVE (VERDE) */
+@keyframes neonSuave {
   0% { border-color: var(--green); box-shadow: 0 0 4px var(--neon-pulse-color); }
-  50% { border-color: var(--cyan); box-shadow: 0 0 14px var(--neon-pulse-color), 0 0 4px var(--green); }
+  50% { border-color: var(--cyan); box-shadow: 0 0 12px var(--neon-pulse-color), 0 0 4px var(--green); }
   100% { border-color: var(--green); box-shadow: 0 0 4px var(--neon-pulse-color); }
 }
 
 .bms-item.online-active {
-  animation: neonPulseVerde 2s infinite ease-in-out !important;
+  animation: neonSuave 2s infinite ease-in-out !important;
   border-width: 1.5px !important;
 }
 
@@ -238,7 +237,7 @@ button:active{transform:scale(0.98)}
 .bar{height:12px;background:var(--gauge-empty);border-radius:999px;overflow:hidden}
 .bar-fill{height:100%;width:0%;border-radius:999px;background:linear-gradient(90deg,var(--green),var(--cyan));transition:width.8s ease}
 
-/* CONFIGURAÇÃO DO NOVO GRID DE 3 STATUS COMPACTOS LADO A LADO */
+/* DESIGN DO NOVO COMPACTO DE TRÊS STATUS */
 .status-triple-grid {
   display: grid !important;
   grid-template-columns: repeat(3, 1fr) !important;
@@ -255,6 +254,9 @@ button:active{transform:scale(0.98)}
   text-align: center !important;
   padding: 10px 4px !important;
   min-height: 80px !important;
+  background: var(--card-bg) !important;
+  border: 1px solid var(--card-border) !important;
+  box-shadow: var(--neon-glow) !important;
   transition: all 0.3s ease !important;
 }
 
@@ -272,25 +274,23 @@ button:active{transform:scale(0.98)}
   font-weight: 800 !important;
 }
 
-/* Classes de Estado Unificadas para os 3 Status */
+/* Lógica das bordas e cores da escrita solicitadas */
 .triple-active {
-  animation: neonPulseVerde 2s infinite ease-in-out !important;
-  border: 1.5px solid var(--green) !important;
+  animation: neonSuave 2s infinite ease-in-out !important;
+  border-width: 1.5px !important;
 }
 .triple-active .status-text {
   color: var(--green) !important;
 }
 
 .triple-inactive {
-  border: 1px solid rgba(231, 29, 54, 0.3) !important;
-  box-shadow: none !important;
-  background: rgba(231, 29, 54, 0.03) !important;
+  animation: none !important;
 }
 .triple-inactive .status-text {
   color: var(--red) !important;
 }
 
-/* GRID DOS CARD DE LEITURA COMPACTOS (SOC, TENSÃO, ETC) */
+/* GRID DOS CARDS DE VALORES */
 .grid{
   display:grid !important;
   grid-template-columns: repeat(2, 1fr) !important;
@@ -585,6 +585,10 @@ button:active{transform:scale(0.98)}
     </div>
   </div>
 
+  <div style="width:100%; text-align:center; margin-top:0px; margin-bottom: 2px;">
+    <div class="bms-code" id="bms-titulo" style="font-size:14px; opacity:.6; font-family:monospace; color:var(--text-main)">--</div>
+  </div>
+
   <div class="status-triple-grid">
     <div id="cardInversor" class="card triple-inactive">
       <span class="status-title">Inversor</span>
@@ -598,10 +602,6 @@ button:active{transform:scale(0.98)}
       <span class="status-title">Bateria</span>
       <span id="txtBateria" class="status-text">Desconectada</span>
     </div>
-  </div>
-
-  <div style="width:100%; text-align:center; margin-top:0px; margin-bottom: 2px;">
-    <div class="bms-code" id="bms-titulo" style="font-size:14px; opacity:.6; font-family:monospace; color:var(--text-main)">--</div>
   </div>
 
   <div class="grid">
@@ -1324,7 +1324,6 @@ function atualizarGauge(soc){
   gauge.style.background = 'conic-gradient(var(--green) 0deg,var(--cyan) '+(soc * 3.6)+'deg,var(--gauge-empty) '+(soc * 3.6)+'deg)';
 }
 
-/* LÓGICA DE ATUALIZAÇÃO DINÂMICA DOS 3 STATUS COM PADRÃO NEON IGUAL */
 function gerenciarLayoutStatus(elementoCard, elementoTxt, ativo, textoAtivo, textoInativo) {
   if (ativo) {
     elementoCard.className = "card triple-active";
@@ -1349,9 +1348,7 @@ function atualizar(){
     var cardBat = document.getElementById('cardBateria');
     var txtBat = document.getElementById('txtBateria');
 
-    // 1. Tratamento caso a caixinha (Smart BMS) caia Offline globalmente
     if(!d.online){
-      // Tudo desliga e fica vermelho
       gerenciarLayoutStatus(cardBms, txtBms, false, "Online", "Offline");
       gerenciarLayoutStatus(cardInv, txtInv, false, "Conectado", "Desconectado");
       gerenciarLayoutStatus(cardBat, txtBat, false, "Conectada", "Desconectada");
@@ -1363,18 +1360,14 @@ function atualizar(){
       atualizarGauge(0); 
       renderCelulas([]);
     } else {
-      // 2. Se a Smart BMS responder Online, avalia individualmente cada cabo
       gerenciarLayoutStatus(cardBms, txtBms, true, "Online", "Offline");
       
-      // Valida o Inversor (Pega o booleano 'inversor_conectado' vindo do banco/API)
       var invAtivo = (d.inversor_conectado !== undefined) ? d.inversor_conectado : true;
       gerenciarLayoutStatus(cardInv, txtInv, invAtivo, "Conectado", "Desconectado");
 
-      // Valida a Bateria Huawei (Pega o booleano 'bateria_conectada' ou 'bat_conectada' vindo do banco/API)
       var batAtiva = (d.bateria_conectada !== undefined) ? d.bateria_conectada : true;
       gerenciarLayoutStatus(cardBat, txtBat, batAtiva, "Conectada", "Desconectada");
 
-      // Se o cabo da bateria cair mas o ESP estiver online, zera apenas os valores da Huawei
       if(!batAtiva) {
         document.getElementById('soc').textContent = '0%';
         document.getElementById('volt').textContent = '0.00V';
@@ -1383,7 +1376,6 @@ function atualizar(){
         atualizarGauge(0);
         renderCelulas([]);
       } else {
-        // Valores normais com a leitura ativa
         document.getElementById('soc').textContent = d.soc.toFixed(0)+'%';
         document.getElementById('volt').textContent = d.voltage.toFixed(2)+'V';
         document.getElementById('corr').textContent = d.current.toFixed(1)+'A';
