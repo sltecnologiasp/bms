@@ -262,18 +262,18 @@ button:active{transform:scale(0.98)}
 .bar{height:12px;background:var(--gauge-empty);border-radius:999px;overflow:hidden}
 .bar-fill{height:100%;width:0%;border-radius:999px;background:linear-gradient(90deg,var(--green),var(--cyan));transition:width.8s ease}
 
-/* ENVELOPE DE STATUS ADAPTADO COM ANIMAÇÕES PREMIUM DE FLUXO */
+/* ENVELOPE ESTABILIZADO DO TRIPLE STATUS COM SUPORTE A PONTE RESPONSIVA PERCENTUAL */
 .status-envelope-card {
   background: var(--card-bg);
   border: 1px solid var(--card-border);
   border-radius: 20px;
-  padding: 16px 14px 16px 14px;
+  padding: 16px 12px 14px 12px;
   width: 100%;
   box-shadow: var(--neon-glow);
   position: relative;
   display: flex;
   flex-direction: column;
-  gap: 22px; /* Garante o espaçamento exato para as pontes */
+  gap: 26px; /* Altura perfeita para as curvas em arco */
 }
 
 .bms-master-id-title {
@@ -288,7 +288,7 @@ button:active{transform:scale(0.98)}
 .status-triple-grid {
   display: grid !important;
   grid-template-columns: repeat(3, 1fr) !important;
-  gap: 12px !important;
+  gap: 8px !important;
   width: 100% !important;
   max-width: 100% !important;
   position: relative;
@@ -307,7 +307,6 @@ button:active{transform:scale(0.98)}
   border-radius: 14px !important;
   box-shadow: none !important;
   transition: all 0.3s ease !important;
-  position: relative;
 }
 
 .status-triple-grid .status-title {
@@ -340,114 +339,31 @@ button:active{transform:scale(0.98)}
   color: var(--red) !important;
 }
 
-/* SISTEMA ANTI-QUEBRA DE LINHA CORRENTE (PONTE EM CSS ESTRUTURAL) */
-#cardInversor:before {
-  content: '';
+/* NOVO PROJETO DO CONTAINER SVG TOTALMENTE FLEXÍVEL E BASEADO EM PORCENTAGENS DOS CARDS */
+.flow-svg-container {
   position: absolute;
-  bottom: 100%;
-  left: 50%;
-  width: calc(50% + 14px);
-  height: 14px;
-  border-top: 1.5px dashed var(--card-border);
-  border-left: 1.5px dashed var(--card-border);
-  border-top-left-radius: 8px;
+  top: 36px; 
+  left: 0;
+  width: 100%;
+  height: 44px;
+  z-index: 3;
   pointer-events: none;
-  opacity: 0;
-  transition: opacity 0.4s ease, border-color 0.4s ease;
 }
 
-#cardBateria:before {
-  content: '';
-  position: absolute;
-  bottom: 100%;
-  right: 50%;
-  width: calc(50% + 14px);
-  height: 14px;
-  border-top: 1.5px dashed var(--card-border);
-  border-right: 1.5px dashed var(--card-border);
-  border-top-right-radius: 8px;
-  pointer-events: none;
-  opacity: 0;
-  transition: opacity 0.4s ease, border-color 0.4s ease;
+.trilha-ponte {
+  fill: none;
+  stroke: var(--card-border);
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-dasharray: 2, 2.5; /* Tracinhos menores e elegantes */
+  opacity: 0; /* Começa totalmente oculta/apagada no offline */
+  transition: opacity 0.4s ease, stroke 0.4s ease, filter 0.4s ease;
 }
 
-#cardBms:before, #cardBms:after {
-  content: '';
-  position: absolute;
-  bottom: 100%;
-  height: 14px;
-  border-left: 1.5px dashed var(--card-border);
-  pointer-events: none;
-  opacity: 0;
-  transition: opacity 0.4s ease, border-color 0.4s ease;
-}
-#cardBms:before { left: calc(50% - 4px); }
-#cardBms:after { left: calc(50% + 4px); }
-
-/* INJEÇÃO DAS SETAS DINÂMICAS VIA ELEMENTOS INDEPENDENTES */
-.status-triple-grid:before, .status-triple-grid:after {
-  font-size: 11px;
-  color: var(--green);
-  position: absolute;
-  bottom: 100%;
-  z-index: 5;
-  opacity: 0;
-  pointer-events: none;
-  filter: drop-shadow(0 0 2px var(--green));
-}
-
-/* Animações CSS lineares e calmas para o trajeto das setas */
-@keyframes correrEsquerda {
-  0% { bottom: 82px; left: calc(16.6% - 2px); content: '➤'; }
-  35% { bottom: 94px; left: calc(16.6% - 2px); content: '➤'; }
-  45% { bottom: 94px; left: calc(16.6() + 4px); content: '➤'; }
-  90% { bottom: 94px; left: calc(50% - 8px); content: '➤'; }
-  100% { bottom: 82px; left: calc(50% - 8px); content: '▼'; }
-}
-
-@keyframes correrDireita {
-  0% { bottom: 82px; right: calc(16.6% - 2px); content: '◄'; }
-  35% { bottom: 94px; right: calc(16.6% - 2px); content: '◄'; }
-  45% { bottom: 94px; right: calc(16.6% + 4px); content: '◄'; }
-  90% { bottom: 94px; right: calc(50% - 8px); content: '◄'; }
-  100% { bottom: 82px; right: calc(50% - 8px); content: '▼'; }
-}
-
-/* ATIVAÇÃO COMPLETA: ACENDE O NEON, CORRE OS TRACINHOS E DISPARA AS SETAS */
-@keyframes deslizarLinha {
-  to { stroke-dashoffset: -20; }
-}
-
-.ponte-esquerda-ativa#cardInversor:before {
+.trilha-ponte.ativa {
   opacity: 1;
-  border-color: var(--green);
-  filter: drop-shadow(0 0 3px var(--green));
-}
-.ponte-esquerda-ativa ~ #cardBms:before {
-  opacity: 1;
-  border-color: var(--green);
-  filter: drop-shadow(0 0 3px var(--green));
-}
-/* Liga a seta esquerda */
-.bms-rodando-esquerda:before {
-  opacity: 1 !important;
-  animation: correrEsquerda 3s infinite linear;
-}
-
-.ponte-direita-ativa#cardBateria:before {
-  opacity: 1;
-  border-color: var(--green);
-  filter: drop-shadow(0 0 3px var(--green));
-}
-.ponte-direita-ativa ~ #cardBms:after {
-  opacity: 1;
-  border-color: var(--green);
-  filter: drop-shadow(0 0 3px var(--green));
-}
-/* Liga a seta direita */
-.bms-rodando-direita:after {
-  opacity: 1 !important;
-  animation: correrDireita 3s infinite linear;
+  stroke: var(--green);
+  filter: drop-shadow(0 0 3px var(--green)); /* Efeito de Neon ativo */
 }
 
 .grid{
@@ -755,7 +671,29 @@ button:active{transform:scale(0.98)}
   <div class="status-envelope-card">
     <div id="bms-titulo" class="bms-master-id-title">SL------------</div>
 
-    <div id="gradeStatusContainer" class="status-triple-grid">
+    <div class="flow-svg-container">
+      <svg width="100%" height="100%" viewBox="0 0 100 100" preserveAspectRatio="none" style="overflow: visible;">
+        <path id="path-left" class="trilha-ponte" d="M 17,98 L 17,35 A 8,8 0 0 1 25,27 L 40,27 A 8,8 0 0 1 48,35 L 48,98" />
+        
+        <path id="path-right" class="trilha-ponte" d="M 83,98 L 83,35 A 8,8 0 0 0 75,27 L 60,27 A 8,8 0 0 0 52,35 L 52,98" />
+
+        <g id="arrow-left" style="opacity: 0; transition: opacity 0.4s ease;">
+          <text font-size="9" fill="var(--green)" text-anchor="middle" dy="3">
+            ➤
+            <animateMotion dur="3s" repeatCount="indefinite" path="M 17,98 L 17,35 A 8,8 0 0 1 25,27 L 40,27 A 8,8 0 0 1 48,35 L 48,98" rotate="auto" />
+          </text>
+        </g>
+
+        <g id="arrow-right" style="opacity: 0; transition: opacity 0.4s ease;">
+          <text font-size="9" fill="var(--green)" text-anchor="middle" dy="3">
+            ➤
+            <animateMotion dur="3s" repeatCount="indefinite" path="M 83,98 L 83,35 A 8,8 0 0 0 75,27 L 60,27 A 8,8 0 0 0 52,35 L 52,98" rotate="auto" />
+          </text>
+        </g>
+      </svg>
+    </div>
+
+    <div class="status-triple-grid">
       <div id="cardInversor" class="card triple-inactive">
         <span class="status-title">Inversor</span>
         <span id="txtInversor" class="status-text">Desconectado</span>
@@ -1506,12 +1444,10 @@ function atualizarGauge(soc){
 
 function gerenciarLayoutStatus(elementoCard, elementoTxt, ativo, textoAtivo, textoInativo) {
   if (ativo) {
-    elementoCard.classList.remove("triple-inactive");
-    elementoCard.classList.add("triple-active");
+    elementoCard.className = "card triple-active";
     elementoTxt.textContent = textoAtivo;
   } else {
-    elementoCard.classList.remove("triple-active");
-    elementoCard.classList.add("triple-inactive");
+    elementoCard.className = "card triple-inactive";
     elementoTxt.textContent = textoInativo;
   }
 }
@@ -1529,17 +1465,22 @@ function atualizar(){
     var txtBms = document.getElementById('txtBms');
     var cardBat = document.getElementById('cardBateria');
     var txtBat = document.getElementById('txtBateria');
-    var containerStatus = document.getElementById('gradeStatusContainer');
+
+    var pLeft = document.getElementById('path-left');
+    var pRight = document.getElementById('path-right');
+    var aLeft = document.getElementById('arrow-left');
+    var aRight = document.getElementById('arrow-right');
 
     if(!d.online){
       gerenciarLayoutStatus(cardBms, txtBms, false, "Online", "Offline");
       gerenciarLayoutStatus(cardInv, txtInv, false, "Conectado", "Desconectado");
       gerenciarLayoutStatus(cardBat, txtBat, false, "Conectada", "Desconectada");
 
-      // Sistema offline: Remove braços de neon e remove as setas correndo
-      cardInv.classList.remove("ponte-esquerda-ativa");
-      cardBat.classList.remove("ponte-direita-ativa");
-      containerStatus.classList.remove("bms-rodando-esquerda", "bms-rodando-direita");
+      // Sistema offline: Apaga e limpa completamente as pernas e fiação (Opacidade Zero)
+      pLeft.className.baseVal = "trilha-ponte";
+      pRight.className.baseVal = "trilha-ponte";
+      aLeft.style.opacity = '0';
+      aRight.style.opacity = '0';
 
       // Zera dados do Inversor
       document.getElementById('invPotencia').textContent = '0W';
@@ -1563,21 +1504,21 @@ function atualizar(){
       var batAtiva = (d.bateria_conectada !== undefined) ? d.bateria_conectada : true;
       gerenciarLayoutStatus(cardBat, txtBat, batAtiva, "Conectada", "Desconectada");
 
-      // Gerencia individualmente a ativação dos braços e das setas horizontais
+      // Acende e liga individualmente o fluxo e a fiação de neon baseado no status real
       if(invAtivo) {
-        cardInv.classList.add("ponte-esquerda-ativa");
-        containerStatus.classList.add("bms-rodando-esquerda");
+        pLeft.className.baseVal = "trilha-ponte ativa";
+        aLeft.style.opacity = '1';
       } else {
-        cardInv.classList.remove("ponte-esquerda-ativa");
-        containerStatus.classList.remove("bms-rodando-esquerda");
+        pLeft.className.baseVal = "trilha-ponte";
+        aLeft.style.opacity = '0';
       }
 
       if(batAtiva) {
-        cardBat.classList.add("ponte-direita-ativa");
-        containerStatus.classList.add("bms-rodando-direita");
+        pRight.className.baseVal = "trilha-ponte ativa";
+        aRight.style.opacity = '1';
       } else {
-        cardBat.classList.remove("ponte-direita-ativa");
-        containerStatus.classList.remove("bms-rodando-direita");
+        pRight.className.baseVal = "trilha-ponte";
+        aRight.style.opacity = '0';
       }
 
       // Atualiza Bloco do Inversor
