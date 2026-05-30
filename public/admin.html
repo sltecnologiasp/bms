@@ -473,6 +473,23 @@ button.logout:hover{background:rgba(231,29,54,0.08);color:var(--red);border-colo
     <div id="adminCellsContent" class="cells"></div>
   </div>
 
+  <!-- BLOCO ATUALIZAÇÃO REMOTA (OTA VIA UPLOAD DIRETO) -->
+  <div class="card-wrapper-block" style="margin-top: 12px; border: 1px solid rgba(0, 180, 216, 0.3);">
+    <div class="section-block-title" style="color: var(--cyan);">Atualização Remota de Firmware (OTA)</div>
+    <div style="padding: 12px 4px; display: flex; flex-direction: column; gap: 10px;">
+      <p style="font-size: 12px; color: var(--text-muted); line-height: 1.4; margin-bottom: 4px;">
+        Selecione o arquivo binário compilado (<strong style="color:var(--orange)">.bin</strong>) para forçar o ESP32 a baixar e instalar a nova versão automaticamente no próximo contato.
+      </p>
+      <div style="position: relative; display: flex; flex-direction: column; gap: 6px;">
+        <input type="file" id="arquivoOtaBin" accept=".bin" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--input-border); background: var(--input-bg); color: var(--text-main); font-size: 13px;">
+      </div>
+      <button onclick="enviarFirmwareOta()" id="btnOtaUpload" style="background: linear-gradient(90deg, var(--blue), var(--cyan)); width: 100%; border-radius: 10px; padding: 14px; font-weight: 700; font-size: 14px; cursor: pointer;">
+        ENVIAR E ATUALIZAR PLACA
+      </button>
+      <div id="msgOtaStatus" style="text-align: center; font-size: 12px; font-weight: 600; min-height: 16px; margin-top: 4px;"></div>
+    </div>
+  </div>
+
   <button class="voltar" style="width:100%; margin-top:4px; padding:18px" onclick="closeBmsModal()">← VOLTAR À LISTA</button>
 </div>
 
@@ -664,6 +681,74 @@ async function del(code){
 }
 
 function viewBmsDetails(code){ showDashAdmin(code); }
+
+async function enviarFirmwareOta() {
+  const fileInput = document.getElementById('arquivoOtaBin');
+  const statusMsg = document.getElementById('msgOtaStatus');
+  const btn = document.getElementById('btnOtaUpload');
+
+  if (!activeBmsCode) {
+    alert('Erro: Nenhuma placa BMS ativa selecionada.');
+    return;
+  }
+  if (!fileInput.files || fileInput.files.length === 0) {
+    statusMsg.textContent = 'Por favor, selecione um arquivo .bin primeiro!';
+    statusMsg.style.color = 'var(--red)';
+    return;
+  }
+
+  const arquivo = fileInput.files[0];
+  if (!arquivo.name.endsWith('.bin')) {
+    statusMsg.textContent = 'Erro: O arquivo precisa ser obrigatoriamente extensão .bin!';
+    statusMsg.style.color = 'var(--red)';
+    return;
+  }
+
+  if (!confirm(`Deseja realmente enviar o firmware "${arquivo.name}" para a placa ${activeBmsCode}?`)) {
+    return;
+  }
+
+  btn.disabled = true;
+  btn.style.opacity = '0.6';
+  btn.textContent = 'UPLOADING FIRMWARE...';
+  statusMsg.textContent = 'Enviando arquivo para o servidor Cloudflare...';
+  statusMsg.style.color = 'var(--cyan)';
+
+  const formData = new FormData();
+  formData.append('firmware', arquivo);
+  formData.append('code', activeBmsCode);
+
+  try {
+    const r = await fetch(API + '?action=admin_upload_ota', {
+      method: 'POST',
+      headers: {
+        'Authorization': 'Bearer ' + adminToken
+        // Nota: Não defina Content-Type ao enviar FormData, o navegador faz isso automaticamente com a boundary correta!
+      },
+      body: formData
+    });
+
+    const d = await r.json();
+
+    if (d && d.ok) {
+      statusMsg.textContent = 'Sucesso! Firmware agendado para o próximo ciclo de 2s.';
+      statusMsg.style.color = 'var(--green)';
+      fileInput.value = '';
+    } else {
+      statusMsg.textContent = 'Falha: ' + (d.message || 'Erro desconhecido no servidor.');
+      statusMsg.style.color = 'var(--red)';
+    }
+  } catch (err) {
+    console.error(err);
+    statusMsg.textContent = 'Erro de conexão ou tamanho limite excedido ao fazer upload.';
+    statusMsg.style.color = 'var(--red)';
+  } finally {
+    btn.disabled = false;
+    btn.style.opacity = '1';
+    btn.textContent = 'ENVIAR E ATUALIZAR PLACA';
+    setTimeout(() => { statusMsg.textContent = ''; }, 6000);
+  }
+}
 
 function closeBmsModal(){
   activeBmsCode = null;
