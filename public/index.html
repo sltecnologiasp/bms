@@ -255,41 +255,35 @@ button:active{transform:scale(0.98)}
 .gauge-inner{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;align-items:center;z-index:2}
 .gauge-value{font-size:clamp(36px,9vw,52px);font-weight:900;color:var(--green)}
 .gauge-label{opacity:.6;letter-spacing:1.5px;font-size:11px;color:var(--text-main)}
+
 .bar-wrap{margin-top:2px}
-.bar-label{display:flex;justify-content:space-between;margin-bottom:6px;font-size:13px;opacity:.8}
+/* MODIFICAÇÃO 2: CENTRALIZAÇÃO DA ESCRITA BATERIA COM O TEXTO EM FILA ÚNICA COLADA */
+.bar-label{display:flex;justify-content:center;align-items:center;gap:6px;margin-bottom:6px;font-size:13px;font-weight:600;}
+.bar-label span:first-child { color: var(--text-main); }
+.bar-label span:last-child { color: var(--cyan); font-weight: 700; }
 .bar{height:12px;background:var(--gauge-empty);border-radius:999px;overflow:hidden}
 .bar-fill{height:100%;width:0%;border-radius:999px;background:linear-gradient(90deg,var(--green),var(--cyan));transition:width.8s ease}
 
-/* ELEMENTOS DAS LINHAS DE CONEXÃO ANIMADAS (SVG) */
-.connection-container {
-  position: relative;
+/* MODIFICAÇÃO 3: CARD ENVELOPADOR GRANDE TOTAL PARA OS TRÊS STATUS */
+.status-envelope-card {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 20px;
+  padding: 16px 14px 14px 14px;
   width: 100%;
-  height: 18px; 
-  margin-bottom: -15px;
-  margin-top: -3px;
-  z-index: 10;
-  pointer-events: none;
+  box-shadow: var(--neon-glow);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
-.connection-line {
-  stroke: var(--card-border);
-  stroke-width: 1.5;
-  stroke-dasharray: 4, 4;
-  fill: none;
-  opacity: 0.4;
-  transition: all 0.5s ease;
-}
-.data-pulse {
-  fill: var(--green);
-  filter: drop-shadow(0 0 3px var(--green));
-  visibility: hidden;
-}
-/* Classes de ativação do fluxo de pulsos */
-.flow-active .connection-line {
-  stroke: var(--green);
-  opacity: 0.8;
-}
-.flow-active .data-pulse {
-  visibility: visible;
+
+.bms-master-id-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-muted);
+  font-family: monospace;
+  text-align: center;
+  letter-spacing: 1px;
 }
 
 .status-triple-grid {
@@ -309,9 +303,9 @@ button:active{transform:scale(0.98)}
   text-align: center !important;
   padding: 10px 4px !important;
   min-height: 80px !important;
-  background: var(--card-bg) !important;
+  background: var(--bg) !important; /* Visual de sub-card limpo */
   border: 1px solid var(--card-border) !important;
-  box-shadow: var(--neon-glow) !important;
+  box-shadow: none !important;
   transition: all 0.3s ease !important;
 }
 
@@ -330,15 +324,16 @@ button:active{transform:scale(0.98)}
 }
 
 .triple-active {
-  animation: neonSuave 2s infinite ease-in-out !important;
-  border-width: 1.5px !important;
+  border-color: var(--green) !important;
+  background: var(--card-bg) !important;
+  box-shadow: 0 0 10px var(--neon-pulse-color) !important;
 }
 .triple-active .status-text {
   color: var(--green) !important;
 }
 
 .triple-inactive {
-  animation: none !important;
+  border-color: var(--card-border) !important;
 }
 .triple-inactive .status-text {
   color: var(--red) !important;
@@ -646,39 +641,22 @@ button:active{transform:scale(0.98)}
     </div>
   </div>
 
-  <div style="width:100%; text-align:center; margin-top:0px; margin-bottom: 2px;">
-    <div class="bms-code" id="bms-titulo" style="font-size:14px; opacity:.6; font-family:monospace; color:var(--text-main)">--</div>
-  </div>
-
-  <div class="connection-container">
-    <svg width="100%" height="100%" viewBox="0 0 300 20" preserveAspectRatio="none">
-      <g id="flowInversor">
-        <path d="M 50 10 L 150 10" class="connection-line" />
-        <circle r="3" class="data-pulse">
-          <animateMotion dur="1.5s" repeatCount="indefinite" path="M 50 10 L 150 10" />
-        </circle>
-      </g>
-      <g id="flowBateria">
-        <path d="M 250 10 L 150 10" class="connection-line" />
-        <circle r="3" class="data-pulse">
-          <animateMotion dur="1.5s" repeatCount="indefinite" path="M 250 10 L 150 10" />
-        </circle>
-      </g>
-    </svg>
-  </div>
-
-  <div class="status-triple-grid">
-    <div id="cardInversor" class="card triple-inactive">
-      <span class="status-title">Inversor</span>
-      <span id="txtInversor" class="status-text">Desconectado</span>
-    </div>
-    <div id="cardBms" class="card triple-inactive">
-      <span class="status-title">Smart BMS</span>
-      <span id="txtBms" class="status-text">Offline</span>
-    </div>
-    <div id="cardBateria" class="card triple-inactive">
-      <span class="status-title">Bateria</span>
-      <span id="txtBateria" class="status-text">Desconectada</span>
+  <div class="status-envelope-card">
+    <div class="bms-master-id-title" id="bms-titulo">--</div>
+    
+    <div class="status-triple-grid">
+      <div id="cardInversor" class="card triple-inactive">
+        <span class="status-title">Inversor</span>
+        <span id="txtInversor" class="status-text">Desconectado</span>
+      </div>
+      <div id="cardBms" class="card triple-inactive">
+        <span class="status-title">Smart BMS</span>
+        <span id="txtBms" class="status-text">Offline</span>
+      </div>
+      <div id="cardBateria" class="card triple-inactive">
+        <span class="status-title">Bateria</span>
+        <span id="txtBateria" class="status-text">Desconectada</span>
+      </div>
     </div>
   </div>
 
@@ -703,7 +681,7 @@ button:active{transform:scale(0.98)}
   </div>
 
   <div class="card">
-    <div class="label">Células - Tensão Individual</div>
+    <div class="section-block-title">Células - Tensão Individual</div>
     <div class="diff">
       <div class="diff-item">Min<span id="celMin" style="color:var(--green)">0.00V</span></div>
       <div class="diff-item">Max<span id="celMax" style="color:var(--orange)">0.00V</span></div>
@@ -1439,18 +1417,10 @@ function atualizar(){
     var cardBat = document.getElementById('cardBateria');
     var txtBat = document.getElementById('txtBateria');
 
-    // Elementos SVG de animação do fluxo de dados
-    var flowInv = document.getElementById('flowInversor');
-    var flowBat = document.getElementById('flowBateria');
-
     if(!d.online){
       gerenciarLayoutStatus(cardBms, txtBms, false, "Online", "Offline");
       gerenciarLayoutStatus(cardInv, txtInv, false, "Conectado", "Desconectado");
       gerenciarLayoutStatus(cardBat, txtBat, false, "Conectada", "Desconectada");
-
-      // Desativa todos os fluxos de luz se a BMS morrer
-      flowInv.removeAttribute('class');
-      flowBat.removeAttribute('class');
 
       // Zera dados do Inversor
       document.getElementById('invPotencia').textContent = '0W';
@@ -1466,6 +1436,7 @@ function atualizar(){
       atualizarGauge(0); 
       renderCelulas([]);
     } else {
+      CircleGauge = true;
       gerenciarLayoutStatus(cardBms, txtBms, true, "Online", "Offline");
       
       var invAtivo = (d.inversor_conectado !== undefined) ? d.inversor_conectado : true;
@@ -1473,19 +1444,6 @@ function atualizar(){
 
       var batAtiva = (d.bateria_conectada !== undefined) ? d.bateria_conectada : true;
       gerenciarLayoutStatus(cardBat, txtBat, batAtiva, "Conectada", "Desconectada");
-
-      // CONTROLE DINÂMICO DAS ANIMAÇÕES DE FLUXO DE DADOS
-      if(invAtivo) {
-        flowInv.setAttribute('class', 'flow-active');
-      } else {
-        flowInv.removeAttribute('class');
-      }
-
-      if(batAtiva) {
-        flowBat.setAttribute('class', 'flow-active');
-      } else {
-        flowBat.removeAttribute('class');
-      }
 
       // Atualiza Bloco do Inversor
       if(!invAtivo) {
