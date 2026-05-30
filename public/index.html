@@ -119,7 +119,6 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text-main);
 #login .card,#cadastro .card,#redefinir .card,#configuracoesPage .card { width:100%; max-width:500px; }
 #lista .card, #dash .card { width:100%; max-width:100%; }
 
-/* Estilo específico para envelopar sub-blocos internos sem bordas excessivas */
 .card-wrapper-block {
   background: var(--card-bg);
   border: 1px solid var(--card-border);
@@ -261,12 +260,45 @@ button:active{transform:scale(0.98)}
 .bar{height:12px;background:var(--gauge-empty);border-radius:999px;overflow:hidden}
 .bar-fill{height:100%;width:0%;border-radius:999px;background:linear-gradient(90deg,var(--green),var(--cyan));transition:width.8s ease}
 
+/* ELEMENTOS DAS LINHAS DE CONEXÃO ANIMADAS (SVG) */
+.connection-container {
+  position: relative;
+  width: 100%;
+  height: 18px; 
+  margin-bottom: -15px;
+  margin-top: -3px;
+  z-index: 10;
+  pointer-events: none;
+}
+.connection-line {
+  stroke: var(--card-border);
+  stroke-width: 1.5;
+  stroke-dasharray: 4, 4;
+  fill: none;
+  opacity: 0.4;
+  transition: all 0.5s ease;
+}
+.data-pulse {
+  fill: var(--green);
+  filter: drop-shadow(0 0 3px var(--green));
+  visibility: hidden;
+}
+/* Classes de ativação do fluxo de pulsos */
+.flow-active .connection-line {
+  stroke: var(--green);
+  opacity: 0.8;
+}
+.flow-active .data-pulse {
+  visibility: visible;
+}
+
 .status-triple-grid {
   display: grid !important;
   grid-template-columns: repeat(3, 1fr) !important;
   gap: 5px !important;
   width: 100% !important;
   max-width: 100% !important;
+  position: relative;
 }
 
 .status-triple-grid .card {
@@ -328,7 +360,7 @@ button:active{transform:scale(0.98)}
   justify-content: center !important;
   text-align: center !important;
   padding: 12px !important;
-  background: var(--bg); /* Fundo igual ao geral para destacar dentro do card pai */
+  background: var(--bg); 
   border: 1px solid var(--card-border);
   border-radius: 14px;
 }
@@ -367,7 +399,7 @@ button:active{transform:scale(0.98)}
 .diff {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 5px; /* Alinhado com o padrão compacto de 5px */
+  gap: 5px; 
   margin-top: 8px;
 }
 .diff-item{padding:10px 6px;border-radius:12px;background:var(--cell-bg);border:1px solid var(--cell-border);text-align:center}
@@ -616,6 +648,23 @@ button:active{transform:scale(0.98)}
 
   <div style="width:100%; text-align:center; margin-top:0px; margin-bottom: 2px;">
     <div class="bms-code" id="bms-titulo" style="font-size:14px; opacity:.6; font-family:monospace; color:var(--text-main)">--</div>
+  </div>
+
+  <div class="connection-container">
+    <svg width="100%" height="100%" viewBox="0 0 300 20" preserveAspectRatio="none">
+      <g id="flowInversor">
+        <path d="M 50 10 L 150 10" class="connection-line" />
+        <circle r="3" class="data-pulse">
+          <animateMotion dur="1.5s" repeatCount="indefinite" path="M 50 10 L 150 10" />
+        </circle>
+      </g>
+      <g id="flowBateria">
+        <path d="M 250 10 L 150 10" class="connection-line" />
+        <circle r="3" class="data-pulse">
+          <animateMotion dur="1.5s" repeatCount="indefinite" path="M 250 10 L 150 10" />
+        </circle>
+      </g>
+    </svg>
   </div>
 
   <div class="status-triple-grid">
@@ -1390,10 +1439,18 @@ function atualizar(){
     var cardBat = document.getElementById('cardBateria');
     var txtBat = document.getElementById('txtBateria');
 
+    // Elementos SVG de animação do fluxo de dados
+    var flowInv = document.getElementById('flowInversor');
+    var flowBat = document.getElementById('flowBateria');
+
     if(!d.online){
       gerenciarLayoutStatus(cardBms, txtBms, false, "Online", "Offline");
       gerenciarLayoutStatus(cardInv, txtInv, false, "Conectado", "Desconectado");
       gerenciarLayoutStatus(cardBat, txtBat, false, "Conectada", "Desconectada");
+
+      // Desativa todos os fluxos de luz se a BMS morrer
+      flowInv.removeAttribute('class');
+      flowBat.removeAttribute('class');
 
       // Zera dados do Inversor
       document.getElementById('invPotencia').textContent = '0W';
@@ -1417,7 +1474,20 @@ function atualizar(){
       var batAtiva = (d.bateria_conectada !== undefined) ? d.bateria_conectada : true;
       gerenciarLayoutStatus(cardBat, txtBat, batAtiva, "Conectada", "Desconectada");
 
-      // Atualiza Bloco do Inversor (Zera se o inversor estiver desconectado)
+      // CONTROLE DINÂMICO DAS ANIMAÇÕES DE FLUXO DE DADOS
+      if(invAtivo) {
+        flowInv.setAttribute('class', 'flow-active');
+      } else {
+        flowInv.removeAttribute('class');
+      }
+
+      if(batAtiva) {
+        flowBat.setAttribute('class', 'flow-active');
+      } else {
+        flowBat.removeAttribute('class');
+      }
+
+      // Atualiza Bloco do Inversor
       if(!invAtivo) {
         document.getElementById('invPotencia').textContent = '0W';
         document.getElementById('invTensaoAC').textContent = '0.0V';
