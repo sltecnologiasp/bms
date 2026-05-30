@@ -1403,12 +1403,28 @@ function gerenciarLayoutStatus(elementoCard, elementoTxt, ativo, textoAtivo, tex
   }
 }
 
+var falhasSeguidas = 0; // CONTADOR DE TOLERÂNCIA ANTI-OSCILAÇÃO (10 SEGUNDOS)
+
 function atualizar(){
   if(!CODIGO) return;
   fetch(API+'?action=data&code='+CODIGO, { headers:{'Authorization':'Bearer '+TOKEN} })
   .then(function(r){ return r ? r.json() : null; })
   .then(function(d){
-    if(!d) return;
+    if(!d) {
+      falhasSeguidas++;
+      return;
+    }
+    
+    // Filtro de tolerância contra micro-oscilações de rede
+    if(!d.online){
+      falhasSeguidas++;
+      if(falhasSeguidas < 5) {
+        // Ignora a resposta offline temporária e mantém os dados anteriores na tela intactos
+        return;
+      }
+    } else {
+      falhasSeguidas = 0; // Conexão estável, reseta o contador de falhas
+    }
     
     var cardInv = document.getElementById('cardInversor');
     var txtInv = document.getElementById('txtInversor');
