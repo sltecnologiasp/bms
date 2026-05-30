@@ -121,6 +121,18 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text-main);
 
 .label{font-size:11px;letter-spacing:1px;text-transform:uppercase;text-align:center;width:100%;margin-bottom:6px;font-weight:700;color:var(--text-muted)}
 
+.section-block-title {
+  font-size: 11px;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  text-align: center;
+  width: 100%;
+  margin-top: 6px;
+  margin-bottom: 2px;
+  font-weight: 800;
+  color: var(--text-muted);
+}
+
 input,select,button{width:100%;padding:16px;border-radius:14px;border:none;outline:none;font-size:16px;transition:all 0.2s ease}
 input,select{
   background: var(--input-bg);
@@ -188,7 +200,6 @@ button:active{transform:scale(0.98)}
 }
 .bms-item:hover{border-color:var(--cyan)}
 
-/* ANIMAÇÃO DO NEON SUAVE (VERDE) */
 @keyframes neonSuave {
   0% { border-color: var(--green); box-shadow: 0 0 4px var(--neon-pulse-color); }
   50% { border-color: var(--cyan); box-shadow: 0 0 12px var(--neon-pulse-color), 0 0 4px var(--green); }
@@ -237,7 +248,6 @@ button:active{transform:scale(0.98)}
 .bar{height:12px;background:var(--gauge-empty);border-radius:999px;overflow:hidden}
 .bar-fill{height:100%;width:0%;border-radius:999px;background:linear-gradient(90deg,var(--green),var(--cyan));transition:width.8s ease}
 
-/* DESIGN DO NOVO COMPACTO DE TRÊS STATUS */
 .status-triple-grid {
   display: grid !important;
   grid-template-columns: repeat(3, 1fr) !important;
@@ -274,7 +284,6 @@ button:active{transform:scale(0.98)}
   font-weight: 800 !important;
 }
 
-/* Lógica das bordas e cores da escrita solicitadas */
 .triple-active {
   animation: neonSuave 2s infinite ease-in-out !important;
   border-width: 1.5px !important;
@@ -290,7 +299,6 @@ button:active{transform:scale(0.98)}
   color: var(--red) !important;
 }
 
-/* GRID DOS CARDS DE VALORES */
 .grid{
   display:grid !important;
   grid-template-columns: repeat(2, 1fr) !important;
@@ -604,6 +612,15 @@ button:active{transform:scale(0.98)}
     </div>
   </div>
 
+  <div class="section-block-title">Informações do Inversor</div>
+  <div class="grid">
+    <div class="card"><div class="label">Potência Ativa</div><div class="value" id="invPotencia" style="color:var(--green)">0W</div></div>
+    <div class="card"><div class="label">Tensão AC</div><div class="value" id="invTensaoAC" style="color:var(--cyan)">0.0V</div></div>
+    <div class="card"><div class="label">Frequência</div><div class="value" id="invFrequencia" style="color:var(--orange)">0.0Hz</div></div>
+    <div class="card"><div class="label">Geração do Dia</div><div class="value" id="invGeracaoDia" style="color:var(--blue)">0.0kWh</div></div>
+  </div>
+
+  <div class="section-block-title">Informações da Bateria</div>
   <div class="grid">
     <div class="card"><div class="label">SOC</div><div class="value" id="soc" style="color:var(--green)">0%</div></div>
     <div class="card"><div class="label">Tensão</div><div class="value" id="volt" style="color:var(--cyan)">0V</div></div>
@@ -1353,6 +1370,13 @@ function atualizar(){
       gerenciarLayoutStatus(cardInv, txtInv, false, "Conectado", "Desconectado");
       gerenciarLayoutStatus(cardBat, txtBat, false, "Conectada", "Desconectada");
 
+      // Zera dados do Inversor
+      document.getElementById('invPotencia').textContent = '0W';
+      document.getElementById('invTensaoAC').textContent = '0.0V';
+      document.getElementById('invFrequencia').textContent = '0.0Hz';
+      document.getElementById('invGeracaoDia').textContent = '0.0kWh';
+
+      // Zera dados da Bateria
       document.getElementById('soc').textContent = '0%';
       document.getElementById('volt').textContent = '0.00V';
       document.getElementById('corr').textContent = '0.0A';
@@ -1368,6 +1392,20 @@ function atualizar(){
       var batAtiva = (d.bateria_conectada !== undefined) ? d.bateria_conectada : true;
       gerenciarLayoutStatus(cardBat, txtBat, batAtiva, "Conectada", "Desconectada");
 
+      // Atualiza Bloco do Inversor (Zera se o inversor estiver desconectado)
+      if(!invAtivo) {
+        document.getElementById('invPotencia').textContent = '0W';
+        document.getElementById('invTensaoAC').textContent = '0.0V';
+        document.getElementById('invFrequencia').textContent = '0.0Hz';
+        document.getElementById('invGeracaoDia').textContent = '0.0kWh';
+      } else {
+        document.getElementById('invPotencia').textContent = (d.inv_potencia !== undefined ? d.inv_potencia.toFixed(0) : '0') + 'W';
+        document.getElementById('invTensaoAC').textContent = (d.inv_tensao_ac !== undefined ? d.inv_tensao_ac.toFixed(1) : '0.0') + 'V';
+        document.getElementById('invFrequencia').textContent = (d.inv_frequencia !== undefined ? d.inv_frequencia.toFixed(1) : '0.0') + 'Hz';
+        document.getElementById('invGeracaoDia').textContent = (d.inv_geracao_dia !== undefined ? d.inv_geracao_dia.toFixed(1) : '0.0') + 'kWh';
+      }
+
+      // Atualiza Bloco da Bateria
       if(!batAtiva) {
         document.getElementById('soc').textContent = '0%';
         document.getElementById('volt').textContent = '0.00V';
