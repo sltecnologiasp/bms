@@ -249,7 +249,7 @@ button:active{transform:scale(0.98)}
 }
 
 .gauge-card{padding:15px;min-height:230px;display:flex;flex-direction:column;gap:10px;justify-content:center}
-.gauge{width:min(190px,48vw);height:min(190px,48vw);margin:auto;border-radius:50%;background:conic-gradient(var(--green) 0deg,var(--cyan) 180deg,var(--gauge-empty) 180deg);position:relative;box-shadow:0 0 30px rgba(0,255,255,.05);transition:background.8s ease}
+.gauge(width:min(190px,48vw);height:min(190px,48vw);margin:auto;border-radius:50%;background:conic-gradient(var(--green) 0deg,var(--cyan) 180deg,var(--gauge-empty) 180deg);position:relative;box-shadow:0 0 30px rgba(0,255,255,.05);transition:background.8s ease}
 .gauge::before{content:'';position:absolute;inset:16px;border-radius:50%;background:var(--bg);transition: background 0.3s}
 .gauge-inner{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;align-items:center;z-index:2}
 .gauge-value{font-size:clamp(36px,9vw,52px);font-weight:900;color:var(--green)}
@@ -262,7 +262,6 @@ button:active{transform:scale(0.98)}
 .bar{height:12px;background:var(--gauge-empty);border-radius:999px;overflow:hidden}
 .bar-fill{height:100%;width:0%;border-radius:999px;background:linear-gradient(90deg,var(--green),var(--cyan));transition:width.8s ease}
 
-/* ENVELOPAMENTO DO TRIPLE STATUS COM ESPAÇO PARA A PONTE SUPERIOR EXTERNA */
 .status-envelope-card {
   background: var(--card-bg);
   border: 1px solid var(--card-border);
@@ -273,7 +272,7 @@ button:active{transform:scale(0.98)}
   position: relative;
   display: flex;
   flex-direction: column;
-  gap: 24px; /* Garante o respiro perfeito para as curvas das pontes */
+  gap: 24px;
 }
 
 .bms-master-id-title {
@@ -340,7 +339,7 @@ button:active{transform:scale(0.98)}
   color: var(--red) !important;
 }
 
-/* CONTAINER SVG DA PONTE: ENCOSTA APENAS NO TOPO EXTERNO */
+/* CONTAINER SVG AJUSTADO PARA EVITAR INVASÃO E APROXIMAR AS LINHAS NO CENTRO */
 .flow-svg-container {
   position: absolute;
   top: 36px; 
@@ -356,12 +355,11 @@ button:active{transform:scale(0.98)}
   stroke: var(--card-border);
   stroke-width: 1.5;
   stroke-linecap: round;
-  stroke-dasharray: 2, 2.5; /* Tracinhos menores e refinados */
-  opacity: 0; /* Apagada por padrão quando offline */
+  stroke-dasharray: 2, 2.5;
+  opacity: 0;
   transition: opacity 0.4s ease, stroke 0.4s ease, filter 0.4s ease;
 }
 
-/* Efeito de Neon/Brilho quando ativado */
 .trilha-ponte.ativa {
   opacity: 1;
   stroke: var(--green);
@@ -676,21 +674,21 @@ button:active{transform:scale(0.98)}
     <div class="flow-svg-container">
       <svg width="100%" height="100%" viewBox="0 0 300 44" preserveAspectRatio="none" style="overflow: visible;">
         
-        <path id="path-left" class="trilha-ponte" d="M 50,44 L 50,14 A 10,10 0 0 1 60,4 L 132,4 A 10,10 0 0 1 142,14 L 142,44" />
+        <path id="path-left" class="trilha-ponte" d="M 50,32 L 50,14 A 10,10 0 0 1 60,4 L 136,4 A 10,10 0 0 1 146,14 L 146,32" />
         
-        <path id="path-right" class="trilha-ponte" d="M 250,44 L 250,14 A 10,10 0 0 0 240,4 L 168,4 A 10,10 0 0 0 158,14 L 158,44" />
+        <path id="path-right" class="trilha-ponte" d="M 250,32 L 250,14 A 10,10 0 0 0 240,4 L 164,4 A 10,10 0 0 0 154,14 L 154,32" />
 
         <g id="arrow-left" style="opacity: 0; transition: opacity 0.4s ease;">
           <text font-size="12" fill="var(--green)" text-anchor="middle" dy="4">
             ➤
-            <animateMotion dur="3s" repeatCount="indefinite" path="M 50,44 L 50,14 A 10,10 0 0 1 60,4 L 132,4 A 10,10 0 0 1 142,14 L 142,44" rotate="auto" />
+            <animateMotion dur="3s" repeatCount="indefinite" path="M 50,32 L 50,14 A 10,10 0 0 1 60,4 L 136,4 A 10,10 0 0 1 146,14 L 146,32" rotate="auto" />
           </text>
         </g>
 
         <g id="arrow-right" style="opacity: 0; transition: opacity 0.4s ease;">
           <text font-size="12" fill="var(--green)" text-anchor="middle" dy="4">
             ➤
-            <animateMotion dur="3s" repeatCount="indefinite" path="M 250,44 L 250,14 A 10,10 0 0 0 240,4 L 168,4 A 10,10 0 0 0 158,14 L 158,44" rotate="auto" />
+            <animateMotion dur="3s" repeatCount="indefinite" path="M 250,32 L 250,14 A 10,10 0 0 0 240,4 L 164,4 A 10,10 0 0 0 154,14 L 154,32" rotate="auto" />
           </text>
         </g>
       </svg>
@@ -1182,7 +1180,7 @@ function iniciarCronometroEspera(email) {
   btn.textContent = 'AGUARDANDO ATIVAÇÃO (' + tempoRestante + 's)';
   
   CRONOMETRO_CADASTRO = setInterval(function() {
-    tempoRestante--;
+    tempoRestRestante--;
     if(tempoRestante <= 0) {
       clearInterval(CRONOMETRO_CADASTRO);
       btn.disabled = false;
@@ -1479,7 +1477,6 @@ function atualizar(){
       gerenciarLayoutStatus(cardInv, txtInv, false, "Conectado", "Desconectado");
       gerenciarLayoutStatus(cardBat, txtBat, false, "Conectada", "Desconectada");
 
-      // Apaga o fluxo e a linha completamente (Opacidade Zero)
       pLeft.className.baseVal = "trilha-ponte";
       pRight.className.baseVal = "trilha-ponte";
       aLeft.style.opacity = '0';
@@ -1507,7 +1504,6 @@ function atualizar(){
       var batAtiva = (d.bateria_conectada !== undefined) ? d.bateria_conectada : true;
       gerenciarLayoutStatus(cardBat, txtBat, batAtiva, "Conectada", "Desconectada");
 
-      // Acende e apaga as linhas/setas dinamicamente baseados nas conexões individuais
       if(invAtivo) {
         pLeft.className.baseVal = "trilha-ponte ativa";
         aLeft.style.opacity = '1';
