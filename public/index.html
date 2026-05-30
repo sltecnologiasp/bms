@@ -71,7 +71,6 @@
 
 body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text-main);min-height:100vh;width:100%;overflow-x:hidden;transition: background 0.3s, color 0.3s}
 
-/* CORREÇÃO DAS CLASSES BASE: Remove display flex forçado dos IDs */
 #login,#dash,#lista,#cadastro,#redefinir,#configuracoesPage{
   position:relative;
   z-index:1;
@@ -93,7 +92,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text-main);
   display: block;
 }
 
-/* CORREÇÃO DO CONTAINER DASHBOARD: Só vira Flex quando não tiver a classe .hidden */
+/* CONTAINER DASHBOARD */
 #dash:not(.hidden) {
   display: flex !important;
   flex-direction: column !important;
@@ -102,7 +101,6 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text-main);
   align-items: center !important;
 }
 
-/* VALIDAÇÃO ABSOLUTA: Sumir com as telas ocultas sem deixar vazar elementos */
 .hidden{display:none !important}
 
 .title{font-size:clamp(32px,7vw,54px);font-weight:900;margin-bottom:4px;letter-spacing:2px;background:linear-gradient(90deg,var(--blue),var(--cyan));-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-align:center;width:100%}
@@ -191,15 +189,15 @@ button:active{transform:scale(0.98)}
 }
 .bms-item:hover{border-color:var(--cyan)}
 
-/* ANIMAÇÃO NEON PULSANTE DOS CARD DISPOSITIVOS ONLINE */
-@keyframes neonPulse {
+/* ANIMAÇÃO NEON PULSANTE PADRONIZADA (VERDE) */
+@keyframes neonPulseVerde {
   0% { border-color: var(--green); box-shadow: 0 0 4px var(--neon-pulse-color); }
-  50% { border-color: var(--cyan); box-shadow: 0 0 15px var(--neon-pulse-color), 0 0 4px var(--green); }
+  50% { border-color: var(--cyan); box-shadow: 0 0 14px var(--neon-pulse-color), 0 0 4px var(--green); }
   100% { border-color: var(--green); box-shadow: 0 0 4px var(--neon-pulse-color); }
 }
 
 .bms-item.online-active {
-  animation: neonPulse 2s infinite ease-in-out !important;
+  animation: neonPulseVerde 2s infinite ease-in-out !important;
   border-width: 1.5px !important;
 }
 
@@ -240,7 +238,59 @@ button:active{transform:scale(0.98)}
 .bar{height:12px;background:var(--gauge-empty);border-radius:999px;overflow:hidden}
 .bar-fill{height:100%;width:0%;border-radius:999px;background:linear-gradient(90deg,var(--green),var(--cyan));transition:width.8s ease}
 
-/* CONFIGURAÇÃO DO GRID DOS CARD DE LEITURA COMPACTOS */
+/* CONFIGURAÇÃO DO NOVO GRID DE 3 STATUS COMPACTOS LADO A LADO */
+.status-triple-grid {
+  display: grid !important;
+  grid-template-columns: repeat(3, 1fr) !important;
+  gap: 5px !important;
+  width: 100% !important;
+  max-width: 100% !important;
+}
+
+.status-triple-grid .card {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  text-align: center !important;
+  padding: 10px 4px !important;
+  min-height: 80px !important;
+  transition: all 0.3s ease !important;
+}
+
+.status-triple-grid .status-title {
+  font-size: 10px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.5px !important;
+  text-transform: uppercase !important;
+  color: var(--text-muted) !important;
+  margin-bottom: 4px !important;
+}
+
+.status-triple-grid .status-text {
+  font-size: 13px !important;
+  font-weight: 800 !important;
+}
+
+/* Classes de Estado Unificadas para os 3 Status */
+.triple-active {
+  animation: neonPulseVerde 2s infinite ease-in-out !important;
+  border: 1.5px solid var(--green) !important;
+}
+.triple-active .status-text {
+  color: var(--green) !important;
+}
+
+.triple-inactive {
+  border: 1px solid rgba(231, 29, 54, 0.3) !important;
+  box-shadow: none !important;
+  background: rgba(231, 29, 54, 0.03) !important;
+}
+.triple-inactive .status-text {
+  color: var(--red) !important;
+}
+
+/* GRID DOS CARD DE LEITURA COMPACTOS (SOC, TENSÃO, ETC) */
 .grid{
   display:grid !important;
   grid-template-columns: repeat(2, 1fr) !important;
@@ -289,10 +339,6 @@ button:active{transform:scale(0.98)}
 #lista .card:hover{border-color:var(--cyan)}
 
 .card-empty{grid-column:1/-1;min-height:180px;display:flex;align-items:center;justify-content:center;color:var(--text-muted);font-size:14px}
-
-.status-badge{display:inline-flex;align-items:center;gap:8px;padding:10px 20px;border-radius:999px;font-weight:700;font-size:14px;margin-top:0px}
-.status-badge.on{background:rgba(46,196,182,.1);color:var(--green);border:1px solid var(--green)}
-.status-badge.off{background:rgba(231,29,54,.1);color:var(--red);border:1px solid var(--red)}
 
 .diff{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:12px}
 .diff-item{padding:10px 6px;border-radius:12px;background:var(--cell-bg);border:1px solid var(--cell-border);text-align:center}
@@ -539,11 +585,23 @@ button:active{transform:scale(0.98)}
     </div>
   </div>
 
-  <div class="card" style="padding:14px;display:flex;flex-direction:column;align-items:center;justify-content:center">
-    <div class="status-wrap" style="margin:0">
-      <span id="status" class="status-badge off">Offline</span>
+  <div class="status-triple-grid">
+    <div id="cardInversor" class="card triple-inactive">
+      <span class="status-title">Inversor</span>
+      <span id="txtInversor" class="status-text">Desconectado</span>
     </div>
-    <div class="bms-code" id="bms-titulo" style="margin-top:8px;font-size:15px;opacity:.7;font-family:monospace;color:var(--text-main)">--</div>
+    <div id="cardBms" class="card triple-inactive">
+      <span class="status-title">Smart BMS</span>
+      <span id="txtBms" class="status-text">Offline</span>
+    </div>
+    <div id="cardBateria" class="card triple-inactive">
+      <span class="status-title">Bateria</span>
+      <span id="txtBateria" class="status-text">Desconectada</span>
+    </div>
+  </div>
+
+  <div style="width:100%; text-align:center; margin-top:0px; margin-bottom: 2px;">
+    <div class="bms-code" id="bms-titulo" style="font-size:14px; opacity:.6; font-family:monospace; color:var(--text-main)">--</div>
   </div>
 
   <div class="grid">
@@ -1112,7 +1170,7 @@ function mostrarLista(){
   USAR_CONTROLE_CORTINA = false;
 
   carregarLista();
-  INT = setInterval(carregarLista, 10000); // 10 segundos
+  INT = setInterval(carregarLista, 10000);
 }
 
 function abrirDash(code){
@@ -1123,7 +1181,7 @@ function abrirDash(code){
   document.getElementById('dash').classList.remove('hidden');
   document.getElementById('bms-titulo').textContent = code;
   atualizar();
-  INT = setInterval(atualizar, 10000); // 10 segundos
+  INT = setInterval(atualizar, 10000);
 }
 
 function voltar(){ clearInterval(INT); localStorage.removeItem('bms_codigo_ativo'); mostrarLista(); }
@@ -1266,25 +1324,73 @@ function atualizarGauge(soc){
   gauge.style.background = 'conic-gradient(var(--green) 0deg,var(--cyan) '+(soc * 3.6)+'deg,var(--gauge-empty) '+(soc * 3.6)+'deg)';
 }
 
+/* LÓGICA DE ATUALIZAÇÃO DINÂMICA DOS 3 STATUS COM PADRÃO NEON IGUAL */
+function gerenciarLayoutStatus(elementoCard, elementoTxt, ativo, textoAtivo, textoInativo) {
+  if (ativo) {
+    elementoCard.className = "card triple-active";
+    elementoTxt.textContent = textoAtivo;
+  } else {
+    elementoCard.className = "card triple-inactive";
+    elementoTxt.textContent = textoInativo;
+  }
+}
+
 function atualizar(){
   if(!CODIGO) return;
   fetch(API+'?action=data&code='+CODIGO, { headers:{'Authorization':'Bearer '+TOKEN} })
   .then(function(r){ return r ? r.json() : null; })
   .then(function(d){
     if(!d) return;
-    var st = document.getElementById('status');
-    if(st) { st.textContent = d.online?'Online':'Offline'; st.className = 'status-badge ' + (d.online?'on':'off'); }
     
+    var cardInv = document.getElementById('cardInversor');
+    var txtInv = document.getElementById('txtInversor');
+    var cardBms = document.getElementById('cardBms');
+    var txtBms = document.getElementById('txtBms');
+    var cardBat = document.getElementById('cardBateria');
+    var txtBat = document.getElementById('txtBateria');
+
+    // 1. Tratamento caso a caixinha (Smart BMS) caia Offline globalmente
     if(!d.online){
+      // Tudo desliga e fica vermelho
+      gerenciarLayoutStatus(cardBms, txtBms, false, "Online", "Offline");
+      gerenciarLayoutStatus(cardInv, txtInv, false, "Conectado", "Desconectado");
+      gerenciarLayoutStatus(cardBat, txtBat, false, "Conectada", "Desconectada");
+
       document.getElementById('soc').textContent = '0%';
       document.getElementById('volt').textContent = '0.00V';
-      atualizarGauge(0); renderCelulas([]);
-    }else{
-      document.getElementById('soc').textContent = d.soc.toFixed(0)+'%';
-      document.getElementById('volt').textContent = d.voltage.toFixed(2)+'V';
-      document.getElementById('corr').textContent = d.current.toFixed(1)+'A';
-      document.getElementById('temp').textContent = d.temp.toFixed(1)+'°C';
-      renderCelulas(d.cells); atualizarGauge(parseInt(d.soc || 0));
+      document.getElementById('corr').textContent = '0.0A';
+      document.getElementById('temp').textContent = '0.0°C';
+      atualizarGauge(0); 
+      renderCelulas([]);
+    } else {
+      // 2. Se a Smart BMS responder Online, avalia individualmente cada cabo
+      gerenciarLayoutStatus(cardBms, txtBms, true, "Online", "Offline");
+      
+      // Valida o Inversor (Pega o booleano 'inversor_conectado' vindo do banco/API)
+      var invAtivo = (d.inversor_conectado !== undefined) ? d.inversor_conectado : true;
+      gerenciarLayoutStatus(cardInv, txtInv, invAtivo, "Conectado", "Desconectado");
+
+      // Valida a Bateria Huawei (Pega o booleano 'bateria_conectada' ou 'bat_conectada' vindo do banco/API)
+      var batAtiva = (d.bateria_conectada !== undefined) ? d.bateria_conectada : true;
+      gerenciarLayoutStatus(cardBat, txtBat, batAtiva, "Conectada", "Desconectada");
+
+      // Se o cabo da bateria cair mas o ESP estiver online, zera apenas os valores da Huawei
+      if(!batAtiva) {
+        document.getElementById('soc').textContent = '0%';
+        document.getElementById('volt').textContent = '0.00V';
+        document.getElementById('corr').textContent = '0.0A';
+        document.getElementById('temp').textContent = '0.0°C';
+        atualizarGauge(0);
+        renderCelulas([]);
+      } else {
+        // Valores normais com a leitura ativa
+        document.getElementById('soc').textContent = d.soc.toFixed(0)+'%';
+        document.getElementById('volt').textContent = d.voltage.toFixed(2)+'V';
+        document.getElementById('corr').textContent = d.current.toFixed(1)+'A';
+        document.getElementById('temp').textContent = d.temp.toFixed(1)+'°C';
+        renderCelulas(d.cells); 
+        atualizarGauge(parseInt(d.soc || 0));
+      }
     }
   });
 }
