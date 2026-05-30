@@ -230,17 +230,38 @@ export async function onRequest({ request, env }) {
       return json({ ok: false, error: 'Credenciais inválidas' }, 401);
     }
 
-    // ROTA 7: UPDATE TELEMETRIA DA EQUIPE/BMS
+    // ROTA 7: UPDATE TELEMETRIA DA EQUIPE/BMS (ADAPTADA PRO INVERSOR)
     if (action === 'update' && request.method === 'POST') {
-      const { code, soc, voltage, current, temp, cells } = await request.json();
+      const body = await request.json();
+      const { code, soc, voltage, current, temp, cells } = body;
+      
+      // Mapeamento dos novos parâmetros do Inversor enviados pelo ESP32
+      const inversor_conectado = body.inversor_conectado !== undefined ? (body.inversor_conectado ? 1 : 0) : 1;
+      const bateria_conectada = body.bateria_conectada !== undefined ? (body.bateria_conectada ? 1 : 0) : 1;
+      const inv_potencia = body.inv_potencia || 0;
+      const inv_tensao_ac = body.inv_tensao_ac || 0;
+      const inv_frequencia = body.inv_frequencia || 0;
+      const inv_geracao_dia = body.inv_geracao_dia || 0;
+
       if (!code) return json({ ok: false, error: 'Code obrigatório' }, 400);
+      
       await env.DB.prepare(`
-        INSERT INTO bms (code, soc, voltage, current, temp, cells, online, updated_at)
-        VALUES (?, ?, ?, ?, ?, ?, 1, datetime('now'))
+        INSERT INTO bms (
+          code, soc, voltage, current, temp, cells, online, updated_at,
+          inversor_conectado, bateria_conectada, inv_potencia, inv_tensao_ac, inv_frequencia, inv_geracao_dia
+        )
+        VALUES (?, ?, ?, ?, ?, ?, 1, datetime('now'), ?, ?, ?, ?, ?, ?)
         ON CONFLICT(code) DO UPDATE SET
           soc = excluded.soc, voltage = excluded.voltage, current = excluded.current,
-          temp = excluded.temp, cells = excluded.cells, online = 1, updated_at = datetime('now')
-      `).bind(code, soc || 0, voltage || 0, current || 0, temp || 0, JSON.stringify(cells || [])).run();
+          temp = excluded.temp, cells = excluded.cells, online = 1, updated_at = datetime('now'),
+          inversor_conectado = excluded.inversor_conectado, bateria_conectada = excluded.bateria_conectada,
+          inv_potencia = excluded.inv_potencia, inv_tensao_ac = excluded.inv_tensao_ac,
+          inv_frequencia = excluded.inv_frequencia, inv_geracao_dia = excluded.inv_geracao_dia
+      `).bind(
+        code, soc || 0, voltage || 0, current || 0, temp || 0, JSON.stringify(cells || []),
+        inversor_conectado, bateria_conectada, inv_potencia, inv_tensao_ac, inv_frequencia, inv_geracao_dia
+      ).run();
+      
       return json({ ok: true });
     }
 
@@ -298,34 +319,26 @@ export async function onRequest({ request, env }) {
         return json(data);
       }
 
-      // NOVO: AÇÃO PARA VINCULAR MANUALMENTE CORRIGIDA
+      // VINCULAR MANUALMENTE
       if (action === 'admin_force_bind' && request.method === 'POST') {
         const { userId, code } = await request.json();
         if (!userId || !code) return json({ ok: false, error: 'Dados incompletos' }, 400);
 
-        // 1. Vincula o user_id no bms_master
         await env.DB.prepare('UPDATE bms_master SET user_id = ? WHERE code = ?').bind(userId, code).run();
-        
-        // 2. Garante que o dispositivo exista na tabela principal de telemetria
         await env.DB.prepare('INSERT OR IGNORE INTO bms (code, nome) VALUES (?, ?)').bind(code, code).run();
-        
-        // 3. Insere o vínculo na tabela user_bms para aparecer para o cliente
         await env.DB.prepare('INSERT OR IGNORE INTO user_bms (user_id, bms_code, bms_nome) VALUES (?, ?, ?)')
           .bind(userId, code, code).run();
 
         return json({ ok: true });
       }
 
-      // NOVO: AÇÃO PARA DESVINCULAR MANUALMENTE CORRIGIDA
+      // DESVINCULAR MANUALMENTE
       if (action === 'admin_force_unbind' && request.method === 'DELETE') {
         const userId = url.searchParams.get('userId');
         const code = url.searchParams.get('code');
         if (!userId || !code) return json({ ok: false, error: 'Parâmetros incompletos' }, 400);
 
-        // 1. Remove o dono da tabela bms_master
         await env.DB.prepare('UPDATE bms_master SET user_id = NULL WHERE code = ? AND user_id = ?').bind(code, userId).run();
-        
-        // 2. Apaga o vínculo da tabela relacional do cliente
         await env.DB.prepare('DELETE FROM user_bms WHERE user_id = ? AND bms_code = ?').bind(userId, code).run();
 
         return json({ ok: true });
@@ -423,7 +436,7 @@ export async function onRequest({ request, env }) {
       return json(withOnline);
     }
 
-    // ROTA COMPARTILHADA (SUPORTA USER E ADMIN)
+    // ROTA COMPARTILHADA: RETORNO DE DADOS PRO CLIENTE (ADAPTADA COM OS NOVOS CAMPOS)
     if (action === 'data' && request.method === 'GET') {
       const code = url.searchParams.get('code');
       if (!code) return json({ ok: false, error: 'Code obrigatório' }, 400);
@@ -433,8 +446,21 @@ export async function onRequest({ request, env }) {
       }
       const data = await env.DB.prepare('SELECT *, datetime(updated_at) || "Z" as updated_at FROM bms WHERE code = ?').bind(code).first();
       if (!data) return json({ ok: false, error: 'BMS não encontrada' }, 404);
+      
       const online = data.updated_at && (Date.now() - new Date(data.updated_at).getTime() < 5000);
-      return json({...data, online, cells: JSON.parse(data.cells || '[]')});
+      
+      // Mapeamento seguro para garantir integridade caso a tabela ainda não possua as colunas preenchidas
+      return json({
+        ...data,
+        online,
+        inversor_conectado: data.inversor_conectado !== undefined ? (data.inversor_conectado === 1) : true,
+        bateria_conectada: data.bateria_conectada !== undefined ? (data.bateria_conectada === 1) : true,
+        inv_potencia: data.inv_potencia || 0,
+        inv_tensao_ac: data.inv_tensao_ac || 0,
+        inv_frequencia: data.inv_frequencia || 0,
+        inv_geracao_dia: data.inv_geracao_dia || 0,
+        cells: JSON.parse(data.cells || '[]')
+      });
     }
 
     if (action === 'user_change_password' && request.method === 'POST') {
