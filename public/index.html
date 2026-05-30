@@ -8,7 +8,7 @@
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://bms.app.br/">
 <meta property="og:title" content="SMART BMS">
-<meta property="og:description" content="Gerenciamento e Monitoramento Avançado de Baterias em Tempo Real - SL Tecnologia">
+<meta property="og:description" content="Gerenciamento e Monitoramento Avançado de Baterias in Tempo Real - SL Tecnologia">
 <meta property="og:image" content="https://bms.app.br/1000229030.png">
 <meta property="og:image:secure_url" content="https://bms.app.br/1000229030.png">
 <meta property="og:image:width" content="300">
@@ -157,7 +157,6 @@ button:active{transform:scale(0.98)}
 .btn-danger:hover{background:rgba(255,68,68,0.15)}
 
 .bms-list{display:flex;flex-direction:column;gap:12px;width:100%;margin-top:8px}
-
 .bms-item{
   background: var(--bg);
   border: 1px solid var(--input-border);
@@ -170,28 +169,15 @@ button:active{transform:scale(0.98)}
   justify-content: center;
   min-height: 160px;
   cursor: pointer;
-  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  transition: border-color 0.2s;
 }
-
-.bms-item.neon-active {
-  border-color: var(--green) !important;
-  animation: pulsoNeonCard 2.5s infinite ease-in-out;
-}
-.bms-item.neon-active h3 {
-  text-shadow: 0 0 10px rgba(0, 255, 136, 0.3);
-}
-
+.bms-item:hover{border-color:var(--cyan)}
 .bms-item h3{color:var(--text-main);font-size:19px;font-weight:800;margin-bottom:4px;width:100%}
 .bms-item p{color:var(--text-muted);font-size:13px;font-family:monospace;margin-bottom:8px;width:100%}
 
 .status-dot{display:inline-flex;align-items:center;justify-content:center;gap:6px;font-size:12px;font-weight:700;margin-bottom:14px;width:100%}
 .status-dot::before{content:'';width:8px;height:8px;border-radius:50%;display:inline-block}
-
-.status-dot.on{color:var(--green)}
-.status-dot.on::before{
-  background:var(--green);
-  box-shadow: 0 0 10px var(--green);
-}
+.status-dot.on{color:var(--green)}.status-dot.on::before{background:var(--green);box-shadow:0 0 8px var(--green)}
 .status-dot.off{color:var(--red)}.status-dot.off::before{background:var(--red);box-shadow:0 0 8px var(--red)}
 
 .bms-item .btn-item-del{
@@ -230,19 +216,6 @@ button:active{transform:scale(0.98)}
   width:100%;
   max-width:100%;
   margin-top:8px
-}
-
-/* AJUSTADO: Centralização absoluta e forçada de todo o conteúdo interno dos mini cards */
-.grid .card{
-  width:100%;
-  height:100px;
-  display:flex;
-  flex-direction:column;
-  justify-content:center;
-  align-items:center;
-  text-align:center;
-  padding:12px;
-  margin:0 !important
 }
 
 #lista, #listaUsers { width: 100% }
@@ -352,29 +325,6 @@ button:active{transform:scale(0.98)}
   fill: none;
   stroke: var(--blue);
   stroke-width: 2;
-}
-
-/* AJUSTADO: Alinhamento de texto centralizado fixado na classe value */
-.value { 
-  font-size:clamp(22px,4.5vw,28px); 
-  font-weight:800; 
-  margin-top:6px; 
-  line-height:1; 
-  width:100%; 
-  text-align:center; 
-  font-variant-numeric:tabular-nums;
-}
-
-@media (min-width: 600px) {
-  .grid {
-    grid-template-columns: repeat(4, 1fr);
-  }
-}
-
-@keyframes pulsoNeonCard {
-  0% { box-shadow: 0 0 10px rgba(0, 255, 136, 0.15); }
-  50% { box-shadow: 0 0 22px rgba(0, 255, 136, 0.5); }
-  100% { box-shadow: 0 0 10px rgba(0, 255, 136, 0.15); }
 }
 </style>
 </head>
@@ -896,11 +846,11 @@ function salvarNovaSenha() {
   const urlParams = new URLSearchParams(window.location.search);
   const token = urlParams.get('reset_token');
   const novaSenha = document.getElementById('nova-senha').value;
-  const MiramarSenha = document.getElementById('nova-senha-confirmar').value;
+  const confirmarSenha = document.getElementById('nova-senha-confirmar').value;
   const errBox = document.getElementById('erro-redefinir');
 
   if (errBox) errBox.classList.add('hidden');
-  if (novaSenha !== MiramarSenha) {
+  if (novaSenha !== confirmarSenha) {
     if (errBox) { errBox.textContent = "As senhas não coincidem!"; errBox.classList.remove('hidden'); }
     return;
   }
@@ -1118,6 +1068,19 @@ function mostrarLista(){
   INT = setInterval(carregarLista, 3000);
 }
 
+function abrirDash(code){
+  clearInterval(INT);
+  CODIGO = code;
+  localStorage.setItem('bms_codigo_ativo', code);
+  esconderTudo();
+  document.getElementById('dash').classList.remove('hidden');
+  document.getElementById('bms-titulo').textContent = code;
+  atualizar();
+  INT = setInterval(atualizar, 3000);
+}
+
+function voltar(){ clearInterval(INT); localStorage.removeItem('bms_codigo_ativo'); mostrarLista(); }
+
 function carregarLista(){
   fetch(API + '?action=user_bms', { headers: {'Authorization':'Bearer '+TOKEN} })
   .then(function(r){
@@ -1160,9 +1123,7 @@ function carregarLista(){
     var html = '';
     for(var i=0;i<lista.length;i++){
       var b = lista[i];
-      var neonClass = b.online ? 'neon-active' : '';
-      
-      html += '<div class="bms-item '+neonClass+'" onclick="abrirDash(\''+b.code+'\')">';
+      html += '<div class="bms-item" onclick="abrirDash(\''+b.code+'\')">';
       html += '<h3>'+b.nome+'</h3>';
       html += '<p>'+b.code+'</p>';
       html += '<span class="status-dot '+(b.online?'on':'off')+'">'+(b.online?'Online':'Offline')+'</span>';
@@ -1205,24 +1166,16 @@ function addBms(){
   });
 }
 
-function abrirDash(code){
-  clearInterval(INT);
-  CODIGO = code;
-  localStorage.setItem('bms_codigo_ativo', code);
-  esconderTudo();
-  document.getElementById('dash').classList.remove('hidden');
-  document.getElementById('bms-titulo').textContent = code;
-  atualizar();
-  INT = setInterval(atualizar, 3000);
-}
-
-function voltar(){ clearInterval(INT); localStorage.removeItem('bms_codigo_ativo'); mostrarLista(); }
-
+// CORREÇÃO VISUAL CRÍTICA DO INFINITYV APLICADA ABAIXO
 function renderCelulas(cels){
   var container = document.getElementById('celulas');
   if(!container) return;
   if(!cels || cels.length === 0){
     container.innerHTML = '<div style="grid-column:1/-1;text-align:center;opacity:.3;padding:10px;font-size:13px">Sem dados</div>';
+    document.getElementById('celMin').textContent = '0.00V';
+    document.getElementById('celMax').textContent = '0.00V';
+    document.getElementById('celDif').textContent = '0.00V';
+    document.getElementById('celTot').textContent = '0';
     return;
   }
   var vals = [];
@@ -1230,12 +1183,20 @@ function renderCelulas(cels){
     var v = parseFloat(cels[i]);
     if(v > 0) vals.push(v);
   }
-  var min = Math.min.apply(null, vals);
-  var max = Math.max.apply(null, vals);
+  
+  var min = 0;
+  var max = 0;
+  var dif = 0;
+  
+  if (vals.length > 0) {
+    min = Math.min.apply(null, vals);
+    max = Math.max.apply(null, vals);
+    dif = max - min;
+  }
   
   document.getElementById('celMin').textContent = min.toFixed(2)+'V';
   document.getElementById('celMax').textContent = max.toFixed(2)+'V';
-  document.getElementById('celDif').textContent = (max - min).toFixed(2)+'V';
+  document.getElementById('celDif').textContent = dif.toFixed(2)+'V';
   document.getElementById('celTot').textContent = cels.length;
   
   var html = '';
