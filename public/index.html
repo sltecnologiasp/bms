@@ -90,11 +90,14 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text-main);
   margin: auto auto;
 }
 
-/* CONTAINER PRINCIPAL DO DASHBOARD: Blocos quase encostados */
+/* TRAVA DE SEGURANÇA: Garante que telas ocultas sumam de verdade */
+.hidden{display:none !important}
+
+/* CONTAINER DO DASHBOARD: Blocos coladinhos e sem buracos */
 #dash {
   display: flex !important;
   flex-direction: column !important;
-  gap: 5px !important; /* Distância mínima e idêntica entre todos os blocos */
+  gap: 5px !important; 
   justify-content: flex-start !important;
 }
 
@@ -108,7 +111,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text-main);
   border-radius:20px;
   padding:20px;
   width:100%;
-  margin: 0 !important; /* Zera as margens externas para evitar buracos */
+  margin: 0 !important; 
   box-shadow: var(--neon-glow);
 }
 
@@ -237,7 +240,7 @@ button:active{transform:scale(0.98)}
 .grid{
   display:grid !important;
   grid-template-columns: repeat(2, 1fr) !important;
-  gap:5px !important; /* Encosta as caixas horizontal e verticalmente */
+  gap:5px !important; 
   width:100% !important;
   max-width:100% !important;
   margin-top:0px !important;
@@ -303,9 +306,6 @@ button:active{transform:scale(0.98)}
 .modal{display:none;position:fixed;inset:0;background:rgba(3,5,10,0.5);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);z-index:999;overflow-y:auto;padding:20px}
 .modal.active{display:flex;align-items:center;justify-content:center}
 .modal-content{width:100%;max-width:440px;background:var(--input-bg);border:1px solid var(--input-border);border-radius:24px;padding:24px;position:relative;box-shadow:0 20px 50px rgba(0,0,0,0.15)}
-
-.hidden{display:none!important}
-.erro{background:rgba(231,29,54,.1);border:1px solid var(--red);border-radius:12px;padding:14px;margin-top:16px;color:var(--red);font-size:14px;text-align:center;}
 
 .link-cadastro{margin-top:20px;text-align:center;color:var(--text-muted);cursor:pointer;font-size:14px}
 .link-cadastro span{color:var(--blue);text-decoration:underline}
@@ -890,7 +890,7 @@ function salvarNovaSenha() {
   const urlParams = new URLSearchParams(window.location.search);
   const token = urlParams.get('reset_token');
   const novaSenha = document.getElementById('nova-senha').value;
-  const confirmarSenha = document.getElementById('nova-senha-confirmar').value;
+  const confirmarSenha = document.getElementById('nova-senha-confirmar');
   const errBox = document.getElementById('erro-redefinir');
 
   if (errBox) errBox.classList.add('hidden');
@@ -1109,7 +1109,7 @@ function mostrarLista(){
   USAR_CONTROLE_CORTINA = false;
 
   carregarLista();
-  INT = setInterval(carregarLista, 10000); // REQUISITO: Atualização em 10 segundos
+  INT = setInterval(carregarLista, 10000); 
 }
 
 function abrirDash(code){
@@ -1120,7 +1120,7 @@ function abrirDash(code){
   document.getElementById('dash').classList.remove('hidden');
   document.getElementById('bms-titulo').textContent = code;
   atualizar();
-  INT = setInterval(atualizar, 10000); // REQUISITO: Atualização em 10 segundos
+  INT = setInterval(atualizar, 10000); 
 }
 
 function voltar(){ clearInterval(INT); localStorage.removeItem('bms_codigo_ativo'); mostrarLista(); }
@@ -1167,7 +1167,6 @@ function carregarLista(){
     var html = '';
     for(var i=0;i<lista.length;i++){
       var b = lista[i];
-      // Injeta dinamicamente a classe de pulsação neon apenas se a bateria responder como Online
       var onlineClass = b.online ? 'online-active' : '';
       html += '<div class="bms-item '+onlineClass+'" onclick="abrirDash(\''+b.code+'\')">';
       html += '<h3>'+b.nome+'</h3>';
