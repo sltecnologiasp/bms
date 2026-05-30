@@ -8,7 +8,7 @@
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://bms.app.br/">
 <meta property="og:title" content="SMART BMS">
-<meta property="og:description" content="Gerenciamento e Monitoramento Avançado de Baterias in Tempo Real - SL Tecnologia">
+<meta property="og:description" content="Gerenciamento e Monitoramento Avançado de Baterias em Tempo Real - SL Tecnologia">
 <meta property="og:image" content="https://bms.app.br/1000229030.png">
 <meta property="og:image:secure_url" content="https://bms.app.br/1000229030.png">
 <meta property="og:image:width" content="300">
@@ -216,6 +216,25 @@ button:active{transform:scale(0.98)}
   width:100%;
   max-width:100%;
   margin-top:8px
+}
+
+/* CORREÇÃO DO CSS FIXA: Alinha absolutamente tudo dentro dos cards do grid */
+.grid .card {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  text-align: center !important;
+}
+
+/* Força os textos numéricos da classe .value a ficarem no meio do card */
+.value {
+  font-size: clamp(22px, 5.5vw, 28px);
+  font-weight: 800;
+  margin-top: 4px;
+  width: 100%;
+  text-align: center !important;
+  display: block !important;
 }
 
 #lista, #listaUsers { width: 100% }
@@ -917,7 +936,7 @@ function cadastrar(){
         if(d.error === 'E-mail já cadastrado') {
           e.innerHTML = 'E-mail já cadastrado. <br><button onclick="reenviarEmailAtivacao(\''+email+'\')" style="padding:10px 14px; font-size:12px; margin-top:8px; border-radius:10px; font-weight:700; color:#fff; cursor:pointer; border:none; background:linear-gradient(90deg,var(--orange),var(--red)); box-shadow:0 4px 12px rgba(255,159,28,0.2);">REENVIAR LINK DE ATIVAÇÃO</button>';
           e.classList.remove('hidden');
-        } else if(d.error === 'E-mail já cadastrado e confirmed') {
+        } else if(d.error === 'E-mail já cadastrado and confirmed') {
           alert('Este e-mail já está verificado e ativo no sistema!');
           mostrarLogin();
           return;
@@ -1166,7 +1185,6 @@ function addBms(){
   });
 }
 
-// CORREÇÃO VISUAL CRÍTICA DO INFINITYV APLICADA ABAIXO
 function renderCelulas(cels){
   var container = document.getElementById('celulas');
   if(!container) return;
