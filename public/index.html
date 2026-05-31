@@ -1548,6 +1548,7 @@ function addBms(){
   });
 }
 
+// === REESTRUTURAÇÃO CIRÚRGICA DE DUPLO ESTADO PARA ELIMINAR O PISCA-PISCA ===
 function renderCelulas(cels){
   var container = document.getElementById('celulas');
   if(!container) return;
@@ -1580,13 +1581,32 @@ function renderCelulas(cels){
   document.getElementById('celDif').textContent = dif.toFixed(2)+'V';
   document.getElementById('celTot').textContent = cels.length;
   
-  var html = '';
-  for(var i=0;i<cels.length;i++){
-    var val = parseFloat(cels[i]);
-    var cls = (val < 3.2 || val > 4.2) ? 'crit' : (val < 3.4 || val > 4.15) ? 'warn' : 'ok';
-    html += '<div class="cell '+cls+'"><div class="cell-num">C'+(i+1)+'</div><div class="cell-val">'+val.toFixed(2)+'V</div></div>';
+  // CORREÇÃO: Cria os blocos estáticos APENAS SE o array mudou de tamanho ou resetou
+  if (container.children.length !== cels.length || container.querySelector('div[style*="grid-column"]')) {
+    var html = '';
+    for(var i=0; i<cels.length; i++){
+      html += '<div class="cell" id="c-box-'+i+'"><div class="cell-num">C'+(i+1)+'</div><div class="cell-val" id="c-val-'+i+'">0.00V</div></div>';
+    }
+    container.innerHTML = html;
   }
-  container.innerHTML = html;
+  
+  // CORREÇÃO: Varre os blocos injetando parâmetros e classes milimetricamente sem redesenhar a tela
+  for(var i=0; i<cels.length; i++){
+    var val = parseFloat(cels[i]);
+    var valStr = val.toFixed(2)+'V';
+    var cls = (val < 3.2 || val > 4.2) ? 'crit' : (val < 3.4 || val > 4.15) ? 'warn' : 'ok';
+    var novaClasse = 'cell ' + cls;
+    
+    var cellBox = document.getElementById('c-box-'+i);
+    var cellVal = document.getElementById('c-val-'+i);
+    
+    if (cellVal && cellVal.textContent !== valStr) {
+      cellVal.textContent = valStr;
+    }
+    if (cellBox && cellBox.className !== novaClasse) {
+      cellBox.className = novaClasse;
+    }
+  }
 }
 
 function atualizarGauge(soc){
@@ -1600,13 +1620,16 @@ function atualizarGauge(soc){
   gauge.style.background = 'conic-gradient(var(--green) 0deg,var(--cyan) '+(soc * 3.6)+'deg,var(--gauge-empty) '+(soc * 3.6)+'deg)';
 }
 
+// CORREÇÃO: Filtra repaints infinitos checando se a classe e o texto são idênticos antes de atribuir
 function gerenciarLayoutStatus(elementoCard, elementoTxt, ativo, textoAtivo, textoInativo) {
-  if (ativo) {
-    elementoCard.className = "card triple-active";
-    elementoTxt.textContent = textoAtivo;
-  } else {
-    elementoCard.className = "card triple-inactive";
-    elementoTxt.textContent = textoInativo;
+  var novaClasse = ativo ? "card triple-active" : "card triple-inactive";
+  var novoTexto = ativo ? textoAtivo : textoInativo;
+  
+  if (elementoCard.className !== novaClasse) {
+    elementoCard.className = novaClasse;
+  }
+  if (elementoTxt.textContent !== novoTexto) {
+    elementoTxt.textContent = novoTexto;
   }
 }
 
