@@ -107,6 +107,23 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text-main);
 .user-info{color:var(--text-muted);font-size:14px;text-align:center;margin-bottom:16px;font-weight:500;width:100%}
 .user-info span{color:var(--text-main);font-weight:600}
 
+/* ESTILIZAÇÃO DO CONTAINER DE ERROS EM CORES NEON LARANJA */
+.erro {
+  color: var(--orange);
+  background: rgba(255, 159, 28, 0.08);
+  border: 1px solid var(--orange);
+  box-shadow: 0 0 14px rgba(255, 159, 28, 0.18);
+  text-align: center;
+  font-size: 14px;
+  font-weight: 700;
+  padding: 12px 16px;
+  border-radius: 14px;
+  width: 100%;
+  max-width: 500px;
+  box-sizing: border-box;
+  margin-top: 14px;
+}
+
 .card{
   background:var(--card-bg);
   border:1px solid var(--card-border);
@@ -483,6 +500,8 @@ button:active{transform:scale(0.98)}
     <img src="1000229030.png" alt="Logo BMS" style="width: 100px; height: 100px; object-fit: contain; border-radius: 50%; box-shadow: 0 4px 15px rgba(0, 180, 216, 0.2); background: var(--card-bg); padding: 8px; transition: transform 0.3s ease;">
     <div style="font-size: clamp(32px, 7vw, 48px); font-weight: 900; margin-top: 12px; letter-spacing: 2px; background: linear-gradient(90deg, var(--blue), var(--cyan)); -webkit-background-clip: text;-webkit-text-fill-color: transparent; text-align: center;">SMART BMS</div>
     <div class="user-info" style="margin-bottom:0; margin-top: 4px;">Gerenciamento Avançado</div>
+    
+    <div id="erro" class="erro hidden"></div>
   </div>
 
   <div class="card">
@@ -499,9 +518,9 @@ button:active{transform:scale(0.98)}
     
     <button onclick="login()">ENTRAR</button>
     <p class="link-cadastro" onclick="mostrarCadastro()">Ainda não tem conta? <span>Cadastre-se</span></p>
-    <div id="erro" class="erro hidden"></div>
   </div>
-  <div class="footer-link">
+  
+  <div class="footer-link" style="margin-top: 60px;">
     <a href="https://wa.me/5515991355393" target="_blank">SL TECNOLOGIA</a>
     <span>© Todos os direitos reservados</span>
   </div>
@@ -748,10 +767,10 @@ var CADASTRO_ATIVO = false;
 var USAR_CONTROLE_CORTINA = false;
 
 var SCANNER_CAMERA_OBJ = null;
-var MQTT_CLIENT = null;             // GERENCIADOR DE INSTÂNCIA DO BROKER
-var bmsTimeoutTimer = null;         // TIMER DE TIMEOUT PARA O DASHBOARD (5 SEGUNDOS)
-var listaPlacasRegistradas = [];   // CACHE LÓGICO PARA MONITORAR STATUS DOS CARDS NA TELA INICIAL
-var listaTimeoutsDispositivos = {}; // CRONÔMETROS DE TIMEOUT INDIVIDUAIS PARA OS CARDS DA LISTA
+var MQTT_CLIENT = null;             
+var bmsTimeoutTimer = null;         
+var listaPlacasRegistradas = [];   
+var listaTimeoutsDispositivos = {}; 
 
 try{USER = JSON.parse(localStorage.getItem('bms_user')||'null');}catch(e){}
 
@@ -1233,7 +1252,6 @@ function toggleCortinaDispositivos() {
 function fecharMqttAnterior() {
   if (bmsTimeoutTimer) { clearTimeout(bmsTimeoutTimer); bmsTimeoutTimer = null; }
   
-  // Limpa todos os cronômetros individuais de timeout das bolinhas da lista
   for (var k in listaTimeoutsDispositivos) {
     if (listaTimeoutsDispositivos[k]) clearTimeout(listaTimeoutsDispositivos[k]);
   }
@@ -1263,11 +1281,9 @@ function mostrarLista(){
   if(btn) btn.classList.add('hidden');
   USAR_CONTROLE_CORTINA = false;
 
-  // CORREÇÃO LOGICA DO FLUXO: Executa a montagem dos cards estáticos uma única vez
   carregarListaUmaVez();
 }
 
-// BUSCA AS PLACAS DO USUÁRIO NO BANCO UMA ÚNICA VEZ E LIGA O FILTRO DO HIVEMQ GERAL NA LISTA
 function carregarListaUmaVez() {
   fetch(API + '?action=user_bms', { headers: {'Authorization':'Bearer '+TOKEN} })
   .then(function(r){
@@ -1277,7 +1293,6 @@ function carregarListaUmaVez() {
   .then(function(lista){
     if(!lista) return;
     
-    // Alimenta o cache lógico global com os códigos das placas vinculadas a este login
     listaPlacasRegistradas = lista.map(function(item) { return item.code; });
 
     var cortina = document.getElementById('cortina-dispositivos');
@@ -1305,7 +1320,6 @@ function carregarListaUmaVez() {
       return;
     }
 
-    // Renderiza a estrutura estática original do HTML. Todas as bolinhas começam em "Offline" (Padrão de Segurança)
     var html = '';
     for(var i=0;i<lista.length;i++){
       var b = lista[i];
@@ -1318,12 +1332,10 @@ function carregarListaUmaVez() {
     }
     el.innerHTML = html;
 
-    // INICIALIZA O MOTOR OUVE-TUDO DO HIVEMQ PARA CONTROLAR AS BOLINHAS EM TEMPO REAL DIRECT
     conectarMqttParaListaDispositivos();
   });
 }
 
-// INICIALIZAÇÃO DA ESCUTA CORINGA NA TELA DA LISTA DE DISPOSITIVOS
 function conectarMqttParaListaDispositivos() {
   const hostMqtt = "965bd6abd6f54692b84d710cab8327b4.s1.eu.hivemq.cloud"; 
   const portaMqtt = 8884;                     
@@ -1337,30 +1349,25 @@ function conectarMqttParaListaDispositivos() {
 
   MQTT_CLIENT.onMessageArrived = function (message) {
     try {
-      // Intercepta qual placa publicou o sinal
       const topicoLido = message.destinationName; 
       const partesTopico = topicoLido.split('/');
-      const idPlacaEmissora = partesTopico[1]; // Captura a string de ID da placa
+      const idPlacaEmissora = partesTopico[1]; 
 
-      // FILTRO LÓGICO DE PERMISSÃO: Só mexe na tela se a placa pertencer a este usuário
       if (listaPlacasRegistradas.indexOf(idPlacaEmissora) !== -1) {
         var cardElemento = document.getElementById('card-lista-' + idPlacaEmissora);
         var dotElemento = document.getElementById('dot-lista-' + idPlacaEmissora);
 
         if (cardElemento && dotElemento) {
-          // Sinal ativo recebido: joga a bolinha para verde e liga a animação neonSuave original
           cardElemento.className = "bms-item online-active";
           dotElemento.className = "status-dot on";
           dotElemento.textContent = "Online";
 
-          // MONITORAMENTO DE TIMEOUT INDIVIDUAL POR DISPOSITIVO (5 SEGUNDOS)
           if (listaTimeoutsDispositivos[idPlacaEmissora]) clearTimeout(listaTimeoutsDispositivos[idPlacaEmissora]);
           listaTimeoutsDispositivos[idPlacaEmissora] = setTimeout(function() {
-            // Se o chip ficar 5s sem publicar nada, a lógica do navegador derruba a bolinha para vermelho
             cardElemento.className = "bms-item";
             dotElemento.className = "status-dot off";
             dotElemento.textContent = "Offline";
-          }, 5000); // Filtro cravado em 5 segundos
+          }, 5000); 
         }
       }
     } catch (err) {}
@@ -1370,13 +1377,11 @@ function conectarMqttParaListaDispositivos() {
     userName: userMqtt, password: passMqtt, useSSL: true, timeout: 3,
     onSuccess: function () {
       console.log("[MQTT LISTA] Ouvindo atividade na nuvem...");
-      // Se inscreve usando o sinal coringa (+) para escutar todas as placas simultaneamente
       MQTT_CLIENT.subscribe("sl_bms/+/telemetria");
     }
   });
 }
 
-// === ENGINE DE TELEMETRIA DO DASHBOARD INDIVIDUAL COM ULTRA-VELOCIDADE ===
 function abrirDash(code){
   clearInterval(INT);
   fecharMqttAnterior();
@@ -1454,7 +1459,6 @@ function configurarInterfaceEstadoOffline() {
 }
 
 function processarERenderizarDadosMqtt(d) {
-  // INTERCEPTADOR DE FILTRO POR TIMEOUT DE SOFTWARE NO DASHBOARD (5 SEGUNDOS)
   if (bmsTimeoutTimer) clearTimeout(bmsTimeoutTimer);
   bmsTimeoutTimer = setTimeout(function() {
     console.log("[SISTEMA] Fluxo interrompido por mais de 5s. Forçando queda do painel.");
@@ -1513,13 +1517,12 @@ function voltar(){
 }
 
 function carregarLista(){
-  // Mantida apenas como segurança sintática caso chamadas órfãs ocorram no fluxo de transição
 }
 
 function removerBms(code, nome){
   if(!confirm(`Remover o dispositivo "${nome || code}"?`)) return;
   fetch(API+`?action=remove_bms&code=${code}`,{ method:'DELETE', headers:{'Authorization':'Bearer '+TOKEN} })
-  .then(function() { carregarListaUmaVez(); }); // Remonta a estrutura estática após deleção de forma limpa
+  .then(function() { carregarListaUmaVez(); }); 
 }
 
 function addBms(){
@@ -1543,12 +1546,11 @@ function addBms(){
       if(cortina) cortina.classList.add('aberta');
       if(btn) btn.textContent = 'OCULTAR DISPOSITIVOS';
       
-      carregarListaUmaVez(); // Remonta a estrutura estática após adição de forma limpa
+      carregarListaUmaVez(); 
     } else { alert('Erro: ' + d.error); }
   });
 }
 
-// === REESTRUTURAÇÃO CIRÚRGICA DE DUPLO ESTADO PARA ELIMINAR O PISCA-PISCA ===
 function renderCelulas(cels){
   var container = document.getElementById('celulas');
   if(!container) return;
@@ -1581,7 +1583,6 @@ function renderCelulas(cels){
   document.getElementById('celDif').textContent = dif.toFixed(2)+'V';
   document.getElementById('celTot').textContent = cels.length;
   
-  // CORREÇÃO: Cria os blocos estáticos APENAS SE o array mudou de tamanho ou resetou
   if (container.children.length !== cels.length || container.querySelector('div[style*="grid-column"]')) {
     var html = '';
     for(var i=0; i<cels.length; i++){
@@ -1590,7 +1591,6 @@ function renderCelulas(cels){
     container.innerHTML = html;
   }
   
-  // CORREÇÃO: Varre os blocos injetando parâmetros e classes milimetricamente sem redesenhar a tela
   for(var i=0; i<cels.length; i++){
     var val = parseFloat(cels[i]);
     var valStr = val.toFixed(2)+'V';
@@ -1620,7 +1620,6 @@ function atualizarGauge(soc){
   gauge.style.background = 'conic-gradient(var(--green) 0deg,var(--cyan) '+(soc * 3.6)+'deg,var(--gauge-empty) '+(soc * 3.6)+'deg)';
 }
 
-// CORREÇÃO: Filtra repaints infinitos checando se a classe e o texto são idênticos antes de atribuir
 function gerenciarLayoutStatus(elementoCard, elementoTxt, ativo, textoAtivo, textoInativo) {
   var novaClasse = ativo ? "card triple-active" : "card triple-inactive";
   var novoTexto = ativo ? textoAtivo : textoInativo;
