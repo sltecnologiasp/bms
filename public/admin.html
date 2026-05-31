@@ -564,8 +564,8 @@ button.logout:hover{background:rgba(231,29,54,0.08);color:var(--red);border-colo
 </div>
 
 <script>
-// CORREÇÃO DA ROTA: Mapeado exatamente para o arquivo físico Node.js ativo na sua VPS
-const API = '/api/bms.js';
+// CONFIGURAÇÃO DA ROTA: Mapeada para o padrão serverless sem extensão do Cloudflare Pages Functions
+const API = '/api/bms';
 let adminToken = sessionStorage.getItem('admin_token');
 let bmsList = [];
 let activeBmsCode = sessionStorage.getItem('admin_active_bms_code');
@@ -769,7 +769,7 @@ async function enviarFirmwareOta() {
   formData.append('code', activeBmsCode);
 
   try {
-    // CORREÇÃO: Removido qualquer Content-Type manual para deixar o navegador gerar o boundary multipart do arquivo nativamente
+    // PROTEÇÃO MULTIPART: Deixa o browser gerar o boundary e o cabeçalho apropriados automaticamente
     const r = await fetch(API + '?action=admin_upload_ota', {
       method: 'POST',
       headers: {
@@ -951,7 +951,7 @@ function conectarMqttParaDashboardAdmin() {
   });
 }
 
-function configuringInterfaceDashboardOfflineAdmin() { configurarInterfaceDashboardOfflineAdmin(); }
+function configuringInterfaceDashboardOfflineAdmin() { configuringInterfaceDashboardOfflineAdmin(); }
 
 function configurarInterfaceDashboardOfflineAdmin() {
   const cardInv = document.getElementById('cardInversor');
