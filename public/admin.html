@@ -342,8 +342,31 @@ button.logout:hover{background:rgba(231,29,54,0.08);color:var(--red);border-colo
 .erro{background:rgba(231,29,54,0.1);border:1px solid var(--red);border-radius:12px;padding:14px;margin-top:16px;color:var(--red);font-size:14px;text-align:center;}
 .erro.hidden{display:none!important}
 
+/* ALTERADO LÓGICAMENTE: Força a lista a abrir em grid 2x2 em telas pequenas (mobile) */
+@media(max-width:599px){
+  #lista { 
+    display: grid !important; 
+    grid-template-columns: repeat(2, 1fr) !important; 
+    gap: 8px !important; 
+    width: 100% !important;
+  }
+  #lista .card {
+    min-height: 145px !important;
+    padding: 10px 8px !important;
+    flex-direction: column !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+  }
+  #lista .card button.del {
+    width: 100% !important;
+    padding: 6px !important;
+    font-size: 11px !important;
+    margin-top: 6px !important;
+  }
+}
+
 @media(min-width:600px){
-  #lista { grid-template-columns: repeat(4, 1fr); display: grid !important; }
+  #lista { grid-template-columns: repeat(4, 1fr); display: grid !important; gap: 12px !important;}
   .filter-row button { font-size: 13px; padding: 14px; }
 }
 </style>
@@ -388,7 +411,7 @@ button.logout:hover{background:rgba(231,29,54,0.08);color:var(--red);border-colo
 
   <div style="width:100%; display:flex; flex-direction:column; margin-bottom:12px">
     <div class="label" style="margin-bottom:8px" id="label-lista-titulo">Todas as BMS do Sistema</div>
-    <div id="lista" style="display:flex; flex-direction:column; gap:12px; width:100%;"></div>
+    <div id="lista" style="width:100%;"></div>
   </div>
   
   <button class="logout" onclick="adminLogout()">SAIR DO PAINEL ADMIN</button>
@@ -551,8 +574,8 @@ let TIMEOUT_ADMIN_MSG = null;
 
 // VARIÁVEIS LÓGICAS DO MOTOR ASSÍNCRONO DO PAINEL ADMIN
 let MQTT_CLIENT = null;
-let bmsTimeoutTimerAdmin = null;         // TIMER DE QUEDA PARA O INTERIOR DO DASHBOARD INDIVIDUAL
-let listaTimeoutsAdminCards = {};      // CONTROLE DE CRONÔMETROS INDIVIDUAIS PARA OS CARDS DO FILTRO DA LISTA PRINCIPAL
+let bmsTimeoutTimerAdmin = null;         
+let listaTimeoutsAdminCards = {};      
 
 if(adminToken === 'admin_ok') {
   if (activeScreen === 'dashAdmin' && activeBmsCode) {
@@ -668,7 +691,7 @@ document.getElementById('code').oninput = e => {
   e.target.value = 'SL' + e.target.value.slice(2).replace(/[^0-9]/g,'').slice(0,12);
 };
 
-function gerarCodigoAleatorio(){
+function generarCodigoAleatorio(){
   const numeros = Math.floor(Math.random() * 1000000000000).toString().padStart(12, '0');
   return 'SL' + numeros;
 }
@@ -876,7 +899,6 @@ function gerenciarLayoutStatus(elementoCard, elementoTxt, ativo, textoAtivo, tex
   }
 }
 
-// === NOVO MOTOR LÓGICO DE DASHBOARD ADMIN CONECTADO VIA WEBSOCKETS NO HIVEMQ ===
 function conectarMqttParaDashboardAdmin() {
   configurarInterfaceDashboardOfflineAdmin();
 
@@ -946,7 +968,6 @@ function configurarInterfaceDashboardOfflineAdmin() {
 }
 
 function processarERenderizarDadosAdminMqtt(d) {
-  // INTERCEPTADOR DE TIMEOUT DE SOFTWARE NO INTERIOR DO DASHBOARD ADMIN (5 SEGUNDOS)
   if (bmsTimeoutTimerAdmin) clearTimeout(bmsTimeoutTimerAdmin);
   bmsTimeoutTimerAdmin = setTimeout(function() {
     configurarInterfaceDashboardOfflineAdmin();
@@ -1086,8 +1107,10 @@ async function carregarTudo(){
   const rBms = await fetch(API+'?action=admin_list_master',{headers:authHeaders()});
   const dBms = await rBms.json();
   
-  // Classificação inicial estática estrutural
+  // Realiza a classificação estrutural estática (Garante que se alinhem no carregamento)
   bmsList = dBms.sort((a, b) => {
+    if (a.online && !b.online) return -1;
+    if (!a.online && b.online) return 1;
     return (b.updated_at ? new Date(b.updated_at).getTime() : 0) - (a.updated_at ? new Date(a.updated_at).getTime() : 0);
   });
 
@@ -1136,26 +1159,24 @@ function atualizarHTMLListaBms() {
 
   document.getElementById('lista').innerHTML = bmsFiltradas.map(b=>{
     const dono = b.user_id? `<span class="badge badge-orange">Vinculada</span>` : `<span class="badge badge-green">Disponível</span>`;
-    
-    // Todas nascem desativadas ("Offline"). O barramento MQTT realiza o acendimento instantâneo na tela
+    const statusClass = b.online ? 'on' : 'off';
+    const statusText = b.online ? 'Online' : 'Offline';
+
     return `
-    <div class="card" id="admin-card-lista-${b.code}" onclick="viewBmsDetails('${b.code}')" style="padding: 12px 14px; flex-direction:row; align-items:center; justify-content: space-between; min-height:auto;">
-      <div style="display:flex; flex-direction:column; align-items:flex-start;">
-        <span class="status off" id="admin-dot-lista-${b.code}">Offline</span>
-        <div class="card-code" style="margin:4px 0">${b.code}</div>
-        <div>${dono}</div>
+    <div class="card" id="admin-card-lista-${b.code}" onclick="viewBmsDetails('${b.code}')">
+      <div style="display:flex; flex-direction:column; align-items:center; width: 100%;">
+        <span class="status ${statusClass}" id="admin-dot-lista-${b.code}">${statusText}</span>
+        <div class="card-code">${b.code}</div>
+        <div style="margin-top: 2px;">${dono}</div>
       </div>
-      <button class="del" style="width:auto; margin-top:0" onclick="del('${b.code}')">EXCLUIR</button>
+      <button class="del" onclick="del('${b.code}')">EXCLUIR</button>
     </div>
   `}).join('') || `<div class="card card-empty"><div>Nenhuma BMS encontrada neste filtro</div></div>`;
 
-  // Ativa os contadores estáticos de balanço
   atualizarContadoresFiltro();
-  // Conecta o motor coringa de atividade instantânea na lista
-  conectarMqttParaListaGeralAdmin();
 }
 
-// === NOVO MOTOR LÓGICO DE INFRAESTRUTURA CORINGA DE ROTEAMENTO NO ADMIN ===
+// === ALTERADO LÓGICAMENTE: MOTOR DE REORDENAÇÃO CONTÍNUA DO HIVEMQ PARA COLOCAR ONLINE NO TOPO ===
 function conectarMqttParaListaGeralAdmin() {
   const hostMqtt = "965bd6abd6f54692b84d710cab8327b4.s1.eu.hivemq.cloud"; 
   const portaMqtt = 8884;                     
@@ -1170,27 +1191,47 @@ function conectarMqttParaListaGeralAdmin() {
     try {
       const topicoLido = message.destinationName;
       const partesTopico = topicoLido.split('/');
-      const idPlacaEmissora = partesTopico[1]; // Resgata o código do dispositivo emissor
+      const idPlacaEmissora = partesTopico[1]; 
 
-      // Varre o cache global para marcar o estado em tempo real na memória lógica
       let dispositivoNoObjeto = bmsList.find(b => b.code === idPlacaEmissora);
-      if (dispositivoNoObjeto) dispositivoNoObjeto.online = true;
+      
+      // Armazena se o estado anterior mudou para evitar renderizações desnecessárias piscando a tela
+      let statusAnteriorEraOffline = dispositivoNoObjeto ? !dispositivoNoObjeto.online : true;
 
-      // Executa o acendimento imediato na tabela caso o card esteja renderizado em tela
+      if (dispositivoNoObjeto) {
+        dispositivoNoObjeto.online = true;
+      }
+
+      // Se a placa acabou de ligar (estava offline), força a reordenação da lista e empurra pro topo
+      if (statusAnteriorEraOffline && activeScreen === 'painel') {
+        bmsList.sort((a, b) => {
+          if (a.online && !b.online) return -1;
+          if (!a.online && b.online) return 1;
+          return (b.updated_at ? new Date(b.updated_at).getTime() : 0) - (a.updated_at ? new Date(a.updated_at).getTime() : 0);
+        });
+        atualizarHTMLListaBms();
+      }
+
       const cardElemento = document.getElementById('admin-card-lista-' + idPlacaEmissora);
       const dotElemento = document.getElementById('admin-dot-lista-' + idPlacaEmissora);
 
       if (cardElemento && dotElemento) {
-        dotElemento.className = "status on";
+        cardElemento.querySelector('.status').className = "status on";
         dotElemento.textContent = "Online";
 
-        // Aplica o timeout lógico anti-queda independente por item de 5 segundos
         if (listaTimeoutsAdminCards[idPlacaEmissora]) clearTimeout(listaTimeoutsAdminCards[idPlacaEmissora]);
         listaTimeoutsAdminCards[idPlacaEmissora] = setTimeout(function() {
           if (dispositivoNoObjeto) dispositivoNoObjeto.online = false;
-          dotElemento.className = "status off";
-          dotElemento.textContent = "Offline";
-          atualizarContadoresFiltro();
+          
+          // Se cair a conexão por 5s, joga pro fim da fila na reordenação e redesenha a tela
+          if (activeScreen === 'painel') {
+            bmsList.sort((a, b) => {
+              if (a.online && !b.online) return -1;
+              if (!a.online && b.online) return 1;
+              return (b.updated_at ? new Date(b.updated_at).getTime() : 0) - (a.updated_at ? new Date(a.updated_at).getTime() : 0);
+            });
+            atualizarHTMLListaBms();
+          }
         }, 5000);
       }
       atualizarContadoresFiltro();
@@ -1200,7 +1241,6 @@ function conectarMqttParaListaGeralAdmin() {
   MQTT_CLIENT.connect({
     userName: userMqtt, password: passMqtt, useSSL: true, timeout: 3,
     onSuccess: function () {
-      // Monitora o barramento completo de dispositivos da fábrica em tempo real com caractere curinga (+)
       MQTT_CLIENT.subscribe("sl_bms/+/telemetria");
     }
   });
@@ -1242,8 +1282,6 @@ async function setupInicial() {
   }
 }
 if(adminToken === 'admin_ok') setupInicial();
-
-// ATENÇÃO: TODOS OS SETINTERVALS REPETITIVOS DE SOLICITAÇÃO HTTP FORAM EXTINTOS PARA ACABAR COM O BOMBARDEIO NO BANCO
 </script>
 </body>
 </html>
