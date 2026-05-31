@@ -59,6 +59,23 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text-main);
 .title{font-size:clamp(32px,7vw,54px);font-weight:900;margin-bottom:4px;letter-spacing:2px;background:linear-gradient(90deg,var(--blue),var(--cyan));-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-align:center;width:100%}
 .user-info{color:var(--text-muted);font-size:14px;text-align:center;margin-bottom:16px;font-weight:500;width:100%}
 
+/* ESTILIZAÇÃO DO CONTAINER DE ERROS ADMIN EM NEON LARANJA */
+.erro {
+  color: var(--orange);
+  background: rgba(255, 159, 28, 0.08);
+  border: 1px solid var(--orange);
+  box-shadow: 0 0 14px rgba(255, 159, 28, 0.18);
+  text-align: center;
+  font-size: 14px;
+  font-weight: 700;
+  padding: 12px 16px;
+  border-radius: 14px;
+  width: 100%;
+  max-width: 440px;
+  box-sizing: border-box;
+  margin-top: 14px;
+}
+
 .card{
   background:var(--card-bg);
   border:1px solid var(--card-border);
@@ -205,7 +222,7 @@ button.logout:hover{background:rgba(231,29,54,0.08);color:var(--red);border-colo
 .card-code{font-size:13px;font-weight:800;font-family:monospace;color:var(--text-main);margin:6px 0;text-align:center;letter-spacing:0.2px;word-break:break-all}
 .card-top{display:flex;flex-direction:column;justify-content:flex-start;align-items:center;width:100%}
 
-/* Estilos do Bloco de Filtros Alinhados */
+/* LINHA DE FILTROS */
 .filter-row {
   display: flex;
   gap: 8px;
@@ -233,7 +250,6 @@ button.logout:hover{background:rgba(231,29,54,0.08);color:var(--red);border-colo
   box-shadow: 0 4px 15px rgba(0, 128, 255, 0.15);
 }
 
-/* COMPONENTES DO DASHBOARD IDENTICOS AO CLIENTE */
 .gauge-card{padding:15px;min-height:230px;display:flex;flex-direction:column;gap:10px;justify-content:center}
 .gauge{width:min(190px,48vw);height:min(190px,48vw);margin:auto;border-radius:50%;background:conic-gradient(var(--green) 0deg,var(--cyan) 180deg,var(--gauge-empty) 180deg);position:relative;box-shadow:0 0 30px rgba(0,255,255,.05);transition:background .8s ease}
 .gauge::before{content:'';position:absolute;inset:16px;border-radius:50%;background:var(--bg);transition: background 0.3s}
@@ -330,9 +346,8 @@ button.logout:hover{background:rgba(231,29,54,0.08);color:var(--red);border-colo
 .cell.warn{border-color:var(--orange)}
 .cell.crit{border-color:var(--red)}
 
-/* CORREÇÃO ESTRETA DO COMPORTAMENTO DOS MODAIS DE POP-UP VISUAIS */
 .modal{
-  display:none !important; /* Esconde por padrão de forma estrita */
+  display:none !important; 
   position:fixed !important;
   inset:0 !important;
   width:100vw !important;
@@ -340,14 +355,20 @@ button.logout:hover{background:rgba(231,29,54,0.08);color:var(--red);border-colo
   background:rgba(3,5,10,0.6) !important;
   backdrop-filter:blur(10px) !important;
   -webkit-backdrop-filter:blur(10px) !important;
-  z-index:99999 !important; /* Joga por cima de absolutamente todas as listas */
+  z-index:99999 !important; 
   padding:20px !important;
 }
 .modal.active{
-  display:flex !important; /* Ativa como caixa flex centralizada quando invocado */
+  display:flex !important; 
   align-items:center !important;
   justify-content:center !important;
 }
+
+/* RODAPÉ PROFISSIONAL ALINHADO NA BASE */
+.footer-link{font-size:11px;margin-top:120px;text-align:center;letter-spacing:1px;line-height:1.6;padding-bottom:24px;width:100%}
+.footer-link a{color:var(--blue);text-decoration:none;font-weight:600;transition:opacity 0.2s;}
+.footer-link a:hover{opacity:0.8;text-decoration:underline;}
+.footer-link span{color:var(--text-muted);opacity:0.6;display:block;margin-top:4px;}
 
 @media(max-width:599px){
   #lista { 
@@ -381,15 +402,23 @@ button.logout:hover{background:rgba(231,29,54,0.08);color:var(--red);border-colo
 <body>
 
 <div id="login">
-  <div class="title">SMART BMS</div>
-  <div class="user-info">Acesso Administrativo</div>
+  <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; margin-bottom: 24px; width: 100%;">
+    <div class="title">SMART BMS</div>
+    <div class="user-info" style="margin-bottom:0px">Acesso Administrativo</div>
+    <div id="loginError" class="erro hidden"></div>
+  </div>
+  
   <div class="card">
     <div class="label">Usuário</div>
     <input id="user" placeholder="administrador" autocomplete="username" value="administrador">
     <div class="label" style="margin-top:16px">Senha</div>
     <input id="password" type="password" placeholder="••••••••" autocomplete="current-password">
     <button onclick="adminLogin()">ENTRAR NO PAINEL</button>
-    <div id="loginError" class="erro hidden"></div>
+  </div>
+
+  <div class="footer-link">
+    <a href="https://wa.me/5515991355393" target="_blank">SL TECNOLOGIA</a>
+    <span>© Todos os direitos reservados</span>
   </div>
 </div>
 
@@ -421,6 +450,11 @@ button.logout:hover{background:rgba(231,29,54,0.08);color:var(--red);border-colo
   </div>
   
   <button class="logout" onclick="adminLogout()">SAIR DO PAINEL ADMIN</button>
+
+  <div class="footer-link">
+    <a href="https://wa.me/5515991355393" target="_blank">SL TECNOLOGIA</a>
+    <span>© Todos os direitos reservados</span>
+  </div>
 </div>
 
 <div id="clientesPage">
@@ -432,6 +466,11 @@ button.logout:hover{background:rgba(231,29,54,0.08);color:var(--red);border-colo
   </div>
   
   <button class="voltar" onclick="voltarPainel()">← VOLTAR AO PAINEL</button>
+
+  <div class="footer-link">
+    <a href="https://wa.me/5515991355393" target="_blank">SL TECNOLOGIA</a>
+    <span>© Todos os direitos reservados</span>
+  </div>
 </div>
 
 <div id="dashAdmin">
@@ -520,6 +559,11 @@ button.logout:hover{background:rgba(231,29,54,0.08);color:var(--red);border-colo
   </div>
 
   <button class="voltar" style="width:100%; margin-top:4px; padding:18px" onclick="closeBmsModal()">← VOLTAR À LISTA</button>
+
+  <div class="footer-link">
+    <a href="https://wa.me/5515991355393" target="_blank">SL TECNOLOGIA</a>
+    <span>© Todos os direitos reservados</span>
+  </div>
 </div>
 
 <div id="modalVincularBms" class="modal">
@@ -907,13 +951,16 @@ async function confirmarDesvinculoManual() {
   } catch (e) { alert('Erro ao deletar vínculo.'); }
 }
 
+// CORREÇÃO: Filtra repaints infinitos checando se a classe e o texto são idênticos antes de atribuir
 function gerenciarLayoutStatus(elementoCard, elementoTxt, ativo, textoAtivo, textoInativo) {
-  if (ativo) {
-    elementoCard.className = "card triple-active";
-    elementoTxt.textContent = textoAtivo;
-  } else {
-    elementoCard.className = "card triple-inactive";
-    elementoTxt.textContent = textoInativo;
+  const novaClasse = ativo ? "card triple-active" : "card triple-inactive";
+  const novoTexto = ativo ? textoAtivo : textoInativo;
+  
+  if (elementoCard.className !== novaClasse) {
+    elementoCard.className = novaClasse;
+  }
+  if (elementoTxt.textContent !== novoTexto) {
+    elementoTxt.textContent = novoTexto;
   }
 }
 
@@ -933,7 +980,8 @@ function conectarMqttParaDashboardAdmin() {
 
   MQTT_CLIENT = new Paho.MQTT.Client(hostMqtt, Number(portaMqtt), clientRandomId);
 
-  MQTT_CLIENT.onConnectionLost = function () { configuringInterfaceDashboardOfflineAdmin(); };
+  // CORREÇÃO DO BUG CRÍTICO: Removida a chamada recursiva com erro de digitação que causava estouro de pilha
+  MQTT_CLIENT.onConnectionLost = function () { configurarInterfaceDashboardOfflineAdmin(); };
   MQTT_CLIENT.onMessageArrived = function (message) {
     try {
       const d = JSON.parse(message.payloadString);
@@ -946,11 +994,9 @@ function conectarMqttParaDashboardAdmin() {
     onSuccess: function () {
       MQTT_CLIENT.subscribe("sl_bms/" + activeBmsCode + "/telemetria");
     },
-    onFailure: function () { configuringInterfaceDashboardOfflineAdmin(); }
+    onFailure: function () { configurarInterfaceDashboardOfflineAdmin(); }
   });
 }
-
-function configuringInterfaceDashboardOfflineAdmin() { configuringInterfaceDashboardOfflineAdmin(); }
 
 function configurarInterfaceDashboardOfflineAdmin() {
   const cardInv = document.getElementById('cardInversor');
@@ -1051,8 +1097,10 @@ function processarERenderizarDadosAdminMqtt(d) {
   renderAdminCells(d.cells || []);
 }
 
+// === REESTRUTURAÇÃO CIRÚRGICA DO PAINEL ADMIN PARA FINISH DO PISCA-PISCA ===
 function renderAdminCells(cells){
   const container = document.getElementById('adminCellsContent');
+  if(!container) return;
   if(!cells || cells.length === 0){
     container.innerHTML = '<div style="grid-column:1/-1;text-align:center;opacity:.5;padding:10px;font-size:13px;color:var(--text-muted)">Sem dados</div>';
     document.getElementById('adminCelMin').textContent = '0.00V';
@@ -1079,13 +1127,34 @@ function renderAdminCells(cells){
   document.getElementById('adminCelDif').textContent = dif.toFixed(2) + 'V';
   document.getElementById('adminCelTot').textContent = cells.length;
 
-  container.innerHTML = cells.map((v, i) => {
-    const val = parseFloat(v);
+  // CORREÇÃO: Injeta os blocos estáticos uma única vez se a contagem mudar
+  if (container.children.length !== cells.length || container.querySelector('div[style*="grid-column"]')) {
+    let html = '';
+    for(let i=0; i<cells.length; i++){
+      html += `<div class="cell" id="adm-c-box-${i}"><div class="cell-num">C${i+1}</div><div class="cell-val" id="adm-c-val-${i}">0.00V</div></div>`;
+    }
+    container.innerHTML = html;
+  }
+
+  // CORREÇÃO: Atualiza pontualmente os campos de texto internos sem destruir elementos na tela
+  for(let i=0; i<cells.length; i++){
+    let val = parseFloat(cells[i]);
+    let valStr = val.toFixed(2) + 'V';
     let cls = 'ok';
     if(val < 3.2 || val > 4.2) cls = 'crit';
     else if(val < 3.4 || val > 4.15) cls = 'warn';
-    return `<div class="cell ${cls}"><div class="cell-num">C${i+1}</div><div class="cell-val">${val.toFixed(2)}V</div></div>`;
-  }).join('');
+    let novaClasse = 'cell ' + cls;
+
+    let cellBox = document.getElementById('adm-c-box-'+i);
+    let cellVal = document.getElementById('adm-c-val-'+i);
+
+    if (cellVal && cellVal.textContent !== valStr) {
+      cellVal.textContent = valStr;
+    }
+    if (cellBox && cellBox.className !== novaClasse) {
+      cellBox.className = novaClasse;
+    }
+  }
 }
 
 function editarUser(id, nome, email){
@@ -1208,7 +1277,7 @@ function conectarMqttParaListaGeralAdmin() {
   MQTT_CLIENT.onConnectionLost = function () {};
   MQTT_CLIENT.onMessageArrived = function (message) {
     try {
-      const topicoLido = message.destinationName;
+      const topico Lido = message.destinationName;
       const partesTopico = topicoLido.split('/');
       const idPlacaEmissora = partesTopico[1]; 
 
