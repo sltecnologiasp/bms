@@ -180,10 +180,10 @@ button.logout:hover{background:rgba(231,29,54,0.08);color:var(--red);border-colo
   margin:0 !important;
   margin-bottom:12px !important;
   display:flex;
-  flex-direction:column;
+  flex-direction:row; /* Mantém o layout original em linha para desktops */
   align-items:center;
   justify-content:space-between;
-  min-height:160px;
+  min-height:auto;
   cursor:pointer;
   box-shadow: var(--neon-glow);
   width:100%;
@@ -330,7 +330,7 @@ button.logout:hover{background:rgba(231,29,54,0.08);color:var(--red);border-colo
 .cell.warn{border-color:var(--orange)}
 .cell.crit{border-color:var(--red)}
 
-/* Força a lista a abrir em grid 2x2 em telas pequenas (mobile) */
+/* CORREÇÃO VISUAL MOBILE: Ajusta os sub-elementos internos para caberem lado a lado sem misturar */
 @media(max-width:599px){
   #lista { 
     display: grid !important; 
@@ -341,7 +341,7 @@ button.logout:hover{background:rgba(231,29,54,0.08);color:var(--red);border-colo
   #lista .card {
     min-height: 145px !important;
     padding: 10px 8px !important;
-    flex-direction: column !important;
+    flex-direction: column !important; /* Muda para coluna apenas no mobile para organizar os sub-itens */
     justify-content: space-between !important;
     align-items: center !important;
   }
@@ -717,7 +717,6 @@ async function del(code){
 
 function viewBmsDetails(code){ showDashAdmin(code); }
 
-// === CORREÇÃO LÓGICA DO MOTOR OTA: REALIZA O UPLOAD E DISPARA O COMANDO JSON LEVE VIA MQTT ===
 async function enviarFirmwareOta() {
   const fileInput = document.getElementById('arquivoOtaBin');
   const statusMsg = document.getElementById('msgOtaStatus');
@@ -769,7 +768,6 @@ async function enviarFirmwareOta() {
       statusMsg.textContent = 'Upload concluído! Disparando gatilho de instalação via HiveMQ...';
       statusMsg.style.color = 'var(--cyan)';
 
-      // Dispara o JSON leve com o link direto gerado pelo seu banco de dados através do MQTT
       if (MQTT_CLIENT && MQTT_CLIENT.isConnected()) {
         const payloadOtaMqtt = JSON.stringify({ url: d.url });
         const mensagemMqtt = new Paho.MQTT.Message(payloadOtaMqtt);
@@ -1036,6 +1034,43 @@ function processarERenderizarDadosAdminMqtt(d) {
   renderAdminCells(d.cells || []);
 }
 
+function renderAdminCells(cells){
+  const container = document.getElementById('adminCellsContent');
+  if(!cells || cells.length === 0){
+    container.innerHTML = '<div style="grid-column:1/-1;text-align:center;opacity:.5;padding:10px;font-size:13px;color:var(--text-muted)">Sem dados</div>';
+    document.getElementById('adminCelMin').textContent = '0.00V';
+    document.getElementById('adminCelMax').textContent = '0.00V';
+    document.getElementById('adminCelDif').textContent = '0.00V';
+    document.getElementById('adminCelTot').textContent = '0';
+    return;
+  }
+
+  let vals = [];
+  for(let i=0; i<cells.length; i++){
+    let v = parseFloat(cells[i]);
+    if(v > 0) vals.push(v);
+  }
+
+  if(vals.length === 0) return;
+
+  const min = Math.min.apply(null, vals);
+  const max = Math.max.apply(null, vals);
+  const dif = max - min;
+
+  document.getElementById('adminCelMin').textContent = min.toFixed(2) + 'V';
+  document.getElementById('adminCelMax').textContent = max.toFixed(2) + 'V';
+  document.getElementById('adminCelDif').textContent = dif.toFixed(2) + 'V';
+  document.getElementById('adminCelTot').textContent = cells.length;
+
+  container.innerHTML = cells.map((v, i) => {
+    const val = parseFloat(v);
+    let cls = 'ok';
+    if(val < 3.2 || val > 4.2) cls = 'crit';
+    else if(val < 3.4 || val > 4.15) cls = 'warn';
+    return `<div class="cell ${cls}"><div class="cell-num">C${i+1}</div><div class="cell-val">${val.toFixed(2)}V</div></div>`;
+  }).join('');
+}
+
 function editarUser(id, nome, email){
   document.getElementById('editUserId').value = id;
   document.getElementById('editUserNome').value = nome;
@@ -1168,7 +1203,6 @@ function conectarMqttParaListaGeralAdmin() {
         dispositivoNoObjeto.online = true;
       }
 
-      // Se a placa acabou de ligar (estava offline), reordena o array e empurra para o topo da lista
       if (statusAnteriorEraOffline && activeScreen === 'painel') {
         bmsList.sort((a, b) => {
           if (a.online && !b.online) return -1;
