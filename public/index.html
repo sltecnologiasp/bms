@@ -107,7 +107,6 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text-main);
 .user-info{color:var(--text-muted);font-size:14px;text-align:center;margin-bottom:16px;font-weight:500;width:100%}
 .user-info span{color:var(--text-main);font-weight:600}
 
-/* ESTILIZAÇÃO DO CONTAINER DE ERROS EM CORES NEON LARANJA */
 .erro {
   color: var(--orange);
   background: rgba(255, 159, 28, 0.08);
@@ -433,7 +432,8 @@ button:active{transform:scale(0.98)}
 .link-esqueceu{display:block;text-align:right;font-size:12px;color:var(--text-muted);margin-top:8px;cursor:pointer;text-decoration:none;transition:color 0.2s}
 .link-esqueceu:hover{color:var(--blue)}
 
-.footer-link{font-size:11px;margin-top:24px;text-align:center;letter-spacing:1px;line-height:1.6}
+/* CORREÇÃO GLOBAL: EXPANSÃO DE MARGIN-TOP PARA REPOSICIONAR O RODAPÉ NA BASE */
+.footer-link{font-size:11px;margin-top:120px;text-align:center;letter-spacing:1px;line-height:1.6;padding-bottom:24px}
 .footer-link a{color:var(--blue);text-decoration:none;font-weight:600;transition:opacity 0.2s;}
 .footer-link a:hover{opacity:0.8;text-decoration:underline;}
 .footer-link span{color:var(--text-muted);opacity:0.6;display:block;margin-top:4px;}
@@ -520,7 +520,7 @@ button:active{transform:scale(0.98)}
     <p class="link-cadastro" onclick="mostrarCadastro()">Ainda não tem conta? <span>Cadastre-se</span></p>
   </div>
   
-  <div class="footer-link" style="margin-top: 60px;">
+  <div class="footer-link">
     <a href="https://wa.me/5515991355393" target="_blank">SL TECNOLOGIA</a>
     <span>© Todos os direitos reservados</span>
   </div>
@@ -856,7 +856,7 @@ function abrirScannerCamera() {
     },
     function(error) {}
   ).catch(function(err) {
-    alert("Câmera bloqueada ou não encontrada. Verifique as permissões do seu navegador.");
+    alert("Câmera bloqueada ou não encontrada. Verifique as permissions do seu navegador.");
     fecharScannerCamera();
   });
 }
