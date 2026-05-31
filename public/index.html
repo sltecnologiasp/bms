@@ -17,7 +17,6 @@
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
 <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.0.1/mqttws31.min.text" type="text/javascript"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.0.1/mqttws31.min.js" type="text/javascript"></script>
 
 <style>
@@ -342,7 +341,7 @@ button:active{transform:scale(0.98)}
 .grid {
   display:grid !important;
   grid-template-columns: repeat(2, 1fr) !important;
-  gap:5px !important; 
+  gap: 5px !important; 
   width:100% !important;
   max-width:100% !important;
   margin-top:0px !important;
@@ -749,8 +748,10 @@ var CADASTRO_ATIVO = false;
 var USAR_CONTROLE_CORTINA = false;
 
 var SCANNER_CAMERA_OBJ = null;
-var MQTT_CLIENT = null; // GERENCIADOR DE SESSÃO DO BROKER
-var bmsTimeoutTimer = null; // TIMER LÓGICO DE QUEDA (OPÇÃO 1 SELECIONADA)
+var MQTT_CLIENT = null;             // GERENCIADOR DE INSTÂNCIA DO BROKER
+var bmsTimeoutTimer = null;         // TIMER DE TIMEOUT PARA O DASHBOARD (5 SEGUNDOS)
+var listaPlacasRegistradas = [];   // CACHE LÓGICO PARA MONITORAR STATUS DOS CARDS NA TELA INICIAL
+var listaTimeoutsDispositivos = {}; // CRONÔMETROS DE TIMEOUT INDIVIDUAIS PARA OS CARDS DA LISTA
 
 try{USER = JSON.parse(localStorage.getItem('bms_user')||'null');}catch(e){}
 
@@ -1025,7 +1026,7 @@ function salvarNovaSenha() {
   const urlParams = new URLSearchParams(window.location.search);
   const token = urlParams.get('reset_token');
   const novaSenha = document.getElementById('nova-senha').value;
-  const Newtonsoft = document.getElementById('nova-senha-confirmar').value;
+  const confirmarSenha = document.getElementById('nova-senha-confirmar').value;
   const errBox = document.getElementById('erro-redefinir');
 
   if (errBox) errBox.classList.add('hidden');
@@ -1230,11 +1231,18 @@ function toggleCortinaDispositivos() {
 }
 
 function fecharMqttAnterior() {
-  if (bmsTimeoutTimer) { clearTimeout(bmsTimeoutTimer); bmsTimeoutTimer = null; } // Zera o cronômetro lógico
+  if (bmsTimeoutTimer) { clearTimeout(bmsTimeoutTimer); bmsTimeoutTimer = null; }
+  
+  // Limpa todos os cronômetros individuais de timeout das bolinhas da lista
+  for (var k in listaTimeoutsDispositivos) {
+    if (listaTimeoutsDispositivos[k]) clearTimeout(listaTimeoutsDispositivos[k]);
+  }
+  listaTimeoutsDispositivos = {};
+
   if (MQTT_CLIENT) {
     try {
       MQTT_CLIENT.disconnect();
-      console.log("[MQTT] Instância anterior finalizada.");
+      console.log("[MQTT] Conexão anterior finalizada de forma limpa.");
     } catch(e) {}
     MQTT_CLIENT = null;
   }
@@ -1255,12 +1263,120 @@ function mostrarLista(){
   if(btn) btn.classList.add('hidden');
   USAR_CONTROLE_CORTINA = false;
 
-  carregarLista();
-  // ALTERADO LOGICAMENTE PARA 1 SEGUNDO DE ESCUTA DA API DA LISTA
-  INT = setInterval(carregarLista, 1000); 
+  // CORREÇÃO LOGICA DO FLUXO: Executa a montagem dos cards estáticos uma única vez
+  carregarListaUmaVez();
 }
 
-// === ENGINE DE COMUNICAÇÃO TOTALMENTE ASSÍNCRONA VIA WEBSOCKETS (PORTA 8884) ===
+// BUSCA AS PLACAS DO USUÁRIO NO BANCO UMA ÚNICA VEZ E LIGA O FILTRO DO HIVEMQ GERAL NA LISTA
+function carregarListaUmaVez() {
+  fetch(API + '?action=user_bms', { headers: {'Authorization':'Bearer '+TOKEN} })
+  .then(function(r){
+    if(r && r.status === 401){ sairSemConfirmacao(); return null; }
+    return r ? r.json() : [];
+  })
+  .then(function(lista){
+    if(!lista) return;
+    
+    // Alimenta o cache lógico global com os códigos das placas vinculadas a este login
+    listaPlacasRegistradas = lista.map(function(item) { return item.code; });
+
+    var cortina = document.getElementById('cortina-dispositivos');
+    var btn = document.getElementById('btn-toggle-cortina');
+    
+    if (lista.length > 4) {
+      if (!USAR_CONTROLE_CORTINA) {
+        USAR_CONTROLE_CORTINA = true;
+        if(cortina) cortina.classList.remove('aberta');
+        if(btn) {
+          btn.classList.remove('hidden');
+          btn.textContent = 'MOSTRAR DISPOSITIVOS';
+        }
+      }
+    } else {
+      USAR_CONTROLE_CORTINA = false;
+      if(cortina) cortina.classList.add('aberta');
+      if(btn) btn.classList.add('hidden');
+    }
+
+    var el = document.getElementById('bms-list');
+    if(!el) return;
+    if(!lista.length){
+      el.innerHTML = '<p style="text-align:center;color:var(--text-muted);padding:20px;font-size:14px">Nenhuma BMS monitorada</p>';
+      return;
+    }
+
+    // Renderiza a estrutura estática original do HTML. Todas as bolinhas começam em "Offline" (Padrão de Segurança)
+    var html = '';
+    for(var i=0;i<lista.length;i++){
+      var b = lista[i];
+      html += '<div class="bms-item" id="card-lista-' + b.code + '" onclick="abrirDash(\''+b.code+'\')">';
+      html += '<h3>'+b.nome+'</h3>';
+      html += '<p>'+b.code+'</p>';
+      html += '<span class="status-dot off" id="dot-lista-' + b.code + '">Offline</span>';
+      html += '<button class="btn-item-del" onclick="event.stopPropagation();removerBms(\''+b.code+'\',\''+b.nome+'\')">Excluir Dispositivo</button>';
+      html += '</div>';
+    }
+    el.innerHTML = html;
+
+    // INICIALIZA O MOTOR OUVE-TUDO DO HIVEMQ PARA CONTROLAR AS BOLINHAS EM TEMPO REAL DIRECT
+    conectarMqttParaListaDispositivos();
+  });
+}
+
+// INICIALIZAÇÃO DA ESCUTA CORINGA NA TELA DA LISTA DE DISPOSITIVOS
+function conectarMqttParaListaDispositivos() {
+  const hostMqtt = "965bd6abd6f54692b84d710cab8327b4.s1.eu.hivemq.cloud"; 
+  const portaMqtt = 8884;                     
+  const userMqtt = "sl_bms_prod";             
+  const passMqtt = "SLtech2026@Bms";           
+  const clientRandomId = "sl_list_client_" + Math.floor(Math.random() * 10000);
+
+  MQTT_CLIENT = new Paho.MQTT.Client(hostMqtt, Number(portaMqtt), clientRandomId);
+
+  MQTT_CLIENT.onConnectionLost = function () { console.log("[MQTT LISTA] Conexão suspensa."); };
+
+  MQTT_CLIENT.onMessageArrived = function (message) {
+    try {
+      // Intercepta qual placa publicou o sinal
+      const topicoLido = message.destinationName; 
+      const partesTopico = topicoLido.split('/');
+      const idPlacaEmissora = partesTopico[1]; // Captura a string de ID da placa
+
+      // FILTRO LÓGICO DE PERMISSÃO: Só mexe na tela se a placa pertencer a este usuário
+      if (listaPlacasRegistradas.indexOf(idPlacaEmissora) !== -1) {
+        var cardElemento = document.getElementById('card-lista-' + idPlacaEmissora);
+        var dotElemento = document.getElementById('dot-lista-' + idPlacaEmissora);
+
+        if (cardElemento && dotElemento) {
+          // Sinal ativo recebido: joga a bolinha para verde e liga a animação neonSuave original
+          cardElemento.className = "bms-item online-active";
+          dotElemento.className = "status-dot on";
+          dotElemento.textContent = "Online";
+
+          // MONITORAMENTO DE TIMEOUT INDIVIDUAL POR DISPOSITIVO (5 SEGUNDOS)
+          if (listaTimeoutsDispositivos[idPlacaEmissora]) clearTimeout(listaTimeoutsDispositivos[idPlacaEmissora]);
+          listaTimeoutsDispositivos[idPlacaEmissora] = setTimeout(function() {
+            // Se o chip ficar 5s sem publicar nada, a lógica do navegador derruba a bolinha para vermelho
+            cardElemento.className = "bms-item";
+            dotElemento.className = "status-dot off";
+            dotElemento.textContent = "Offline";
+          }, 5000); // Filtro cravado em 5 segundos
+        }
+      }
+    } catch (err) {}
+  };
+
+  MQTT_CLIENT.connect({
+    userName: userMqtt, password: passMqtt, useSSL: true, timeout: 3,
+    onSuccess: function () {
+      console.log("[MQTT LISTA] Ouvindo atividade na nuvem...");
+      // Se inscreve usando o sinal coringa (+) para escutar todas as placas simultaneamente
+      MQTT_CLIENT.subscribe("sl_bms/+/telemetria");
+    }
+  });
+}
+
+// === ENGINE DE TELEMETRIA DO DASHBOARD INDIVIDUAL COM ULTRA-VELOCIDADE ===
 function abrirDash(code){
   clearInterval(INT);
   fecharMqttAnterior();
@@ -1271,11 +1387,10 @@ function abrirDash(code){
   document.getElementById('dash').classList.remove('hidden');
   document.getElementById('bms-titulo').textContent = code;
   
-  // Limpa o painel e força o estado Offline visual inicial até que chegue o primeiro payload
   configurarInterfaceEstadoOffline();
 
   const hostMqtt = "965bd6abd6f54692b84d710cab8327b4.s1.eu.hivemq.cloud"; 
-  const portaMqtt = 8884;                     // Porta estável WebSocket TLS criptografada para navegadores
+  const portaMqtt = 8884;                     
   const userMqtt = "sl_bms_prod";             
   const passMqtt = "SLtech2026@Bms";           
   
@@ -1339,12 +1454,12 @@ function configurarInterfaceEstadoOffline() {
 }
 
 function processarERenderizarDadosMqtt(d) {
-  // CORREÇÃO CRÍTICA DO SINAL: INTERCEPTADOR DE FILTRO POR TIMEOUT DE SOFTWARE (5 SEGUNDOS)
+  // INTERCEPTADOR DE FILTRO POR TIMEOUT DE SOFTWARE NO DASHBOARD (5 SEGUNDOS)
   if (bmsTimeoutTimer) clearTimeout(bmsTimeoutTimer);
   bmsTimeoutTimer = setTimeout(function() {
     console.log("[SISTEMA] Fluxo interrompido por mais de 5s. Forçando queda do painel.");
-    configurarInterfaceEstadoOffline(); // Executa o desligamento imediato na tela
-  }, 5000); // 5000ms = 5 segundos cravados
+    configurarInterfaceEstadoOffline(); 
+  }, 5000); 
 
   var cardInv = document.getElementById('cardInversor');
   var txtInv = document.getElementById('txtInversor');
@@ -1353,7 +1468,6 @@ function processarERenderizarDadosMqtt(d) {
   var cardBat = document.getElementById('cardBateria');
   var txtBat = document.getElementById('txtBateria');
 
-  // Dado em movimento detectado, força o acendimento da placa como Online
   gerenciarLayoutStatus(cardBms, txtBms, true, "Online", "Offline");
   
   var invAtivo = (d.inversor_conectado !== undefined) ? d.inversor_conectado : true;
@@ -1399,66 +1513,15 @@ function voltar(){
 }
 
 function carregarLista(){
-  fetch(API + '?action=user_bms', { headers: {'Authorization':'Bearer '+TOKEN} })
-  .then(function(r){
-    if(r && r.status === 401){ sairSemConfirmacao(); return; }
-    return r ? r.json() : [];
-  })
-  .then(function(lista){
-    if(!lista) return;
-    
-    var cortina = document.getElementById('cortina-dispositivos');
-    var btn = document.getElementById('btn-toggle-cortina');
-    
-    if (lista.length > 4) {
-      if (!USAR_CONTROLE_CORTINA) {
-        USAR_CONTROLE_CORTINA = true;
-        if(cortina) cortina.classList.remove('aberta');
-        if(btn) {
-          btn.classList.remove('hidden');
-          btn.textContent = 'MOSTRAR DISPOSITIVOS';
-        }
-      }
-    } else {
-      USAR_CONTROLE_CORTINA = false;
-      if(cortina) cortina.classList.add('aberta');
-      if(btn) btn.classList.add('hidden');
-    }
-
-    lista.sort(function(a, b) {
-      if (a.online && !b.online) return -1;
-      if (!a.online && b.online) return 1;
-      return 0;
-    });
-
-    var el = document.getElementById('bms-list');
-    if(!el) return;
-    if(!lista.length){
-      el.innerHTML = '<p style="text-align:center;color:var(--text-muted);padding:20px;font-size:14px">Nenhuma BMS monitorada</p>';
-      return;
-    }
-    var html = '';
-    for(var i=0;i<lista.length;i++){
-      var b = lista[i];
-      var onlineClass = b.online ? 'online-active' : '';
-      html += '<div class="bms-item '+onlineClass+'" onclick="abrirDash(\''+b.code+'\')">';
-      html += '<h3>'+b.nome+'</h3>';
-      html += '<p>'+b.code+'</p>';
-      html += '<span class="status-dot '+(b.online?'on':'off')+'">'+(b.online?'Online':'Offline')+'</span>';
-      html += '<button class="btn-item-del" onclick="event.stopPropagation();removerBms(\''+b.code+'\',\''+b.nome+'\')">Excluir Dispositivo</button>';
-      html += '</div>';
-    }
-    el.innerHTML = html;
-  });
+  // Mantida apenas como segurança sintática caso chamadas órfãs ocorram no fluxo de transição
 }
 
 function removerBms(code, nome){
   if(!confirm(`Remover o dispositivo "${nome || code}"?`)) return;
   fetch(API+`?action=remove_bms&code=${code}`,{ method:'DELETE', headers:{'Authorization':'Bearer '+TOKEN} })
-  .then(function() { carregarLista(); });
+  .then(function() { carregarListaUmaVez(); }); // Remonta a estrutura estática após deleção de forma limpa
 }
 
-// Função addBms original restaurada sem alterações de layout
 function addBms(){
   var code = document.getElementById('bms-code').value.trim();
   var nome = document.getElementById('bms-nome').value.trim();
@@ -1480,7 +1543,7 @@ function addBms(){
       if(cortina) cortina.classList.add('aberta');
       if(btn) btn.textContent = 'OCULTAR DISPOSITIVOS';
       
-      carregarLista();
+      carregarListaUmaVez(); // Remonta a estrutura estática após adição de forma limpa
     } else { alert('Erro: ' + d.error); }
   });
 }
