@@ -347,6 +347,7 @@ button.logout:hover{background:rgba(231,29,54,0.08);color:var(--red);border-colo
   .filter-row button { font-size: 13px; padding: 14px; }
 }
 </style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.0.1/mqttws31.min.js" type="text/javascript"></script>
 </head>
 <body>
 
@@ -473,7 +474,6 @@ button.logout:hover{background:rgba(231,29,54,0.08);color:var(--red);border-colo
     <div id="adminCellsContent" class="cells"></div>
   </div>
 
-  <!-- BLOCO ATUALIZAÇÃO REMOTA (OTA VIA UPLOAD DIRETO) -->
   <div class="card-wrapper-block" style="margin-top: 12px; border: 1px solid rgba(0, 180, 216, 0.3);">
     <div class="section-block-title" style="color: var(--cyan);">Atualização Remota de Firmware (OTA)</div>
     <div style="padding: 12px 4px; display: flex; flex-direction: column; gap: 10px;">
@@ -549,6 +549,11 @@ let filtroAtivo = 'todas';
 let TIMEOUT_ADMIN_LOGIN = null;
 let TIMEOUT_ADMIN_MSG = null;
 
+// VARIÁVEIS LÓGICAS DO MOTOR ASSÍNCRONO DO PAINEL ADMIN
+let MQTT_CLIENT = null;
+let bmsTimeoutTimerAdmin = null;         // TIMER DE QUEDA PARA O INTERIOR DO DASHBOARD INDIVIDUAL
+let listaTimeoutsAdminCards = {};      // CONTROLE DE CRONÔMETROS INDIVIDUAIS PARA OS CARDS DO FILTRO DA LISTA PRINCIPAL
+
 if(adminToken === 'admin_ok') {
   if (activeScreen === 'dashAdmin' && activeBmsCode) {
     showDashAdmin(activeBmsCode);
@@ -585,7 +590,24 @@ async function adminLogin(){
   }
 }
 
+function fecharMqttAnterior() {
+  if (bmsTimeoutTimerAdmin) { clearTimeout(bmsTimeoutTimerAdmin); bmsTimeoutTimerAdmin = null; }
+  for (let k in listaTimeoutsAdminCards) {
+    if (listaTimeoutsAdminCards[k]) clearTimeout(listaTimeoutsAdminCards[k]);
+  }
+  listaTimeoutsAdminCards = {};
+
+  if (MQTT_CLIENT) {
+    try {
+      MQTT_CLIENT.disconnect();
+      console.log("[MQTT ADMIN] Instância finalizada.");
+    } catch(e) {}
+    MQTT_CLIENT = null;
+  }
+}
+
 function showPainelPage(){
+  fecharMqttAnterior();
   activeScreen = 'painel';
   sessionStorage.setItem('admin_active_screen', 'painel');
   
@@ -601,6 +623,7 @@ function showPainelPage(){
 }
 
 function showClientesPage(){
+  fecharMqttAnterior();
   activeScreen = 'clientesPage';
   sessionStorage.setItem('admin_active_screen', 'clientesPage');
   
@@ -616,6 +639,7 @@ function showClientesPage(){
 }
 
 function showDashAdmin(code) {
+  fecharMqttAnterior();
   activeBmsCode = code;
   activeScreen = 'dashAdmin';
   sessionStorage.setItem('admin_active_bms_code', code);
@@ -631,12 +655,12 @@ function showDashAdmin(code) {
   document.getElementById('dashAdmin').style.display = 'flex';
   
   document.getElementById('modalBmsTitle').textContent = code;
-  renderAdminDashboard();
+  conectarMqttParaDashboardAdmin();
 }
 
 function mostrarClientes(){ showClientesPage(); }
 function voltarPainel(){ showPainelPage(); }
-function adminLogout(){ sessionStorage.clear(); location.reload(); }
+function adminLogout(){ fecharMqttAnterior(); sessionStorage.clear(); location.reload(); }
 function authHeaders(){ return {'Content-Type':'application/json','Authorization':'Bearer '+adminToken}; }
 
 document.getElementById('code').oninput = e => {
@@ -688,7 +712,7 @@ async function enviarFirmwareOta() {
   const btn = document.getElementById('btnOtaUpload');
 
   if (!activeBmsCode) {
-    alert('Erro: Nenhuma placa BMS ativa selecionada.');
+    alert('Erro: Nenhuma placa BMS activa selecionada.');
     return;
   }
   if (!fileInput.files || fileInput.files.length === 0) {
@@ -723,7 +747,6 @@ async function enviarFirmwareOta() {
       method: 'POST',
       headers: {
         'Authorization': 'Bearer ' + adminToken
-        // Nota: Não defina Content-Type ao enviar FormData, o navegador faz isso automaticamente com a boundary correta!
       },
       body: formData
     });
@@ -769,7 +792,7 @@ function abrirModalVincular(userId, nomeCliente) {
     select.innerHTML = '<option value="">Nenhuma BMS disponível no banco</option>';
   } else {
     select.innerHTML = '<option value="">-- Selecione uma BMS --</option>' + 
-      livres.map(b => `<option value="${b.code}">${b.code} (${b.online ? 'Online' : 'Offline'})</option>`).join('');
+      livres.map(b => `<option value="${b.code}">${b.code}</option>`).join('');
   }
   
   document.getElementById('modalVincularBms').classList.add('active');
@@ -853,99 +876,138 @@ function gerenciarLayoutStatus(elementoCard, elementoTxt, ativo, textoAtivo, tex
   }
 }
 
-function renderAdminDashboard(){
-  if(!activeBmsCode) return;
-  
-  fetch(API + '?action=data&code=' + activeBmsCode, { headers: authHeaders() })
-  .then(r => r.json())
-  .then(d => {
-    const online = d && d.online;
-    const bms = bmsList.find(b => b.code === activeBmsCode) || {};
-    
-    document.getElementById('modalBmsDono').innerHTML = bms.user_id ? 
-      `<span class="badge badge-orange" style="font-size:12px; padding:6px 12px;">Vinculada: ${bms.dono_nome || bms.dono_email}</span>` : 
-      `<span class="badge badge-green" style="font-size:12px; padding:6px 12px;">Disponível / Livre</span>`;
+// === NOVO MOTOR LÓGICO DE DASHBOARD ADMIN CONECTADO VIA WEBSOCKETS NO HIVEMQ ===
+function conectarMqttParaDashboardAdmin() {
+  configurarInterfaceDashboardOfflineAdmin();
 
-    const cardInv = document.getElementById('cardInversor');
-    const txtInv = document.getElementById('txtInversor');
-    const cardBms = document.getElementById('cardBms');
-    const txtBms = document.getElementById('txtBms');
-    const cardBat = document.getElementById('cardBateria');
-    const txtBat = document.getElementById('txtBateria');
+  const bmsInfo = bmsList.find(b => b.code === activeBmsCode) || {};
+  document.getElementById('modalBmsDono').innerHTML = bmsInfo.user_id ? 
+    `<span class="badge badge-orange" style="font-size:12px; padding:6px 12px;">Vinculada: ${bmsInfo.dono_nome || bmsInfo.dono_email}</span>` : 
+    `<span class="badge badge-green" style="font-size:12px; padding:6px 12px;">Disponível / Livre</span>`;
 
-    const adminSocGauge = document.getElementById('adminSocGauge');
-    const adminSocValor = document.getElementById('adminSocValor');
-    const adminSocBarTxt = document.getElementById('adminSocBarTxt');
-    const adminSocBar = document.getElementById('adminSocBar');
-    
-    if(!online){
-      gerenciarLayoutStatus(cardBms, txtBms, false, "Online", "Offline");
-      gerenciarLayoutStatus(cardInv, txtInv, false, "Conectado", "Desconectado");
-      gerenciarLayoutStatus(cardBat, txtBat, false, "Conectada", "Desconectada");
+  const hostMqtt = "965bd6abd6f54692b84d710cab8327b4.s1.eu.hivemq.cloud"; 
+  const portaMqtt = 8884;                     
+  const userMqtt = "sl_bms_prod";             
+  const passMqtt = "SLtech2026@Bms";           
+  const clientRandomId = "sl_admin_dash_client_" + Math.floor(Math.random() * 10000);
 
-      document.getElementById('adminInvPotencia').textContent = '0W';
-      document.getElementById('adminInvTensaoAC').textContent = '0.0V';
-      document.getElementById('adminInvFrequencia').textContent = '0.0Hz';
-      document.getElementById('adminInvGeracaoDia').textContent = '0.0kWh';
+  MQTT_CLIENT = new Paho.MQTT.Client(hostMqtt, Number(portaMqtt), clientRandomId);
 
-      document.getElementById('adminSoc').textContent = '0%';
-      document.getElementById('adminVolt').textContent = '0.0V';
-      document.getElementById('adminCorr').textContent = '0.0A';
-      document.getElementById('adminTemp').textContent = '0°C';
-      
-      adminSocValor.textContent = '0%';
-      adminSocBarTxt.textContent = '0%';
-      adminSocBar.style.width = '0%';
-      adminSocGauge.style.background = 'var(--gauge-empty)';
-      
-      renderAdminCells([]);
-    } else {
-      gerenciarLayoutStatus(cardBms, txtBms, true, "Online", "Offline");
-      
-      const invAtivo = (d.inversor_conectado !== undefined) ? d.inversor_conectado : true;
-      gerenciarLayoutStatus(cardInv, txtInv, invAtivo, "Conectado", "Desconectado");
+  MQTT_CLIENT.onConnectionLost = function () { configurarInterfaceDashboardOfflineAdmin(); };
+  MQTT_CLIENT.onMessageArrived = function (message) {
+    try {
+      const d = JSON.parse(message.payloadString);
+      processarERenderizarDadosAdminMqtt(d);
+    } catch (err) {}
+  };
 
-      const batAtiva = (d.bateria_conectada !== undefined) ? d.bateria_conectada : true;
-      gerenciarLayoutStatus(cardBat, txtBat, batAtiva, "Conectada", "Desconectada");
-
-      if(!invAtivo) {
-        document.getElementById('adminInvPotencia').textContent = '0W';
-        document.getElementById('adminInvTensaoAC').textContent = '0.0V';
-        document.getElementById('adminInvFrequencia').textContent = '0.0Hz';
-        document.getElementById('adminInvGeracaoDia').textContent = '0.0kWh';
-      } else {
-        document.getElementById('adminInvPotencia').textContent = (d.inv_potencia !== undefined ? d.inv_potencia.toFixed(0) : '0') + 'W';
-        document.getElementById('adminInvTensaoAC').textContent = (d.inv_tensao_ac !== undefined ? d.inv_tensao_ac.toFixed(1) : '0.0') + 'V';
-        document.getElementById('adminInvFrequencia').textContent = (d.inv_frequencia !== undefined ? d.inv_frequencia.toFixed(1) : '0.0') + 'Hz';
-        document.getElementById('adminInvGeracaoDia').textContent = (d.inv_geracao_dia !== undefined ? d.inv_geracao_dia.toFixed(1) : '0.0') + 'kWh';
-      }
-
-      if(!batAtiva) {
-        document.getElementById('adminSoc').textContent = '0%';
-        document.getElementById('adminVolt').textContent = '0.0V';
-        document.getElementById('adminCorr').textContent = '0.0A';
-        document.getElementById('adminTemp').textContent = '0°C';
-        adminSocValor.textContent = '0%';
-        adminSocBarTxt.textContent = '0%';
-        adminSocBar.style.width = '0%';
-        adminSocGauge.style.background = 'var(--gauge-empty)';
-      } else {
-        const socVal = d.soc ? parseInt(d.soc) : 0;
-        document.getElementById('adminSoc').textContent = socVal + '%';
-        document.getElementById('adminVolt').textContent = (d.voltage ? d.voltage.toFixed(2) : '0.00') + 'V';
-        document.getElementById('adminCorr').textContent = (d.current ? d.current.toFixed(1) : '0.0') + 'A';
-        document.getElementById('adminTemp').textContent = (d.temp ? d.temp.toFixed(1) : '0.0') + '°C';
-        
-        adminSocValor.textContent = socVal + '%';
-        adminSocBarTxt.textContent = socVal + '%';
-        adminSocBar.style.width = socVal + '%';
-        const deg = socVal * 3.6;
-        adminSocGauge.style.background = `conic-gradient(var(--green) 0deg, var(--cyan) ${deg}deg, var(--gauge-empty) ${deg}deg)`;
-      }
-      
-      renderAdminCells(d.cells || []);
-    }
+  MQTT_CLIENT.connect({
+    userName: userMqtt, password: passMqtt, useSSL: true, timeout: 3,
+    onSuccess: function () {
+      MQTT_CLIENT.subscribe("sl_bms/" + activeBmsCode + "/telemetria");
+    },
+    onFailure: function () { configurarInterfaceDashboardOfflineAdmin(); }
   });
+}
+
+function configurarInterfaceDashboardOfflineAdmin() {
+  const cardInv = document.getElementById('cardInversor');
+  const txtInv = document.getElementById('txtInversor');
+  const cardBms = document.getElementById('cardBms');
+  const txtBms = document.getElementById('txtBms');
+  const cardBat = document.getElementById('cardBateria');
+  const txtBat = document.getElementById('txtBateria');
+
+  const adminSocGauge = document.getElementById('adminSocGauge');
+  const adminSocValor = document.getElementById('adminSocValor');
+  const adminSocBarTxt = document.getElementById('adminSocBarTxt');
+  const adminSocBar = document.getElementById('adminSocBar');
+
+  gerenciarLayoutStatus(cardBms, txtBms, false, "Online", "Offline");
+  gerenciarLayoutStatus(cardInv, txtInv, false, "Conectado", "Desconectado");
+  gerenciarLayoutStatus(cardBat, txtBat, false, "Conectada", "Desconectada");
+
+  document.getElementById('adminInvPotencia').textContent = '0W';
+  document.getElementById('adminInvTensaoAC').textContent = '0.0V';
+  document.getElementById('adminInvFrequencia').textContent = '0.0Hz';
+  document.getElementById('adminInvGeracaoDia').textContent = '0.0kWh';
+
+  document.getElementById('adminSoc').textContent = '0%';
+  document.getElementById('adminVolt').textContent = '0.0V';
+  document.getElementById('adminCorr').textContent = '0.0A';
+  document.getElementById('adminTemp').textContent = '0°C';
+  
+  adminSocValor.textContent = '0%';
+  adminSocBarTxt.textContent = '0%';
+  adminSocBar.style.width = '0%';
+  adminSocGauge.style.background = 'var(--gauge-empty)';
+  
+  renderAdminCells([]);
+}
+
+function processarERenderizarDadosAdminMqtt(d) {
+  // INTERCEPTADOR DE TIMEOUT DE SOFTWARE NO INTERIOR DO DASHBOARD ADMIN (5 SEGUNDOS)
+  if (bmsTimeoutTimerAdmin) clearTimeout(bmsTimeoutTimerAdmin);
+  bmsTimeoutTimerAdmin = setTimeout(function() {
+    configurarInterfaceDashboardOfflineAdmin();
+  }, 5000);
+
+  const cardInv = document.getElementById('cardInversor');
+  const txtInv = document.getElementById('txtInversor');
+  const cardBms = document.getElementById('cardBms');
+  const txtBms = document.getElementById('txtBms');
+  const cardBat = document.getElementById('cardBateria');
+  const txtBat = document.getElementById('txtBateria');
+
+  const adminSocGauge = document.getElementById('adminSocGauge');
+  const adminSocValor = document.getElementById('adminSocValor');
+  const adminSocBarTxt = document.getElementById('adminSocBarTxt');
+  const adminSocBar = document.getElementById('adminSocBar');
+
+  gerenciarLayoutStatus(cardBms, txtBms, true, "Online", "Offline");
+  
+  const invAtivo = (d.inversor_conectado !== undefined) ? d.inversor_conectado : true;
+  gerenciarLayoutStatus(cardInv, txtInv, invAtivo, "Conectado", "Desconectado");
+
+  const batAtiva = (d.bateria_conectada !== undefined) ? d.bateria_conectada : true;
+  gerenciarLayoutStatus(cardBat, txtBat, batAtiva, "Conectada", "Desconectada");
+
+  if(!invAtivo) {
+    document.getElementById('adminInvPotencia').textContent = '0W';
+    document.getElementById('adminInvTensaoAC').textContent = '0.0V';
+    document.getElementById('adminInvFrequencia').textContent = '0.0Hz';
+    document.getElementById('adminInvGeracaoDia').textContent = '0.0kWh';
+  } else {
+    document.getElementById('adminInvPotencia').textContent = (d.inv_potencia !== undefined ? d.inv_potencia.toFixed(0) : '0') + 'W';
+    document.getElementById('adminInvTensaoAC').textContent = (d.inv_tensao_ac !== undefined ? d.inv_tensao_ac.toFixed(1) : '0.0') + 'V';
+    document.getElementById('adminInvFrequencia').textContent = (d.inv_frequencia !== undefined ? d.inv_frequencia.toFixed(1) : '0.0') + 'Hz';
+    document.getElementById('adminInvGeracaoDia').textContent = (d.inv_geracao_dia !== undefined ? d.inv_geracao_dia.toFixed(1) : '0.0') + 'kWh';
+  }
+
+  if(!batAtiva) {
+    document.getElementById('adminSoc').textContent = '0%';
+    document.getElementById('adminVolt').textContent = '0.0V';
+    document.getElementById('adminCorr').textContent = '0.0A';
+    document.getElementById('adminTemp').textContent = '0°C';
+    adminSocValor.textContent = '0%';
+    adminSocBarTxt.textContent = '0%';
+    adminSocBar.style.width = '0%';
+    adminSocGauge.style.background = 'var(--gauge-empty)';
+  } else {
+    const socVal = d.soc ? parseInt(d.soc) : 0;
+    document.getElementById('adminSoc').textContent = socVal + '%';
+    document.getElementById('adminVolt').textContent = (d.voltage ? d.voltage.toFixed(2) : '0.00') + 'V';
+    document.getElementById('adminCorr').textContent = (d.current ? d.current.toFixed(1) : '0.0') + 'A';
+    document.getElementById('adminTemp').textContent = (d.temp ? d.temp.toFixed(1) : '0.0') + '°C';
+    
+    adminSocValor.textContent = socVal + '%';
+    adminSocBarTxt.textContent = socVal + '%';
+    adminSocBar.style.width = socVal + '%';
+    const deg = socVal * 3.6;
+    adminSocGauge.style.background = `conic-gradient(var(--green) 0deg, var(--cyan) ${deg}deg, var(--gauge-empty) ${deg}deg)`;
+  }
+  
+  renderAdminCells(d.cells || []);
 }
 
 function renderAdminCells(cells){
@@ -1024,13 +1086,10 @@ async function carregarTudo(){
   const rBms = await fetch(API+'?action=admin_list_master',{headers:authHeaders()});
   const dBms = await rBms.json();
   
+  // Classificação inicial estática estrutural
   bmsList = dBms.sort((a, b) => {
-    if (a.online && !b.online) return -1;
-    if (!a.online && b.online) return 1;
     return (b.updated_at ? new Date(b.updated_at).getTime() : 0) - (a.updated_at ? new Date(a.updated_at).getTime() : 0);
   });
-
-  atualizarContadoresFiltro();
 
   if(activeScreen === 'painel') {
     atualizarHTMLListaBms();
@@ -1077,19 +1136,74 @@ function atualizarHTMLListaBms() {
 
   document.getElementById('lista').innerHTML = bmsFiltradas.map(b=>{
     const dono = b.user_id? `<span class="badge badge-orange">Vinculada</span>` : `<span class="badge badge-green">Disponível</span>`;
-    const statusClass = b.online ? 'on' : 'off';
-    const statusText = b.online ? 'Online' : 'Offline';
-
+    
+    // Todas nascem desativadas ("Offline"). O barramento MQTT realiza o acendimento instantâneo na tela
     return `
-    <div class="card" onclick="viewBmsDetails('${b.code}')" style="padding: 12px 14px; flex-direction:row; align-items:center; justify-content: space-between; min-height:auto;">
+    <div class="card" id="admin-card-lista-${b.code}" onclick="viewBmsDetails('${b.code}')" style="padding: 12px 14px; flex-direction:row; align-items:center; justify-content: space-between; min-height:auto;">
       <div style="display:flex; flex-direction:column; align-items:flex-start;">
-        <span class="status ${statusClass}">${statusText}</span>
+        <span class="status off" id="admin-dot-lista-${b.code}">Offline</span>
         <div class="card-code" style="margin:4px 0">${b.code}</div>
         <div>${dono}</div>
       </div>
       <button class="del" style="width:auto; margin-top:0" onclick="del('${b.code}')">EXCLUIR</button>
     </div>
   `}).join('') || `<div class="card card-empty"><div>Nenhuma BMS encontrada neste filtro</div></div>`;
+
+  // Ativa os contadores estáticos de balanço
+  atualizarContadoresFiltro();
+  // Conecta o motor coringa de atividade instantânea na lista
+  conectarMqttParaListaGeralAdmin();
+}
+
+// === NOVO MOTOR LÓGICO DE INFRAESTRUTURA CORINGA DE ROTEAMENTO NO ADMIN ===
+function conectarMqttParaListaGeralAdmin() {
+  const hostMqtt = "965bd6abd6f54692b84d710cab8327b4.s1.eu.hivemq.cloud"; 
+  const portaMqtt = 8884;                     
+  const userMqtt = "sl_bms_prod";             
+  const passMqtt = "SLtech2026@Bms";           
+  const clientRandomId = "sl_admin_list_client_" + Math.floor(Math.random() * 10000);
+
+  MQTT_CLIENT = new Paho.MQTT.Client(hostMqtt, Number(portaMqtt), clientRandomId);
+
+  MQTT_CLIENT.onConnectionLost = function () {};
+  MQTT_CLIENT.onMessageArrived = function (message) {
+    try {
+      const topicoLido = message.destinationName;
+      const partesTopico = topicoLido.split('/');
+      const idPlacaEmissora = partesTopico[1]; // Resgata o código do dispositivo emissor
+
+      // Varre o cache global para marcar o estado em tempo real na memória lógica
+      let dispositivoNoObjeto = bmsList.find(b => b.code === idPlacaEmissora);
+      if (dispositivoNoObjeto) dispositivoNoObjeto.online = true;
+
+      // Executa o acendimento imediato na tabela caso o card esteja renderizado em tela
+      const cardElemento = document.getElementById('admin-card-lista-' + idPlacaEmissora);
+      const dotElemento = document.getElementById('admin-dot-lista-' + idPlacaEmissora);
+
+      if (cardElemento && dotElemento) {
+        dotElemento.className = "status on";
+        dotElemento.textContent = "Online";
+
+        // Aplica o timeout lógico anti-queda independente por item de 5 segundos
+        if (listaTimeoutsAdminCards[idPlacaEmissora]) clearTimeout(listaTimeoutsAdminCards[idPlacaEmissora]);
+        listaTimeoutsAdminCards[idPlacaEmissora] = setTimeout(function() {
+          if (dispositivoNoObjeto) dispositivoNoObjeto.online = false;
+          dotElemento.className = "status off";
+          dotElemento.textContent = "Offline";
+          atualizarContadoresFiltro();
+        }, 5000);
+      }
+      atualizarContadoresFiltro();
+    } catch (err) {}
+  };
+
+  MQTT_CLIENT.connect({
+    userName: userMqtt, password: passMqtt, useSSL: true, timeout: 3,
+    onSuccess: function () {
+      // Monitora o barramento completo de dispositivos da fábrica em tempo real com caractere curinga (+)
+      MQTT_CLIENT.subscribe("sl_bms/+/telemetria");
+    }
+  });
 }
 
 async function listarUsers(){
@@ -1129,15 +1243,7 @@ async function setupInicial() {
 }
 if(adminToken === 'admin_ok') setupInicial();
 
-setInterval(()=>{
-  if(!adminToken) return;
-  
-  if(activeScreen === 'painel') {
-    carregarTudo();
-  } else if(activeScreen === 'dashAdmin') {
-    renderAdminDashboard();
-  }
-}, 5000);
+// ATENÇÃO: TODOS OS SETINTERVALS REPETITIVOS DE SOLICITAÇÃO HTTP FORAM EXTINTOS PARA ACABAR COM O BOMBARDEIO NO BANCO
 </script>
 </body>
 </html>
