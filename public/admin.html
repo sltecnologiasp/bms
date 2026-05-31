@@ -59,23 +59,6 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text-main);
 .title{font-size:clamp(32px,7vw,54px);font-weight:900;margin-bottom:4px;letter-spacing:2px;background:linear-gradient(90deg,var(--blue),var(--cyan));-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-align:center;width:100%}
 .user-info{color:var(--text-muted);font-size:14px;text-align:center;margin-bottom:16px;font-weight:500;width:100%}
 
-/* ESTILIZAÇÃO DO CONTAINER DE ERROS ADMIN EM NEON LARANJA */
-.erro {
-  color: var(--orange);
-  background: rgba(255, 159, 28, 0.08);
-  border: 1px solid var(--orange);
-  box-shadow: 0 0 14px rgba(255, 159, 28, 0.18);
-  text-align: center;
-  font-size: 14px;
-  font-weight: 700;
-  padding: 12px 16px;
-  border-radius: 14px;
-  width: 100%;
-  max-width: 440px;
-  box-sizing: border-box;
-  margin-top: 14px;
-}
-
 .card{
   background:var(--card-bg);
   border:1px solid var(--card-border);
@@ -222,7 +205,6 @@ button.logout:hover{background:rgba(231,29,54,0.08);color:var(--red);border-colo
 .card-code{font-size:13px;font-weight:800;font-family:monospace;color:var(--text-main);margin:6px 0;text-align:center;letter-spacing:0.2px;word-break:break-all}
 .card-top{display:flex;flex-direction:column;justify-content:flex-start;align-items:center;width:100%}
 
-/* LINHA DE FILTROS */
 .filter-row {
   display: flex;
   gap: 8px;
@@ -364,12 +346,6 @@ button.logout:hover{background:rgba(231,29,54,0.08);color:var(--red);border-colo
   justify-content:center !important;
 }
 
-/* RODAPÉ PROFISSIONAL ALINHADO NA BASE */
-.footer-link{font-size:11px;margin-top:120px;text-align:center;letter-spacing:1px;line-height:1.6;padding-bottom:24px;width:100%}
-.footer-link a{color:var(--blue);text-decoration:none;font-weight:600;transition:opacity 0.2s;}
-.footer-link a:hover{opacity:0.8;text-decoration:underline;}
-.footer-link span{color:var(--text-muted);opacity:0.6;display:block;margin-top:4px;}
-
 @media(max-width:599px){
   #lista { 
     display: grid !important; 
@@ -402,23 +378,15 @@ button.logout:hover{background:rgba(231,29,54,0.08);color:var(--red);border-colo
 <body>
 
 <div id="login">
-  <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; margin-bottom: 24px; width: 100%;">
-    <div class="title">SMART BMS</div>
-    <div class="user-info" style="margin-bottom:0px">Acesso Administrativo</div>
-    <div id="loginError" class="erro hidden"></div>
-  </div>
-  
+  <div class="title">SMART BMS</div>
+  <div class="user-info">Acesso Administrativo</div>
   <div class="card">
     <div class="label">Usuário</div>
     <input id="user" placeholder="administrador" autocomplete="username" value="administrador">
     <div class="label" style="margin-top:16px">Senha</div>
     <input id="password" type="password" placeholder="••••••••" autocomplete="current-password">
     <button onclick="adminLogin()">ENTRAR NO PAINEL</button>
-  </div>
-
-  <div class="footer-link">
-    <a href="https://wa.me/5515991355393" target="_blank">SL TECNOLOGIA</a>
-    <span>© Todos os direitos reservados</span>
+    <div id="loginError" class="erro hidden"></div>
   </div>
 </div>
 
@@ -450,11 +418,6 @@ button.logout:hover{background:rgba(231,29,54,0.08);color:var(--red);border-colo
   </div>
   
   <button class="logout" onclick="adminLogout()">SAIR DO PAINEL ADMIN</button>
-
-  <div class="footer-link">
-    <a href="https://wa.me/5515991355393" target="_blank">SL TECNOLOGIA</a>
-    <span>© Todos os direitos reservados</span>
-  </div>
 </div>
 
 <div id="clientesPage">
@@ -466,11 +429,6 @@ button.logout:hover{background:rgba(231,29,54,0.08);color:var(--red);border-colo
   </div>
   
   <button class="voltar" onclick="voltarPainel()">← VOLTAR AO PAINEL</button>
-
-  <div class="footer-link">
-    <a href="https://wa.me/5515991355393" target="_blank">SL TECNOLOGIA</a>
-    <span>© Todos os direitos reservados</span>
-  </div>
 </div>
 
 <div id="dashAdmin">
@@ -546,7 +504,7 @@ button.logout:hover{background:rgba(231,29,54,0.08);color:var(--red);border-colo
     <div class="section-block-title" style="color: var(--cyan);">Atualização Remota de Firmware (OTA)</div>
     <div style="padding: 12px 4px; display: flex; flex-direction: column; gap: 10px;">
       <p style="font-size: 12px; color: var(--text-muted); line-height: 1.4; margin-bottom: 4px;">
-        Selecione o arquivo binário compilado (<strong style="color:var(--orange)">.bin</strong>) para forçar o ESP32 a baixar e instalar a nova versão automaticamente no próximo contato.
+        Selecione o arquivo binário compilado (<strong>.bin</strong>) para forçar o ESP32 a baixar e instalar a nova versão automaticamente no próximo contato.
       </p>
       <div style="position: relative; display: flex; flex-direction: column; gap: 6px;">
         <input type="file" id="arquivoOtaBin" accept=".bin" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--input-border); background: var(--input-bg); color: var(--text-main); font-size: 13px;">
@@ -559,11 +517,6 @@ button.logout:hover{background:rgba(231,29,54,0.08);color:var(--red);border-colo
   </div>
 
   <button class="voltar" style="width:100%; margin-top:4px; padding:18px" onclick="closeBmsModal()">← VOLTAR À LISTA</button>
-
-  <div class="footer-link">
-    <a href="https://wa.me/5515991355393" target="_blank">SL TECNOLOGIA</a>
-    <span>© Todos os direitos reservados</span>
-  </div>
 </div>
 
 <div id="modalVincularBms" class="modal">
@@ -951,7 +904,7 @@ async function confirmarDesvinculoManual() {
   } catch (e) { alert('Erro ao deletar vínculo.'); }
 }
 
-// CORREÇÃO: Filtra repaints infinitos checando se a classe e o texto são idênticos antes de atribuir
+// LÓGICA CORRIGIDA: Evita redesenhar o bloco se a classe e o texto forem idênticos
 function gerenciarLayoutStatus(elementoCard, elementoTxt, ativo, textoAtivo, textoInativo) {
   const novaClasse = ativo ? "card triple-active" : "card triple-inactive";
   const novoTexto = ativo ? textoAtivo : textoInativo;
@@ -980,8 +933,7 @@ function conectarMqttParaDashboardAdmin() {
 
   MQTT_CLIENT = new Paho.MQTT.Client(hostMqtt, Number(portaMqtt), clientRandomId);
 
-  // CORREÇÃO DO BUG CRÍTICO: Removida a chamada recursiva com erro de digitação que causava estouro de pilha
-  MQTT_CLIENT.onConnectionLost = function () { configurarInterfaceDashboardOfflineAdmin(); };
+  MQTT_CLIENT.onConnectionLost = function () { configuringInterfaceDashboardOfflineAdmin(); };
   MQTT_CLIENT.onMessageArrived = function (message) {
     try {
       const d = JSON.parse(message.payloadString);
@@ -994,9 +946,11 @@ function conectarMqttParaDashboardAdmin() {
     onSuccess: function () {
       MQTT_CLIENT.subscribe("sl_bms/" + activeBmsCode + "/telemetria");
     },
-    onFailure: function () { configurarInterfaceDashboardOfflineAdmin(); }
+    onFailure: function () { configuringInterfaceDashboardOfflineAdmin(); }
   });
 }
+
+function configuringInterfaceDashboardOfflineAdmin() { configurarInterfaceDashboardOfflineAdmin(); }
 
 function configurarInterfaceDashboardOfflineAdmin() {
   const cardInv = document.getElementById('cardInversor');
@@ -1097,7 +1051,7 @@ function processarERenderizarDadosAdminMqtt(d) {
   renderAdminCells(d.cells || []);
 }
 
-// === REESTRUTURAÇÃO CIRÚRGICA DO PAINEL ADMIN PARA FINISH DO PISCA-PISCA ===
+// LÓGICA CORRIGIDA: Atualiza apenas strings e bordas se os valores realmente mudarem
 function renderAdminCells(cells){
   const container = document.getElementById('adminCellsContent');
   if(!container) return;
@@ -1127,7 +1081,6 @@ function renderAdminCells(cells){
   document.getElementById('adminCelDif').textContent = dif.toFixed(2) + 'V';
   document.getElementById('adminCelTot').textContent = cells.length;
 
-  // CORREÇÃO: Injeta os blocos estáticos uma única vez se a contagem mudar
   if (container.children.length !== cells.length || container.querySelector('div[style*="grid-column"]')) {
     let html = '';
     for(let i=0; i<cells.length; i++){
@@ -1136,7 +1089,6 @@ function renderAdminCells(cells){
     container.innerHTML = html;
   }
 
-  // CORREÇÃO: Atualiza pontualmente os campos de texto internos sem destruir elementos na tela
   for(let i=0; i<cells.length; i++){
     let val = parseFloat(cells[i]);
     let valStr = val.toFixed(2) + 'V';
@@ -1277,7 +1229,7 @@ function conectarMqttParaListaGeralAdmin() {
   MQTT_CLIENT.onConnectionLost = function () {};
   MQTT_CLIENT.onMessageArrived = function (message) {
     try {
-      const topico Lido = message.destinationName;
+      const topicoLido = message.destinationName;
       const partesTopico = topicoLido.split('/');
       const idPlacaEmissora = partesTopico[1]; 
 
