@@ -299,6 +299,44 @@ export async function onRequest({ request, env }) {
     // ROTAS PROTEGIDAS - EXCLUSIVAS DO ADMIN
     // ==========================================
     if (isAdmin) {
+      // NOVA ROTA: RECEBER FILMEWARE .BIN DO FORMULÁRIO E SALVAR NO BUCKET CLOUDFLARE R2
+      if (action === 'admin_upload_ota' && request.method === 'POST') {
+        try {
+          const formData = await request.formData();
+          const file = formData.get('firmware');
+          const code = formData.get('code');
+
+          if (!file || !code) return json({ ok: false, error: 'Arquivo ou código do dispositivo ausente.' }, 400);
+          if (!env.FIRMWARES_BUCKET) return json({ ok: false, error: 'Configuração do bucket R2 não vinculada nas variáveis de ambiente do Cloudflare.' }, 500);
+
+          // Salva os bytes crus da stream do binário diretamente no Cloudflare R2
+          const keyName = `firmwares/${code}_${Date.now()}.bin`;
+          await env.FIRMWARES_BUCKET.put(keyName, file.stream(), {
+            httpMetadata: { contentType: 'application/octet-stream' }
+          });
+
+          // Monta o link público gerado pelo R2. Substitua pelo seu domínio caso o bucket esteja em subdomínio próprio
+          const publicUrl = `${url.origin}/api/bms?action=download_bin&key=${keyName}`;
+
+          return json({ ok: true, url: publicUrl });
+        } catch (uploadErr) {
+          return json({ ok: false, error: 'Falha interna na gravação do R2: ' + uploadErr.message }, 500);
+        }
+      }
+
+      // ROTA COMPLEMENTAR PÚBLICA PARA O ESP32 BAIXAR O ARQUIVO BINÁRIO SALVO NO R2
+      if (action === 'download_bin' && request.method === 'GET') {
+        const key = url.searchParams.get('key');
+        if (!key || !env.FIRMWARES_BUCKET) return new Response('Arquivo não encontrado', { status: 404 });
+        const object = await env.FIRMWARES_BUCKET.get(key);
+        if (!object) return new Response('Objeto ausente no R2', { status: 404 });
+        
+        const headers = new Headers();
+        object.writeHttpMetadata(headers);
+        headers.set('etag', object.httpEtag);
+        return new Response(object.body, { headers });
+      }
+
       // LISTAR DISPOSITIVOS NO ADMIN COM NOME DO DONO
       if (action === 'admin_list_master' && request.method === 'GET') {
         const { results } = await env.DB.prepare(`
@@ -449,7 +487,6 @@ export async function onRequest({ request, env }) {
       
       const online = data.updated_at && (Date.now() - new Date(data.updated_at).getTime() < 5000);
       
-      // Mapeamento seguro para garantir integridade caso a tabela ainda não possua as colunas preenchidas
       return json({
         ...data,
         online,
