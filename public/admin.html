@@ -450,7 +450,7 @@ button.logout:hover{background:rgba(231,29,54,0.08);color:var(--red);border-colo
     </div>
   </div>
 
-  <div class="status-envelope-card">
+  <div class="card-wrapper-block">
     <div id="modalBmsTitle" style="font-size:13px; font-weight:700; color:var(--text-muted); font-family:monospace; text-align:center; letter-spacing:1px; margin-bottom:0px">SL000000000000</div>
     
     <div class="status-triple-grid">
@@ -564,7 +564,8 @@ button.logout:hover{background:rgba(231,29,54,0.08);color:var(--red);border-colo
 </div>
 
 <script>
-const API = '/api/bms';
+// CORREÇÃO DA ROTA: Mapeado exatamente para o arquivo físico Node.js ativo na sua VPS
+const API = '/api/bms.js';
 let adminToken = sessionStorage.getItem('admin_token');
 let bmsList = [];
 let activeBmsCode = sessionStorage.getItem('admin_active_bms_code');
@@ -768,6 +769,7 @@ async function enviarFirmwareOta() {
   formData.append('code', activeBmsCode);
 
   try {
+    // CORREÇÃO: Removido qualquer Content-Type manual para deixar o navegador gerar o boundary multipart do arquivo nativamente
     const r = await fetch(API + '?action=admin_upload_ota', {
       method: 'POST',
       headers: {
@@ -873,7 +875,7 @@ async function abrirModalDesvincular(userId, nomeCliente) {
   if (vinculadas.length === 0) {
     select.innerHTML = '<option value="">Este usuário não possui nenhuma BMS</option>';
   } else {
-    select.innerHTML = '<option value="">-- Selecione a BMS para remover --</option>' + 
+    select.innerHTML = '<option value="">-- Selecione la BMS para remover --</option>' + 
       vinculadas.map(b => `<option value="${b.code}">${b.code}</option>`).join('');
   }
   
@@ -904,7 +906,6 @@ async function confirmarDesvinculoManual() {
   } catch (e) { alert('Erro ao deletar vínculo.'); }
 }
 
-// LÓGICA CORRIGIDA: Evita redesenhar o bloco se a classe e o texto forem idênticos
 function gerenciarLayoutStatus(elementoCard, elementoTxt, ativo, textoAtivo, textoInativo) {
   const novaClasse = ativo ? "card triple-active" : "card triple-inactive";
   const novoTexto = ativo ? textoAtivo : textoInativo;
@@ -1051,7 +1052,6 @@ function processarERenderizarDadosAdminMqtt(d) {
   renderAdminCells(d.cells || []);
 }
 
-// LÓGICA CORRIGIDA: Atualiza apenas strings e bordas se os valores realmente mudarem
 function renderAdminCells(cells){
   const container = document.getElementById('adminCellsContent');
   if(!container) return;
