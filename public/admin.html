@@ -180,7 +180,7 @@ button.logout:hover{background:rgba(231,29,54,0.08);color:var(--red);border-colo
   margin:0 !important;
   margin-bottom:12px !important;
   display:flex;
-  flex-direction:row; /* Mantém o layout original em linha para desktops */
+  flex-direction:row;
   align-items:center;
   justify-content:space-between;
   min-height:auto;
@@ -330,7 +330,25 @@ button.logout:hover{background:rgba(231,29,54,0.08);color:var(--red);border-colo
 .cell.warn{border-color:var(--orange)}
 .cell.crit{border-color:var(--red)}
 
-/* CORREÇÃO VISUAL MOBILE: Ajusta os sub-elementos internos para caberem lado a lado sem misturar */
+/* CORREÇÃO ESTRETA DO COMPORTAMENTO DOS MODAIS DE POP-UP VISUAIS */
+.modal{
+  display:none !important; /* Esconde por padrão de forma estrita */
+  position:fixed !important;
+  inset:0 !important;
+  width:100vw !important;
+  height:100vh !important;
+  background:rgba(3,5,10,0.6) !important;
+  backdrop-filter:blur(10px) !important;
+  -webkit-backdrop-filter:blur(10px) !important;
+  z-index:99999 !important; /* Joga por cima de absolutamente todas as listas */
+  padding:20px !important;
+}
+.modal.active{
+  display:flex !important; /* Ativa como caixa flex centralizada quando invocado */
+  align-items:center !important;
+  justify-content:center !important;
+}
+
 @media(max-width:599px){
   #lista { 
     display: grid !important; 
@@ -341,7 +359,7 @@ button.logout:hover{background:rgba(231,29,54,0.08);color:var(--red);border-colo
   #lista .card {
     min-height: 145px !important;
     padding: 10px 8px !important;
-    flex-direction: column !important; /* Muda para coluna apenas no mobile para organizar os sub-itens */
+    flex-direction: column !important;
     justify-content: space-between !important;
     align-items: center !important;
   }
@@ -560,7 +578,6 @@ let filtroAtivo = 'todas';
 let TIMEOUT_ADMIN_LOGIN = null;
 let TIMEOUT_ADMIN_MSG = null;
 
-// VARIÁVEIS LÓGICAS DO MOTOR ASSÍNCRONO DO PAINEL ADMIN
 let MQTT_CLIENT = null;
 let bmsTimeoutTimerAdmin = null;         
 let listaTimeoutsAdminCards = {};      
@@ -617,7 +634,7 @@ function fecharMqttAnterior() {
   }
 }
 
-function showPainelPage(){
+function showPainelPage() {
   fecharMqttAnterior();
   activeScreen = 'painel';
   sessionStorage.setItem('admin_active_screen', 'painel');
@@ -679,7 +696,7 @@ document.getElementById('code').oninput = e => {
   e.target.value = 'SL' + e.target.value.slice(2).replace(/[^0-9]/g,'').slice(0,12);
 };
 
-function generarCodigoAleatorio(){
+function gerarCodigoAleatorio(){
   const numeros = Math.floor(Math.random() * 1000000000000).toString().padStart(12, '0');
   return 'SL' + numeros;
 }
@@ -929,11 +946,11 @@ function conectarMqttParaDashboardAdmin() {
     onSuccess: function () {
       MQTT_CLIENT.subscribe("sl_bms/" + activeBmsCode + "/telemetria");
     },
-    onFailure: function () { configurarInterfaceDashboardOfflineAdmin(); }
+    onFailure: function () { configuringInterfaceDashboardOfflineAdmin(); }
   });
 }
 
-function configuringInterfaceDashboardOfflineAdmin() { configurarInterfaceDashboardOfflineAdmin(); }
+function configuringInterfaceDashboardOfflineAdmin() { configuringInterfaceDashboardOfflineAdmin(); }
 
 function configurarInterfaceDashboardOfflineAdmin() {
   const cardInv = document.getElementById('cardInversor');
@@ -1179,7 +1196,6 @@ function atualizarHTMLListaBms() {
   conectarMqttParaListaGeralAdmin();
 }
 
-// === LÓGICA DE REORDENAÇÃO CONTÍNUA DO HIVEMQ PARA COLOCAR ONLINE NO TOPO ===
 function conectarMqttParaListaGeralAdmin() {
   const hostMqtt = "965bd6abd6f54692b84d710cab8327b4.s1.eu.hivemq.cloud"; 
   const portaMqtt = 8884;                     
