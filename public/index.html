@@ -80,34 +80,11 @@
 body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text-main);min-height:100vh;width:100%;overflow-x:hidden;transition: background 0.3s, color 0.3s}
 
 #login,#dash,#lista,#cadastro,#redefinir,#configuracoesPage{
-  position:relative;
-  z-index:1;
-  width:100%;
-  max-width:1100px;
-  margin:0 auto;
-  min-height:100vh;
-  padding:12px 12px;
+  position:relative; z-index:1; width:100%; max-width:1100px; margin:0 auto; min-height:100vh; padding:12px 12px;
 }
-
-#login, #cadastro, #redefinir {
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  justify-content:center;
-}
-
-#lista, #configuracoesPage {
-  display: block;
-}
-
-#dash:not(.hidden) {
-  display: flex !important;
-  flex-direction: column !important;
-  gap: 5px !important; 
-  justify-content: flex-start !important;
-  align-items: center !important;
-}
-
+#login, #cadastro, #redefinir { display:flex; flex-direction:column; align-items:center; justify-content:center; }
+#lista, #configuracoesPage { display: block; }
+#dash:not(.hidden) { display: flex !important; flex-direction: column !important; gap: 5px !important; justify-content: flex-start !important; align-items: center !important; }
 .hidden{display:none !important}
 
 .title{font-size:clamp(32px,7vw,54px);font-weight:900;margin-bottom:4px;letter-spacing:2px;background:linear-gradient(90deg,var(--blue),var(--cyan));-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-align:center;width:100%}
@@ -115,125 +92,38 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text-main);
 .user-info span{color:var(--text-main);font-weight:600}
 
 .erro {
-  color: var(--orange);
-  background: rgba(255, 159, 28, 0.08);
-  border: 1px solid var(--orange);
-  box-shadow: 0 0 14px rgba(255, 159, 28, 0.18);
-  text-align: center;
-  font-size: 14px;
-  font-weight: 700;
-  padding: 12px 16px;
-  border-radius: 14px;
-  width: 100%;
-  max-width: 500px;
-  box-sizing: border-box;
-  margin-top: 14px;
+  color: var(--orange); background: rgba(255, 159, 28, 0.08); border: 1px solid var(--orange);
+  box-shadow: 0 0 14px rgba(255, 159, 28, 0.18); text-align: center; font-size: 14px; font-weight: 700;
+  padding: 12px 16px; border-radius: 14px; width: 100%; max-width: 500px; box-sizing: border-box; margin-top: 14px;
 }
 
-.card{
-  background:var(--card-bg);
-  border:1px solid var(--card-border);
-  border-radius:20px;
-  padding:20px;
-  width:100%;
-  margin: 0 !important; 
-  box-shadow: var(--neon-glow);
-}
-
+.card{ background:var(--card-bg); border:1px solid var(--card-border); border-radius:20px; padding:20px; width:100%; margin: 0 !important; box-shadow: var(--neon-glow); }
 #login .card,#cadastro .card,#redefinir .card,#configuracoesPage .card { width:100%; max-width:500px; }
 #lista .card, #dash .card { width:100%; max-width:100%; }
 
-.card-wrapper-block {
-  background: var(--card-bg);
-  border: 1px solid var(--card-border);
-  border-radius: 20px;
-  padding: 16px 14px 14px 14px;
-  width: 100%;
-  box-shadow: var(--neon-glow);
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
+.card-wrapper-block { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 20px; padding: 16px 14px 14px 14px; width: 100%; box-shadow: var(--neon-glow); display: flex; flex-direction: column; gap: 10px; }
 .label{font-size:11px;letter-spacing:1px;text-transform:uppercase;text-align:center;width:100%;margin-bottom:6px;font-weight:700;color:var(--text-muted)}
-
-.section-block-title {
-  font-size: 11px;
-  letter-spacing: 1.2px;
-  text-transform: uppercase;
-  text-align: center;
-  width: 100%;
-  margin-top: 2px;
-  margin-bottom: 2px;
-  font-weight: 800;
-  color: var(--text-muted);
-}
+.section-block-title { font-size: 11px; letter-spacing: 1.2px; text-transform: uppercase; text-align: center; width: 100%; margin-top: 2px; margin-bottom: 2px; font-weight: 800; color: var(--text-muted); }
 
 input,select,button{width:100%;padding:16px;border-radius:14px;border:none;outline:none;font-size:16px;transition:all 0.2s ease}
-input,select{
-  background: var(--input-bg);
-  color: var(--input-text);
-  border: 1px solid var(--input-border);
-  text-align: center;
-  font-weight: 600;
-}
-input:focus{
-  border-color: var(--cyan);
-  box-shadow: 0 0 10px rgba(0, 255, 255, 0.2);
-}
-input::placeholder{
-  color: var(--input-placeholder) !important;
-  opacity: 1 !important;
-}
+input,select{ background: var(--input-bg); color: var(--input-text); border: 1px solid var(--input-border); text-align: center; font-weight: 600; }
+input:focus{ border-color: var(--cyan); box-shadow: 0 0 10px rgba(0, 255, 255, 0.2); }
+input::placeholder{ color: var(--input-placeholder) !important; opacity: 1 !important; }
 
 .pass-wrapper{position:relative;width:100%}
 .pass-wrapper input{padding-right:50px}
-.pass-toggle{
-  position:absolute;
-  right:16px;
-  top:16px;
-  cursor:pointer;
-  opacity:.6;
-  font-size:18px;
-  user-select:none;
-  transition:opacity .2s;
-  filter: grayscale(100%);
-}
+.pass-toggle{ position:absolute; right:16px; top:16px; cursor:pointer; opacity:.6; font-size:18px; user-select:none; transition:opacity .2s; filter: grayscale(100%); }
 .pass-toggle:hover{opacity:.9}
 
 button{background:linear-gradient(90deg,var(--blue),var(--cyan));color:#fff;font-weight:700;cursor:pointer;margin-top:12px;box-shadow:0 4px 20px rgba(0,128,255,0.25)}
 button:active{transform:scale(0.98)}
-
 .btn-sec{background:transparent;border:1px solid var(--cyan);color:var(--cyan);box-shadow:none;font-weight:700}
-
-.btn-card-action {
-  background: linear-gradient(90deg,var(--blue),var(--cyan));
-  color: #fff;
-  font-weight: 700;
-  margin-top: 0;
-  box-shadow: 0 4px 20px rgba(0,128,255,0.15);
-}
-
+.btn-card-action { background: linear-gradient(90deg,var(--blue),var(--cyan)); color: #fff; font-weight: 700; margin-top: 0; box-shadow: 0 4px 20px rgba(0,128,255,0.15); }
 .btn-danger{background:rgba(255,68,68,0.05);border:1px solid var(--red);color:var(--red);box-shadow:none;font-weight:700}
 .btn-danger:hover{background:rgba(255,68,68,0.15)}
 
 .bms-list{display:flex;flex-direction:column;gap:12px;width:100%;margin-top:8px}
-
-.bms-item{
-  background: var(--card-bg);
-  border: 1px solid var(--card-border);
-  border-radius: 16px;
-  padding: 20px 16px;
-  text-align: center;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  min-height: 160px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: var(--neon-glow);
-}
+.bms-item{ background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 16px; padding: 20px 16px; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 160px; cursor: pointer; transition: all 0.3s ease; box-shadow: var(--neon-glow); }
 .bms-item:hover{border-color:var(--cyan)}
 
 @keyframes neonSuave {
@@ -241,12 +131,7 @@ button:active{transform:scale(0.98)}
   50% { border-color: var(--cyan); box-shadow: 0 0 12px var(--neon-pulse-color), 0 0 4px var(--green); }
   100% { border-color: var(--green); box-shadow: 0 0 4px var(--neon-pulse-color); }
 }
-
-.bms-item.online-active {
-  animation: neonSuave 2s infinite ease-in-out !important;
-  border-width: 1.5px !important;
-}
-
+.bms-item.online-active { animation: neonSuave 2s infinite ease-in-out !important; border-width: 1.5px !important; }
 .bms-item h3{color:var(--text-main);font-size:19px;font-weight:800;margin-bottom:4px;width:100%}
 .bms-item p{color:var(--text-muted);font-size:13px;font-family:monospace;margin-bottom:8px;width:100%}
 
@@ -254,24 +139,8 @@ button:active{transform:scale(0.98)}
 .status-dot::before{content:'';width:8px;height:8px;border-radius:50%;display:inline-block}
 .status-dot.on{color:var(--green)}.status-dot.on::before{background:var(--green);box-shadow:0 0 8px var(--green)}
 .status-dot.off{color:var(--red)}.status-dot.off::before{background:var(--red);box-shadow:0 0 8px var(--red)}
-
-.bms-item .btn-item-del{
-  background:transparent;
-  border:1px solid var(--input-border);
-  color:var(--text-muted);
-  font-size:11px;
-  font-weight:700;
-  padding:6px 12px;
-  border-radius:8px;
-  width:auto;
-  margin-top:4px;
-  box-shadow:none;
-}
-.bms-item .btn-item-del:hover{
-  background:rgba(255,68,68,0.08);
-  color:var(--red);
-  border-color:var(--red);
-}
+.bms-item .btn-item-del{ background:transparent; border:1px solid var(--input-border); color:var(--text-muted); font-size:11px; font-weight:700; padding:6px 12px; border-radius:8px; width:auto; margin-top:4px; box-shadow:none; }
+.bms-item .btn-item-del:hover{ background:rgba(255,68,68,0.08); color:var(--red); border-color:var(--red); }
 
 .gauge-card{padding:15px;min-height:230px;display:flex;flex-direction:column;gap:10px;justify-content:center}
 .gauge{width:min(190px,48vw);height:min(190px,48vw);margin:auto;border-radius:50%;background:conic-gradient(var(--green) 0deg,var(--cyan) 180deg,var(--gauge-empty) 180deg);position:relative;box-shadow:0 0 30px rgba(0,255,255,.05);transition:background.8s ease}
@@ -287,138 +156,30 @@ button:active{transform:scale(0.98)}
 .bar{height:12px;background:var(--gauge-empty);border-radius:999px;overflow:hidden}
 .bar-fill{height:100%;width:0%;border-radius:999px;background:linear-gradient(90deg,var(--green),var(--cyan));transition:width.8s ease}
 
-.status-envelope-card {
-  background: var(--card-bg);
-  border: 1px solid var(--card-border);
-  border-radius: 20px;
-  padding: 16px 14px 14px 14px;
-  width: 100%;
-  box-shadow: var(--neon-glow);
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
+.status-envelope-card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 20px; padding: 16px 14px 14px 14px; width: 100%; box-shadow: var(--neon-glow); display: flex; flex-direction: column; gap: 12px; }
+.bms-master-id-title { font-size: 13px; font-weight: 700; color: var(--text-muted); font-family: monospace; text-align: center; letter-spacing: 1px; }
 
-.bms-master-id-title {
-  font-size: 13px;
-  font-weight: 700;
-  color: var(--text-muted);
-  font-family: monospace;
-  text-align: center;
-  letter-spacing: 1px;
-}
+.status-triple-grid { display: grid !important; grid-template-columns: repeat(3, 1fr) !important; gap: 5px !important; width: 100% !important; max-width: 100% !important; position: relative; }
+.status-triple-grid .card { display: flex !important; flex-direction: column !important; align-items: center !important; justify-content: center !important; text-align: center !important; padding: 10px 4px !important; min-height: 80px !important; background: var(--bg) !important; border: 1px solid var(--card-border) !important; box-shadow: none !important; transition: all 0.3s ease !important; }
+.status-triple-grid .status-title { font-size: 10px !important; font-weight: 700 !important; letter-spacing: 0.5px !important; text-transform: uppercase !important; color: var(--text-muted) !important; margin-bottom: 4px !important; }
+.status-triple-grid .status-text { font-size: 13px !important; font-weight: 800 !important; }
 
-.status-triple-grid {
-  display: grid !important;
-  grid-template-columns: repeat(3, 1fr) !important;
-  gap: 5px !important;
-  width: 100% !important;
-  max-width: 100% !important;
-  position: relative;
-}
+.triple-active { border-color: var(--green) !important; background: var(--card-bg) !important; box-shadow: 0 0 10px var(--neon-pulse-color) !important; }
+.triple-active .status-text { color: var(--green) !important; }
+.triple-inactive { border-color: var(--card-border) !important; }
+.triple-inactive .status-text { color: var(--red) !important; }
 
-.status-triple-grid .card {
-  display: flex !important;
-  flex-direction: column !important;
-  align-items: center !important;
-  justify-content: center !important;
-  text-align: center !important;
-  padding: 10px 4px !important;
-  min-height: 80px !important;
-  background: var(--bg) !important;
-  border: 1px solid var(--card-border) !important;
-  box-shadow: none !important;
-  transition: all 0.3s ease !important;
-}
-
-.status-triple-grid .status-title {
-  font-size: 10px !important;
-  font-weight: 700 !important;
-  letter-spacing: 0.5px !important;
-  text-transform: uppercase !important;
-  color: var(--text-muted) !important;
-  margin-bottom: 4px !important;
-}
-
-.status-triple-grid .status-text {
-  font-size: 13px !important;
-  font-weight: 800 !important;
-}
-
-.triple-active {
-  border-color: var(--green) !important;
-  background: var(--card-bg) !important;
-  box-shadow: 0 0 10px var(--neon-pulse-color) !important;
-}
-.triple-active .status-text {
-  color: var(--green) !important;
-}
-
-.triple-inactive {
-  border-color: var(--card-border) !important;
-}
-.triple-inactive .status-text {
-  color: var(--red) !important;
-}
-
-.grid {
-  display:grid !important;
-  grid-template-columns: repeat(2, 1fr) !important;
-  gap: 5px !important; 
-  width:100% !important;
-  max-width:100% !important;
-  margin-top:0px !important;
-}
-
-.grid .card-inner-item {
-  display: flex !important;
-  flex-direction: column !important;
-  align-items: center !important;
-  justify-content: center !important;
-  text-align: center !important;
-  padding: 12px !important;
-  background: var(--bg); 
-  border: 1px solid var(--card-border);
-  border-radius: 14px;
-}
-
-.value {
-  font-size: clamp(22px, 5.5vw, 28px);
-  font-weight: 800;
-  margin-top: 4px;
-  width: 100%;
-  text-align: center !important;
-  display: block !important;
-}
+.grid { display:grid !important; grid-template-columns: repeat(2, 1fr) !important; gap: 5px !important; width:100% !important; max-width:100% !important; margin-top:0px !important; }
+.grid .card-inner-item { display: flex !important; flex-direction: column !important; align-items: center !important; justify-content: center !important; text-align: center !important; padding: 12px !important; background: var(--bg); border: 1px solid var(--card-border); border-radius: 14px; }
+.value { font-size: clamp(22px, 5.5vw, 28px); font-weight: 800; margin-top: 4px; width: 100%; text-align: center !important; display: block !important; }
 
 #lista, #listaUsers { width: 100% }
 #listaUsers { display: flex; flex-direction: column; gap: 12px; }
-
-#lista .card {
-  background:var(--card-bg);
-  border:1px solid var(--card-border);
-  border-radius:16px;
-  padding:14px;
-  margin:0 !important;
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  justify-content:space-between;
-  min-height:160px;
-  cursor:pointer;
-  box-shadow: var(--neon-glow);
-  width:100%;
-}
+#lista .card { background:var(--card-bg); border:1px solid var(--card-border); border-radius:16px; padding:14px; margin:0 !important; display:flex; flex-direction:column; align-items:center; justify-content:space-between; min-height:160px; cursor:pointer; box-shadow: var(--neon-glow); width:100%; }
 #lista .card:hover{border-color:var(--cyan)}
-
 .card-empty{grid-column:1/-1;min-height:180px;display:flex;align-items:center;justify-content:center;color:var(--text-muted);font-size:14px}
 
-.diff {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 5px; 
-  margin-top: 8px;
-}
+.diff { display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; margin-top: 8px; }
 .diff-item{padding:10px 6px;border-radius:12px;background:var(--cell-bg);border:1px solid var(--cell-border);text-align:center}
 .diff-item span{display:block;margin-top:4px;font-size:clamp(16px,4.5vw,20px);font-weight:800;font-variant-numeric:tabular-nums}
 
@@ -439,7 +200,6 @@ button:active{transform:scale(0.98)}
 .link-esqueceu{display:block;text-align:right;font-size:12px;color:var(--text-muted);margin-top:8px;cursor:pointer;text-decoration:none;transition:color 0.2s}
 .link-esqueceu:hover{color:var(--blue)}
 
-/* CORREÇÃO GLOBAL: EXPANSÃO DE MARGIN-TOP PARA REPOSICIONAR O RODAPÉ NA BASE */
 .footer-link{font-size:11px;margin-top:120px;text-align:center;letter-spacing:1px;line-height:1.6;padding-bottom:24px}
 .footer-link a{color:var(--blue);text-decoration:none;font-weight:600;transition:opacity 0.2s;}
 .footer-link a:hover{opacity:0.8;text-decoration:underline;}
@@ -447,57 +207,14 @@ button:active{transform:scale(0.98)}
 
 .footer-voltar{width:100%;display:flex;justify-content:center;margin-top:4px!important;margin-bottom:8px}
 .footer-voltar button{width:100%;max-width:320px;margin-top:0px}
+.cortina-wrapper { max-height: 0; overflow: hidden; transition: max-height 0.4s ease-out, opacity 0.3s ease; opacity: 0; width: 100%; }
+.cortina-wrapper.aberta { max-height: 2000px; opacity: 1; transition: max-height 0.6s ease-in, opacity 0.4s ease; }
 
-.cortina-wrapper {
-  max-height: 0;
-  overflow: hidden;
-  transition: max-height 0.4s ease-out, opacity 0.3s ease;
-  opacity: 0;
-  width: 100%;
-}
-.cortina-wrapper.aberta {
-  max-height: 2000px;
-  opacity: 1;
-  transition: max-height 0.6s ease-in, opacity 0.4s ease;
-}
-
-.qr-input-row {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-top: 8px;
-  width: 100%;
-}
-.qr-input-row input {
-  flex: 1;
-  margin-top: 0 !important;
-}
-.btn-qr-scan {
-  width: 54px;
-  height: 54px;
-  min-width: 54px;
-  padding: 0;
-  margin-top: 0 !important;
-  background: rgba(0, 180, 216, 0.08);
-  border: 1px solid var(--card-border);
-  border-radius: 14px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  box-shadow: none;
-  transition: background 0.2s;
-}
-.btn-qr-scan:hover {
-  background: rgba(0, 180, 216, 0.15);
-}
-.btn-qr-scan svg {
-  width: 24px;
-  height: 24px;
-  fill: none;
-  stroke: var(--blue);
-  stroke-width: 2;
-}
+.qr-input-row { display: flex; align-items: center; gap: 10px; margin-top: 8px; width: 100%; }
+.qr-input-row input { flex: 1; margin-top: 0 !important; }
+.btn-qr-scan { width: 54px; height: 54px; min-width: 54px; padding: 0; margin-top: 0 !important; background: rgba(0, 180, 216, 0.08); border: 1px solid var(--card-border); border-radius: 14px; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: none; transition: background 0.2s; }
+.btn-qr-scan:hover { background: rgba(0, 180, 216, 0.15); }
+.btn-qr-scan svg { width: 24px; height: 24px; fill: none; stroke: var(--blue); stroke-width: 2; }
 </style>
 </head>
 <body>
@@ -507,32 +224,26 @@ button:active{transform:scale(0.98)}
     <img src="1000229030.png" alt="Logo BMS" style="width: 100px; height: 100px; object-fit: contain; border-radius: 50%; box-shadow: 0 4px 15px rgba(0, 180, 216, 0.2); background: var(--card-bg); padding: 8px; transition: transform 0.3s ease;">
     <div style="font-size: clamp(32px, 7vw, 48px); font-weight: 900; margin-top: 12px; letter-spacing: 2px; background: linear-gradient(90deg, var(--blue), var(--cyan)); -webkit-background-clip: text;-webkit-text-fill-color: transparent; text-align: center;">SMART BMS</div>
     <div class="user-info" style="margin-bottom:0; margin-top: 4px;">Gerenciamento Avançado</div>
-    
     <div id="erro" class="erro hidden"></div>
   </div>
 
   <div class="card">
     <div class="label">E-mail</div>
     <input id="email" type="email" placeholder="seu@email.com">
-    
     <div class="label" style="margin-top:16px">Senha</div>
     <div class="pass-wrapper">
       <input id="senha" type="password" placeholder="••••••••">
       <span class="pass-toggle" onclick="togglePass('senha', this)">👁</span>
     </div>
-    
     <span class="link-esqueceu" onclick="recoverSenha()">Esqueceu sua senha?</span>
-    
     <button onclick="login()">ENTRAR</button>
     <p class="link-cadastro" onclick="mostrarCadastro()">Ainda não tem conta? <span>Cadastre-se</span></p>
   </div>
-  
   <div class="footer-link">
     <a href="https://wa.me/5515991355393" target="_blank">SL TECNOLOGIA</a>
     <span>© Todos os direitos reservados</span>
   </div>
 </div>
-
 <div id="cadastro" class="hidden">
   <div class="title">SMART BMS</div>
   <div class="user-info" style="margin-bottom:12px">Crie sua Conta de Monitoramento</div>
@@ -1075,6 +786,9 @@ function salvarNovaSenha() {
   });
 }
 
+// =========================================================================
+// CORREÇÃO CIRÚRGICA: LOGICA REESTRUTURADA PARA CRIAR DISPOSITIVO DEMO NO CADASTRO
+// =========================================================================
 function cadastrar(){
   var btn = document.getElementById('btn-cadastrar');
   var nome = document.getElementById('cad-nome').value.trim();
@@ -1092,23 +806,16 @@ function cadastrar(){
   }
   
   if(!nome || !email || !senha || !confirmarSenha){
-    if (e) { 
-      e.textContent = 'Preencha todos os campos'; 
-      e.classList.remove('hidden'); 
-      TIMEOUT_ERRO_CADASTRO = setTimeout(function() { e.classList.add('hidden'); }, 3000);
-    }
+    if (e) { e.textContent = 'Preencha todos os campos'; e.classList.remove('hidden'); }
     return;
   }
 
   if (senha !== confirmarSenha) {
-    if (e) { 
-      e.textContent = 'As senhas não coincidem!'; 
-      e.classList.remove('hidden'); 
-      TIMEOUT_ERRO_CADASTRO = setTimeout(function() { e.classList.add('hidden'); }, 3000);
-    }
+    if (e) { e.textContent = 'As senhas não coincidem!'; e.classList.remove('hidden'); }
     return;
   }
 
+  // 1. Envia os dados para criar a conta no banco
   fetch(API + '?action=register_user', {
     method:'POST',
     headers:{'Content-Type':'application/json'},
@@ -1117,7 +824,33 @@ function cadastrar(){
   .then(function(r){return r.json();})
   .then(function(d){
     if(d.ok){
-      iniciarCronometroEspera(email);
+      // 2. CONTA CRIADA COM SUCESSO! Inicia a injeção silenciosa da BMS de Demonstração
+      console.log("[MARKETING] Usuário criado. Autenticando para injetar a BMS simulada...");
+      
+      fetch(API + '?action=login', {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({email:email, senha:senha})
+      })
+      .then(rAuth => rAuth.json())
+      .then(dAuth => {
+        if(dAuth.ok && dAuth.token) {
+          // 3. Vincula de forma oculta o código virtual SL000000000000 na conta recém-criada
+          fetch(API + '?action=add_bms', {
+            method:'POST',
+            headers:{'Content-Type':'application/json','Authorization':'Bearer ' + dAuth.token},
+            body:JSON.stringify({code: "SL000000000000", nome: "BMS Demonstração SL"})
+          })
+          .then(() => {
+            console.log("[MARKETING] Dispositivo de testes acoplado com sucesso!");
+            // 4. Libera o fluxo original do temporizador de confirmação por e-mail
+            iniciarCronometroEspera(email);
+          })
+          .catch(() => iniciarCronometroEspera(email));
+        } else { iniciarCronometroEspera(email); }
+      })
+      .catch(() => iniciarCronometroEspera(email));
+      
     } else { 
       if (e) { 
         if(d.error === 'E-mail já cadastrado') {
@@ -1126,21 +859,14 @@ function cadastrar(){
         } else if(d.error === 'E-mail já cadastrado and confirmed') {
           alert('Este e-mail já está verificado e ativo no sistema!');
           mostrarLogin();
-          return;
         } else {
-          e.textContent = d.error; 
-          e.classList.remove('hidden');
-          TIMEOUT_ERRO_CADASTRO = setTimeout(function() { e.classList.add('hidden'); }, 3000);
+          e.textContent = d.error; e.classList.remove('hidden');
         }
       } 
     }
   })
   .catch(function(err){
-    if (e) { 
-      e.textContent = 'Erro: ' + err.message; 
-      e.classList.remove('hidden'); 
-      TIMEOUT_ERRO_CADASTRO = setTimeout(function() { e.classList.add('hidden'); }, 3000);
-    }
+    if (e) { e.textContent = 'Erro: ' + err.message; e.classList.remove('hidden'); }
   });
 }  
 
@@ -1219,11 +945,7 @@ function limparControlesCadastro() {
 
 function restaurarEstilosErroOriginal() {
   var e = document.getElementById('erro-cad');
-  if(e) {
-    e.style.color = '';
-    e.style.background = '';
-    e.style.borderColor = '';
-  }
+  if(e) { e.style.color = ''; e.style.background = ''; e.style.borderColor = ''; }
 }
 
 function restaurarBotaoCadastroOriginal() {
@@ -1235,16 +957,12 @@ function restaurarBotaoCadastroOriginal() {
     btn.style.background = 'linear-gradient(90deg,var(--blue),var(--cyan))';
     btn.textContent = 'CADASTRAR';
   }
-  if(e) {
-    e.classList.add('hidden');
-    restaurarEstilosErroOriginal();
-  }
+  if(e) { e.classList.add('hidden'); restaurarEstilosErroOriginal(); }
 }
 
 function toggleCortinaDispositivos() {
   var cortina = document.getElementById('cortina-dispositivos');
   var btn = document.getElementById('btn-toggle-cortina');
-  
   if (!cortina || !btn) return;
   
   if (cortina.classList.contains('aberta')) {
@@ -1258,19 +976,9 @@ function toggleCortinaDispositivos() {
 
 function fecharMqttAnterior() {
   if (bmsTimeoutTimer) { clearTimeout(bmsTimeoutTimer); bmsTimeoutTimer = null; }
-  
-  for (var k in listaTimeoutsDispositivos) {
-    if (listaTimeoutsDispositivos[k]) clearTimeout(listaTimeoutsDispositivos[k]);
-  }
+  for (var k in listaTimeoutsDispositivos) { if (listaTimeoutsDispositivos[k]) clearTimeout(listaTimeoutsDispositivos[k]); }
   listaTimeoutsDispositivos = {};
-
-  if (MQTT_CLIENT) {
-    try {
-      MQTT_CLIENT.disconnect();
-      console.log("[MQTT] Conexão anterior finalizada de forma limpa.");
-    } catch(e) {}
-    MQTT_CLIENT = null;
-  }
+  if (MQTT_CLIENT) { try { MQTT_CLIENT.disconnect(); } catch(e) {} MQTT_CLIENT = null; }
 }
 
 function mostrarLista(){
@@ -1283,11 +991,9 @@ function mostrarLista(){
   
   var cortina = document.getElementById('cortina-dispositivos');
   var btn = document.getElementById('btn-toggle-cortina');
-  
   if(cortina) cortina.classList.add('aberta');
   if(btn) btn.classList.add('hidden');
   USAR_CONTROLE_CORTINA = false;
-
   carregarListaUmaVez();
 }
 
@@ -1299,7 +1005,6 @@ function carregarListaUmaVez() {
   })
   .then(function(lista){
     if(!lista) return;
-    
     listaPlacasRegistradas = lista.map(function(item) { return item.code; });
 
     var cortina = document.getElementById('cortina-dispositivos');
@@ -1309,10 +1014,7 @@ function carregarListaUmaVez() {
       if (!USAR_CONTROLE_CORTINA) {
         USAR_CONTROLE_CORTINA = true;
         if(cortina) cortina.classList.remove('aberta');
-        if(btn) {
-          btn.classList.remove('hidden');
-          btn.textContent = 'MOSTRAR DISPOSITIVOS';
-        }
+        if(btn) { btn.classList.remove('hidden'); btn.textContent = 'MOSTRAR DISPOSITIVOS'; }
       }
     } else {
       USAR_CONTROLE_CORTINA = false;
@@ -1338,7 +1040,6 @@ function carregarListaUmaVez() {
       html += '</div>';
     }
     el.innerHTML = html;
-
     conectarMqttParaListaDispositivos();
   });
 }
@@ -1351,9 +1052,6 @@ function conectarMqttParaListaDispositivos() {
   const clientRandomId = "sl_list_client_" + Math.floor(Math.random() * 10000);
 
   MQTT_CLIENT = new Paho.MQTT.Client(hostMqtt, Number(portaMqtt), clientRandomId);
-
-  MQTT_CLIENT.onConnectionLost = function () { console.log("[MQTT LISTA] Conexão suspensa."); };
-
   MQTT_CLIENT.onMessageArrived = function (message) {
     try {
       const topicoLido = message.destinationName; 
@@ -1382,10 +1080,7 @@ function conectarMqttParaListaDispositivos() {
 
   MQTT_CLIENT.connect({
     userName: userMqtt, password: passMqtt, useSSL: true, timeout: 3,
-    onSuccess: function () {
-      console.log("[MQTT LISTA] Ouvindo atividade na nuvem...");
-      MQTT_CLIENT.subscribe("sl_bms/+/telemetria");
-    }
+    onSuccess: function () { MQTT_CLIENT.subscribe("sl_bms/+/telemetria"); }
   });
 }
 
@@ -1398,45 +1093,27 @@ function abrirDash(code){
   esconderTudo();
   document.getElementById('dash').classList.remove('hidden');
   document.getElementById('bms-titulo').textContent = code;
-  
   configurarInterfaceEstadoOffline();
 
   const hostMqtt = "965bd6abd6f54692b84d710cab8327b4.s1.eu.hivemq.cloud"; 
   const portaMqtt = 8884;                     
   const userMqtt = "sl_bms_prod";             
   const passMqtt = "SLtech2026@Bms";           
-  
   const clientRandomId = "sl_web_client_" + Math.floor(Math.random() * 10000);
 
   MQTT_CLIENT = new Paho.MQTT.Client(hostMqtt, Number(portaMqtt), clientRandomId);
-
-  MQTT_CLIENT.onConnectionLost = function (responseObject) {
-    console.log("[MQTT] Conexão finalizada ou perdida.");
-    configurarInterfaceEstadoOffline();
-  };
-
+  MQTT_CLIENT.onConnectionLost = function () { configuringInterfaceEstadoOffline(); };
   MQTT_CLIENT.onMessageArrived = function (message) {
     try {
       const d = JSON.parse(message.payloadString);
       processarERenderizarDadosMqtt(d);
-    } catch (err) {
-      console.error("[MQTT] Erro de processamento do payload:", err);
-    }
+    } catch (err) {}
   };
 
   MQTT_CLIENT.connect({
-    userName: userMqtt,
-    password: passMqtt,
-    useSSL: true, 
-    timeout: 3,
-    onSuccess: function () {
-      console.log("[MQTT] Conectado com sucesso. Ouvindo dispositivo: " + CODIGO);
-      MQTT_CLIENT.subscribe("sl_bms/" + CODIGO + "/telemetria");
-    },
-    onFailure: function (err) {
-      console.error("[MQTT] Falha na autenticação:", err);
-      configurarInterfaceEstadoOffline();
-    }
+    userName: userMqtt, password: passMqtt, useSSL: true, timeout: 3,
+    onSuccess: function () { MQTT_CLIENT.subscribe("sl_bms/" + CODIGO + "/telemetria"); },
+    onFailure: function () { configurarInterfaceEstadoOffline(); }
   });
 }
 
@@ -1456,7 +1133,6 @@ function configurarInterfaceEstadoOffline() {
   document.getElementById('invTensaoAC').textContent = '0.0V';
   document.getElementById('invFrequencia').textContent = '0.0Hz';
   document.getElementById('invGeracaoDia').textContent = '0.0kWh';
-
   document.getElementById('soc').textContent = '0%';
   document.getElementById('volt').textContent = '0.00V';
   document.getElementById('corr').textContent = '0.0A';
@@ -1467,10 +1143,7 @@ function configurarInterfaceEstadoOffline() {
 
 function processarERenderizarDadosMqtt(d) {
   if (bmsTimeoutTimer) clearTimeout(bmsTimeoutTimer);
-  bmsTimeoutTimer = setTimeout(function() {
-    console.log("[SISTEMA] Fluxo interrompido por mais de 5s. Forçando queda do painel.");
-    configurarInterfaceEstadoOffline(); 
-  }, 5000); 
+  bmsTimeoutTimer = setTimeout(function() { configurarInterfaceEstadoOffline(); }, 5000); 
 
   var cardInv = document.getElementById('cardInversor');
   var txtInv = document.getElementById('txtInversor');
@@ -1480,10 +1153,8 @@ function processarERenderizarDadosMqtt(d) {
   var txtBat = document.getElementById('txtBateria');
 
   gerenciarLayoutStatus(cardBms, txtBms, true, "Online", "Offline");
-  
   var invAtivo = (d.inversor_conectado !== undefined) ? d.inversor_conectado : true;
   gerenciarLayoutStatus(cardInv, txtInv, invAtivo, "Conectado", "Desconectado");
-
   var batAtiva = (d.bateria_conectada !== undefined) ? d.bateria_conectada : true;
   gerenciarLayoutStatus(cardBat, txtBat, batAtiva, "Conectada", "Desconectada");
 
@@ -1516,20 +1187,11 @@ function processarERenderizarDadosMqtt(d) {
   }
 }
 
-function voltar(){ 
-  fecharMqttAnterior();
-  clearInterval(INT); 
-  localStorage.removeItem('bms_codigo_ativo'); 
-  mostrarLista(); 
-}
-
-function carregarLista(){
-}
-
+function voltar(){ fecharMqttAnterior(); clearInterval(INT); localStorage.removeItem('bms_codigo_ativo'); mostrarLista(); }
+function carregarLista(){}
 function removerBms(code, nome){
   if(!confirm(`Remover o dispositivo "${nome || code}"?`)) return;
-  fetch(API+`?action=remove_bms&code=${code}`,{ method:'DELETE', headers:{'Authorization':'Bearer '+TOKEN} })
-  .then(function() { carregarListaUmaVez(); }); 
+  fetch(API+`?action=remove_bms&code=${code}`,{ method:'DELETE', headers:{'Authorization':'Bearer '+TOKEN} }).then(function() { carregarListaUmaVez(); }); 
 }
 
 function addBms(){
@@ -1538,21 +1200,17 @@ function addBms(){
   if(code.length !== 14) return alert('Código inválido.');
 
   fetch(API + '?action=add_bms', {
-    method:'POST',
-    headers:{'Content-Type':'application/json','Authorization':'Bearer '+TOKEN},
+    method:'POST', headers:{'Content-Type':'application/json','Authorization':'Bearer '+TOKEN},
     body:JSON.stringify({code:code,nome:nome || code})
   })
   .then(function(r){ return r.json(); })
   .then(function(d){
     if(d.ok){
-      document.getElementById('bms-code').value = '';
-      document.getElementById('bms-nome').value = '';
-      
+      document.getElementById('bms-code').value = ''; document.getElementById('bms-nome').value = '';
       var cortina = document.getElementById('cortina-dispositivos');
       var btn = document.getElementById('btn-toggle-cortina');
       if(cortina) cortina.classList.add('aberta');
       if(btn) btn.textContent = 'OCULTAR DISPOSITIVOS';
-      
       carregarListaUmaVez(); 
     } else { alert('Erro: ' + d.error); }
   });
@@ -1570,20 +1228,11 @@ function renderCelulas(cels){
     return;
   }
   var vals = [];
-  for(var i=0;i<cels.length;i++){
-    var v = parseFloat(cels[i]);
-    if(v > 0) vals.push(v);
-  }
+  for(var i=0;i<cels.length;i++){ var v = parseFloat(cels[i]); if(v > 0) vals.push(v); }
   
-  var min = 0;
-  var max = 0;
-  var dif = 0;
-  
-  if (vals.length > 0) {
-    min = Math.min.apply(null, vals);
-    max = Math.max.apply(null, vals);
-    dif = max - min;
-  }
+  var min = vals.length > 0 ? Math.min.apply(null, vals) : 0;
+  var max = vals.length > 0 ? Math.max.apply(null, vals) : 0;
+  var dif = max - min;
   
   document.getElementById('celMin').textContent = min.toFixed(2)+'V';
   document.getElementById('celMax').textContent = max.toFixed(2)+'V';
@@ -1592,9 +1241,7 @@ function renderCelulas(cels){
   
   if (container.children.length !== cels.length || container.querySelector('div[style*="grid-column"]')) {
     var html = '';
-    for(var i=0; i<cels.length; i++){
-      html += '<div class="cell" id="c-box-'+i+'"><div class="cell-num">C'+(i+1)+'</div><div class="cell-val" id="c-val-'+i+'">0.00V</div></div>';
-    }
+    for(var i=0; i<cels.length; i++){ html += '<div class="cell" id="c-box-'+i+'"><div class="cell-num">C'+(i+1)+'</div><div class="cell-val" id="c-val-'+i+'">0.00V</div></div>'; }
     container.innerHTML = html;
   }
   
@@ -1603,16 +1250,10 @@ function renderCelulas(cels){
     var valStr = val.toFixed(2)+'V';
     var cls = (val < 3.2 || val > 4.2) ? 'crit' : (val < 3.4 || val > 4.15) ? 'warn' : 'ok';
     var novaClasse = 'cell ' + cls;
-    
     var cellBox = document.getElementById('c-box-'+i);
     var cellVal = document.getElementById('c-val-'+i);
-    
-    if (cellVal && cellVal.textContent !== valStr) {
-      cellVal.textContent = valStr;
-    }
-    if (cellBox && cellBox.className !== novaClasse) {
-      cellBox.className = novaClasse;
-    }
+    if (cellVal && cellVal.textContent !== valStr) cellVal.textContent = valStr;
+    if (cellBox && cellBox.className !== novaClasse) cellBox.className = novaClasse;
   }
 }
 
@@ -1630,24 +1271,12 @@ function atualizarGauge(soc){
 function gerenciarLayoutStatus(elementoCard, elementoTxt, ativo, textoAtivo, textoInativo) {
   var novaClasse = ativo ? "card triple-active" : "card triple-inactive";
   var novoTexto = ativo ? textoAtivo : textoInativo;
-  
-  if (elementoCard.className !== novaClasse) {
-    elementoCard.className = novaClasse;
-  }
-  if (elementoTxt.textContent !== novoTexto) {
-    elementoTxt.textContent = novoTexto;
-  }
+  if (elementoCard.className !== novaClasse) elementoCard.className = novaClasse;
+  if (elementoTxt.textContent !== novoTexto) elementoTxt.textContent = novoTexto;
 }
 
 function sair(){ if(confirm('Deseja realmente sair?')) sairSemConfirmacao(); }
-function sairSemConfirmacao(){ 
-  fecharMqttAnterior();
-  clearInterval(INT); 
-  localStorage.removeItem('bms_token'); 
-  localStorage.removeItem('bms_user'); 
-  localStorage.removeItem('bms_codigo_ativo'); 
-  location.reload(); 
-}
+function sairSemConfirmacao(){ fecharMqttAnterior(); clearInterval(INT); localStorage.removeItem('bms_token'); localStorage.removeItem('bms_user'); localStorage.removeItem('bms_codigo_ativo'); location.reload(); }
 </script>
 </body>
 </html>
