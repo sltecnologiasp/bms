@@ -20,6 +20,21 @@ export async function onRequest({ request, env }) {
     // ROTAS PÚBLICAS (NÃO EXIGEM TOKEN / LOGIN)
     // ==========================================
 
+    // ROTA COMPLEMENTAR PÚBLICA PARA O ESP32 BAIXAR O ARQUIVO BINÁRIO SALVO NO R2
+    // (Movido para o topo para evitar bloqueio pelo interceptor de token Bearer)
+    if (action === 'download_bin' && request.method === 'GET') {
+      const key = url.searchParams.get('key');
+      if (!key || !env.FIRMWARES_BUCKET) return new Response('Arquivo não encontrado', { status: 404 });
+      const object = await env.FIRMWARES_BUCKET.get(key);
+      if (!object) return new Response('Objeto ausente no R2', { status: 404 });
+      
+      const headers = new Headers();
+      object.writeHttpMetadata(headers);
+      headers.set('etag', object.httpEtag);
+      headers.set('Access-Control-Allow-Origin', '*'); // Garante que a placa possa ler a stream de dados
+      return new Response(object.body, { headers });
+    }
+
     // ROTA 1: VERIFICAÇÃO DE E-MAIL
     if (action === 'verify_email' && request.method === 'GET') {
       const token = url.searchParams.get('token');
@@ -235,7 +250,6 @@ export async function onRequest({ request, env }) {
       const body = await request.json();
       const { code, soc, voltage, current, temp, cells } = body;
       
-      // Mapeamento dos novos parâmetros do Inversor enviados pelo ESP32
       const inversor_conectado = body.inversor_conectado !== undefined ? (body.inversor_conectado ? 1 : 0) : 1;
       const bateria_conectada = body.bateria_conectada !== undefined ? (body.bateria_conectada ? 1 : 0) : 1;
       const inv_potencia = body.inv_potencia || 0;
@@ -309,32 +323,16 @@ export async function onRequest({ request, env }) {
           if (!file || !code) return json({ ok: false, error: 'Arquivo ou código do dispositivo ausente.' }, 400);
           if (!env.FIRMWARES_BUCKET) return json({ ok: false, error: 'Configuração do bucket R2 não vinculada nas variáveis de ambiente do Cloudflare.' }, 500);
 
-          // Salva os bytes crus da stream do binário diretamente no Cloudflare R2
           const keyName = `firmwares/${code}_${Date.now()}.bin`;
           await env.FIRMWARES_BUCKET.put(keyName, file.stream(), {
             httpMetadata: { contentType: 'application/octet-stream' }
           });
 
-          // Monta o link público gerado pelo R2. Substitua pelo seu domínio caso o bucket esteja em subdomínio próprio
           const publicUrl = `${url.origin}/api/bms?action=download_bin&key=${keyName}`;
-
           return json({ ok: true, url: publicUrl });
         } catch (uploadErr) {
           return json({ ok: false, error: 'Falha interna na gravação do R2: ' + uploadErr.message }, 500);
         }
-      }
-
-      // ROTA COMPLEMENTAR PÚBLICA PARA O ESP32 BAIXAR O ARQUIVO BINÁRIO SALVO NO R2
-      if (action === 'download_bin' && request.method === 'GET') {
-        const key = url.searchParams.get('key');
-        if (!key || !env.FIRMWARES_BUCKET) return new Response('Arquivo não encontrado', { status: 404 });
-        const object = await env.FIRMWARES_BUCKET.get(key);
-        if (!object) return new Response('Objeto ausente no R2', { status: 404 });
-        
-        const headers = new Headers();
-        object.writeHttpMetadata(headers);
-        headers.set('etag', object.httpEtag);
-        return new Response(object.body, { headers });
       }
 
       // LISTAR DISPOSITIVOS NO ADMIN COM NOME DO DONO
@@ -474,7 +472,6 @@ export async function onRequest({ request, env }) {
       return json(withOnline);
     }
 
-    // ROTA COMPARTILHADA: RETORNO DE DADOS PRO CLIENTE (ADAPTADA COM OS NOVOS CAMPOS)
     if (action === 'data' && request.method === 'GET') {
       const code = url.searchParams.get('code');
       if (!code) return json({ ok: false, error: 'Code obrigatório' }, 400);
