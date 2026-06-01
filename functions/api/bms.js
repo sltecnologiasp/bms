@@ -16,12 +16,29 @@ export async function onRequest({ request, env }) {
   });
 
   try {
-    // ==========================================
-    // ROTAS PÚBLICAS (NÃO EXIGEM TOKEN / LOGIN)
-    // ==========================================
+    // =========================================================================
+    // ROTAS PÚBLICAS CRÍTICAS (PROCESSADAS NO TOPO ABSOLUTO SEM EXIGIR TOKEN)
+    // =========================================================================
+
+    // ROTA EXPRESSA: AUTO-CADASTRO DO HARDWARE ESP32 VIA eFUSE/MAC
+    if (action === 'device_auto_register' && request.method === 'POST') {
+      try {
+        const body = await request.json();
+        const { code } = body;
+        
+        if (!code || !code.startsWith('SL') || code.length !== 14) {
+          return json({ ok: false, error: 'Código inválido enviado pelo hardware' }, 400);
+        }
+        
+        // Insere na tabela bms_master. Se já existir, ignora para não dar erro de duplicidade
+        await env.DB.prepare("INSERT OR IGNORE INTO bms_master (code, user_id) VALUES (?, NULL)").bind(code).run();
+        return json({ ok: true, message: 'Hardware registrado com sucesso!' }, 200);
+      } catch (dbErr) {
+        return json({ ok: false, error: 'Falha interna na gravação do banco D1: ' + dbErr.message }, 500);
+      }
+    }
 
     // ROTA COMPLEMENTAR PÚBLICA PARA O ESP32 BAIXAR O ARQUIVO BINÁRIO SALVO NO R2
-    // (Movido para o topo para evitar bloqueio pelo interceptor de token Bearer)
     if (action === 'download_bin' && request.method === 'GET') {
       const key = url.searchParams.get('key');
       if (!key || !env.FIRMWARES_BUCKET) return new Response('Arquivo não encontrado', { status: 404 });
@@ -31,7 +48,7 @@ export async function onRequest({ request, env }) {
       const headers = new Headers();
       object.writeHttpMetadata(headers);
       headers.set('etag', object.httpEtag);
-      headers.set('Access-Control-Allow-Origin', '*'); // Garante que a placa possa ler a stream de dados
+      headers.set('Access-Control-Allow-Origin', '*'); 
       return new Response(object.body, { headers });
     }
 
@@ -279,9 +296,9 @@ export async function onRequest({ request, env }) {
       return json({ ok: true });
     }
 
-    // ==========================================
-    // BARREIRA DE SEGURANÇA (TOKEN)
-    // ==========================================
+    // =========================================================================
+    // BARREIRA DE SEGURANÇA GLOBAL (EXIGE TOKEN BEARER DAQUI PARA BAIXO)
+    // =========================================================================
     const auth = request.headers.get('Authorization');
     if (!auth?.startsWith('Bearer ')) return json({ ok: false, error: 'Não autorizado' }, 401);
     const token = auth.slice(7);
@@ -321,7 +338,7 @@ export async function onRequest({ request, env }) {
           const code = formData.get('code');
 
           if (!file || !code) return json({ ok: false, error: 'Arquivo ou código do dispositivo ausente.' }, 400);
-          if (!env.FIRMWARES_BUCKET) return json({ ok: false, error: 'Configuração do bucket R2 não vinculada nas variáveis de ambiente do Cloudflare.' }, 500);
+          if (!env.FIRMWARES_BUCKET) return json({ ok: false, error: 'Configuração do bucket R2 não vinculada.' }, 500);
 
           const keyName = `firmwares/${code}_${Date.now()}.bin`;
           await env.FIRMWARES_BUCKET.put(keyName, file.stream(), {
