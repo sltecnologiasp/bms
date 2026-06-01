@@ -6,6 +6,60 @@
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('/sw.js');
   }
+
+  let gatilhoInstalacaoPWA;
+
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    gatilhoInstalacaoPWA = e;
+
+    setTimeout(() => {
+      const telaLista = document.getElementById('lista');
+      if (telaLista && !telaLista.classList.contains('hidden')) {
+        criarBannerInstalacao();
+      }
+    }, 2000);
+  });
+
+  function criarBannerInstalacao() {
+    if (document.getElementById('pwa-install-banner')) return;
+
+    const banner = document.createElement('div');
+    banner.id = 'pwa-install-banner';
+    banner.style.cssText = `
+      position: fixed; top: 16px; left: 16px; right: 16px;
+      background: linear-gradient(90deg, var(--blue), var(--cyan)); color: white;
+      padding: 16px; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,180,216,0.25);
+      z-index: 9999; display: flex; align-items: center; justify-content: space-between;
+      font-family: 'Inter', sans-serif; border: 1px solid rgba(255,255,255,0.2);
+    `;
+
+    banner.innerHTML = `
+      <div style="flex: 1; padding-right: 12px;">
+        <strong style="display:block; font-size:14px; font-weight:800; margin-bottom: 2px;">Leve o painel com você!</strong>
+        <span style="font-size:12px; opacity:0.95; line-height: 1.4; display:block;">Adicione o app à sua tela inicial para acompanhar suas baterias num clique.</span>
+      </div>
+      <div style="display:flex; gap: 8px; align-items: center;">
+        <button id="btn-pwa-nao" style="width:auto; margin:0; padding:10px 14px; font-size:12px; background:transparent; border:1px solid rgba(255,255,255,0.4); color:white; box-shadow:none; font-weight:600; border-radius:10px; white-space: nowrap;">Agora não</button>
+        <button id="btn-pwa-sim" style="width:auto; margin:0; padding:10px 14px; font-size:12px; background:white; color:var(--blue); font-weight:800; box-shadow:none; border-radius:10px; white-space: nowrap;">👉🏻 Instalar aplicativo</button>
+      </div>
+    `;
+
+    document.body.appendChild(banner);
+    document.getElementById('btn-pwa-nao').addEventListener('click', () => { banner.remove(); });
+    document.getElementById('btn-pwa-sim').addEventListener('click', async () => {
+      banner.remove();
+      if (!gatilhoInstalacaoPWA) return;
+      gatilhoInstalacaoPWA.prompt();
+      await gatilhoInstalacaoPWA.userChoice;
+      gatilhoInstalacaoPWA = null;
+    });
+  }
+
+  window.addEventListener('appinstalled', () => {
+    const banner = document.getElementById('pwa-install-banner');
+    if (banner) banner.remove();
+  });
 </script>
   
 <meta charset="UTF-8">
@@ -42,10 +96,8 @@
   --gauge-empty: #e2e8f0;
   --cell-bg: #f8fafc;
   --cell-border: #e2e8f0;
-  
   --neon-glow: 0 0 12px rgba(0, 180, 216, 0.12);
   --neon-pulse-color: rgba(46, 196, 182, 0.3);
-  
   --cyan: #00b4d8;
   --blue: #0077b6;
   --green: #2ec4b6;
@@ -66,10 +118,8 @@
   --gauge-empty: rgba(255, 255, 255, .08);
   --cell-bg: rgba(0, 0, 0, .3);
   --cell-border: rgba(255, 255, 255, .04);
-  
   --neon-glow: 0 0 15px rgba(0, 255, 255, 0.2);
   --neon-pulse-color: rgba(0, 255, 136, 0.4);
-  
   --cyan: #00ffff;
   --blue: #0080ff;
   --green: #00ff88;
@@ -117,6 +167,7 @@ input::placeholder{ color: var(--input-placeholder) !important; opacity: 1 !impo
 
 button{background:linear-gradient(90deg,var(--blue),var(--cyan));color:#fff;font-weight:700;cursor:pointer;margin-top:12px;box-shadow:0 4px 20px rgba(0,128,255,0.25)}
 button:active{transform:scale(0.98)}
+
 .btn-sec{background:transparent;border:1px solid var(--cyan);color:var(--cyan);box-shadow:none;font-weight:700}
 .btn-card-action { background: linear-gradient(90deg,var(--blue),var(--cyan)); color: #fff; font-weight: 700; margin-top: 0; box-shadow: 0 4px 20px rgba(0,128,255,0.15); }
 .btn-danger{background:rgba(255,68,68,0.05);border:1px solid var(--red);color:var(--red);box-shadow:none;font-weight:700}
@@ -244,28 +295,25 @@ button:active{transform:scale(0.98)}
     <span>© Todos os direitos reservados</span>
   </div>
 </div>
+
 <div id="cadastro" class="hidden">
   <div class="title">SMART BMS</div>
   <div class="user-info" style="margin-bottom:12px">Crie sua Conta de Monitoramento</div>
   <div class="card">
     <div class="label">Nome</div>
     <input id="cad-nome" placeholder="Seu nome">
-    
     <div class="label" style="margin-top:16px">E-mail</div>
     <input id="cad-email" type="email" placeholder="seu@email.com">
-    
     <div class="label" style="margin-top:16px">Senha</div>
     <div class="pass-wrapper">
       <input id="cad-senha" type="password" placeholder="••••••••">
       <span class="pass-toggle" onclick="togglePass('cad-senha', this)">👁</span>
     </div>
-
     <div class="label" style="margin-top:16px">Confirmar Senha</div>
     <div class="pass-wrapper">
       <input id="cad-confirmar-senha" type="password" placeholder="••••••••">
       <span class="pass-toggle" onclick="togglePass('cad-confirmar-senha', this)">👁</span>
     </div>
-    
     <button id="btn-cadastrar" onclick="cadastrar()">CADASTRAR</button>
     <button id="btn-cad-voltar" class="btn-sec" onclick="mostrarLogin()">VOLTAR</button>
     <div id="erro-cad" class="erro hidden"></div>
@@ -285,13 +333,11 @@ button:active{transform:scale(0.98)}
       <input id="nova-senha" type="password" placeholder="••••••••">
       <span class="pass-toggle" onclick="togglePass('nova-senha', this)">👁</span>
     </div>
-
     <div class="label" style="margin-top:16px">Confirmar Nova Senha</div>
     <div class="pass-wrapper">
       <input id="nova-senha-confirmar" type="password" placeholder="••••••••">
       <span class="pass-toggle" onclick="togglePass('nova-senha-confirmar', this)">👁</span>
     </div>
-    
     <button onclick="salvarNovaSenha()">SALVAR NOVA SENHA</button>
     <div id="erro-redefinir" class="erro hidden"></div>
   </div>
@@ -304,10 +350,8 @@ button:active{transform:scale(0.98)}
 <div id="lista" class="hidden">
   <div class="title" style="font-size:clamp(28px,6vw,34px);margin-bottom:4px">SMART BMS</div>
   <div class="user-info">Olá, <span id="user-nome">--</span></div>
-  
   <div class="card">
     <div class="label">Adicionar dispositivo</div>
-    
     <div class="qr-input-row">
       <input id="bms-code" placeholder="SL000000000000" maxlength="14">
       <button class="btn-qr-scan" onclick="abrirScannerCamera()" title="Escanear QR Code">
@@ -316,24 +360,20 @@ button:active{transform:scale(0.98)}
         </svg>
       </button>
     </div>
-    
     <input id="bms-nome" placeholder="Nome Ex: Bateria Casa" style="margin-top:12px">
     <button onclick="addBms()">ADICIONAR DISPOSITIVO</button>
     <button id="btn-toggle-cortina" class="hidden" onclick="toggleCortinaDispositivos()">MOSTRAR DISPOSITIVOS</button>
   </div>
-  
   <div id="cortina-dispositivos" class="cortina-wrapper">
     <div class="card">
       <div class="label" style="margin-bottom:12px">Meus Dispositivos</div>
       <div id="bms-list" class="bms-list"></div>
     </div>
   </div>
-  
   <div class="card" style="width:100%; display:flex; flex-direction:column; gap:12px; padding:16px; box-sizing:border-box;">
     <button class="btn-card-action" onclick="mostrarPaginaConta()">Configurações da Conta</button>
     <button class="btn-card-action" onclick="sair()">Sair</button>
   </div>
-
   <div class="footer-link">
     <a href="https://wa.me/5515991355393" target="_blank">SL TECNOLOGIA</a>
     <span>© Todos os direitos reservados</span>
@@ -343,19 +383,16 @@ button:active{transform:scale(0.98)}
 <div id="configuracoesPage" class="hidden">
   <div class="title" style="font-size:clamp(28px,6vw,34px);margin-bottom:4px">SMART BMS</div>
   <div class="user-info">Configurações de Segurança</div>
-
   <div class="card" style="max-width:440px; width:100%">
     <div class="label" style="margin-bottom:16px">Gerenciar Minha Conta</div>
     <button class="btn-sec" style="margin-top:0" onclick="abrirModalSenha()">ALTERAR MINHA SENHA</button>
     <button class="btn-sec" style="margin-top:12px; border-color:var(--green); color:var(--green);" onclick="window.open('https://wa.me/5515991355393', '_blank')">SUPORTE</button>
     <button class="btn-danger" style="margin-top:12px" onclick="excluirMinhaConta()">EXCLUIR CONTA DEFINITIVAMENTE</button>
   </div>
-
   <div class="card" style="max-width:440px; width:100%">
     <div class="label" style="margin-bottom:12px">Visual do Aplicativo</div>
     <button id="theme-toggle-btn" class="btn-sec" style="margin-top:0" onclick="alternarThemeDireto()"></button>
   </div>
-
   <button class="btn-sec" style="max-width:440px; width:100%" onclick="voltarParaLista()">Voltar</button>
   <div class="footer-link">
     <a href="https://wa.me/5515991355393" target="_blank">SL TECNOLOGIA</a>
@@ -379,7 +416,6 @@ button:active{transform:scale(0.98)}
 
   <div class="status-envelope-card">
     <div class="bms-master-id-title" id="bms-titulo">--</div>
-    
     <div class="status-triple-grid">
       <div id="cardInversor" class="card triple-inactive">
         <span class="status-title">Inversor</span>
@@ -435,25 +471,21 @@ button:active{transform:scale(0.98)}
 <div id="modalSenha" class="modal">
   <div class="modal-content">
     <h2 style="text-align:center;margin-bottom:16px;font-size:20px;font-weight:900;background:linear-gradient(90deg,var(--blue),var(--cyan));-webkit-background-clip:text;-webkit-text-fill-color:transparent">Alterar Senha</h2>
-    
     <div class="label">Senha Atual</div>
     <div class="pass-wrapper">
       <input id="change-senha-atual" type="password" placeholder="••••••••">
       <span class="pass-toggle" onclick="togglePass('change-senha-atual', this)">👁</span>
     </div>
-    
     <div class="label" style="margin-top:12px">Nova Senha</div>
     <div class="pass-wrapper">
       <input id="change-nova-senha" type="password" placeholder="••••••••">
       <span class="pass-toggle" onclick="togglePass('change-nova-senha', this)">👁</span>
     </div>
-
     <div class="label" style="margin-top:12px">Confirmar Nova Senha</div>
     <div class="pass-wrapper">
       <input id="change-confirmar-senha" type="password" placeholder="••••••••">
       <span class="pass-toggle" onclick="togglePass('change-confirmar-senha', this)">👁</span>
     </div>
-    
     <button onclick="salvarAlteracaoSenha()">SALVAR NOVA SENHA</button>
     <button class="btn-sec" style="margin-top:8px" onclick="fecharModalSenha()">CANCELAR</button>
     <div id="erro-change-senha" class="erro hidden"></div>
@@ -474,16 +506,12 @@ var TOKEN = localStorage.getItem('bms_token');
 var USER = null;
 var CODIGO = localStorage.getItem('bms_codigo_ativo');
 var INT = null;
-
 var CRONOMETRO_CADASTRO = null;
 var ESCUTA_ATIVACAO = null;
-
 var TIMEOUT_ERRO_LOGIN = null;
 var TIMEOUT_ERRO_CADASTRO = null;
-
 var CADASTRO_ATIVO = false;
 var USAR_CONTROLE_CORTINA = false;
-
 var SCANNER_CAMERA_OBJ = null;
 var MQTT_CLIENT = null;             
 var bmsTimeoutTimer = null;         
@@ -496,11 +524,7 @@ var temaSalvo = localStorage.getItem('bms_theme') || 'light';
 document.documentElement.setAttribute('data-theme', temaSalvo);
 
 window.addEventListener('beforeunload', function(e) {
-  if (CADASTRO_ATIVO) {
-    e.preventDefault();
-    e.returnValue = 'Você está na tela de cadastro. Para sair com segurança, use o botão VOLTAR.';
-    return e.returnValue;
-  }
+  if (CADASTRO_ATIVO) { e.preventDefault(); e.returnValue = 'Ação travada'; return e.returnValue; }
 });
 
 function atualizarBotaoTema() {
@@ -529,26 +553,24 @@ window.onload = function(){
   atualizarBotaoTema();
   const urlParams = new URLSearchParams(window.location.search);
   const resetToken = urlParams.get('reset_token');
-
-  if (resetToken) {
-    esconderTudo();
-    document.getElementById('redefinir').classList.remove('hidden');
-    return;
-  }
+  if (resetToken) { esconderTudo(); document.getElementById('redefinir').classList.remove('hidden'); return; }
 
   if(TOKEN && USER){
     if(CODIGO){ abrirDash(CODIGO); } else { mostrarLista(); }
   }else{
-    esconderTudo();
-    document.getElementById('login').classList.remove('hidden');
+    esconderTudo(); document.getElementById('login').classList.remove('hidden');
   }
 
   var bmsInput = document.getElementById('bms-code');
-  if(bmsInput){
-    bmsInput.oninput = function(e){
-      formatarBmsTextInput(e.target);
-    };
-  }
+  if(bmsInput){ bmsInput.oninput = function(e){ formatarBmsTextInput(e.target); }; }
+
+  setInterval(function() {
+    if(TOKEN && USER && !document.getElementById('lista').classList.contains('hidden')) carregarListaSilenciosa();
+  }, 4000);
+
+  setInterval(function() {
+    if(TOKEN && USER && !document.getElementById('dash').classList.contains('hidden') && CODIGO) buscarDadosViaApiDeRetaguarda();
+  }, 3000);
 };
 
 function formatarBmsTextInput(inputElement) {
@@ -559,720 +581,277 @@ function formatarBmsTextInput(inputElement) {
 function abrirScannerCamera() {
   document.getElementById('modalScannerCamera').classList.add('active');
   SCANNER_CAMERA_OBJ = new Html5Qrcode("reader-camera");
-  const config = { fps: 15, qrbox: { width: 230, height: 230 } };
-  
-  SCANNER_CAMERA_OBJ.start(
-    { facingMode: "environment" }, 
-    config,
-    function(textResult) {
-      var bmsInput = document.getElementById('bms-code');
-      if(bmsInput) {
-        bmsInput.value = textResult.trim().toUpperCase();
-        formatarBmsTextInput(bmsInput);
-      }
-      fecharScannerCamera();
-    },
-    function(error) {}
-  ).catch(function(err) {
-    alert("Câmera bloqueada ou não encontrada. Verifique as permissions do seu navegador.");
+  SCANNER_CAMERA_OBJ.start({ facingMode: "environment" }, { fps: 15, qrbox: { width: 230, height: 230 } }, function(textResult) {
+    var bmsInput = document.getElementById('bms-code');
+    if(bmsInput) { bmsInput.value = textResult.trim().toUpperCase(); formatarBmsTextInput(bmsInput); }
     fecharScannerCamera();
-  });
+  }, function(error) {});
 }
 
 function fecharScannerCamera() {
   document.getElementById('modalScannerCamera').classList.remove('active');
-  if(SCANNER_CAMERA_OBJ) {
-    SCANNER_CAMERA_OBJ.stop().then(function() {
-      document.getElementById('reader-camera').innerHTML = "";
-    }).catch(function(e){});
-  }
+  if(SCANNER_CAMERA_OBJ) { SCANNER_CAMERA_OBJ.stop().then(function() { document.getElementById('reader-camera').innerHTML = ""; }); }
 }
 
-function mostrarLogin(){
-  CADASTRO_ATIVO = false;
-  limparControlesCadastro();
-  fecharMqttAnterior();
-  clearInterval(INT);
-  localStorage.removeItem('bms_codigo_ativo');
-  esconderTudo();
-  document.getElementById('login').classList.remove('hidden');
-}
-
-function mostrarCadastro(){
-  CADASTRO_ATIVO = true;
-  fecharMqttAnterior();
-  clearInterval(INT);
-  esconderTudo();
-  document.getElementById('cadastro').classList.remove('hidden');
-  restaurarBotaoCadastroOriginal();
-}
-
-function togglePass(inputId, iconEl) {
-  var input = document.getElementById(inputId);
-  if (!input) return;
-  if (input.type === "password") {
-    input.type = "text";
-    iconEl.style.opacity = ".8";
-  } else {
-    input.type = "password";
-    iconEl.style.opacity = ".3";
-  }
-}
-
-function mostrarPaginaConta() {
-  fecharMqttAnterior();
-  clearInterval(INT);
-  esconderTudo();
-  document.getElementById('configuracoesPage').classList.remove('hidden');
-  atualizarBotaoTema();
-}
-
+function mostrarLogin(){ CADASTRO_ATIVO = false; limparControlesCadastro(); fecharMqttAnterior(); clearInterval(INT); localStorage.removeItem('bms_codigo_ativo'); esconderTudo(); document.getElementById('login').classList.remove('hidden'); }
+function mostrarCadastro(){ CADASTRO_ATIVO = true; fecharMqttAnterior(); clearInterval(INT); esconderTudo(); document.getElementById('cadastro').classList.remove('hidden'); restaurarBotaoCadastroOriginal(); }
+function togglePass(id, iconEl) { var input = document.getElementById(id); input.type = (input.type === "password") ? "text" : "password"; iconEl.style.opacity = (input.type === "text") ? ".8" : ".3"; }
+function mostrarPaginaConta() { fecharMqttAnterior(); clearInterval(INT); esconderTudo(); document.getElementById('configuracoesPage').classList.remove('hidden'); atualizarBotaoTema(); }
 function voltarParaLista() { mostrarLista(); }
-
-function abrirModalSenha() {
-  document.getElementById('change-senha-atual').value = '';
-  document.getElementById('change-nova-senha').value = '';
-  document.getElementById('change-confirmar-senha').value = '';
-  document.getElementById('erro-change-senha').classList.add('hidden');
-  document.getElementById('modalSenha').classList.add('active');
-}
-
+function abrirModalSenha() { document.getElementById('change-senha-atual').value = ''; document.getElementById('change-nova-senha').value = ''; document.getElementById('change-confirmar-senha').value = ''; document.getElementById('erro-change-senha').classList.add('hidden'); document.getElementById('modalSenha').classList.add('active'); }
 function fecharModalSenha() { document.getElementById('modalSenha').classList.remove('active'); }
 
 async function salvarAlteracaoSenha() {
   const senhaAtual = document.getElementById('change-senha-atual').value;
   const novaSenha = document.getElementById('change-nova-senha').value;
   const confirmarSenha = document.getElementById('change-confirmar-senha').value;
-  const errBox = document.getElementById('erro-change-senha');
-  
-  errBox.classList.add('hidden');
-  if(!senhaAtual || !novaSenha || !confirmarSenha) {
-    errBox.textContent = 'Preencha todos os campos.';
-    errBox.classList.remove('hidden');
-    return;
-  }
-  if(novaSenha !== confirmarSenha) {
-    errBox.textContent = 'As novas senhas não coincidem!';
-    errBox.classList.remove('hidden');
-    return;
-  }
-
+  if(novaSenha !== confirmarSenha) return alert('Senhas não coincidem!');
   try {
-    const r = await fetch(API + '?action=user_change_password', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + TOKEN },
-      body: JSON.stringify({ senhaAtual, novaSenha })
-    });
-    if(r.status === 401) { sairSemConfirmacao(); return; }
+    const r = await fetch(API + '?action=user_change_password', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + TOKEN }, body: JSON.stringify({ senhaAtual, novaSenha }) });
     const d = await r.json();
-    if(d.ok) {
-      alert('Senha alterada com sucesso!');
-      fecharModalSenha();
-      voltarParaLista();
-    } else {
-      errBox.textContent = d.error || 'Erro ao alterar senha';
-      errBox.classList.remove('hidden');
-    }
-  } catch(err) {
-    errBox.textContent = 'Erro de rede: ' + err.message;
-    errBox.classList.remove('hidden');
-  }
+    if(d.ok) { alert('Senha atualizada!'); fecharModalSenha(); voltarParaLista(); }
+  } catch(err) {}
 }
 
 async function excluirMinhaConta() {
-  if(!confirm('ATENÇÃO: Deseja deletar sua conta permanentemente?')) return;
-  const confirmacao = prompt('Para confirmar, digite "CONCORDO":');
-  if(confirmacao !== "CONCORDO") return;
-
-  try {
-    const r = await fetch(API + '?action=user_delete_self', {
-      method: 'DELETE',
-      headers: { 'Authorization': 'Bearer ' + TOKEN }
-    });
-    if(r.ok) {
-      alert('Sua conta foi excluída com sucesso.');
-      sairSemConfirmacao();
-    }
-  } catch(err) { alert('Erro ao se comunicar com o servidor.'); }
+  if(!confirm('Excluir conta definitivamente?')) return;
+  if(prompt('Digite "CONCORDO":') !== "CONCORDO") return;
+  try { var r = await fetch(API + '?action=user_delete_self', { method: 'DELETE', headers: { 'Authorization': 'Bearer ' + TOKEN } }); if(r.ok) { alert('Conta removida.'); sairSemConfirmacao(); } } catch(err) {}
 }
 
 function login(){
-  var e = document.getElementById('erro');
-  if (e) e.classList.add('hidden');
-  clearTimeout(TIMEOUT_ERRO_LOGIN);
-  
+  var e = document.getElementById('erro'); if (e) e.classList.add('hidden');
   var email = document.getElementById('email').value.trim();
   var senha = document.getElementById('senha').value;
+  if(!email || !senha) return;
   
-  if(!email || !senha){
-    if (e) { 
-      e.textContent = 'Preencha e-mail e senha'; 
-      e.classList.remove('hidden'); 
-      TIMEOUT_ERRO_LOGIN = setTimeout(function() { e.classList.add('hidden'); }, 3000);
-    }
-    return;
-  }
-  
-  fetch(API + '?action=login', {
-    method:'POST',
-    headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({email:email, senha:senha})
-  })
-  .then(function(r){return r.json();})
-  .then(function(d){
+  fetch(API + '?action=login', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({email:email, senha:senha}) })
+  .then(r => r.json()).then(d => {
     if(d.ok && d.token){
-      TOKEN = d.token;
-      USER = d.user; 
-      localStorage.setItem('bms_token', TOKEN);
-      localStorage.setItem('bms_user', JSON.stringify(USER));
+      TOKEN = d.token; USER = d.user; 
+      localStorage.setItem('bms_token', TOKEN); localStorage.setItem('bms_user', JSON.stringify(USER));
       mostrarLista();
-    }else{
-      if (e) {
-        e.textContent = d.error || 'Erro ao realizar login';
-        e.classList.remove('hidden');
-        TIMEOUT_ERRO_LOGIN = setTimeout(function() { e.classList.add('hidden'); }, 3000);
-      }
-    }
-  })
-  .catch(function(err){
-    if (e) { 
-      e.textContent = 'Erro: ' + err.message; 
-      e.classList.remove('hidden'); 
-      TIMEOUT_ERRO_LOGIN = setTimeout(function() { e.classList.add('hidden'); }, 3000);
-    }
+    } else if (e) { e.textContent = d.error || 'Erro no login'; e.classList.remove('hidden'); }
   });
 }
 
 function recoverSenha() {
-  var emailAtual = document.getElementById('email').value.trim();
-  var email = prompt("Digite o seu e-mail cadastrado:", emailAtual);
-  if (email === null || !email.trim()) return;
-  
-  fetch(API + '?action=recover_user', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email: email.trim() })
-  })
-  .then(function(r) { return r.json(); })
-  .then(function(d) {
-    alert(d.ok ? "Link de recuperação enviado com sucesso." : "Erro: " + d.error);
-  });
+  var email = prompt("Digite o e-mail cadastrado:", document.getElementById('email').value.trim()); if (!email) return;
+  fetch(API + '?action=recover_user', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: email.trim() }) }).then(r => r.json()).then(d => alert(d.ok ? "Link enviado." : "Erro: " + d.error));
 }
 
 function salvarNovaSenha() {
-  const urlParams = new URLSearchParams(window.location.search);
-  const token = urlParams.get('reset_token');
+  const token = new URLSearchParams(window.location.search).get('reset_token');
   const novaSenha = document.getElementById('nova-senha').value;
-  const confirmarSenha = document.getElementById('nova-senha-confirmar').value;
-  const errBox = document.getElementById('erro-redefinir');
-
-  if (errBox) errBox.classList.add('hidden');
-  if (novaSenha !== confirmarSenha) {
-    if (errBox) { errBox.textContent = "As senhas não coincidem!"; errBox.classList.remove('hidden'); }
-    return;
-  }
-
-  fetch(API + '?action=reset_password', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ token: token, novaSenha: novaSenha })
-  })
-  .then(function(r) { return r.json(); })
-  .then(function(d) {
-    if (d.ok) {
-      alert("Senha alterada com sucesso!");
-      window.location.href = "/"; 
-    } else { if (errBox) { errBox.textContent = d.error; errBox.classList.remove('hidden'); } }
-  });
+  if (novaSenha !== document.getElementById('nova-senha-confirmar').value) return alert("Senhas não batem!");
+  fetch(API + '?action=reset_password', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ token: token, novaSenha: novaSenha }) }).then(r => r.json()).then(d => { if (d.ok) { alert("Senha salva!"); window.location.href = "/"; } });
 }
 
-// =========================================================================
-// CORREÇÃO CIRÚRGICA: LOGICA REESTRUTURADA PARA CRIAR DISPOSITIVO DEMO NO CADASTRO
-// =========================================================================
 function cadastrar(){
   var btn = document.getElementById('btn-cadastrar');
   var nome = document.getElementById('cad-nome').value.trim();
   var email = document.getElementById('cad-email').value.trim();
   var senha = document.getElementById('cad-senha').value;
-  var confirmarSenha = document.getElementById('cad-confirmar-senha').value;
   var e = document.getElementById('erro-cad');
-  
   if (e) e.classList.add('hidden');
-  clearTimeout(TIMEOUT_ERRO_CADASTRO);
-  
-  if(btn.getAttribute('data-action') === 'resend') {
-    reenviarEmailAtivacao(email);
-    return;
-  }
-  
-  if(!nome || !email || !senha || !confirmarSenha){
-    if (e) { e.textContent = 'Preencha todos os campos'; e.classList.remove('hidden'); }
-    return;
-  }
+  if(btn.getAttribute('data-action') === 'resend') { reenviarEmailAtivacao(email); return; }
+  if(!nome || !email || !senha) return alert('Preencha os campos!');
 
-  if (senha !== confirmarSenha) {
-    if (e) { e.textContent = 'As senhas não coincidem!'; e.classList.remove('hidden'); }
-    return;
-  }
-
-  // 1. Envia os dados para criar a conta no banco
-  fetch(API + '?action=register_user', {
-    method:'POST',
-    headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({nome:nome, email:email, senha:senha})
-  })
-  .then(function(r){return r.json();})
-  .then(function(d){
-    if(d.ok){
-      // 2. CONTA CRIADA COM SUCESSO! Inicia a injeção silenciosa da BMS de Demonstração
-      console.log("[MARKETING] Usuário criado. Autenticando para injetar a BMS simulada...");
-      
-      fetch(API + '?action=login', {
-        method:'POST',
-        headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({email:email, senha:senha})
-      })
-      .then(rAuth => rAuth.json())
-      .then(dAuth => {
-        if(dAuth.ok && dAuth.token) {
-          // 3. Vincula de forma oculta o código virtual SL000000000000 na conta recém-criada
-          fetch(API + '?action=add_bms', {
-            method:'POST',
-            headers:{'Content-Type':'application/json','Authorization':'Bearer ' + dAuth.token},
-            body:JSON.stringify({code: "SL000000000000", nome: "BMS Demonstração SL"})
-          })
-          .then(() => {
-            console.log("[MARKETING] Dispositivo de testes acoplado com sucesso!");
-            // 4. Libera o fluxo original do temporizador de confirmação por e-mail
-            iniciarCronometroEspera(email);
-          })
-          .catch(() => iniciarCronometroEspera(email));
-        } else { iniciarCronometroEspera(email); }
-      })
-      .catch(() => iniciarCronometroEspera(email));
-      
-    } else { 
-      if (e) { 
-        if(d.error === 'E-mail já cadastrado') {
-          e.innerHTML = 'E-mail já cadastrado. <br><button onclick="reenviarEmailAtivacao(\''+email+'\')" style="padding:10px 14px; font-size:12px; margin-top:8px; border-radius:10px; font-weight:700; color:#fff; cursor:pointer; border:none; background:linear-gradient(90deg,var(--orange),var(--red)); box-shadow:0 4px 12px rgba(255,159,28,0.2);">REENVIAR LINK DE ATIVAÇÃO</button>';
-          e.classList.remove('hidden');
-        } else if(d.error === 'E-mail já cadastrado and confirmed') {
-          alert('Este e-mail já está verificado e ativo no sistema!');
-          mostrarLogin();
-        } else {
-          e.textContent = d.error; e.classList.remove('hidden');
-        }
-      } 
-    }
-  })
-  .catch(function(err){
-    if (e) { e.textContent = 'Erro: ' + err.message; e.classList.remove('hidden'); }
+  fetch(API + '?action=register_user', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({nome:nome, email:email, senha:senha}) })
+  .then(r => r.json()).then(d => {
+    if(d.ok){ iniciarCronometroEspera(email); } 
+    else if (e) { e.textContent = d.error; e.classList.remove('hidden'); }
   });
 }  
 
 function iniciarCronometroEspera(email) {
-  var btn = document.getElementById('btn-cadastrar');
-  var e = document.getElementById('erro-cad');
-  var tempoRestante = 60;
-  
+  var btn = document.getElementById('btn-cadastrar'); var e = document.getElementById('erro-cad'); var tempoRestante = 60;
   limparControlesCadastro();
-  
-  e.textContent = 'Link de confirmação enviado! Ative sua conta no e-mail.';
-  e.style.color = 'var(--green)';
-  e.style.background = 'rgba(46,196,182,0.1)';
-  e.style.borderColor = 'var(--green)';
-  e.classList.remove('hidden');
-  
-  btn.disabled = true;
-  btn.style.background = 'var(--text-muted)';
-  btn.textContent = 'AGUARDANDO ATIVAÇÃO (' + tempoRestante + 's)';
+  e.textContent = 'Link enviado! Ative sua conta no seu e-mail.';
+  e.style.color = 'var(--green)'; e.style.background = 'rgba(46,196,182,0.1)'; e.style.borderColor = 'var(--green)'; e.classList.remove('hidden');
+  btn.disabled = true; btn.style.background = 'var(--text-muted)'; btn.textContent = 'AGUARDANDO ATIVAÇÃO (' + tempoRestante + 's)';
   
   CRONOMETRO_CADASTRO = setInterval(function() {
     tempoRestante--;
     if(tempoRestante <= 0) {
-      clearInterval(CRONOMETRO_CADASTRO);
-      btn.disabled = false;
-      btn.setAttribute('data-action', 'resend');
-      btn.style.background = 'linear-gradient(90deg, var(--orange), var(--red))';
-      btn.textContent = 'REENVIAR LINK DE ATIVAÇÃO';
-      e.classList.add('hidden');
-      restaurarEstilosErroOriginal();
-    } else {
-      btn.textContent = 'AGUARDANDO ATIVAÇÃO (' + tempoRestante + 's)';
-    }
+      clearInterval(CRONOMETRO_CADASTRO); btn.disabled = false; btn.setAttribute('data-action', 'resend');
+      btn.style.background = 'linear-gradient(90deg, var(--orange), var(--red))'; btn.textContent = 'REENVIAR LINK DE ATIVAÇÃO';
+      e.classList.add('hidden'); restaurarEstilosErroOriginal();
+    } else { btn.textContent = 'AGUARDANDO ATIVAÇÃO (' + tempoRestante + 's)'; }
   }, 1000);
   
   ESCUTA_ATIVACAO = setInterval(function() {
-    fetch(API + '?action=check_activation&email=' + encodeURIComponent(email))
-    .then(function(r) { return r.json(); })
-    .then(function(d) {
-      if(d.ok && d.activated) {
-        limparControlesCadastro();
-        alert('Sua conta foi ativada com sucesso! Faça seu login.');
-        mostrarLogin();
-      }
-    });
+    fetch(API + '?action=check_activation&email=' + encodeURIComponent(email)).then(r => r.json()).then(d => { if(d.ok && d.activated) { limparControlesCadastro(); alert('Ativada! Faça login.'); mostrarLogin(); } });
   }, 3000);
 }
 
 function reenviarEmailAtivacao(email) {
-  var e = document.getElementById('erro-cad');
-  if(!email) return alert('Insira o e-mail primeiro.');
-
-  fetch(API + '?action=resend_verification', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email: email })
-  })
-  .then(function(r) { return r.json(); })
-  .then(function(d) {
-    if (d.ok) {
-      alert('Novo link de ativação enviado! Verifique sua caixa de entrada.');
-      iniciarCronometroEspera(email);
-    } else {
-      alert('Erro: ' + d.error);
-    }
-  })
-  .catch(function(err) {
-    alert('Erro de conexão: ' + err.message);
-  });
+  fetch(API + '?action=resend_verification', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: email }) }).then(r => r.json()).then(d => { if (d.ok) { alert('Novo link enviado!'); iniciarCronometroEspera(email); } });
 }
 
-function limparControlesCadastro() {
-  clearInterval(CRONOMETRO_CADASTRO);
-  clearInterval(ESCUTA_ATIVACAO);
-}
-
-function restaurarEstilosErroOriginal() {
-  var e = document.getElementById('erro-cad');
-  if(e) { e.style.color = ''; e.style.background = ''; e.style.borderColor = ''; }
-}
-
-function restaurarBotaoCadastroOriginal() {
-  var btn = document.getElementById('btn-cadastrar');
-  var e = document.getElementById('erro-cad');
-  if(btn) {
-    btn.disabled = false;
-    btn.removeAttribute('data-action');
-    btn.style.background = 'linear-gradient(90deg,var(--blue),var(--cyan))';
-    btn.textContent = 'CADASTRAR';
-  }
-  if(e) { e.classList.add('hidden'); restaurarEstilosErroOriginal(); }
-}
-
-function toggleCortinaDispositivos() {
-  var cortina = document.getElementById('cortina-dispositivos');
-  var btn = document.getElementById('btn-toggle-cortina');
-  if (!cortina || !btn) return;
-  
-  if (cortina.classList.contains('aberta')) {
-    cortina.classList.remove('aberta');
-    btn.textContent = 'MOSTRAR DISPOSITIVOS';
-  } else {
-    cortina.classList.add('aberta');
-    btn.textContent = 'OCULTAR DISPOSITIVOS';
-  }
-}
-
-function fecharMqttAnterior() {
-  if (bmsTimeoutTimer) { clearTimeout(bmsTimeoutTimer); bmsTimeoutTimer = null; }
-  for (var k in listaTimeoutsDispositivos) { if (listaTimeoutsDispositivos[k]) clearTimeout(listaTimeoutsDispositivos[k]); }
-  listaTimeoutsDispositivos = {};
-  if (MQTT_CLIENT) { try { MQTT_CLIENT.disconnect(); } catch(e) {} MQTT_CLIENT = null; }
-}
+function limparControlesCadastro() { clearInterval(CRONOMETRO_CADASTRO); clearInterval(ESCUTA_ATIVACAO); }
+function restaurarEstilosErroOriginal() { var e = document.getElementById('erro-cad'); if(e) { e.style.color = ''; e.style.background = ''; e.style.borderColor = ''; } }
+if(btn) { btn.disabled = false; btn.removeAttribute('data-action'); btn.style.background = 'linear-gradient(90deg,var(--blue),var(--cyan))'; btn.textContent = 'CADASTRAR'; }
+function restaurarBotaoCadastroOriginal() { var btn = document.getElementById('btn-cadastrar'); var e = document.getElementById('erro-cad'); if(e) e.classList.add('hidden'); restaurarEstilosErroOriginal(); }
 
 function mostrarLista(){
-  fecharMqttAnterior();
-  clearInterval(INT);
-  localStorage.removeItem('bms_codigo_ativo');
-  esconderTudo();
-  document.getElementById('lista').classList.remove('hidden');
+  fecharMqttAnterior(); clearInterval(INT); localStorage.removeItem('bms_codigo_ativo');
+  esconderTudo(); document.getElementById('lista').classList.remove('hidden');
   document.getElementById('user-nome').textContent = USER ? USER.nome : 'Usuário';
-  
-  var cortina = document.getElementById('cortina-dispositivos');
-  var btn = document.getElementById('btn-toggle-cortina');
-  if(cortina) cortina.classList.add('aberta');
-  if(btn) btn.classList.add('hidden');
-  USAR_CONTROLE_CORTINA = false;
   carregarListaUmaVez();
 }
 
+// =========================================================================
+// CORREÇÃO ESTRUTURAL DEFINTIVA: SE A CONTA FOR VAZIA NO PRIMEIRO ACESSO,
+// INJETA A USINA DE TESTES SEM DEPENDER DO STATUS DO CADASTRO
+// =========================================================================
 function carregarListaUmaVez() {
-  fetch(API + '?action=user_bms', { headers: {'Authorization':'Bearer '+TOKEN} })
-  .then(function(r){
-    if(r && r.status === 401){ sairSemConfirmacao(); return null; }
-    return r ? r.json() : [];
-  })
-  .then(function(lista){
+  fetch(API + '?action=user_bms&_nocache=' + Date.now(), { headers: {'Authorization':'Bearer '+TOKEN} })
+  .then(r => r ? r.json() : []).then(lista => {
     if(!lista) return;
-    listaPlacasRegistradas = lista.map(function(item) { return item.code; });
 
-    var cortina = document.getElementById('cortina-dispositivos');
-    var btn = document.getElementById('btn-toggle-cortina');
-    
-    if (lista.length > 4) {
-      if (!USAR_CONTROLE_CORTINA) {
-        USAR_CONTROLE_CORTINA = true;
-        if(cortina) cortina.classList.remove('aberta');
-        if(btn) { btn.classList.remove('hidden'); btn.textContent = 'MOSTRAR DISPOSITIVOS'; }
-      }
-    } else {
-      USAR_CONTROLE_CORTINA = false;
-      if(cortina) cortina.classList.add('aberta');
-      if(btn) btn.classList.add('hidden');
-    }
-
-    var el = document.getElementById('bms-list');
-    if(!el) return;
-    if(!lista.length){
-      el.innerHTML = '<p style="text-align:center;color:var(--text-muted);padding:20px;font-size:14px">Nenhuma BMS monitorada</p>';
+    if(lista.length === 0) {
+      console.log("[MARKETING SYSTEM] Conta virgem detectada. Acoplando usina de demonstração...");
+      fetch(API + '?action=add_bms', {
+        method:'POST', headers:{'Content-Type':'application/json','Authorization':'Bearer '+TOKEN},
+        body:JSON.stringify({code: "SL000000000000", nome: "BMS Demonstração SL"})
+      })
+      .then(function() { carregarListaUmaVez(); }); 
       return;
     }
 
-    var html = '';
-    for(var i=0;i<lista.length;i++){
-      var b = lista[i];
-      html += '<div class="bms-item" id="card-lista-' + b.code + '" onclick="abrirDash(\''+b.code+'\')">';
-      html += '<h3>'+b.nome+'</h3>';
-      html += '<p>'+b.code+'</p>';
-      html += '<span class="status-dot off" id="dot-lista-' + b.code + '">Offline</span>';
-      html += '<button class="btn-item-del" onclick="event.stopPropagation();removerBms(\''+b.code+'\',\''+b.nome+'\')">Excluir Dispositivo</button>';
-      html += '</div>';
-    }
-    el.innerHTML = html;
+    listaPlacasRegistradas = lista.map(item => item.code);
+    renderizarEstruturaCards(lista);
     conectarMqttParaListaDispositivos();
   });
 }
 
-function conectarMqttParaListaDispositivos() {
-  const hostMqtt = "965bd6abd6f54692b84d710cab8327b4.s1.eu.hivemq.cloud"; 
-  const portaMqtt = 8884;                     
-  const userMqtt = "sl_bms_prod";             
-  const passMqtt = "SLtech2026@Bms";           
-  const clientRandomId = "sl_list_client_" + Math.floor(Math.random() * 10000);
+function carregarListaSilenciosa() {
+  fetch(API + '?action=user_bms&_nocache=' + Date.now(), { headers: {'Authorization':'Bearer '+TOKEN} })
+  .then(r => r && r.status === 200 ? r.json() : null).then(lista => {
+    if(!lista) return;
+    const novasPlacas = lista.map(item => item.code);
+    if(novasPlacas.length !== listaPlacasRegistradas.length) { listaPlacasRegistradas = novasPlacas; renderizarEstruturaCards(lista); }
+  });
+}
 
-  MQTT_CLIENT = new Paho.MQTT.Client(hostMqtt, Number(portaMqtt), clientRandomId);
+function renderizarEstruturaCards(lista) {
+  var el = document.getElementById('bms-list'); if(!el) return;
+  var html = '';
+  for(var i=0;i<lista.length;i++){
+    var b = lista[i];
+    var classeAtual = (listaTimeoutsDispositivos[b.code]) ? "bms-item online-active" : "bms-item";
+    var textoStatus = (listaTimeoutsDispositivos[b.code]) ? "Online" : "Offline";
+    var classeDot = (listaTimeoutsDispositivos[b.code]) ? "status-dot on" : "status-dot off";
+    html += '<div class="' + classeAtual + '" id="card-lista-' + b.code + '" onclick="abrirDash(\''+b.code+'\')"><h3>'+b.nome+'</h3><p>'+b.code+'</p><span class="' + classeDot + '" id="dot-lista-' + b.code + '">' + textoStatus + '</span><button class="btn-item-del" onclick="event.stopPropagation();removerBms(\''+b.code+'\',\''+b.nome+'\')">Excluir Dispositivo</button></div>';
+  }
+  el.innerHTML = html;
+}
+
+function conectarMqttParaListaDispositivos() {
+  if (document.getElementById('lista').classList.contains('hidden')) return;
+  MQTT_CLIENT = new Paho.MQTT.Client("965bd6abd6f54692b84d710cab8327b4.s1.eu.hivemq.cloud", 8884, "sl_l_cl_" + Math.floor(Math.random() * 10000));
   MQTT_CLIENT.onMessageArrived = function (message) {
     try {
-      const topicoLido = message.destinationName; 
-      const partesTopico = topicoLido.split('/');
-      const idPlacaEmissora = partesTopico[1]; 
-
+      const idPlacaEmissora = message.destinationName.split('/')[1];
       if (listaPlacasRegistradas.indexOf(idPlacaEmissora) !== -1) {
-        var cardElemento = document.getElementById('card-lista-' + idPlacaEmissora);
-        var dotElemento = document.getElementById('dot-lista-' + idPlacaEmissora);
-
-        if (cardElemento && dotElemento) {
-          cardElemento.className = "bms-item online-active";
-          dotElemento.className = "status-dot on";
-          dotElemento.textContent = "Online";
-
+        var card = document.getElementById('card-lista-' + idPlacaEmissora); var dot = document.getElementById('dot-lista-' + idPlacaEmissora);
+        if (card && dot) {
+          card.className = "bms-item online-active"; dot.className = "status-dot on"; dot.textContent = "Online";
           if (listaTimeoutsDispositivos[idPlacaEmissora]) clearTimeout(listaTimeoutsDispositivos[idPlacaEmissora]);
-          listaTimeoutsDispositivos[idPlacaEmissora] = setTimeout(function() {
-            cardElemento.className = "bms-item";
-            dotElemento.className = "status-dot off";
-            dotElemento.textContent = "Offline";
-          }, 5000); 
+          listaTimeoutsDispositivos[idPlacaEmissora] = setTimeout(function() { card.className = "bms-item"; dot.className = "status-dot off"; dot.textContent = "Offline"; delete listaTimeoutsDispositivos[idPlacaEmissora]; }, 5000);
         }
       }
     } catch (err) {}
   };
+  MQTT_CLIENT.connect({ userName: "sl_bms_prod", password: "SLtech2026@Bms", useSSL: true, timeout: 3, onSuccess: function () { if(!document.getElementById('lista').classList.contains('hidden')) MQTT_CLIENT.subscribe("sl_bms/+/telemetria"); } });
+}
 
-  MQTT_CLIENT.connect({
-    userName: userMqtt, password: passMqtt, useSSL: true, timeout: 3,
-    onSuccess: function () { MQTT_CLIENT.subscribe("sl_bms/+/telemetria"); }
-  });
+function buscarDadosViaApiDeRetaguarda() {
+  if (!CODIGO || document.getElementById('dash').classList.contains('hidden')) return;
+  fetch(API + '?action=data&code=' + CODIGO + '&_t=' + Date.now(), { headers: {'Authorization':'Bearer '+TOKEN} }).then(r => r && r.status === 200 ? r.json() : null).then(d => { if (d && !document.getElementById('dash').classList.contains('hidden')) processarERenderizarDadosMqtt(d); });
 }
 
 function abrirDash(code){
-  clearInterval(INT);
-  fecharMqttAnterior();
-  
-  CODIGO = code;
-  localStorage.setItem('bms_codigo_ativo', code);
-  esconderTudo();
-  document.getElementById('dash').classList.remove('hidden');
-  document.getElementById('bms-titulo').textContent = code;
+  fecharMqttAnterior(); clearInterval(INT); CODIGO = code; localStorage.setItem('bms_codigo_ativo', code);
+  esconderTudo(); document.getElementById('dash').classList.remove('hidden'); document.getElementById('bms-titulo').textContent = code;
   configurarInterfaceEstadoOffline();
+  fetch(API + '?action=data&code=' + CODIGO + '&_t=' + Date.now(), { headers: {'Authorization':'Bearer '+TOKEN} }).then(r => r && r.status === 200 ? r.json() : null).then(d => { if(d && !document.getElementById('dash').classList.contains('hidden')) processarERenderizarDadosMqtt(d); });
 
-  const hostMqtt = "965bd6abd6f54692b84d710cab8327b4.s1.eu.hivemq.cloud"; 
-  const portaMqtt = 8884;                     
-  const userMqtt = "sl_bms_prod";             
-  const passMqtt = "SLtech2026@Bms";           
-  const clientRandomId = "sl_web_client_" + Math.floor(Math.random() * 10000);
-
-  MQTT_CLIENT = new Paho.MQTT.Client(hostMqtt, Number(portaMqtt), clientRandomId);
-  MQTT_CLIENT.onConnectionLost = function () { configuringInterfaceEstadoOffline(); };
-  MQTT_CLIENT.onMessageArrived = function (message) {
-    try {
-      const d = JSON.parse(message.payloadString);
-      processarERenderizarDadosMqtt(d);
-    } catch (err) {}
-  };
-
-  MQTT_CLIENT.connect({
-    userName: userMqtt, password: passMqtt, useSSL: true, timeout: 3,
-    onSuccess: function () { MQTT_CLIENT.subscribe("sl_bms/" + CODIGO + "/telemetria"); },
-    onFailure: function () { configurarInterfaceEstadoOffline(); }
-  });
+  MQTT_CLIENT = new Paho.MQTT.Client("965bd6abd6f54692b84d710cab8327b4.s1.eu.hivemq.cloud", 8884, "sl_w_cl_" + Math.floor(Math.random() * 10000));
+  MQTT_CLIENT.onMessageArrived = function (message) { try { if (!document.getElementById('dash').classList.contains('hidden')) processarERenderizarDadosMqtt(JSON.parse(message.payloadString)); } catch (err) {} };
+  MQTT_CLIENT.connect({ userName: "sl_bms_prod", password: "SLtech2026@Bms", useSSL: true, timeout: 3, onSuccess: function () { if (!document.getElementById('dash').classList.contains('hidden')) MQTT_CLIENT.subscribe("sl_bms/" + CODIGO + "/telemetria"); } });
 }
 
+function configuringInterfaceEstadoOffline() { configurarInterfaceEstadoOffline(); }
 function configurarInterfaceEstadoOffline() {
-  var cardInv = document.getElementById('cardInversor');
-  var txtInv = document.getElementById('txtInversor');
-  var cardBms = document.getElementById('cardBms');
-  var txtBms = document.getElementById('txtBms');
-  var cardBat = document.getElementById('cardBateria');
-  var txtBat = document.getElementById('txtBateria');
-
-  gerenciarLayoutStatus(cardBms, txtBms, false, "Online", "Offline");
-  gerenciarLayoutStatus(cardInv, txtInv, false, "Conectado", "Desconectado");
-  gerenciarLayoutStatus(cardBat, txtBat, false, "Conectada", "Desconectada");
-
-  document.getElementById('invPotencia').textContent = '0W';
-  document.getElementById('invTensaoAC').textContent = '0.0V';
-  document.getElementById('invFrequencia').textContent = '0.0Hz';
-  document.getElementById('invGeracaoDia').textContent = '0.0kWh';
-  document.getElementById('soc').textContent = '0%';
-  document.getElementById('volt').textContent = '0.00V';
-  document.getElementById('corr').textContent = '0.0A';
-  document.getElementById('temp').textContent = '0.0°C';
-  atualizarGauge(0); 
-  renderCelulas([]);
+  var cardInv = document.getElementById('cardInversor'); var txtInv = document.getElementById('txtInversor');
+  var cardBms = document.getElementById('cardBms'); var txtBms = document.getElementById('txtBms');
+  var cardBat = document.getElementById('cardBateria'); var txtBat = document.getElementById('txtBateria');
+  gerenciarLayoutStatus(cardBms, txtBms, false, "Online", "Offline"); gerenciarLayoutStatus(cardInv, txtInv, false, "Conectado", "Desconectado"); gerenciarLayoutStatus(cardBat, txtBat, false, "Conectada", "Desconectada");
+  document.getElementById('invPotencia').textContent = '0W'; document.getElementById('invTensaoAC').textContent = '0.0V'; document.getElementById('invFrequencia').textContent = '0.0Hz'; document.getElementById('invGeracaoDia').textContent = '0.0kWh';
+  document.getElementById('soc').textContent = '0%'; document.getElementById('volt').textContent = '0.00V'; document.getElementById('corr').textContent = '0.0A'; document.getElementById('temp').textContent = '0.0°C';
+  atualizarGauge(0); renderCelulas([]);
 }
 
 function processarERenderizarDadosMqtt(d) {
   if (bmsTimeoutTimer) clearTimeout(bmsTimeoutTimer);
-  bmsTimeoutTimer = setTimeout(function() { configurarInterfaceEstadoOffline(); }, 5000); 
+  bmsTimeoutTimer = setTimeout(function() { if (!document.getElementById('dash').classList.contains('hidden')) configurarInterfaceEstadoOffline(); }, 6000); 
+  var cardInv = document.getElementById('cardInversor'); var txtInv = document.getElementById('txtInversor');
+  var cardBms = document.getElementById('cardBms'); var txtBms = document.getElementById('txtBms');
+  var cardBat = document.getElementById('cardBateria'); var txtBat = document.getElementById('txtBateria');
 
-  var cardInv = document.getElementById('cardInversor');
-  var txtInv = document.getElementById('txtInversor');
-  var cardBms = document.getElementById('cardBms');
-  var txtBms = document.getElementById('txtBms');
-  var cardBat = document.getElementById('cardBateria');
-  var txtBat = document.getElementById('txtBateria');
-
-  gerenciarLayoutStatus(cardBms, txtBms, true, "Online", "Offline");
-  var invAtivo = (d.inversor_conectado !== undefined) ? d.inversor_conectado : true;
+  var bmsOnline = (d.online === true || d.online === 1 || d.online === "1" || d.online === "true");
+  gerenciarLayoutStatus(cardBms, txtBms, bmsOnline, "Online", "Offline");
+  var invAtivo = (d.inversor_conectado === true || d.inversor_conectado === 1 || d.inversor_conectado === "1" || d.inversor_conectado === "true");
   gerenciarLayoutStatus(cardInv, txtInv, invAtivo, "Conectado", "Desconectado");
-  var batAtiva = (d.bateria_conectada !== undefined) ? d.bateria_conectada : true;
+  var batAtiva = (d.bateria_conectada === true || d.bateria_conectada === 1 || d.bateria_conectada === "1" || d.bateria_conectada === "true");
   gerenciarLayoutStatus(cardBat, txtBat, batAtiva, "Conectada", "Desconectada");
 
-  if(!invAtivo) {
-    document.getElementById('invPotencia').textContent = '0W';
-    document.getElementById('invTensaoAC').textContent = '0.0V';
-    document.getElementById('invFrequencia').textContent = '0.0Hz';
-    document.getElementById('invGeracaoDia').textContent = '0.0kWh';
-  } else {
-    document.getElementById('invPotencia').textContent = (d.inv_potencia !== undefined ? d.inv_potencia.toFixed(0) : '0') + 'W';
-    document.getElementById('invTensaoAC').textContent = (d.inv_tensao_ac !== undefined ? d.inv_tensao_ac.toFixed(1) : '0.0') + 'V';
-    document.getElementById('invFrequencia').textContent = (d.inv_frequencia !== undefined ? d.inv_frequencia.toFixed(1) : '0.0') + 'Hz';
-    document.getElementById('invGeracaoDia').textContent = (d.inv_geracao_dia !== undefined ? d.inv_geracao_dia.toFixed(1) : '0.0') + 'kWh';
+  if(!invAtivo) { document.getElementById('invPotencia').textContent = '0W'; document.getElementById('invTensaoAC').textContent = '0.0V'; document.getElementById('invFrequencia').textContent = '0.0Hz'; document.getElementById('invGeracaoDia').textContent = '0.0kWh'; } 
+  else {
+    var pActive = parseFloat(d.inv_potencia || 0); var vAC = parseFloat(d.inv_tensao_ac || 0); var fAC = parseFloat(d.inv_frequencia || 0); var gDia = parseFloat(d.inv_geracao_dia || 0);
+    document.getElementById('invPotencia').textContent = pActive.toFixed(0) + 'W'; document.getElementById('invTensaoAC').textContent = vAC.toFixed(1) + 'V'; document.getElementById('invFrequencia').textContent = fAC.toFixed(1) + 'Hz'; document.getElementById('invGeracaoDia').textContent = gDia.toFixed(1) + 'kWh';
   }
 
-  if(!batAtiva) {
-    document.getElementById('soc').textContent = '0%';
-    document.getElementById('volt').textContent = '0.00V';
-    document.getElementById('corr').textContent = '0.0A';
-    document.getElementById('temp').textContent = '0.0°C';
-    atualizarGauge(0);
-    renderCelulas([]);
-  } else {
-    document.getElementById('soc').textContent = d.soc.toFixed(0)+'%';
-    document.getElementById('volt').textContent = d.voltage.toFixed(2)+'V';
-    document.getElementById('corr').textContent = d.current.toFixed(1)+'A';
-    document.getElementById('temp').textContent = d.temp.toFixed(1)+'°C';
-    renderCelulas(d.cells); 
-    atualizarGauge(parseInt(d.soc || 0));
+  if(!batAtiva) { document.getElementById('soc').textContent = '0%'; document.getElementById('volt').textContent = '0.00V'; document.getElementById('corr').textContent = '0.0A'; document.getElementById('temp').textContent = '0.0°C'; atualizarGauge(0); renderCelulas([]); } 
+  else {
+    var sB = parseFloat(d.soc || 0); var vB = parseFloat(d.voltage || 0); var cB = parseFloat(d.current || 0); var tB = parseFloat(d.temp || 0);
+    document.getElementById('soc').textContent = sB.toFixed(0)+'%'; document.getElementById('volt').textContent = vB.toFixed(2)+'V'; document.getElementById('corr').textContent = cB.toFixed(1)+'A'; document.getElementById('temp').textContent = tB.toFixed(1)+'°C';
+    var arrayCelulas = []; if (d.cells) { if (typeof d.cells === 'string') { try { arrayCelulas = JSON.parse(d.cells); } catch(e) {} } else { arrayCelulas = d.cells; } }
+    renderCelulas(arrayCelulas); atualizarGauge(parseInt(sB));
   }
 }
 
-function voltar(){ fecharMqttAnterior(); clearInterval(INT); localStorage.removeItem('bms_codigo_ativo'); mostrarLista(); }
-function carregarLista(){}
-function removerBms(code, nome){
-  if(!confirm(`Remover o dispositivo "${nome || code}"?`)) return;
-  fetch(API+`?action=remove_bms&code=${code}`,{ method:'DELETE', headers:{'Authorization':'Bearer '+TOKEN} }).then(function() { carregarListaUmaVez(); }); 
-}
-
+function removerBms(code, nome){ if(!confirm(`Remover o dispositivo "${nome || code}"?`)) return; fetch(API+`?action=remove_bms&code=${code}`,{ method:'DELETE', headers:{'Authorization':'Bearer '+TOKEN} }).then(function() { carregarListaUmaVez(); }); }
 function addBms(){
-  var code = document.getElementById('bms-code').value.trim();
-  var nome = document.getElementById('bms-nome').value.trim();
-  if(code.length !== 14) return alert('Código inválido.');
-
-  fetch(API + '?action=add_bms', {
-    method:'POST', headers:{'Content-Type':'application/json','Authorization':'Bearer '+TOKEN},
-    body:JSON.stringify({code:code,nome:nome || code})
-  })
-  .then(function(r){ return r.json(); })
-  .then(function(d){
-    if(d.ok){
-      document.getElementById('bms-code').value = ''; document.getElementById('bms-nome').value = '';
-      var cortina = document.getElementById('cortina-dispositivos');
-      var btn = document.getElementById('btn-toggle-cortina');
-      if(cortina) cortina.classList.add('aberta');
-      if(btn) btn.textContent = 'OCULTAR DISPOSITIVOS';
-      carregarListaUmaVez(); 
-    } else { alert('Erro: ' + d.error); }
-  });
+  var code = document.getElementById('bms-code').value.trim(); var nome = document.getElementById('bms-nome').value.trim(); if(code.length !== 14) return alert('Código inválido.');
+  fetch(API + '?action=add_bms', { method:'POST', headers:{'Content-Type':'application/json','Authorization':'Bearer '+TOKEN}, body:JSON.stringify({code:code,nome:nome || code}) }).then(r => r.json()).then(d => { if(d.ok){ document.getElementById('bms-code').value = ''; document.getElementById('bms-nome').value = ''; carregarListaUmaVez(); } else { alert('Erro: ' + d.error); } });
 }
 
 function renderCelulas(cels){
-  var container = document.getElementById('celulas');
-  if(!container) return;
-  if(!cels || cels.length === 0){
-    container.innerHTML = '<div style="grid-column:1/-1;text-align:center;opacity:.3;padding:10px;font-size:13px">Sem dados</div>';
-    document.getElementById('celMin').textContent = '0.00V';
-    document.getElementById('celMax').textContent = '0.00V';
-    document.getElementById('celDif').textContent = '0.00V';
-    document.getElementById('celTot').textContent = '0';
-    return;
-  }
-  var vals = [];
-  for(var i=0;i<cels.length;i++){ var v = parseFloat(cels[i]); if(v > 0) vals.push(v); }
-  
-  var min = vals.length > 0 ? Math.min.apply(null, vals) : 0;
-  var max = vals.length > 0 ? Math.max.apply(null, vals) : 0;
-  var dif = max - min;
-  
-  document.getElementById('celMin').textContent = min.toFixed(2)+'V';
-  document.getElementById('celMax').textContent = max.toFixed(2)+'V';
-  document.getElementById('celDif').textContent = dif.toFixed(2)+'V';
-  document.getElementById('celTot').textContent = cels.length;
-  
+  var container = document.getElementById('celulas'); if(!container) return;
+  if(!cels || cels.length === 0){ container.innerHTML = '<div style="grid-column:1/-1;text-align:center;opacity:.3;padding:10px;font-size:13px">Sem dados</div>'; document.getElementById('celMin').textContent = '0.00V'; document.getElementById('celMax').textContent = '0.00V'; document.getElementById('celDif').textContent = '0.00V'; document.getElementById('celTot').textContent = '0'; return; }
+  var vals = []; for(var i=0;i<cels.length;i++){ var v = parseFloat(cels[i]); if(v > 0) vals.push(v); }
+  var min = vals.length > 0 ? Math.min.apply(null, vals) : 0; var max = vals.length > 0 ? Math.max.apply(null, vals) : 0; var dif = max - min;
+  document.getElementById('celMin').textContent = min.toFixed(2)+'V'; document.getElementById('celMax').textContent = max.toFixed(2)+'V'; document.getElementById('celDif').textContent = dif.toFixed(2)+'V'; document.getElementById('celTot').textContent = cels.length;
   if (container.children.length !== cels.length || container.querySelector('div[style*="grid-column"]')) {
-    var html = '';
-    for(var i=0; i<cels.length; i++){ html += '<div class="cell" id="c-box-'+i+'"><div class="cell-num">C'+(i+1)+'</div><div class="cell-val" id="c-val-'+i+'">0.00V</div></div>'; }
-    container.innerHTML = html;
+    var html = ''; for(var i=0; i<cels.length; i++){ html += '<div class="cell" id="c-box-'+i+'"><div class="cell-num">C'+(i+1)+'</div><div class="cell-val" id="c-val-'+i+'">0.00V</div></div>'; } container.innerHTML = html;
   }
-  
   for(var i=0; i<cels.length; i++){
-    var val = parseFloat(cels[i]);
-    var valStr = val.toFixed(2)+'V';
-    var cls = (val < 3.2 || val > 4.2) ? 'crit' : (val < 3.4 || val > 4.15) ? 'warn' : 'ok';
-    var novaClasse = 'cell ' + cls;
-    var cellBox = document.getElementById('c-box-'+i);
-    var cellVal = document.getElementById('c-val-'+i);
-    if (cellVal && cellVal.textContent !== valStr) cellVal.textContent = valStr;
-    if (cellBox && cellBox.className !== novaClasse) cellBox.className = novaClasse;
+    var val = parseFloat(cels[i]); var valStr = val.toFixed(2)+'V'; var cls = (val < 3.2 || val > 4.2) ? 'crit' : (val < 3.4 || val > 4.15) ? 'warn' : 'ok'; var novaClasse = 'cell ' + cls; var cellBox = document.getElementById('c-box-'+i); var cellVal = document.getElementById('c-val-'+i);
+    if (cellVal && cellVal.textContent !== valStr) cellVal.textContent = valStr; if (cellBox && cellBox.className !== novaClasse) cellBox.className = novaClasse;
   }
 }
 
 function atualizarGauge(soc){
-  var gauge = document.getElementById('socGauge');
-  var valor = document.getElementById('socValor');
-  var bar = document.getElementById('socBar');
-  if(!gauge || !valor || !bar) return;
-  valor.textContent = soc + '%';
-  document.getElementById('socBarTxt').textContent = soc + '%';
-  bar.style.width = soc + '%';
-  gauge.style.background = 'conic-gradient(var(--green) 0deg,var(--cyan) '+(soc * 3.6)+'deg,var(--gauge-empty) '+(soc * 3.6)+'deg)';
+  var gauge = document.getElementById('socGauge'); var valor = document.getElementById('socValor'); var bar = document.getElementById('socBar'); if(!gauge || !valor || !bar) return;
+  valor.textContent = soc + '%'; document.getElementById('socBarTxt').textContent = soc + '%'; bar.style.width = soc + '%'; gauge.style.background = 'conic-gradient(var(--green) 0deg,var(--cyan) '+(soc * 3.6)+'deg,var(--gauge-empty) '+(soc * 3.6)+'deg)';
 }
 
 function gerenciarLayoutStatus(elementoCard, elementoTxt, ativo, textoAtivo, textoInativo) {
-  var novaClasse = ativo ? "card triple-active" : "card triple-inactive";
-  var novoTexto = ativo ? textoAtivo : textoInativo;
-  if (elementoCard.className !== novaClasse) elementoCard.className = novaClasse;
-  if (elementoTxt.textContent !== novoTexto) elementoTxt.textContent = novoTexto;
+  var novaClasse = ativo ? "card triple-active" : "card triple-inactive"; var novoTexto = ativo ? textoAtivo : textoInativo;
+  if (elementoCard.className !== novaClasse) elementoCard.className = novaClasse; if (elementoTxt.textContent !== novoTexto) elementoTxt.textContent = novoTexto;
 }
 
 function sair(){ if(confirm('Deseja realmente sair?')) sairSemConfirmacao(); }
