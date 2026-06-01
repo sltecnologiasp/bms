@@ -1649,5 +1649,35 @@ function sairSemConfirmacao(){
   location.reload(); 
 }
 </script>
+  <script>
+// Adicionado: Reconexão automática MQTT
+document.addEventListener("visibilitychange", function() {
+  if (document.visibilityState === "visible") {
+    console.log("Página visível novamente - tentando reconectar MQTT");
+    if (typeof client !== "undefined" && client && !client.isConnected()) {
+      try {
+        client.connect({onSuccess: () => console.log("MQTT reconectado"), useSSL: true});
+      } catch(e) { console.log("Erro ao reconectar:", e); }
+    }
+    if (typeof conectarMQTT === "function") { conectarMQTT(); }
+    if (typeof iniciarMQTT === "function") { iniciarMQTT(); }
+  }
+});
+
+if (typeof client !== "undefined") {
+  client.onConnectionLost = function(responseObject) {
+    console.log("Conexão MQTT perdida:", responseObject.errorMessage);
+    let retryInterval = setInterval(function() {
+      if (client.isConnected()) {
+        clearInterval(retryInterval);
+        console.log("MQTT reconectado com sucesso");
+      } else {
+        console.log("Tentando reconectar MQTT...");
+        try { client.connect({onSuccess: () => clearInterval(retryInterval), useSSL: true}); } catch(e){}
+      }
+    }, 5000);
+  };
+}
+  </script>
 </body>
 </html>
