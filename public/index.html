@@ -1649,62 +1649,54 @@ function sairSemConfirmacao(){
   location.reload(); 
 }
 </script>
-  <script>
-// Reconexão automática MQTT - versão corrigida pro SMART BMS
-document.addEventListener("visibilitychange", function() {
-  if (document.visibilityState === "visible") {
-    console.log("[RECONNECT] Página visível - verificando MQTT");
-    if (typeof MQTT_CLIENT !== "undefined" && !MQTT_CLIENT.isConnected()) {
-      console.log("[RECONNECT] Reconectando MQTT...");
-      MQTT_CLIENT.connect({
-        userName: "sl_bms_prod",
-        password: "SLtech2026@Bms",
-        useSSL: true,
-        timeout: 3,
-        onSuccess: function () {
-          console.log("[RECONNECT] MQTT reconectado!");
-          // Re-inscreve nos tópicos
-          if (typeof CODIGO !== "undefined" && CODIGO) {
-            MQTT_CLIENT.subscribe("sl_bms/" + CODIGO + "/telemetria");
-          } else {
-            MQTT_CLIENT.subscribe("sl_bms/+/telemetria");
-          }
-        }
-      });
-    }
-  }
-});
+<script>
+// Plano B: Recarrega a página quando voltar pra aba
+let saiuDaAba = false;
+let timestampSaida = 0;
 
-// Sobrescreve o onConnectionLost pra reconectar sozinho
-if (typeof MQTT_CLIENT !== "undefined") {
-  MQTT_CLIENT.onConnectionLost = function(responseObject) {
-    console.log("[MQTT] Conexão perdida:", responseObject.errorMessage);
-    configurarInterfaceEstadoOffline(); // mantém o status offline
+document.addEventListener("visibilitychange", function() {
+  if (document.visibilityState === "hidden") {
+    saiuDaAba = true;
+    timestampSaida = Date.now();
+    console.log("[BMS] Aba em segundo plano");
+  }
+  
+  if (document.visibilityState === "visible" && saiuDaAba) {
+    let tempoFora = Date.now() - timestampSaida;
+    console.log("[BMS] Voltou pra aba após " + Math.round(tempoFora/1000) + "s");
     
-    // Tenta reconectar a cada 5 segundos
-    let retryInterval = setInterval(function() {
-      if (MQTT_CLIENT.isConnected()) {
-        clearInterval(retryInterval);
-        console.log("[RECONNECT] MQTT voltou!");
-      } else {
-        console.log("[RECONNECT] Tentando reconectar...");
+    // Se ficou mais de 30s fora, recarrega pra garantir reconexão
+    if (tempoFora > 30000) {
+      console.log("[BMS] Recarregando pra reconectar MQTT...");
+      location.reload();
+    } else {
+      // Se foi rápido, só tenta reconectar
+      if (typeof MQTT_CLIENT !== "undefined" && !MQTT_CLIENT.isConnected()) {
         MQTT_CLIENT.connect({
           userName: "sl_bms_prod",
           password: "SLtech2026@Bms",
           useSSL: true,
           timeout: 3,
           onSuccess: function () {
-            clearInterval(retryInterval);
             if (typeof CODIGO !== "undefined" && CODIGO) {
               MQTT_CLIENT.subscribe("sl_bms/" + CODIGO + "/telemetria");
             }
-            console.log("[RECONNECT] Reconectado com sucesso!");
           }
         });
       }
-    }, 5000);
-  };
-}
-  </script>
+    }
+    saiuDaAba = false;
+  }
+});
+
+// Keep-alive: ping a cada 20s pra Android não matar a conexão
+setInterval(function() {
+  if (typeof MQTT_CLIENT !== "undefined" && MQTT_CLIENT.isConnected()) {
+    try {
+      MQTT_CLIENT.send("sl_bms/ping", "keepalive", 0, false);
+    } catch(e) {}
+  }
+}, 20000);
+</script>
 </body>
 </html>
