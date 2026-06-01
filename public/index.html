@@ -1650,30 +1650,57 @@ function sairSemConfirmacao(){
 }
 </script>
   <script>
-// Adicionado: Reconexão automática MQTT
+// Reconexão automática MQTT - versão corrigida pro SMART BMS
 document.addEventListener("visibilitychange", function() {
   if (document.visibilityState === "visible") {
-    console.log("Página visível novamente - tentando reconectar MQTT");
-    if (typeof client !== "undefined" && client && !client.isConnected()) {
-      try {
-        client.connect({onSuccess: () => console.log("MQTT reconectado"), useSSL: true});
-      } catch(e) { console.log("Erro ao reconectar:", e); }
+    console.log("[RECONNECT] Página visível - verificando MQTT");
+    if (typeof MQTT_CLIENT !== "undefined" && !MQTT_CLIENT.isConnected()) {
+      console.log("[RECONNECT] Reconectando MQTT...");
+      MQTT_CLIENT.connect({
+        userName: "sl_bms_prod",
+        password: "SLtech2026@Bms",
+        useSSL: true,
+        timeout: 3,
+        onSuccess: function () {
+          console.log("[RECONNECT] MQTT reconectado!");
+          // Re-inscreve nos tópicos
+          if (typeof CODIGO !== "undefined" && CODIGO) {
+            MQTT_CLIENT.subscribe("sl_bms/" + CODIGO + "/telemetria");
+          } else {
+            MQTT_CLIENT.subscribe("sl_bms/+/telemetria");
+          }
+        }
+      });
     }
-    if (typeof conectarMQTT === "function") { conectarMQTT(); }
-    if (typeof iniciarMQTT === "function") { iniciarMQTT(); }
   }
 });
 
-if (typeof client !== "undefined") {
-  client.onConnectionLost = function(responseObject) {
-    console.log("Conexão MQTT perdida:", responseObject.errorMessage);
+// Sobrescreve o onConnectionLost pra reconectar sozinho
+if (typeof MQTT_CLIENT !== "undefined") {
+  MQTT_CLIENT.onConnectionLost = function(responseObject) {
+    console.log("[MQTT] Conexão perdida:", responseObject.errorMessage);
+    configurarInterfaceEstadoOffline(); // mantém o status offline
+    
+    // Tenta reconectar a cada 5 segundos
     let retryInterval = setInterval(function() {
-      if (client.isConnected()) {
+      if (MQTT_CLIENT.isConnected()) {
         clearInterval(retryInterval);
-        console.log("MQTT reconectado com sucesso");
+        console.log("[RECONNECT] MQTT voltou!");
       } else {
-        console.log("Tentando reconectar MQTT...");
-        try { client.connect({onSuccess: () => clearInterval(retryInterval), useSSL: true}); } catch(e){}
+        console.log("[RECONNECT] Tentando reconectar...");
+        MQTT_CLIENT.connect({
+          userName: "sl_bms_prod",
+          password: "SLtech2026@Bms",
+          useSSL: true,
+          timeout: 3,
+          onSuccess: function () {
+            clearInterval(retryInterval);
+            if (typeof CODIGO !== "undefined" && CODIGO) {
+              MQTT_CLIENT.subscribe("sl_bms/" + CODIGO + "/telemetria");
+            }
+            console.log("[RECONNECT] Reconectado com sucesso!");
+          }
+        });
       }
     }, 5000);
   };
