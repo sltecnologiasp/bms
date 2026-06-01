@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Admin BMS</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2=family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
 <style>
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 :root{
@@ -769,34 +769,47 @@ async function enviarFirmwareOta() {
   formData.append('code', activeBmsCode);
 
   try {
-    // PROTEÇÃO MULTIPART: Deixa o browser gerar o boundary e o cabeçalho apropriados automaticamente
     const r = await fetch(API + '?action=admin_upload_ota', {
       method: 'POST',
-      headers: {
-        'Authorization': 'Bearer ' + adminToken
-      },
+      headers: { 'Authorization': 'Bearer ' + adminToken },
       body: formData
     });
 
     const d = await r.json();
 
     if (d && d.ok && d.url) {
-      statusMsg.textContent = 'Upload concluído! Disparando gatilho de instalação via HiveMQ...';
+      statusMsg.textContent = 'Upload concluído! Conectando canal expresso via HiveMQ...';
       statusMsg.style.color = 'var(--cyan)';
 
-      if (MQTT_CLIENT && MQTT_CLIENT.isConnected()) {
-        const payloadOtaMqtt = JSON.stringify({ url: d.url });
-        const mensagemMqtt = new Paho.MQTT.Message(payloadOtaMqtt);
-        mensagemMqtt.destinationName = "sl_bms/" + activeBmsCode + "/ota";
-        MQTT_CLIENT.send(mensagemMqtt);
-        
-        statusMsg.textContent = 'Sucesso! Comando de atualização enviado em tempo real via MQTT.';
-        statusMsg.style.color = 'var(--green)';
-        fileInput.value = '';
-      } else {
-        statusMsg.textContent = 'Upload OK, mas o canal MQTT estava desconectado. O chip lerá no próximo ciclo.';
-        statusMsg.style.color = 'var(--orange)';
-      }
+      // MOTOR DE DISPARO EXPRESSO (Corrige o bug de falso-desconectado do canal MQTT geral)
+      const hostMqtt = "965bd6abd6f54692b84d710cab8327b4.s1.eu.hivemq.cloud"; 
+      const portaMqtt = 8884;                     
+      const userMqtt = "sl_bms_prod";             
+      const passMqtt = "SLtech2026@Bms";           
+      const otaClientId = "sl_admin_ota_trigger_" + Math.floor(Math.random() * 1000);
+
+      const otaClient = new Paho.MQTT.Client(hostMqtt, Number(portaMqtt), otaClientId);
+      
+      otaClient.connect({
+        userName: userMqtt, password: passMqtt, useSSL: true, timeout: 5,
+        onSuccess: function () {
+          const payloadOtaMqtt = JSON.stringify({ url: d.url });
+          const mensagemMqtt = new Paho.MQTT.Message(payloadOtaMqtt);
+          mensagemMqtt.destinationName = "sl_bms/" + activeBmsCode + "/ota";
+          otaClient.send(mensagemMqtt);
+          
+          statusMsg.textContent = 'Sucesso! Comando de atualização enviado em tempo real via MQTT.';
+          statusMsg.style.color = 'var(--green)';
+          fileInput.value = '';
+          
+          setTimeout(() => { try { otaClient.disconnect(); } catch(e){} }, 500);
+        },
+        onFailure: function () {
+          statusMsg.textContent = 'Upload OK, mas falha ao injetar comando no HiveMQ. O chip lerá no próximo ciclo.';
+          statusMsg.style.color = 'var(--orange)';
+        }
+      });
+
     } else {
       statusMsg.textContent = 'Falha: ' + (d.message || d.error || 'Erro desconhecido no servidor.');
       statusMsg.style.color = 'var(--red)';
@@ -934,7 +947,7 @@ function conectarMqttParaDashboardAdmin() {
 
   MQTT_CLIENT = new Paho.MQTT.Client(hostMqtt, Number(portaMqtt), clientRandomId);
 
-  MQTT_CLIENT.onConnectionLost = function () { configuringInterfaceDashboardOfflineAdmin(); };
+  MQTT_CLIENT.onConnectionLost = function () { configurarInterfaceDashboardOfflineAdmin(); };
   MQTT_CLIENT.onMessageArrived = function (message) {
     try {
       const d = JSON.parse(message.payloadString);
@@ -947,11 +960,9 @@ function conectarMqttParaDashboardAdmin() {
     onSuccess: function () {
       MQTT_CLIENT.subscribe("sl_bms/" + activeBmsCode + "/telemetria");
     },
-    onFailure: function () { configuringInterfaceDashboardOfflineAdmin(); }
+    onFailure: function () { configurarInterfaceDashboardOfflineAdmin(); }
   });
 }
-
-function configuringInterfaceDashboardOfflineAdmin() { configuringInterfaceDashboardOfflineAdmin(); }
 
 function configurarInterfaceDashboardOfflineAdmin() {
   const cardInv = document.getElementById('cardInversor');
