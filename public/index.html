@@ -439,7 +439,6 @@ button:active{transform:scale(0.98)}
 .link-esqueceu{display:block;text-align:right;font-size:12px;color:var(--text-muted);margin-top:8px;cursor:pointer;text-decoration:none;transition:color 0.2s}
 .link-esqueceu:hover{color:var(--blue)}
 
-/* CORREÇÃO GLOBAL: EXPANSÃO DE MARGIN-TOP PARA REPOSICIONAR O RODAPÉ NA BASE */
 .footer-link{font-size:11px;margin-top:120px;text-align:center;letter-spacing:1px;line-height:1.6;padding-bottom:24px}
 .footer-link a{color:var(--blue);text-decoration:none;font-weight:600;transition:opacity 0.2s;}
 .footer-link a:hover{opacity:0.8;text-decoration:underline;}
@@ -838,6 +837,13 @@ window.onload = function(){
       formatarBmsTextInput(e.target);
     };
   }
+
+  // POLLING GLOBAL DE FUNDO: Mantém o estado da aplicação alinhado com o banco a cada 4 segundos
+  setInterval(function() {
+    if(TOKEN && USER && !document.getElementById('lista').classList.contains('hidden')) {
+      carregarListaSilenciosa();
+    }
+  }, 4000);
 };
 
 function formatarBmsTextInput(inputElement) {
@@ -1291,6 +1297,24 @@ function mostrarLista(){
   carregarListaUmaVez();
 }
 
+// ATUALIZAÇÃO SILENCIOSA: Recarrega as informações do banco D1 em background sem piscar a tela
+function carregarListaSilenciosa() {
+  fetch(API + '?action=user_bms', { headers: {'Authorization':'Bearer '+TOKEN} })
+  .then(function(r){ return r && r.status === 200 ? r.json() : null; })
+  .then(function(lista){
+    if(!lista) return;
+    
+    // Atualiza a lista global de placas caso uma nova tenha sido adicionada em outro dispositivo
+    const novasPlacas = lista.map(function(item) { return item.code; });
+    
+    // Se o número de dispositivos mudou, reconstrói os cards para manter o sincronismo
+    if(novasPlacas.length !== listaPlacasRegistradas.length) {
+      listaPlacasRegistradas = novasPlacas;
+      renderizarEstruturaCards(lista);
+    }
+  });
+}
+
 function carregarListaUmaVez() {
   fetch(API + '?action=user_bms', { headers: {'Authorization':'Bearer '+TOKEN} })
   .then(function(r){
@@ -1299,48 +1323,55 @@ function carregarListaUmaVez() {
   })
   .then(function(lista){
     if(!lista) return;
-    
     listaPlacasRegistradas = lista.map(function(item) { return item.code; });
-
-    var cortina = document.getElementById('cortina-dispositivos');
-    var btn = document.getElementById('btn-toggle-cortina');
-    
-    if (lista.length > 4) {
-      if (!USAR_CONTROLE_CORTINA) {
-        USAR_CONTROLE_CORTINA = true;
-        if(cortina) cortina.classList.remove('aberta');
-        if(btn) {
-          btn.classList.remove('hidden');
-          btn.textContent = 'MOSTRAR DISPOSITIVOS';
-        }
-      }
-    } else {
-      USAR_CONTROLE_CORTINA = false;
-      if(cortina) cortina.classList.add('aberta');
-      if(btn) btn.classList.add('hidden');
-    }
-
-    var el = document.getElementById('bms-list');
-    if(!el) return;
-    if(!lista.length){
-      el.innerHTML = '<p style="text-align:center;color:var(--text-muted);padding:20px;font-size:14px">Nenhuma BMS monitorada</p>';
-      return;
-    }
-
-    var html = '';
-    for(var i=0;i<lista.length;i++){
-      var b = lista[i];
-      html += '<div class="bms-item" id="card-lista-' + b.code + '" onclick="abrirDash(\''+b.code+'\')">';
-      html += '<h3>'+b.nome+'</h3>';
-      html += '<p>'+b.code+'</p>';
-      html += '<span class="status-dot off" id="dot-lista-' + b.code + '">Offline</span>';
-      html += '<button class="btn-item-del" onclick="event.stopPropagation();removerBms(\''+b.code+'\',\''+b.nome+'\')">Excluir Dispositivo</button>';
-      html += '</div>';
-    }
-    el.innerHTML = html;
-
+    renderizarEstruturaCards(lista);
     conectarMqttParaListaDispositivos();
   });
+}
+
+// Isolado em uma função para poder ser chamado dinamicamente pelo Polling ou carregamento inicial
+function renderizarEstruturaCards(lista) {
+  var cortina = document.getElementById('cortina-dispositivos');
+  var btn = document.getElementById('btn-toggle-cortina');
+  
+  if (lista.length > 4) {
+    if (!USAR_CONTROLE_CORTINA) {
+      USAR_CONTROLE_CORTINA = true;
+      if(cortina) cortina.classList.remove('aberta');
+      if(btn) {
+        btn.classList.remove('hidden');
+        btn.textContent = 'MOSTRAR DISPOSITIVOS';
+      }
+    }
+  } else {
+    USAR_CONTROLE_CORTINA = false;
+    if(cortina) cortina.classList.add('aberta');
+    if(btn) btn.classList.add('hidden');
+  }
+
+  var el = document.getElementById('bms-list');
+  if(!el) return;
+  if(!lista.length){
+    el.innerHTML = '<p style="text-align:center;color:var(--text-muted);padding:20px;font-size:14px">Nenhuma BMS monitorada</p>';
+    return;
+  }
+
+  var html = '';
+  for(var i=0;i<lista.length;i++){
+    var b = lista[i];
+    // Preserva o estado visual atual do card durante a renderização estrutural de fundo
+    var classeAtual = (listaTimeoutsDispositivos[b.code]) ? "bms-item online-active" : "bms-item";
+    var textoStatus = (listaTimeoutsDispositivos[b.code]) ? "Online" : "Offline";
+    var classeDot = (listaTimeoutsDispositivos[b.code]) ? "status-dot on" : "status-dot off";
+
+    html += '<div class="' + classeAtual + '" id="card-lista-' + b.code + '" onclick="abrirDash(\''+b.code+'\')">';
+    html += '<h3>'+b.nome+'</h3>';
+    html += '<p>'+b.code+'</p>';
+    html += '<span class="' + classeDot + '" id="dot-lista-' + b.code + '">' + textoStatus + '</span>';
+    html += '<button class="btn-item-del" onclick="event.stopPropagation();removerBms(\''+b.code+'\',\''+b.nome+'\')">Excluir Dispositivo</button>';
+    html += '</div>';
+  }
+  el.innerHTML = html;
 }
 
 function conectarMqttParaListaDispositivos() {
@@ -1352,7 +1383,13 @@ function conectarMqttParaListaDispositivos() {
 
   MQTT_CLIENT = new Paho.MQTT.Client(hostMqtt, Number(portaMqtt), clientRandomId);
 
-  MQTT_CLIENT.onConnectionLost = function () { console.log("[MQTT LISTA] Conexão suspensa."); };
+  // LOOP DE RECONEXÃO AUTOMÁTICA: Garante que a lista nunca pare de escutar por queda de rede do celular
+  MQTT_CLIENT.onConnectionLost = function () { 
+    console.log("[MQTT LISTA] Conexão suspensa. Tentando reconectar..."); 
+    if(!document.getElementById('lista').classList.contains('hidden')) {
+      setTimeout(conectarMqttParaListaDispositivos, 3000);
+    }
+  };
 
   MQTT_CLIENT.onMessageArrived = function (message) {
     try {
@@ -1374,6 +1411,7 @@ function conectarMqttParaListaDispositivos() {
             cardElemento.className = "bms-item";
             dotElemento.className = "status-dot off";
             dotElemento.textContent = "Offline";
+            delete listaTimeoutsDispositivos[idPlacaEmissora]; // Remove a flag de atividade
           }, 5000); 
         }
       }
