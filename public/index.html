@@ -838,12 +838,19 @@ window.onload = function(){
     };
   }
 
-  // POLLING GLOBAL DE FUNDO: Mantém o estado da aplicação alinhado com o banco a cada 4 segundos
+  // Polling de Retaguarda da Lista Principal (A cada 4 segundos)
   setInterval(function() {
     if(TOKEN && USER && !document.getElementById('lista').classList.contains('hidden')) {
       carregarListaSilenciosa();
     }
   }, 4000);
+
+  // Polling de Retaguarda do Dashboard Interno (A cada 3 segundos - Mata a necessidade de F5)
+  setInterval(function() {
+    if(TOKEN && USER && !document.getElementById('dash').classList.contains('hidden') && CODIGO) {
+      buscarDadosViaApiDeRetaguarda();
+    }
+  }, 3000);
 };
 
 function formatarBmsTextInput(inputElement) {
@@ -1283,6 +1290,7 @@ function mostrarLista(){
   fecharMqttAnterior();
   clearInterval(INT);
   localStorage.removeItem('bms_codigo_ativo');
+  CODIGO = null; // Zera a seleção ativa ao voltar
   esconderTudo();
   document.getElementById('lista').classList.remove('hidden');
   document.getElementById('user-nome').textContent = USER ? USER.nome : 'Usuário';
@@ -1297,17 +1305,12 @@ function mostrarLista(){
   carregarListaUmaVez();
 }
 
-// ATUALIZAÇÃO SILENCIOSA: Recarrega as informações do banco D1 em background sem piscar a tela
 function carregarListaSilenciosa() {
   fetch(API + '?action=user_bms', { headers: {'Authorization':'Bearer '+TOKEN} })
   .then(function(r){ return r && r.status === 200 ? r.json() : null; })
   .then(function(lista){
     if(!lista) return;
-    
-    // Atualiza a lista global de placas caso uma nova tenha sido adicionada em outro dispositivo
     const novasPlacas = lista.map(function(item) { return item.code; });
-    
-    // Se o número de dispositivos mudou, reconstrói os cards para manter o sincronismo
     if(novasPlacas.length !== listaPlacasRegistradas.length) {
       listaPlacasRegistradas = novasPlacas;
       renderizarEstruturaCards(lista);
@@ -1329,7 +1332,6 @@ function carregarListaUmaVez() {
   });
 }
 
-// Isolado em uma função para poder ser chamado dinamicamente pelo Polling ou carregamento inicial
 function renderizarEstruturaCards(lista) {
   var cortina = document.getElementById('cortina-dispositivos');
   var btn = document.getElementById('btn-toggle-cortina');
@@ -1359,7 +1361,6 @@ function renderizarEstruturaCards(lista) {
   var html = '';
   for(var i=0;i<lista.length;i++){
     var b = lista[i];
-    // Preserva o estado visual atual do card durante a renderização estrutural de fundo
     var classeAtual = (listaTimeoutsDispositivos[b.code]) ? "bms-item online-active" : "bms-item";
     var textoStatus = (listaTimeoutsDispositivos[b.code]) ? "Online" : "Offline";
     var classeDot = (listaTimeoutsDispositivos[b.code]) ? "status-dot on" : "status-dot off";
@@ -1383,9 +1384,7 @@ function conectarMqttParaListaDispositivos() {
 
   MQTT_CLIENT = new Paho.MQTT.Client(hostMqtt, Number(portaMqtt), clientRandomId);
 
-  // LOOP DE RECONEXÃO AUTOMÁTICA: Garante que a lista nunca pare de escutar por queda de rede do celular
   MQTT_CLIENT.onConnectionLost = function () { 
-    console.log("[MQTT LISTA] Conexão suspensa. Tentando reconectar..."); 
     if(!document.getElementById('lista').classList.contains('hidden')) {
       setTimeout(conectarMqttParaListaDispositivos, 3000);
     }
@@ -1411,7 +1410,7 @@ function conectarMqttParaListaDispositivos() {
             cardElemento.className = "bms-item";
             dotElemento.className = "status-dot off";
             dotElemento.textContent = "Offline";
-            delete listaTimeoutsDispositivos[idPlacaEmissora]; // Remove a flag de atividade
+            delete listaTimeoutsDispositivos[idPlacaEmissora];
           }, 5000); 
         }
       }
@@ -1421,10 +1420,24 @@ function conectarMqttParaListaDispositivos() {
   MQTT_CLIENT.connect({
     userName: userMqtt, password: passMqtt, useSSL: true, timeout: 3,
     onSuccess: function () {
-      console.log("[MQTT LISTA] Ouvindo atividade na nuvem...");
       MQTT_CLIENT.subscribe("sl_bms/+/telemetria");
     }
   });
+}
+
+// MOTOR DE BACKUP: Alimenta a interface caso os WebSockets caiam no celular
+function buscarDadosViaApiDeRetaguarda() {
+  if (!CODIGO || document.getElementById('dash').classList.contains('hidden')) return;
+
+  fetch(API + '?action=data&code=' + CODIGO, { headers: {'Authorization':'Bearer '+TOKEN} })
+  .then(function(r) { return r && r.status === 200 ? r.json() : null; })
+  .then(function(d) {
+    if (d && d.online) {
+      // Repassa para a mesma função de renderização que o MQTT usa
+      processarERenderizarDadosMqtt(d);
+    }
+  })
+  .catch(function(e){});
 }
 
 function abrirDash(code){
@@ -1439,18 +1452,22 @@ function abrirDash(code){
   
   configurarInterfaceEstadoOffline();
 
+  // Executa uma busca imediata via API para a tela não iniciar zerada em 0%
+  fetch(API + '?action=data&code=' + CODIGO, { headers: {'Authorization':'Bearer '+TOKEN} })
+  .then(function(r){ return r.json(); })
+  .then(function(d){ if(d) processarERenderizarDadosMqtt(d); });
+
   const hostMqtt = "965bd6abd6f54692b84d710cab8327b4.s1.eu.hivemq.cloud"; 
   const portaMqtt = 8884;                     
   const userMqtt = "sl_bms_prod";             
   const passMqtt = "SLtech2026@Bms";           
-  
   const clientRandomId = "sl_web_client_" + Math.floor(Math.random() * 10000);
 
   MQTT_CLIENT = new Paho.MQTT.Client(hostMqtt, Number(portaMqtt), clientRandomId);
 
   MQTT_CLIENT.onConnectionLost = function (responseObject) {
     console.log("[MQTT] Conexão finalizada ou perdida.");
-    configurarInterfaceEstadoOffline();
+    // Deixa a cargo do Polling de retaguarda atualizar enquanto tenta reconectar
   };
 
   MQTT_CLIENT.onMessageArrived = function (message) {
@@ -1473,7 +1490,6 @@ function abrirDash(code){
     },
     onFailure: function (err) {
       console.error("[MQTT] Falha na autenticação:", err);
-      configurarInterfaceEstadoOffline();
     }
   });
 }
@@ -1508,7 +1524,7 @@ function processarERenderizarDadosMqtt(d) {
   bmsTimeoutTimer = setTimeout(function() {
     console.log("[SISTEMA] Fluxo interrompido por mais de 5s. Forçando queda do painel.");
     configurarInterfaceEstadoOffline(); 
-  }, 5000); 
+  }, 6000); 
 
   var cardInv = document.getElementById('cardInversor');
   var txtInv = document.getElementById('txtInversor');
@@ -1517,12 +1533,14 @@ function processarERenderizarDadosMqtt(d) {
   var cardBat = document.getElementById('cardBateria');
   var txtBat = document.getElementById('txtBateria');
 
-  gerenciarLayoutStatus(cardBms, txtBms, true, "Online", "Offline");
+  // Trata tanto o booleano real quanto o formato de texto vindo do banco SQLite
+  var bmsOnline = (d.online === true || d.online === 1 || d.online === "1");
+  gerenciarLayoutStatus(cardBms, txtBms, bmsOnline, "Online", "Offline");
   
-  var invAtivo = (d.inversor_conectado !== undefined) ? d.inversor_conectado : true;
+  var invAtivo = (d.inversor_conectado === true || d.inversor_conectado === 1 || d.inversor_conectado === "1" || d.inversor_conectado === "true");
   gerenciarLayoutStatus(cardInv, txtInv, invAtivo, "Conectado", "Desconectado");
 
-  var batAtiva = (d.bateria_conectada !== undefined) ? d.bateria_conectada : true;
+  var batAtiva = (d.bateria_conectada === true || d.bateria_conectada === 1 || d.bateria_conectada === "1" || d.bateria_conectada === "true");
   gerenciarLayoutStatus(cardBat, txtBat, batAtiva, "Conectada", "Desconectada");
 
   if(!invAtivo) {
@@ -1531,10 +1549,15 @@ function processarERenderizarDadosMqtt(d) {
     document.getElementById('invFrequencia').textContent = '0.0Hz';
     document.getElementById('invGeracaoDia').textContent = '0.0kWh';
   } else {
-    document.getElementById('invPotencia').textContent = (d.inv_potencia !== undefined ? d.inv_potencia.toFixed(0) : '0') + 'W';
-    document.getElementById('invTensaoAC').textContent = (d.inv_tensao_ac !== undefined ? d.inv_tensao_ac.toFixed(1) : '0.0') + 'V';
-    document.getElementById('invFrequencia').textContent = (d.inv_frequencia !== undefined ? d.inv_frequencia.toFixed(1) : '0.0') + 'Hz';
-    document.getElementById('invGeracaoDia').textContent = (d.inv_geracao_dia !== undefined ? d.inv_geracao_dia.toFixed(1) : '0.0') + 'kWh';
+    var pActive = parseFloat(d.inv_potencia || 0);
+    var vAC = parseFloat(d.inv_tensao_ac || 0);
+    var fAC = parseFloat(d.inv_frequencia || 0);
+    var gDia = parseFloat(d.inv_geracao_dia || 0);
+
+    document.getElementById('invPotencia').textContent = pActive.toFixed(0) + 'W';
+    document.getElementById('invTensaoAC').textContent = vAC.toFixed(1) + 'V';
+    document.getElementById('invFrequencia').textContent = fAC.toFixed(1) + 'Hz';
+    document.getElementById('invGeracaoDia').textContent = gDia.toFixed(1) + 'kWh';
   }
 
   if(!batAtiva) {
@@ -1545,12 +1568,26 @@ function processarERenderizarDadosMqtt(d) {
     atualizarGauge(0);
     renderCelulas([]);
   } else {
-    document.getElementById('soc').textContent = d.soc.toFixed(0)+'%';
-    document.getElementById('volt').textContent = d.voltage.toFixed(2)+'V';
-    document.getElementById('corr').textContent = d.current.toFixed(1)+'A';
-    document.getElementById('temp').textContent = d.temp.toFixed(1)+'°C';
-    renderCelulas(d.cells); 
-    atualizarGauge(parseInt(d.soc || 0));
+    var sB = parseFloat(d.soc || 0);
+    var vB = parseFloat(d.voltage || 0);
+    var cB = parseFloat(d.current || 0);
+    var tB = parseFloat(d.temp || 0);
+
+    document.getElementById('soc').textContent = sB.toFixed(0)+'%';
+    document.getElementById('volt').textContent = vB.toFixed(2)+'V';
+    document.getElementById('corr').textContent = cB.toFixed(1)+'A';
+    document.getElementById('temp').textContent = tB.toFixed(1)+'°C';
+    
+    // Tratamento dinâmico para o Array de Células vindo como String JSON ou Objeto puro
+    var arrayCelulas = [];
+    if (d.cells) {
+      if (typeof d.cells === 'string') {
+        try { arrayCelulas = JSON.parse(d.cells); } catch(e) {}
+      } else { arrayCelulas = d.cells; }
+    }
+
+    renderCelulas(arrayCelulas); 
+    atualizarGauge(parseInt(sB));
   }
 }
 
