@@ -838,14 +838,14 @@ window.onload = function(){
     };
   }
 
-  // Polling de Retaguarda da Lista Principal (A cada 4 segundos)
+  // Polling de fundo da Lista Principal (A cada 4 segundos)
   setInterval(function() {
     if(TOKEN && USER && !document.getElementById('lista').classList.contains('hidden')) {
       carregarListaSilenciosa();
     }
   }, 4000);
 
-  // Polling de Retaguarda do Dashboard Interno (A cada 3 segundos - Mata a necessidade de F5)
+  // MOTOR DE RETAGUARDA INTERNO (Mata a necessidade de F5 no painel interno)
   setInterval(function() {
     if(TOKEN && USER && !document.getElementById('dash').classList.contains('hidden') && CODIGO) {
       buscarDadosViaApiDeRetaguarda();
@@ -995,7 +995,7 @@ async function excluirMinhaConta() {
       alert('Sua conta foi excluída com sucesso.');
       sairSemConfirmacao();
     }
-  } catch(err) { alert('Erro ao se comunicar com o servidor.'); }
+  } catch(err) { alert('Erro ao se communicate com o servidor.'); }
 }
 
 function login(){
@@ -1290,7 +1290,7 @@ function mostrarLista(){
   fecharMqttAnterior();
   clearInterval(INT);
   localStorage.removeItem('bms_codigo_ativo');
-  CODIGO = null; // Zera a seleção ativa ao voltar
+  CODIGO = null; 
   esconderTudo();
   document.getElementById('lista').classList.remove('hidden');
   document.getElementById('user-nome').textContent = USER ? USER.nome : 'Usuário';
@@ -1306,7 +1306,8 @@ function mostrarLista(){
 }
 
 function carregarListaSilenciosa() {
-  fetch(API + '?action=user_bms', { headers: {'Authorization':'Bearer '+TOKEN} })
+  // Anti-Cache embutido via timestamp de milissegundos na URL
+  fetch(API + '?action=user_bms&_nocache=' + Date.now(), { headers: {'Authorization':'Bearer '+TOKEN} })
   .then(function(r){ return r && r.status === 200 ? r.json() : null; })
   .then(function(lista){
     if(!lista) return;
@@ -1319,7 +1320,7 @@ function carregarListaSilenciosa() {
 }
 
 function carregarListaUmaVez() {
-  fetch(API + '?action=user_bms', { headers: {'Authorization':'Bearer '+TOKEN} })
+  fetch(API + '?action=user_bms&_nocache=' + Date.now(), { headers: {'Authorization':'Bearer '+TOKEN} })
   .then(function(r){
     if(r && r.status === 401){ sairSemConfirmacao(); return null; }
     return r ? r.json() : [];
@@ -1376,6 +1377,8 @@ function renderizarEstruturaCards(lista) {
 }
 
 function conectarMqttParaListaDispositivos() {
+  if (document.getElementById('lista').classList.contains('hidden')) return;
+
   const hostMqtt = "965bd6abd6f54692b84d710cab8327b4.s1.eu.hivemq.cloud"; 
   const portaMqtt = 8884;                     
   const userMqtt = "sl_bms_prod";             
@@ -1420,20 +1423,21 @@ function conectarMqttParaListaDispositivos() {
   MQTT_CLIENT.connect({
     userName: userMqtt, password: passMqtt, useSSL: true, timeout: 3,
     onSuccess: function () {
-      MQTT_CLIENT.subscribe("sl_bms/+/telemetria");
+      if(!document.getElementById('lista').classList.contains('hidden')) {
+        MQTT_CLIENT.subscribe("sl_bms/+/telemetria");
+      }
     }
   });
 }
 
-// MOTOR DE BACKUP: Alimenta a interface caso os WebSockets caiam no celular
+// BUSCA ATIVA DE BACKUP (Resolve o problema do congelamento do F5 de forma imediata)
 function buscarDadosViaApiDeRetaguarda() {
   if (!CODIGO || document.getElementById('dash').classList.contains('hidden')) return;
 
-  fetch(API + '?action=data&code=' + CODIGO, { headers: {'Authorization':'Bearer '+TOKEN} })
+  fetch(API + '?action=data&code=' + CODIGO + '&_t=' + Date.now(), { headers: {'Authorization':'Bearer '+TOKEN} })
   .then(function(r) { return r && r.status === 200 ? r.json() : null; })
   .then(function(d) {
-    if (d && d.online) {
-      // Repassa para a mesma função de renderização que o MQTT usa
+    if (d && !document.getElementById('dash').classList.contains('hidden')) {
       processarERenderizarDadosMqtt(d);
     }
   })
@@ -1441,8 +1445,9 @@ function buscarDadosViaApiDeRetaguarda() {
 }
 
 function abrirDash(code){
-  clearInterval(INT);
+  // CORREÇÃO CRÍTICA: Desconecta o barramento MQTT anterior antes de iniciar o novo painel
   fecharMqttAnterior();
+  clearInterval(INT);
   
   CODIGO = code;
   localStorage.setItem('bms_codigo_ativo', code);
@@ -1452,10 +1457,14 @@ function abrirDash(code){
   
   configurarInterfaceEstadoOffline();
 
-  // Executa uma busca imediata via API para a tela não iniciar zerada em 0%
-  fetch(API + '?action=data&code=' + CODIGO, { headers: {'Authorization':'Bearer '+TOKEN} })
-  .then(function(r){ return r.json(); })
-  .then(function(d){ if(d) processarERenderizarDadosMqtt(d); });
+  // Força uma requisição REST limpa de inicialização instantânea para matar os 0% em tela
+  fetch(API + '?action=data&code=' + CODIGO + '&_t=' + Date.now(), { headers: {'Authorization':'Bearer '+TOKEN} })
+  .then(function(r){ return r && r.status === 200 ? r.json() : null; })
+  .then(function(d){ 
+    if(d && !document.getElementById('dash').classList.contains('hidden')) {
+      processarERenderizarDadosMqtt(d);
+    } 
+  });
 
   const hostMqtt = "965bd6abd6f54692b84d710cab8327b4.s1.eu.hivemq.cloud"; 
   const portaMqtt = 8884;                     
@@ -1466,14 +1475,15 @@ function abrirDash(code){
   MQTT_CLIENT = new Paho.MQTT.Client(hostMqtt, Number(portaMqtt), clientRandomId);
 
   MQTT_CLIENT.onConnectionLost = function (responseObject) {
-    console.log("[MQTT] Conexão finalizada ou perdida.");
-    // Deixa a cargo do Polling de retaguarda atualizar enquanto tenta reconectar
+    console.log("[MQTT] Conexão terminada. Retaguarda assumindo...");
   };
 
   MQTT_CLIENT.onMessageArrived = function (message) {
     try {
-      const d = JSON.parse(message.payloadString);
-      processarERenderizarDadosMqtt(d);
+      if (!document.getElementById('dash').classList.contains('hidden')) {
+        const d = JSON.parse(message.payloadString);
+        processarERenderizarDadosMqtt(d);
+      }
     } catch (err) {
       console.error("[MQTT] Erro de processamento do payload:", err);
     }
@@ -1485,11 +1495,13 @@ function abrirDash(code){
     useSSL: true, 
     timeout: 3,
     onSuccess: function () {
-      console.log("[MQTT] Conectado com sucesso. Ouvindo dispositivo: " + CODIGO);
-      MQTT_CLIENT.subscribe("sl_bms/" + CODIGO + "/telemetria");
+      if (!document.getElementById('dash').classList.contains('hidden')) {
+        console.log("[MQTT] Canal em tempo real estabelecido para: " + CODIGO);
+        MQTT_CLIENT.subscribe("sl_bms/" + CODIGO + "/telemetria");
+      }
     },
     onFailure: function (err) {
-      console.error("[MQTT] Falha na autenticação:", err);
+      console.error("[MQTT] Erro na autenticação segura do barramento:", err);
     }
   });
 }
@@ -1522,8 +1534,9 @@ function configurarInterfaceEstadoOffline() {
 function processarERenderizarDadosMqtt(d) {
   if (bmsTimeoutTimer) clearTimeout(bmsTimeoutTimer);
   bmsTimeoutTimer = setTimeout(function() {
-    console.log("[SISTEMA] Fluxo interrompido por mais de 5s. Forçando queda do painel.");
-    configurarInterfaceEstadoOffline(); 
+    if (!document.getElementById('dash').classList.contains('hidden')) {
+      configurarInterfaceEstadoOffline(); 
+    }
   }, 6000); 
 
   var cardInv = document.getElementById('cardInversor');
@@ -1533,8 +1546,7 @@ function processarERenderizarDadosMqtt(d) {
   var cardBat = document.getElementById('cardBateria');
   var txtBat = document.getElementById('txtBateria');
 
-  // Trata tanto o booleano real quanto o formato de texto vindo do banco SQLite
-  var bmsOnline = (d.online === true || d.online === 1 || d.online === "1");
+  var bmsOnline = (d.online === true || d.online === 1 || d.online === "1" || d.online === "true");
   gerenciarLayoutStatus(cardBms, txtBms, bmsOnline, "Online", "Offline");
   
   var invAtivo = (d.inversor_conectado === true || d.inversor_conectado === 1 || d.inversor_conectado === "1" || d.inversor_conectado === "true");
@@ -1578,7 +1590,6 @@ function processarERenderizarDadosMqtt(d) {
     document.getElementById('corr').textContent = cB.toFixed(1)+'A';
     document.getElementById('temp').textContent = tB.toFixed(1)+'°C';
     
-    // Tratamento dinâmico para o Array de Células vindo como String JSON ou Objeto puro
     var arrayCelulas = [];
     if (d.cells) {
       if (typeof d.cells === 'string') {
@@ -1633,6 +1644,7 @@ function addBms(){
   });
 }
 
+// Mantive o seu motor de renderização de células idêntico
 function renderCelulas(cels){
   var container = document.getElementById('celulas');
   if(!container) return;
