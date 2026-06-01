@@ -4,10 +4,17 @@
   <link rel="manifest" href="/manifest.json">
 <script>
   if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/sw.js');
+    window.addEventListener('load', function() {
+      navigator.serviceWorker.register('/sw.js')
+        .then(function(reg) {
+          console.log('Service Worker registrado com sucesso!', reg.scope);
+        })
+        .catch(function(err) {
+          console.error('Falha ao registrar o Service Worker:', err);
+        });
+    });
   }
 </script>
-  
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <title>SMART BMS</title>
