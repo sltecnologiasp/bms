@@ -30,7 +30,7 @@
 
 body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text-main);min-height:100vh;width:100%;overflow-x:hidden}
 
-#login,#painel,#clientesPage,#dashAdmin{
+#painel,#clientesPage,#dashAdmin{
   position:relative;
   z-index:1;
   width:100%;
@@ -43,7 +43,6 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text-main);
   align-items:center;
   justify-content:center;
 }
-#login{display:flex}
 #painel.active,#clientesPage.active,#dashAdmin.active{display:flex}
 
 #painel, #clientesPage, #dashAdmin {
@@ -70,7 +69,6 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text-main);
   box-shadow: var(--neon-glow);
 }
 
-#login .card { max-width:440px }
 #dashAdmin .card { width:100%; max-width:100%; margin-bottom:0 !important; }
 .card-cadastro { width: 100%; max-width: 100% !important; margin: 0 auto 12px auto !important; }
 
@@ -390,19 +388,6 @@ button.logout:hover{background:rgba(231,29,54,0.08);color:var(--red);border-colo
 </head>
 <body>
 
-<div id="login">
-  <div class="title">SMART BMS</div>
-  <div class="user-info">Acesso Administrativo</div>
-  <div class="card">
-    <div class="label">Usuário</div>
-    <input id="user" placeholder="administrador" autocomplete="username" value="administrador">
-    <div class="label" style="margin-top:16px">Senha</div>
-    <input id="password" type="password" placeholder="••••••••" autocomplete="current-password">
-    <button onclick="adminLogin()">ENTRAR NO PAINEL</button>
-    <div id="loginError" class="erro hidden"></div>
-  </div>
-</div>
-
 <div id="painel">
   <div class="title" style="font-size:clamp(28px,6vw,32px);margin-bottom:4px">SMART BMS</div>
   <div class="user-info">Painel Administrativo</div>
@@ -588,7 +573,6 @@ button.logout:hover{background:rgba(231,29,54,0.08);color:var(--red);border-colo
 </div>
 
 <script>
-// CONFIGURAÇÃO DA ROTA: Mapeada para o padrão serverless sem extensão do Cloudflare Pages Functions
 const API = '/api/bms';
 let adminToken = sessionStorage.getItem('admin_token');
 let bmsList = [];
@@ -597,46 +581,24 @@ let activeScreen = sessionStorage.getItem('admin_active_screen') || 'painel';
 
 let filtroAtivo = 'todas';
 
-let TIMEOUT_ADMIN_LOGIN = null;
 let TIMEOUT_ADMIN_MSG = null;
 
 let MQTT_CLIENT = null;
 let bmsTimeoutTimerAdmin = null;         
 let listaTimeoutsAdminCards = {};      
 
-if(adminToken === 'admin_ok') {
+// FILTRO DE SEGURANÇA GLOBAL: Se não possuir o token 'admin_ok', expulsa para o index do cliente
+if (adminToken !== 'admin_ok') {
+  sessionStorage.clear();
+  window.location.href = '/'; 
+} else {
+  // Inicializa a tela correta caso passe na barreira
   if (activeScreen === 'dashAdmin' && activeBmsCode) {
     showDashAdmin(activeBmsCode);
   } else if (activeScreen === 'clientesPage') {
     showClientesPage();
   } else {
     showPainelPage();
-  }
-}
-
-async function adminLogin(){
-  const user = document.getElementById('user').value;
-  const password = document.getElementById('password').value;
-  const errorEl = document.getElementById('loginError');
-  errorEl.classList.add('hidden');
-  clearTimeout(TIMEOUT_ADMIN_LOGIN);
-
-  try {
-    const r = await fetch(API+'?action=login_admin',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({user,password})});
-    const d = await r.json();
-    if(d.ok){
-      adminToken = d.token;
-      sessionStorage.setItem('admin_token', adminToken);
-      showPainelPage();
-    }else{
-      errorEl.textContent = d.error || 'Credenciais inválidas';
-      errorEl.classList.remove('hidden');
-      TIMEOUT_ADMIN_LOGIN = setTimeout(() => { errorEl.classList.add('hidden'); }, 3000);
-    }
-  } catch(e) {
-    errorEl.textContent = 'Erro de comunicação com o servidor';
-    errorEl.classList.remove('hidden');
-    TIMEOUT_ADMIN_LOGIN = setTimeout(() => { errorEl.classList.add('hidden'); }, 3000);
   }
 }
 
@@ -661,7 +623,6 @@ function showPainelPage() {
   activeScreen = 'painel';
   sessionStorage.setItem('admin_active_screen', 'painel');
   
-  document.getElementById('login').style.display = 'none';
   document.getElementById('clientesPage').style.display = 'none';
   document.getElementById('clientesPage').classList.remove('active');
   document.getElementById('dashAdmin').style.display = 'none';
@@ -677,7 +638,6 @@ function showClientesPage(){
   activeScreen = 'clientesPage';
   sessionStorage.setItem('admin_active_screen', 'clientesPage');
   
-  document.getElementById('login').style.display = 'none';
   document.getElementById('painel').classList.remove('active');
   document.getElementById('painel').style.display = 'none';
   document.getElementById('dashAdmin').classList.remove('active');
@@ -695,7 +655,6 @@ function showDashAdmin(code) {
   sessionStorage.setItem('admin_active_bms_code', code);
   sessionStorage.setItem('admin_active_screen', 'dashAdmin');
   
-  document.getElementById('login').style.display = 'none';
   document.getElementById('painel').classList.remove('active');
   document.getElementById('painel').style.display = 'none';
   document.getElementById('clientesPage').classList.remove('active');
@@ -710,7 +669,7 @@ function showDashAdmin(code) {
 
 function mostrarClientes(){ showClientesPage(); }
 function voltarPainel(){ showPainelPage(); }
-function adminLogout(){ fecharMqttAnterior(); sessionStorage.clear(); location.reload(); }
+function adminLogout(){ fecharMqttAnterior(); sessionStorage.clear(); window.location.href = '/'; }
 function authHeaders(){ return {'Content-Type':'application/json','Authorization':'Bearer '+adminToken}; }
 
 document.getElementById('code').oninput = e => {
@@ -1147,7 +1106,7 @@ function editarUser(id, nome, email, role){
   document.getElementById('editUserId').value = id;
   document.getElementById('editUserNome').value = nome;
   document.getElementById('editUserEmail').value = email;
-  document.getElementById('editUserPassword').value = ''; // Limpo por padrão
+  document.getElementById('editUserPassword').value = ''; 
   document.getElementById('editUserRole').value = role || 'user';
   document.getElementById('editMsg').textContent = '';
   document.getElementById('modalEditUser').classList.add('active');
@@ -1336,7 +1295,6 @@ async function listarUsers(){
   const d = await r.json();
   
   document.getElementById('listaUsers').innerHTML = d.map(u=>{
-    // Adiciona uma badge azul bonita se o tipo de conta for admin
     const labelTipoConta = u.role === 'admin' ? '<span class="badge badge-blue">Administrador</span>' : '<span class="badge badge-green">Usuário</span>';
     
     return `
@@ -1361,14 +1319,6 @@ async function listarUsers(){
     </div>
   `}).join('') || '<div class="card card-empty"><div>Nenhum cliente cadastrado</div></div>';
 }
-
-async function setupInicial() {
-  await carregarTudo();
-  if (activeScreen === 'clientesPage') {
-    await listarUsers();
-  }
-}
-if(adminToken === 'admin_ok') setupInicial();
 </script>
 </body>
 </html>
