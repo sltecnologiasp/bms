@@ -531,22 +531,22 @@ body {
   margin-top: 40px;
 }
 
-/* Grid responsivo para dispositivos */
-.dispositivos-grid {
-  display: grid;
+/* Grid responsivo para a lista de BMS */
+#bms-list, .bms-list {
+  display: grid !important;
   gap: 16px;
   grid-template-columns: repeat(2, 1fr);
   width: 100%;
 }
 
 @media (min-width: 768px) {
-  .dispositivos-grid {
+  #bms-list, .bms-list {
     grid-template-columns: repeat(4, 1fr);
   }
 }
 
 @media (min-width: 1200px) {
-  .dispositivos-grid {
+  #bms-list, .bms-list {
     gap: 24px;
   }
 }
@@ -1710,31 +1710,5 @@ function sairSemConfirmacao(){
   location.reload(); 
 }
 </script>
-
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-  // Procura o título MEUS DISPOSITIVOS
-  const titles = Array.from(document.querySelectorAll('*')).filter(el => 
-    el.textContent.trim() === 'MEUS DISPOSITIVOS'
-  );
-  
-  if (titles.length > 0) {
-    const title = titles[0];
-    const container = title.nextElementSibling;
-    
-    // Se o próximo elemento tem filhos que parecem cards, envolve eles
-    if (container && container.children.length >= 2) {
-      const cards = Array.from(container.children);
-      const wrapper = document.createElement('div');
-      wrapper.className = 'dispositivos-grid';
-      
-      // Move os cards pra dentro do wrapper
-      cards.forEach(card => wrapper.appendChild(card));
-      container.appendChild(wrapper);
-    }
-  }
-});
-</script>
-
 </body>
 </html>
