@@ -236,15 +236,17 @@ button:active{transform:scale(0.98)}
 }
 .bms-item:hover{border-color:var(--cyan)}
 
-@keyframes neonSuave {
-  0% { border-color: var(--green); box-shadow: 0 0 4px var(--neon-pulse-color); }
-  50% { border-color: var(--cyan); box-shadow: 0 0 12px var(--neon-pulse-color), 0 0 4px var(--green); }
-  100% { border-color: var(--green); box-shadow: 0 0 4px var(--neon-pulse-color); }
-}
+@media (prefers-reduced-motion: no-preference) {
+  @keyframes neonSuave {
+    0% { border-color: var(--green); box-shadow: 0 0 4px var(--neon-pulse-color); }
+    50% { border-color: var(--cyan); box-shadow: 0 0 12px var(--neon-pulse-color), 0 0 4px var(--green); }
+    100% { border-color: var(--green); box-shadow: 0 0 4px var(--neon-pulse-color); }
+  }
 
-.bms-item.online-active {
-  animation: neonSuave 2s infinite ease-in-out !important;
-  border-width: 1.5px !important;
+  .bms-item.online-active {
+    animation: neonSuave 2s infinite ease-in-out !important;
+    border-width: 1.5px !important;
+  }
 }
 
 .bms-item h3{color:var(--text-main);font-size:19px;font-weight:800;margin-bottom:4px;width:100%}
@@ -439,7 +441,6 @@ button:active{transform:scale(0.98)}
 .link-esqueceu{display:block;text-align:right;font-size:12px;color:var(--text-muted);margin-top:8px;cursor:pointer;text-decoration:none;transition:color 0.2s}
 .link-esqueceu:hover{color:var(--blue)}
 
-/* CORREÇÃO GLOBAL: EXPANSÃO DE MARGIN-TOP PARA REPOSICIONAR O RODAPÉ NA BASE */
 .footer-link{font-size:11px;margin-top:120px;text-align:center;letter-spacing:1px;line-height:1.6;padding-bottom:24px}
 .footer-link a{color:var(--blue);text-decoration:none;font-weight:600;transition:opacity 0.2s;}
 .footer-link a:hover{opacity:0.8;text-decoration:underline;}
@@ -622,6 +623,11 @@ button:active{transform:scale(0.98)}
     <button class="btn-card-action" onclick="mostrarPaginaConta()">Configurações da Conta</button>
     <button class="btn-card-action" onclick="sair()">Sair</button>
   </div>
+
+  <div class="footer-link">
+    <a href="https://wa.me/5515991355393" target="_blank">SL TECNOLOGIA</a>
+    <span>© Todos os direitos reservados</span>
+  </div>
 </div>
 
 <div id="configuracoesPage" class="hidden">
@@ -641,7 +647,10 @@ button:active{transform:scale(0.98)}
   </div>
 
   <button class="btn-sec" style="max-width:440px; width:100%" onclick="voltarParaLista()">Voltar</button>
-  
+  <div class="footer-link">
+    <a href="https://wa.me/5515991355393" target="_blank">SL TECNOLOGIA</a>
+    <span>© Todos os direitos reservados</span>
+  </div>
 </div>
 
 <div id="dash" class="hidden">
@@ -1002,11 +1011,18 @@ function login(){
   .then(function(r){return r.json();})
   .then(function(d){
     if(d.ok && d.token){
-      TOKEN = d.token;
-      USER = d.user; 
-      localStorage.setItem('bms_token', TOKEN);
-      localStorage.setItem('bms_user', JSON.stringify(USER));
-      mostrarLista();
+      // REGRA DE DIRECIONAMENTO HÍBRIDA: ANALISA O PRIVILÉGIO DO USUÁRIO RETORNADO PELA API
+      if (d.user && d.user.role === 'admin') {
+        sessionStorage.setItem('admin_token', 'admin_ok');
+        sessionStorage.setItem('admin_active_screen', 'painel');
+        window.location.href = '/admin.html';
+      } else {
+        TOKEN = d.token;
+        USER = d.user; 
+        localStorage.setItem('bms_token', TOKEN);
+        localStorage.setItem('bms_user', JSON.stringify(USER));
+        mostrarLista();
+      }
     }else{
       if (e) {
         e.textContent = d.error || 'Erro ao realizar login';
@@ -1460,7 +1476,7 @@ function configurarInterfaceEstadoOffline() {
 function processarERenderizarDadosMqtt(d) {
   if (bmsTimeoutTimer) clearTimeout(bmsTimeoutTimer);
   bmsTimeoutTimer = setTimeout(function() {
-    console.log("[SISTEMA] Fluxo interrompido por mais de 5s. Forçando queda do painel.");
+    console.log("[SISTEMA] Forçando queda do painel por inatividade.");
     configurarInterfaceEstadoOffline(); 
   }, 5000); 
 
@@ -1513,9 +1529,6 @@ function voltar(){
   clearInterval(INT); 
   localStorage.removeItem('bms_codigo_ativo'); 
   mostrarLista(); 
-}
-
-function carregarLista(){
 }
 
 function removerBms(code, nome){
@@ -1638,6 +1651,7 @@ function sairSemConfirmacao(){
   localStorage.removeItem('bms_token'); 
   localStorage.removeItem('bms_user'); 
   localStorage.removeItem('bms_codigo_ativo'); 
+  sessionStorage.clear();
   location.reload(); 
 }
 </script>
