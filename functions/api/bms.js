@@ -15,6 +15,28 @@ export async function onRequest({ request, env }) {
     headers: {...cors, 'Content-Type': 'application/json' }
   });
 
+  // =========================================================================
+  // FUNÇÃO AUXILIAR DE CRIPTOGRAFIA PARA O NOVO TOKEN SEGURO (HMAC-SHA256)
+  // =========================================================================
+  async function gerarAssinaturaToken(texto, segredo) {
+    const encoder = new TextEncoder();
+    const keyData = encoder.encode(segredo);
+    const messageData = encoder.encode(texto);
+    
+    // Importa a chave secreta usando o algoritmo HMAC
+    const key = await crypto.subtle.importKey(
+      'raw', keyData, { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']
+    );
+    
+    // Gera a assinatura digital baseada no segredo do servidor
+    const signature = await crypto.subtle.sign('HMAC', key, messageData);
+    
+    // Transforma o resultado binário em uma string Hexadecimal estável
+    return Array.from(new Uint8Array(signature))
+      .map(b => b.toString(16).padStart(2, '0'))
+      .join('');
+  }
+
   try {
     // =========================================================================
     // ROTAS PÚBLICAS CRÍTICAS (PROCESSADAS NO TOPO ABSOLUTO SEM EXIGIR TOKEN)
@@ -30,7 +52,6 @@ export async function onRequest({ request, env }) {
           return json({ ok: false, error: 'Código inválido enviado pelo hardware' }, 400);
         }
         
-        // Insere na tabela bms_master. Se já existir, ignora para não dar erro de duplicidade
         await env.DB.prepare("INSERT OR IGNORE INTO bms_master (code, user_id) VALUES (?, NULL)").bind(code).run();
         return json({ ok: true, message: 'Hardware registrado com sucesso!' }, 200);
       } catch (dbErr) {
@@ -202,7 +223,7 @@ export async function onRequest({ request, env }) {
                 <h2 style="color: #00ffff; text-align: center; margin-top: 0;">SMART BMS</h2>
                 <h3 style="text-align: center; color: #fff;">Olá, ${user.nome}!</h3>
                 <p style="text-align: center; color: #a1aab8; line-height: 1.6;">Você solicitou a redefinição de sua senha. Clique no botão abaixo para criar uma nova senha agora mesmo:</p>
-                <div style="text-align: center; margin: 36px 0;">
+                <div style="text-align: center; margin: 36px 0 planetary;">
                   <a href="${resetLink}" style="background: linear-gradient(90deg, #0080ff, #00ffff); color: #ffffff; padding: 16px 32px; text-decoration: none; border-radius: 12px; font-weight: bold; font-size: 16px;">REDEFINIR MINHA SENHA</a>
                 </div>
                 <p style="text-align: center; color: #6b7c96; font-size: 12px;">Se você não solicitou essa mudança, pode ignorar este e-mail.</p>
@@ -229,7 +250,7 @@ export async function onRequest({ request, env }) {
       return json({ ok: true });
     }
 
-    // ROTA 5: LOGIN USER
+    // ROTA 5: LOGIN USER (CRIAÇÃO DO TOKEN CRIPTOGRAFADO)
     if (action === 'login' && request.method === 'POST') {
       const { email, senha } = await request.json();
       const cleanEmail = (email || '').trim().toLowerCase();
@@ -251,15 +272,33 @@ export async function onRequest({ request, env }) {
         return json({ ok: false, error: 'Confirme seu e-mail na caixa de entrada antes de acessar.' }, 403);
       }
 
-      const token = btoa(`user:${user.id}:${Date.now()}`);
-      return json({ ok: true, token, user: { id: user.id, nome: user.nome, email: user.email } });
+      // ASSINATURA DIGITAL COMPLETA PARA SEGURANÇA
+      const JWT_SECRET = env.JWT_SECRET || "MudeEsseTextoNoPainelCloudflare123!";
+      const payloadTexto = `user:${user.id}:${Date.now()}`;
+      const payloadB64 = btoa(payloadTexto);
+      const assinaturaHex = await gerarAssinaturaToken(payloadB64, JWT_SECRET);
+      const tokenSeguro = `${payloadB64}.${assinaturaHex}`;
+
+      return json({ ok: true, token: tokenSeguro, user: { id: user.id, nome: user.nome, email: user.email } });
     }
 
-    // ROTA 6: LOGIN ADMIN
+    // ROTA 6: LOGIN ADMIN (LENDO CLOUDFLARE E GERANDO TOKEN SEGURO)
     if (action === 'login_admin' && request.method === 'POST') {
       const { user, password } = await request.json();
-      if (user === 'administrador' && password === '426240637') return json({ ok: true, token: 'admin_ok' });
-      return json({ ok: false, error: 'Credenciais inválidas' }, 401);
+      
+      const ADMIN_USER_CORRETO = env.ADMIN_USER || "administrador";
+      const ADMIN_PASS_CORRETO = env.ADMIN_PASS || "SuaSenhaSuperForte2026!";
+      
+      if (user === ADMIN_USER_CORRETO && password === ADMIN_PASS_CORRETO) {
+        const JWT_SECRET = env.JWT_SECRET || "MudeEsseTextoNoPainelCloudflare123!";
+        const payloadTexto = `admin:true:${Date.now()}`;
+        const payloadB64 = btoa(payloadTexto);
+        const assinaturaHex = await gerarAssinaturaToken(payloadB64, JWT_SECRET);
+        const tokenAdminSeguro = `${payloadB64}.${assinaturaHex}`;
+        
+        return json({ ok: true, token: tokenAdminSeguro });
+      }
+      return json({ ok: false, error: 'Credenciais administrativas inválidas' }, 401);
     }
 
     // ROTA 7: UPDATE TELEMETRIA DA EQUIPE/BMS (ADAPTADA PRO INVERSOR)
@@ -297,26 +336,45 @@ export async function onRequest({ request, env }) {
     }
 
     // =========================================================================
-    // BARREIRA DE SEGURANÇA GLOBAL (EXIGE TOKEN BEARER DAQUI PARA BAIXO)
+    // BARREIRA DE SEGURANÇA GLOBAL COM ASSINATURA DIGITAL VERDATEIRA (HMAC)
     // =========================================================================
     const auth = request.headers.get('Authorization');
     if (!auth?.startsWith('Bearer ')) return json({ ok: false, error: 'Não autorizado' }, 401);
-    const token = auth.slice(7);
+    const tokenCompleto = auth.slice(7);
+
+    const JWT_SECRET = env.JWT_SECRET || "MudeEsseTextoNoPainelCloudflare123!";
 
     let userId = null;
     let isAdmin = false;
 
-    if (token === 'admin_ok') {
-      isAdmin = true;
-    } else {
-      try {
-        const decoded = atob(token);
-        const parts = decoded.split(':');
-        if (parts[0] === 'user') userId = parseInt(parts[1]);
-        else return json({ ok: false, error: 'Token inválido' }, 401);
-      } catch {
-        return json({ ok: false, error: 'Token inválido' }, 401);
+    try {
+      const partesToken = tokenCompleto.split('.');
+      if (partesToken.length !== 2) {
+        return json({ ok: false, error: 'Formato de token inválido' }, 401);
       }
+      
+      const dadosOriginaisB64 = partesToken[0];
+      const assinaturaRecebida = partesToken[1];
+      
+      // Confeir se a assinatura confere com a gravada em nosso segredo privado
+      const assinaturaConferida = await gerarAssinaturaToken(dadosOriginaisB64, JWT_SECRET);
+      
+      if (assinaturaRecebida !== assinaturaConferida) {
+        return json({ ok: false, error: 'Token violado ou adulterado!' }, 401);
+      }
+      
+      const dadosDecodificados = atob(dadosOriginaisB64);
+      const partesDados = dadosDecodificados.split(':');
+      
+      if (partesDados[0] === 'admin') {
+        isAdmin = true;
+      } else if (partesDados[0] === 'user') {
+        userId = parseInt(partesDados[1]);
+      } else {
+        return json({ ok: false, error: 'Tipo de usuário inválido' }, 401);
+      }
+    } catch (err) {
+      return json({ ok: false, error: 'Token inválido ou corrompido' }, 401);
     }
 
     if (!isAdmin && userId) {
@@ -330,7 +388,6 @@ export async function onRequest({ request, env }) {
     // ROTAS PROTEGIDAS - EXCLUSIVAS DO ADMIN
     // ==========================================
     if (isAdmin) {
-      // NOVA ROTA: RECEBER FILMEWARE .BIN DO FORMULÁRIO E SALVAR NO BUCKET CLOUDFLARE R2
       if (action === 'admin_upload_ota' && request.method === 'POST') {
         try {
           const formData = await request.formData();
@@ -352,7 +409,6 @@ export async function onRequest({ request, env }) {
         }
       }
 
-      // LISTAR DISPOSITIVOS NO ADMIN COM NOME DO DONO
       if (action === 'admin_list_master' && request.method === 'GET') {
         const { results } = await env.DB.prepare(`
           SELECT bm.code, bm.user_id, b.soc, b.voltage, b.current, b.temp, b.cells, 
@@ -372,7 +428,6 @@ export async function onRequest({ request, env }) {
         return json(data);
       }
 
-      // VINCULAR MANUALMENTE
       if (action === 'admin_force_bind' && request.method === 'POST') {
         const { userId, code } = await request.json();
         if (!userId || !code) return json({ ok: false, error: 'Dados incompletos' }, 400);
@@ -385,7 +440,6 @@ export async function onRequest({ request, env }) {
         return json({ ok: true });
       }
 
-      // DESVINCULAR MANUALMENTE
       if (action === 'admin_force_unbind' && request.method === 'DELETE') {
         const userId = url.searchParams.get('userId');
         const code = url.searchParams.get('code');
