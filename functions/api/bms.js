@@ -114,7 +114,7 @@ export async function onRequest({ request, env }) {
       const exists = await env.DB.prepare('SELECT email_verificado FROM users WHERE email = ?').bind(userEmail).first();
       if (exists) {
         if (exists.email_verificado === 1) {
-          return json({ ok: false, error: 'E-mail já cadastrado e confirmado' }, 400);
+          return json({ ok: false, error: 'E-mail já cadastrado e confirmed' }, 400);
         } else {
           return json({ ok: false, error: 'E-mail já cadastrado' }, 400);
         }
@@ -223,7 +223,7 @@ export async function onRequest({ request, env }) {
                 <h2 style="color: #00ffff; text-align: center; margin-top: 0;">SMART BMS</h2>
                 <h3 style="text-align: center; color: #fff;">Olá, ${user.nome}!</h3>
                 <p style="text-align: center; color: #a1aab8; line-height: 1.6;">Você solicitou a redefinição de sua senha. Clique no botão abaixo para criar uma nova senha agora mesmo:</p>
-                <div style="text-align: center; margin: 36px 0 planetary;">
+                <div style="text-align: center; margin: 36px 0;">
                   <a href="${resetLink}" style="background: linear-gradient(90deg, #0080ff, #00ffff); color: #ffffff; padding: 16px 32px; text-decoration: none; border-radius: 12px; font-weight: bold; font-size: 16px;">REDEFINIR MINHA SENHA</a>
                 </div>
                 <p style="text-align: center; color: #6b7c96; font-size: 12px;">Se você não solicitou essa mudança, pode ignorar este e-mail.</p>
@@ -336,7 +336,7 @@ export async function onRequest({ request, env }) {
     }
 
     // =========================================================================
-    // BARREIRA DE SEGURANÇA GLOBAL COM ASSINATURA DIGITAL VERDATEIRA (HMAC)
+    // BARREIRA DE SEGURANÇA GLOBAL COM ASSINATURA DIGITAL VERDADEIRA (HMAC)
     // =========================================================================
     const auth = request.headers.get('Authorization');
     if (!auth?.startsWith('Bearer ')) return json({ ok: false, error: 'Não autorizado' }, 401);
@@ -356,7 +356,7 @@ export async function onRequest({ request, env }) {
       const dadosOriginaisB64 = partesToken[0];
       const assinaturaRecebida = partesToken[1];
       
-      // Confeir se a assinatura confere com a gravada em nosso segredo privado
+      // Conferir se a assinatura confere com a gravada em nosso segredo privado
       const assinaturaConferida = await gerarAssinaturaToken(dadosOriginaisB64, JWT_SECRET);
       
       if (assinaturaRecebida !== assinaturaConferida) {
@@ -382,6 +382,24 @@ export async function onRequest({ request, env }) {
       if (!userCheck) {
         return json({ ok: false, error: 'Sessão inválida ou usuário removido' }, 401);
       }
+    }
+
+    // =========================================================================
+    // ROTA PROTEGIDA GLOBAL: CREDENCIAIS INTELIGENTES MQTT PARA SESSÕES ATIVAS
+    // =========================================================================
+    if (action === 'get_mqtt_credentials' && request.method === 'GET') {
+      const hostMqtt = env.MQTT_HOST || "965bd6abd6f54692b84d710cab8327b4.s1.eu.hivemq.cloud";
+      const userMqtt = env.MQTT_USER || "sl_bms_prod";
+      const passMqtt = env.MQTT_PASS || "SLtech2026@Bms";
+
+      return json({
+        ok: true,
+        host: hostMqtt,
+        port: 8884,
+        user: userMqtt,
+        pass: passMqtt,
+        clientPrefix: isAdmin ? "sl_admin_" : `sl_user_${userId}_`
+      });
     }
 
     // ==========================================
