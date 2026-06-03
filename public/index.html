@@ -100,14 +100,6 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text-main);
   display: block;
 }
 
-/* MODIFICAÇÃO EXCLUSIVA: Alinha e empurra o conjunto inteiro do painel para baixo proporcionalmente */
-#lista:not(.hidden) {
-  display: flex !important;
-  flex-direction: column !important;
-  justify-content: flex-end !important;
-  padding-bottom: 24px !important;
-}
-
 #dash:not(.hidden) {
   display: flex !important;
   flex-direction: column !important;
@@ -282,7 +274,7 @@ button:active{transform:scale(0.98)}
 }
 
 .gauge-card{padding:15px;min-height:230px;display:flex;flex-direction:column;gap:10px;justify-content:center}
-.gauge(width:min(190px,48vw);height:min(190px,48vw);margin:auto;border-radius:50%;background:conic-gradient(var(--green) 0deg,var(--cyan) 180deg,var(--gauge-empty) 180deg);position:relative;box-shadow:0 0 30px rgba(0,255,255,.05);transition:background.8s ease}
+.gauge{width:min(190px,48vw);height:min(190px,48vw);margin:auto;border-radius:50%;background:conic-gradient(var(--green) 0deg,var(--cyan) 180deg,var(--gauge-empty) 180deg);position:relative;box-shadow:0 0 30px rgba(0,255,255,.05);transition:background.8s ease}
 .gauge::before{content:'';position:absolute;inset:16px;border-radius:50%;background:var(--bg);transition: background 0.3s}
 .gauge-inner{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;align-items:center;z-index:2}
 .gauge-value{font-size:clamp(36px,9vw,52px);font-weight:900;color:var(--green)}
@@ -407,7 +399,7 @@ button:active{transform:scale(0.98)}
   border:1px solid var(--card-border);
   border-radius:16px;
   padding:14px;
-  margin: 0 0 10px 0 !important; /* Adicionado margem para distanciar os cartões na descida */
+  margin:0 !important;
   display:flex;
   flex-direction:column;
   align-items:center;
@@ -448,7 +440,7 @@ button:active{transform:scale(0.98)}
 .link-esqueceu:hover{color:var(--blue)}
 
 /* CORREÇÃO GLOBAL: EXPANSÃO DE MARGIN-TOP PARA REPOSICIONAR O RODAPÉ NA BASE */
-.footer-link{font-size:11px;margin-top:40px;text-align:center;letter-spacing:1px;line-height:1.6;padding-bottom:12px}
+.footer-link{font-size:11px;margin-top:120px;text-align:center;letter-spacing:1px;line-height:1.6;padding-bottom:24px}
 .footer-link a{color:var(--blue);text-decoration:none;font-weight:600;transition:opacity 0.2s;}
 .footer-link a:hover{opacity:0.8;text-decoration:underline;}
 .footer-link span{color:var(--text-muted);opacity:0.6;display:block;margin-top:4px;}
@@ -508,7 +500,7 @@ button:active{transform:scale(0.98)}
 }
 </style>
 </head>
-<body>
+<body style="margin-top: 40px;">
 
 <div id="login">
   <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; margin-bottom: 24px; width: 100%;">
