@@ -522,7 +522,6 @@ export async function onRequest({ request, env }) {
       return json({ ok: true });
     }
 
-    // CORREÇÃO EFETUADA AQUI: Removido termo incorreto gerado por corretor ortográfico
     if (action === 'user_bms' && request.method === 'GET') {
       if (!userId) return json({ ok: false, error: 'Login necessário' }, 401);
       const { results } = await env.DB.prepare(`
