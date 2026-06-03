@@ -232,7 +232,7 @@ button.logout:hover{background:rgba(231,29,54,0.08);color:var(--red);border-colo
 }
 
 .gauge-card{padding:15px;min-height:230px;display:flex;flex-direction:column;gap:10px;justify-content:center}
-.gauge{width:min(190px,48vw);height:min(190px,48vw);margin:auto;border-radius:50%;background:conic-gradient(var(--green) 0deg,var(--cyan) 180deg,var(--gauge-empty) 180deg);position:relative;box-shadow:0 0 30px rgba(0,255,255,.05);transition:background .8s ease}
+.gauge(width:min(190px,48vw);height:min(190px,48vw);margin:auto;border-radius:50%;background:conic-gradient(var(--green) 0deg,var(--cyan) 180deg,var(--gauge-empty) 180deg);position:relative;box-shadow:0 0 30px rgba(0,255,255,.05);transition:background .8s ease}
 .gauge::before{content:'';position:absolute;inset:16px;border-radius:50%;background:var(--bg);transition: background 0.3s}
 .gauge-inner{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;align-items:center;z-index:2}
 .gauge-value{font-size:clamp(36px,9vw,52px);font-weight:900;color:var(--green)}
@@ -574,25 +574,26 @@ button.logout:hover{background:rgba(231,29,54,0.08);color:var(--red);border-colo
 
 <script>
 const API = '/api/bms';
-let adminToken = sessionStorage.getItem('admin_token');
+
+// BARREIRA HIDRICA PERSISTENTE: Lê tokens de qualquer contexto seguro gravado
+let adminToken = localStorage.getItem('admin_token') || sessionStorage.getItem('admin_token');
 let bmsList = [];
-let activeBmsCode = sessionStorage.getItem('admin_active_bms_code');
-let activeScreen = sessionStorage.getItem('admin_active_screen') || 'painel';
+let activeBmsCode = localStorage.getItem('admin_active_bms_code') || sessionStorage.getItem('admin_active_bms_code');
+let activeScreen = localStorage.getItem('admin_active_screen') || sessionStorage.getItem('admin_active_screen') || 'painel';
 
 let filtroAtivo = 'todas';
-
 let TIMEOUT_ADMIN_MSG = null;
 
 let MQTT_CLIENT = null;
 let bmsTimeoutTimerAdmin = null;         
 let listaTimeoutsAdminCards = {};      
 
-// FILTRO DE SEGURANÇA GLOBAL: Se não possuir o token 'admin_ok', expulsa para o index do cliente
+// FILTRO DE SEGURANÇA SEGURO CONTRA INVADOES POR URL DIRECTA
 if (adminToken !== 'admin_ok') {
+  localStorage.removeItem('admin_token');
   sessionStorage.clear();
   window.location.href = '/'; 
 } else {
-  // Inicializa a tela correta caso passe na barreira
   if (activeScreen === 'dashAdmin' && activeBmsCode) {
     showDashAdmin(activeBmsCode);
   } else if (activeScreen === 'clientesPage') {
@@ -621,6 +622,7 @@ function fecharMqttAnterior() {
 function showPainelPage() {
   fecharMqttAnterior();
   activeScreen = 'painel';
+  localStorage.setItem('admin_active_screen', 'painel');
   sessionStorage.setItem('admin_active_screen', 'painel');
   
   document.getElementById('clientesPage').style.display = 'none';
@@ -636,6 +638,7 @@ function showPainelPage() {
 function showClientesPage(){
   fecharMqttAnterior();
   activeScreen = 'clientesPage';
+  localStorage.setItem('admin_active_screen', 'clientesPage');
   sessionStorage.setItem('admin_active_screen', 'clientesPage');
   
   document.getElementById('painel').classList.remove('active');
@@ -652,6 +655,9 @@ function showDashAdmin(code) {
   fecharMqttAnterior();
   activeBmsCode = code;
   activeScreen = 'dashAdmin';
+  
+  localStorage.setItem('admin_active_bms_code', code);
+  localStorage.setItem('admin_active_screen', 'dashAdmin');
   sessionStorage.setItem('admin_active_bms_code', code);
   sessionStorage.setItem('admin_active_screen', 'dashAdmin');
   
@@ -669,7 +675,16 @@ function showDashAdmin(code) {
 
 function mostrarClientes(){ showClientesPage(); }
 function voltarPainel(){ showPainelPage(); }
-function adminLogout(){ fecharMqttAnterior(); sessionStorage.clear(); window.location.href = '/'; }
+
+function adminLogout(){ 
+  fecharMqttAnterior(); 
+  localStorage.removeItem('admin_token');
+  localStorage.removeItem('admin_active_screen');
+  localStorage.removeItem('admin_active_bms_code');
+  sessionStorage.clear(); 
+  window.location.href = '/'; 
+}
+
 function authHeaders(){ return {'Content-Type':'application/json','Authorization':'Bearer '+adminToken}; }
 
 document.getElementById('code').oninput = e => {
@@ -810,6 +825,7 @@ async function enviarFirmwareOta() {
 
 function closeBmsModal(){
   activeBmsCode = null;
+  localStorage.removeItem('admin_active_bms_code');
   sessionStorage.removeItem('admin_active_bms_code');
   showPainelPage();
 }
