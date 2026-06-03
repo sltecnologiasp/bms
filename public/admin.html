@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Admin BMS</title>
-<link href="https://fonts.googleapis.com/css2=family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
 <style>
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 :root{
@@ -564,7 +564,6 @@ button.logout:hover{background:rgba(231,29,54,0.08);color:var(--red);border-colo
 </div>
 
 <script>
-// CONFIGURAÇÃO DA ROTA: Mapeada para o padrão serverless sem extensão do Cloudflare Pages Functions
 const API = '/api/bms';
 let adminToken = sessionStorage.getItem('admin_token');
 let bmsList = [];
@@ -580,7 +579,10 @@ let MQTT_CLIENT = null;
 let bmsTimeoutTimerAdmin = null;         
 let listaTimeoutsAdminCards = {};      
 
-if(adminToken === 'admin_ok') {
+// VARIÁVEL GLOBAL DE TIMEOUT DE DISPOSITIVOS (15 SEGUNDOS)
+const TEMPO_TIMEOUT_CONEXAO = 15000;
+
+if(adminToken) {
   if (activeScreen === 'dashAdmin' && activeBmsCode) {
     showDashAdmin(activeBmsCode);
   } else if (activeScreen === 'clientesPage') {
@@ -778,20 +780,24 @@ async function enviarFirmwareOta() {
     const d = await r.json();
 
     if (d && d.ok && d.url) {
-      statusMsg.textContent = 'Upload concluído! Conectando canal expresso via HiveMQ...';
+      statusMsg.textContent = 'Upload concluído! Resolvendo canal expresso via HiveMQ...';
       statusMsg.style.color = 'var(--cyan)';
 
-      // MOTOR DE DISPARO EXPRESSO (Corrige o bug de falso-desconectado do canal MQTT geral)
-      const hostMqtt = "965bd6abd6f54692b84d710cab8327b4.s1.eu.hivemq.cloud"; 
-      const portaMqtt = 8884;                     
-      const userMqtt = "sl_bms_prod";             
-      const passMqtt = "SLtech2026@Bms";           
-      const otaClientId = "sl_admin_ota_trigger_" + Math.floor(Math.random() * 1000);
+      // SOLICITAÇÃO DINÂMICA DE CREDENCIAIS MQTT PARA O DISPARO DO OTA (BLINDAGEM CONTRA FALHAS)
+      const rCred = await fetch(API + '?action=get_mqtt_credentials', { headers: { 'Authorization': 'Bearer ' + adminToken } });
+      const cred = await rCred.json();
 
-      const otaClient = new Paho.MQTT.Client(hostMqtt, Number(portaMqtt), otaClientId);
+      if (!cred.ok) {
+        statusMsg.textContent = 'Upload concluído, mas falha ao obter canais dinâmicos do HiveMQ.';
+        statusMsg.style.color = 'var(--orange)';
+        return;
+      }
+
+      const otaClientId = cred.clientPrefix + "ota_trigger_" + Math.floor(Math.random() * 1000);
+      const otaClient = new Paho.MQTT.Client(cred.host, Number(cred.port), otaClientId);
       
       otaClient.connect({
-        userName: userMqtt, password: passMqtt, useSSL: true, timeout: 5,
+        userName: cred.user, password: cred.pass, useSSL: true, timeout: 5,
         onSuccess: function () {
           const payloadOtaMqtt = JSON.stringify({ url: d.url });
           const mensagemMqtt = new Paho.MQTT.Message(payloadOtaMqtt);
@@ -805,7 +811,7 @@ async function enviarFirmwareOta() {
           setTimeout(() => { try { otaClient.disconnect(); } catch(e){} }, 500);
         },
         onFailure: function () {
-          statusMsg.textContent = 'Upload OK, mas falha ao injetar comando no HiveMQ. O chip lerá no próximo ciclo.';
+          statusMsg.textContent = 'Upload OK, mas falha na injeção do canal HiveMQ. O chip lerá no próximo contato.';
           statusMsg.style.color = 'var(--orange)';
         }
       });
@@ -888,7 +894,7 @@ async function abrirModalDesvincular(userId, nomeCliente) {
   if (vinculadas.length === 0) {
     select.innerHTML = '<option value="">Este usuário não possui nenhuma BMS</option>';
   } else {
-    select.innerHTML = '<option value="">-- Selecione la BMS para remover --</option>' + 
+    select.innerHTML = '<option value="">-- Selecione a BMS para remover --</option>' + 
       vinculadas.map(b => `<option value="${b.code}">${b.code}</option>`).join('');
   }
   
@@ -902,7 +908,7 @@ async function confirmarDesvinculoManual() {
   const code = document.getElementById('selectBmsVinculadas').value;
   
   if (!code) { alert('Selecione a BMS que deseja desvincular.'); return; }
-  if (!confirm(`⚠️ ALERTA DE SEGURANÇA:\n\nTem certeza que deseja apagar o vínculo e remover a BMS ${code} da conta deste cliente?`)) return;
+  if (!confirm(`⚠️ ALERTA DE SEGURANÇA:\n\ Tem certeza que deseja apagar o vínculo e remover a BMS ${code} da conta deste cliente?`)) return;
 
   try {
     const r = await fetch(API + `?action=admin_force_unbind&userId=${userId}&code=${code}`, {
@@ -931,7 +937,7 @@ function gerenciarLayoutStatus(elementoCard, elementoTxt, ativo, textoAtivo, tex
   }
 }
 
-function conectarMqttParaDashboardAdmin() {
+async function conectarMqttParaDashboardAdmin() {
   configurarInterfaceDashboardOfflineAdmin();
 
   const bmsInfo = bmsList.find(b => b.code === activeBmsCode) || {};
@@ -939,29 +945,30 @@ function conectarMqttParaDashboardAdmin() {
     `<span class="badge badge-orange" style="font-size:12px; padding:6px 12px;">Vinculada: ${bmsInfo.dono_nome || bmsInfo.dono_email}</span>` : 
     `<span class="badge badge-green" style="font-size:12px; padding:6px 12px;">Disponível / Livre</span>`;
 
-  const hostMqtt = "965bd6abd6f54692b84d710cab8327b4.s1.eu.hivemq.cloud"; 
-  const portaMqtt = 8884;                     
-  const userMqtt = "sl_bms_prod";             
-  const passMqtt = "SLtech2026@Bms";           
-  const clientRandomId = "sl_admin_dash_client_" + Math.floor(Math.random() * 10000);
+  try {
+    const rCred = await fetch(API + '?action=get_mqtt_credentials', { headers: { 'Authorization': 'Bearer ' + adminToken } });
+    const cred = await rCred.json();
+    if (!cred.ok) return;
 
-  MQTT_CLIENT = new Paho.MQTT.Client(hostMqtt, Number(portaMqtt), clientRandomId);
+    const clientRandomId = cred.clientPrefix + "dash_admin_" + Math.floor(Math.random() * 10000);
+    MQTT_CLIENT = new Paho.MQTT.Client(cred.host, Number(cred.port), clientRandomId);
 
-  MQTT_CLIENT.onConnectionLost = function () { configurarInterfaceDashboardOfflineAdmin(); };
-  MQTT_CLIENT.onMessageArrived = function (message) {
-    try {
-      const d = JSON.parse(message.payloadString);
-      processarERenderizarDadosAdminMqtt(d);
-    } catch (err) {}
-  };
+    MQTT_CLIENT.onConnectionLost = function () { configurarInterfaceDashboardOfflineAdmin(); };
+    MQTT_CLIENT.onMessageArrived = function (message) {
+      try {
+        const d = JSON.parse(message.payloadString);
+        processarERenderizarDadosAdminMqtt(d);
+      } catch (err) {}
+    };
 
-  MQTT_CLIENT.connect({
-    userName: userMqtt, password: passMqtt, useSSL: true, timeout: 3,
-    onSuccess: function () {
-      MQTT_CLIENT.subscribe("sl_bms/" + activeBmsCode + "/telemetria");
-    },
-    onFailure: function () { configurarInterfaceDashboardOfflineAdmin(); }
-  });
+    MQTT_CLIENT.connect({
+      userName: cred.user, password: cred.pass, useSSL: true, timeout: 5,
+      onSuccess: function () {
+        MQTT_CLIENT.subscribe("sl_bms/" + activeBmsCode + "/telemetria");
+      },
+      onFailure: function () { configurarInterfaceDashboardOfflineAdmin(); }
+    });
+  } catch(e) { configurarInterfaceDashboardOfflineAdmin(); }
 }
 
 function configurarInterfaceDashboardOfflineAdmin() {
@@ -1003,7 +1010,7 @@ function processarERenderizarDadosAdminMqtt(d) {
   if (bmsTimeoutTimerAdmin) clearTimeout(bmsTimeoutTimerAdmin);
   bmsTimeoutTimerAdmin = setTimeout(function() {
     configurarInterfaceDashboardOfflineAdmin();
-  }, 5000);
+  }, TEMPO_TIMEOUT_CONEXAO); // TIMEOUT AJUSTADO DE 5s PARA 15s CONTRA OSCILAÇÕES
 
   const cardInv = document.getElementById('cardInversor');
   const txtInv = document.getElementById('txtInversor');
@@ -1228,69 +1235,70 @@ function atualizarHTMLListaBms() {
   conectarMqttParaListaGeralAdmin();
 }
 
-function conectarMqttParaListaGeralAdmin() {
-  const hostMqtt = "965bd6abd6f54692b84d710cab8327b4.s1.eu.hivemq.cloud"; 
-  const portaMqtt = 8884;                     
-  const userMqtt = "sl_bms_prod";             
-  const passMqtt = "SLtech2026@Bms";           
-  const clientRandomId = "sl_admin_list_client_" + Math.floor(Math.random() * 10000);
+async function conectarMqttParaListaGeralAdmin() {
+  try {
+    const rCred = await fetch(API + '?action=get_mqtt_credentials', { headers: { 'Authorization': 'Bearer ' + adminToken } });
+    const cred = await rCred.json();
+    if (!cred.ok) return;
 
-  MQTT_CLIENT = new Paho.MQTT.Client(hostMqtt, Number(portaMqtt), clientRandomId);
+    const clientRandomId = cred.clientPrefix + "list_admin_" + Math.floor(Math.random() * 10000);
+    MQTT_CLIENT = new Paho.MQTT.Client(cred.host, Number(cred.port), clientRandomId);
 
-  MQTT_CLIENT.onConnectionLost = function () {};
-  MQTT_CLIENT.onMessageArrived = function (message) {
-    try {
-      const topicoLido = message.destinationName;
-      const partesTopico = topicoLido.split('/');
-      const idPlacaEmissora = partesTopico[1]; 
+    MQTT_CLIENT.onConnectionLost = function () {};
+    MQTT_CLIENT.onMessageArrived = function (message) {
+      try {
+        const topicoLido = message.destinationName;
+        const partesTopico = topicoLido.split('/');
+        const idPlacaEmissora = partesTopico[1]; 
 
-      let dispositivoNoObjeto = bmsList.find(b => b.code === idPlacaEmissora);
-      let statusAnteriorEraOffline = dispositivoNoObjeto ? !dispositivoNoObjeto.online : true;
+        let dispositivoNoObjeto = bmsList.find(b => b.code === idPlacaEmissora);
+        let statusAnteriorEraOffline = dispositivoNoObjeto ? !dispositivoNoObjeto.online : true;
 
-      if (dispositivoNoObjeto) {
-        dispositivoNoObjeto.online = true;
+        if (dispositivoNoObjeto) {
+          dispositivoNoObjeto.online = true;
+        }
+
+        if (statusAnteriorEraOffline && activeScreen === 'painel') {
+          bmsList.sort((a, b) => {
+            if (a.online && !b.online) return -1;
+            if (!a.online && b.online) return 1;
+            return (b.updated_at ? new Date(b.updated_at).getTime() : 0) - (a.updated_at ? new Date(a.updated_at).getTime() : 0);
+          });
+          atualizarHTMLListaBms();
+        }
+
+        const cardElemento = document.getElementById('admin-card-lista-' + idPlacaEmissora);
+        const dotElemento = document.getElementById('admin-dot-lista-' + idPlacaEmissora);
+
+        if (cardElemento && dotElemento) {
+          cardElemento.querySelector('.status').className = "status on";
+          dotElemento.textContent = "Online";
+
+          if (listaTimeoutsAdminCards[idPlacaEmissora]) clearTimeout(listaTimeoutsAdminCards[idPlacaEmissora]);
+          listaTimeoutsAdminCards[idPlacaEmissora] = setTimeout(function() {
+            if (dispositivoNoObjeto) dispositivoNoObjeto.online = false;
+            
+            if (activeScreen === 'painel') {
+              bmsList.sort((a, b) => {
+                if (a.online && !b.online) return -1;
+                if (!a.online && b.online) return 1;
+                return (b.updated_at ? new Date(b.updated_at).getTime() : 0) - (a.updated_at ? new Date(a.updated_at).getTime() : 0);
+              });
+              atualizarHTMLListaBms();
+            }
+          }, TEMPO_TIMEOUT_CONEXAO); // TIMEOUT DE LISTAGEM ADMIN AJUSTADO PARA 15s
+        }
+        atualizarContadoresFiltro();
+      } catch (err) {}
+    };
+
+    MQTT_CLIENT.connect({
+      userName: cred.user, password: cred.pass, useSSL: true, timeout: 5,
+      onSuccess: function () {
+        MQTT_CLIENT.subscribe("sl_bms/+/telemetria");
       }
-
-      if (statusAnteriorEraOffline && activeScreen === 'painel') {
-        bmsList.sort((a, b) => {
-          if (a.online && !b.online) return -1;
-          if (!a.online && b.online) return 1;
-          return (b.updated_at ? new Date(b.updated_at).getTime() : 0) - (a.updated_at ? new Date(a.updated_at).getTime() : 0);
-        });
-        atualizarHTMLListaBms();
-      }
-
-      const cardElemento = document.getElementById('admin-card-lista-' + idPlacaEmissora);
-      const dotElemento = document.getElementById('admin-dot-lista-' + idPlacaEmissora);
-
-      if (cardElemento && dotElemento) {
-        cardElemento.querySelector('.status').className = "status on";
-        dotElemento.textContent = "Online";
-
-        if (listaTimeoutsAdminCards[idPlacaEmissora]) clearTimeout(listaTimeoutsAdminCards[idPlacaEmissora]);
-        listaTimeoutsAdminCards[idPlacaEmissora] = setTimeout(function() {
-          if (dispositivoNoObjeto) dispositivoNoObjeto.online = false;
-          
-          if (activeScreen === 'painel') {
-            bmsList.sort((a, b) => {
-              if (a.online && !b.online) return -1;
-              if (!a.online && b.online) return 1;
-              return (b.updated_at ? new Date(b.updated_at).getTime() : 0) - (a.updated_at ? new Date(a.updated_at).getTime() : 0);
-            });
-            atualizarHTMLListaBms();
-          }
-        }, 5000);
-      }
-      atualizarContadoresFiltro();
-    } catch (err) {}
-  };
-
-  MQTT_CLIENT.connect({
-    userName: userMqtt, password: passMqtt, useSSL: true, timeout: 3,
-    onSuccess: function () {
-      MQTT_CLIENT.subscribe("sl_bms/+/telemetria");
-    }
-  });
+    });
+  } catch(e) {}
 }
 
 async function listarUsers(){
@@ -1328,7 +1336,7 @@ async function setupInicial() {
     await listarUsers();
   }
 }
-if(adminToken === 'admin_ok') setupInicial();
+if(adminToken) setupInicial();
 </script>
 </body>
 </html>
