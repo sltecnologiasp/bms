@@ -100,6 +100,11 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text-main);
   display: block;
 }
 
+/* AJUSTE AQUI: Adicionado padding-top para desgrudar o título do topo da tela no celular */
+#lista {
+  padding-top: 35px;
+}
+
 #dash:not(.hidden) {
   display: flex !important;
   flex-direction: column !important;
@@ -1356,7 +1361,7 @@ function conectarMqttParaListaDispositivos() {
 
   MQTT_CLIENT.onMessageArrived = function (message) {
     try {
-      const topicoLido = message.destinationName; 
+      const topico LIdo = message.destinationName; 
       const partesTopico = topicoLido.split('/');
       const idPlacaEmissora = partesTopico[1]; 
 
