@@ -16,6 +16,7 @@
 <meta property="og:url" content="https://bms.app.br/">
 <meta property="og:title" content="SMART BMS">
 <meta property="og:description" content="Gerenciamento e Monitoramento Avançado de Baterias em Tempo Real - SL Tecnologia">
+<meta property="og:url" content="https://bms.app.br/1000229030.png">
 <meta property="og:image" content="https://bms.app.br/1000229030.png">
 <meta property="og:image:secure_url" content="https://bms.app.br/1000229030.png">
 <meta property="og:image:width" content="300">
@@ -1011,10 +1012,14 @@ function login(){
   .then(function(r){return r.json();})
   .then(function(d){
     if(d.ok && d.token){
-      // REGRA DE DIRECIONAMENTO HÍBRIDA: ANALISA O PRIVILÉGIO DO USUÁRIO RETORNADO PELA API
+      // GRAVAÇÃO PERSISTENTE E DIRECIONAMENTO INTELIGENTE DA SESSÃO ADMIN
       if (d.user && d.user.role === 'admin') {
+        localStorage.setItem('admin_token', 'admin_ok');
+        localStorage.setItem('admin_active_screen', 'painel');
+        
         sessionStorage.setItem('admin_token', 'admin_ok');
         sessionStorage.setItem('admin_active_screen', 'painel');
+        
         window.location.href = '/admin.html';
       } else {
         TOKEN = d.token;
@@ -1630,6 +1635,18 @@ function atualizarGauge(soc){
   document.getElementById('socBarTxt').textContent = soc + '%';
   bar.style.width = soc + '%';
   gauge.style.background = 'conic-gradient(var(--green) 0deg,var(--cyan) '+(soc * 3.6)+'deg,var(--gauge-empty) '+(soc * 3.6)+'deg)';
+}
+
+function togglePass(inputId, iconEl) {
+  var input = document.getElementById(inputId);
+  if (!input) return;
+  if (input.type === "password") {
+    input.type = "text";
+    iconEl.style.opacity = ".8";
+  } else {
+    input.type = "password";
+    iconEl.style.opacity = ".3";
+  }
 }
 
 function gerenciarLayoutStatus(elementoCard, elementoTxt, ativo, textoAtivo, textoInativo) {
