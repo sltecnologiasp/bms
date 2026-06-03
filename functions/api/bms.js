@@ -102,7 +102,6 @@ export async function onRequest({ request, env }) {
       const senha_hash = Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2, '0')).join('');
       const token_verificacao = crypto.randomUUID();
       
-      // Criado por padrão como conta do tipo 'user'
       await env.DB.prepare('INSERT INTO users (nome, email, senha_hash, email_verificado, token_verificacao, role) VALUES (?, ?, ?, 0, ?, "user")')
         .bind(nome, userEmail, senha_hash, token_verificacao).run();
 
@@ -230,7 +229,7 @@ export async function onRequest({ request, env }) {
       return json({ ok: true });
     }
 
-    // ROTA 5: LOGIN USER COMUM
+    // ROTA 5: LOGIN USER
     if (action === 'login' && request.method === 'POST') {
       const { email, senha } = await request.json();
       const cleanEmail = (email || '').trim().toLowerCase();
@@ -256,13 +255,18 @@ export async function onRequest({ request, env }) {
       return json({ ok: true, token, user: { id: user.id, nome: user.nome, email: user.email, role: user.role || 'user' } });
     }
 
-    // ROTA 6: LOGIN ADMIN (CONSULTANDO DINAMICAMENTE O BANCO DE DADOS D1)
+    // ROTA 6: LOGIN ADMIN (MODO HÍBRIDO INTELIGENTE)
     if (action === 'login_admin' && request.method === 'POST') {
       const { user, password } = await request.json();
-      const cleanEmail = (user || '').trim().toLowerCase();
+      const cleanUser = (user || '').trim().toLowerCase();
 
-      // Procura o usuário e valida se ele possui privilégios de administrador ('admin')
-      const adminUser = await env.DB.prepare('SELECT id, senha_hash, email_verificado, role FROM users WHERE email = ? AND role = "admin"').bind(cleanEmail).first();
+      // MODO A: Credenciais Estáticas Legadas (Garante compatibilidade total imediata)
+      if (cleanUser === 'administrador' && password === '426240637') {
+        return json({ ok: true, token: 'admin_ok' });
+      }
+
+      // MODO B: Credenciais Dinâmicas do Banco D1 filtrando por role = "admin"
+      const adminUser = await env.DB.prepare('SELECT id, senha_hash, email_verificado FROM users WHERE email = ? AND role = "admin"').bind(cleanUser).first();
       
       if (!adminUser) {
         return json({ ok: false, error: 'Acesso administrativo negado ou e-mail inválido.' }, 401);
@@ -276,7 +280,7 @@ export async function onRequest({ request, env }) {
       }
 
       if (adminUser.email_verificado === 0) {
-        return json({ ok: false, error: 'Por favor, confirme seu e-mail antes de acessar o painel administrativo.' }, 403);
+        return json({ ok: false, error: 'Por favor, confirme seu e-mail antes de acessar.' }, 403);
       }
 
       return json({ ok: true, token: 'admin_ok' });
@@ -437,7 +441,7 @@ export async function onRequest({ request, env }) {
         return json({ ok: true });
       }
 
-      // LISTAR CLIENTES ADICIONANDO O RETORNO DA COLUNA ROLE (TIPO DE CONTA)
+      // LISTAR CLIENTES E SEUS PRIVILÉGIOS (ROLE)
       if (action === 'all_users' && request.method === 'GET') {
         const { results } = await env.DB.prepare(`
           SELECT u.id, u.nome, u.email, u.created_at, u.role, COUNT(bm.id) as bms_count
@@ -449,7 +453,7 @@ export async function onRequest({ request, env }) {
         return json(results || []);
       }
 
-      // SALVAR ALTERAÇÃO COMPLETA DE USUÁRIO (NOME, EMAIL, SENHA E TIPO DE CONTA)
+      // SALVAR EDICÃO INTEGRAL DO USUÁRIO NO MODAL (NOME, EMAIL, SENHA, CARGO)
       if (action === 'edit_user' && request.method === 'POST') {
         const body = await request.json();
         const { id, nome, email, role, password } = body;
@@ -459,14 +463,12 @@ export async function onRequest({ request, env }) {
         }
 
         if (password && password.trim() !== "") {
-          // Se uma nova senha foi enviada, gera o hash SHA-256 correspondente
           const hash = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(password));
           const senha_hash = Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2, '0')).join('');
           
           await env.DB.prepare('UPDATE users SET nome = ?, email = ?, role = ?, senha_hash = ? WHERE id = ?')
             .bind(nome, email.trim().toLowerCase(), role, senha_hash, id).run();
         } else {
-          // Se nenhuma senha foi informada, mantém a antiga intacta
           await env.DB.prepare('UPDATE users SET nome = ?, email = ?, role = ? WHERE id = ?')
             .bind(nome, email.trim().toLowerCase(), role, id).run();
         }
