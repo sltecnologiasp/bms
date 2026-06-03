@@ -236,23 +236,21 @@ button:active{transform:scale(0.98)}
 }
 .bms-item:hover{border-color:var(--cyan)}
 
-@media (prefers-reduced-motion: no-preference) {
-  @keyframes neonSuave {
-    0% { border-color: var(--green); box-shadow: 0 0 4px var(--neon-pulse-color); }
-    50% { border-color: var(--cyan); box-shadow: 0 0 12px var(--neon-pulse-color), 0 0 4px var(--green); }
-    100% { border-color: var(--green); box-shadow: 0 0 4px var(--neon-pulse-color); }
-  }
+@keyframes neonSuave {
+  0% { border-color: var(--green); box-shadow: 0 0 4px var(--neon-pulse-color); }
+  50% { border-color: var(--cyan); box-shadow: 0 0 12px var(--neon-pulse-color), 0 0 4px var(--green); }
+  100% { border-color: var(--green); box-shadow: 0 0 4px var(--neon-pulse-color); }
+}
 
-  .bms-item.online-active {
-    animation: neonSuave 2s infinite ease-in-out !important;
-    border-width: 1.5px !important;
-  }
+.bms-item.online-active {
+  animation: neonSuave 2s infinite ease-in-out !important;
+  border-width: 1.5px !important;
 }
 
 .bms-item h3{color:var(--text-main);font-size:19px;font-weight:800;margin-bottom:4px;width:100%}
 .bms-item p{color:var(--text-muted);font-size:13px;font-family:monospace;margin-bottom:8px;width:100%}
 
-.status-dot{display:inline-flex;align-items:center;justify-content:center;gap:12px;font-size:12px;font-weight:700;margin-bottom:14px;width:100%}
+.status-dot{display:inline-flex;align-items:center;justify-content:center;gap:6px;font-size:12px;font-weight:700;margin-bottom:14px;width:100%}
 .status-dot::before{content:'';width:8px;height:8px;border-radius:50%;display:inline-block}
 .status-dot.on{color:var(--green)}.status-dot.on::before{background:var(--green);box-shadow:0 0 8px var(--green)}
 .status-dot.off{color:var(--red)}.status-dot.off::before{background:var(--red);box-shadow:0 0 8px var(--red)}
@@ -441,6 +439,7 @@ button:active{transform:scale(0.98)}
 .link-esqueceu{display:block;text-align:right;font-size:12px;color:var(--text-muted);margin-top:8px;cursor:pointer;text-decoration:none;transition:color 0.2s}
 .link-esqueceu:hover{color:var(--blue)}
 
+/* CORREÇÃO GLOBAL: EXPANSÃO DE MARGIN-TOP PARA REPOSICIONAR O RODAPÉ NA BASE */
 .footer-link{font-size:11px;margin-top:120px;text-align:center;letter-spacing:1px;line-height:1.6;padding-bottom:24px}
 .footer-link a{color:var(--blue);text-decoration:none;font-weight:600;transition:opacity 0.2s;}
 .footer-link a:hover{opacity:0.8;text-decoration:underline;}
@@ -826,23 +825,11 @@ window.onload = function(){
     return;
   }
 
-  // FAXINA DE CACHE INTEGRADA: Limpa resíduos antigos de sessões desatualizadas[cite: 3]
-  if (!TOKEN || !USER || typeof USER !== 'object' || !USER.role) {
-    localStorage.removeItem('bms_token');
-    localStorage.removeItem('bms_user');
-    localStorage.removeItem('bms_codigo_ativo');
-    localStorage.removeItem('admin_token');
-    localStorage.removeItem('admin_active_screen');
-    sessionStorage.clear();
-    
-    TOKEN = null;
-    USER = null;
-    CODIGO = null;
-    
+  if(TOKEN && USER){
+    if(CODIGO){ abrirDash(CODIGO); } else { mostrarLista(); }
+  }else{
     esconderTudo();
     document.getElementById('login').classList.remove('hidden');
-  } else {
-    if(CODIGO){ abrirDash(CODIGO); } else { mostrarLista(); }
   }
 
   var bmsInput = document.getElementById('bms-code');
@@ -1023,22 +1010,11 @@ function login(){
   .then(function(r){return r.json();})
   .then(function(d){
     if(d.ok && d.token){
-      // GRAVAÇÃO PERSISTENTE E DIRECIONAMENTO INTELIGENTE DA SESSÃO ADMIN
-      if (d.user && d.user.role === 'admin') {
-        localStorage.setItem('admin_token', 'admin_ok');
-        localStorage.setItem('admin_active_screen', 'painel');
-        
-        sessionStorage.setItem('admin_token', 'admin_ok');
-        sessionStorage.setItem('admin_active_screen', 'painel');
-        
-        window.location.href = '/admin.html';
-      } else {
-        TOKEN = d.token;
-        USER = d.user; 
-        localStorage.setItem('bms_token', TOKEN);
-        localStorage.setItem('bms_user', JSON.stringify(USER));
-        mostrarLista();
-      }
+      TOKEN = d.token;
+      USER = d.user; 
+      localStorage.setItem('bms_token', TOKEN);
+      localStorage.setItem('bms_user', JSON.stringify(USER));
+      mostrarLista();
     }else{
       if (e) {
         e.textContent = d.error || 'Erro ao realizar login';
@@ -1492,7 +1468,7 @@ function configurarInterfaceEstadoOffline() {
 function processarERenderizarDadosMqtt(d) {
   if (bmsTimeoutTimer) clearTimeout(bmsTimeoutTimer);
   bmsTimeoutTimer = setTimeout(function() {
-    console.log("[SISTEMA] Forçando queda do painel por inatividade.");
+    console.log("[SISTEMA] Fluxo interrompido por mais de 5s. Forçando queda do painel.");
     configurarInterfaceEstadoOffline(); 
   }, 5000); 
 
@@ -1545,6 +1521,9 @@ function voltar(){
   clearInterval(INT); 
   localStorage.removeItem('bms_codigo_ativo'); 
   mostrarLista(); 
+}
+
+function carregarLista(){
 }
 
 function removerBms(code, nome){
@@ -1667,7 +1646,6 @@ function sairSemConfirmacao(){
   localStorage.removeItem('bms_token'); 
   localStorage.removeItem('bms_user'); 
   localStorage.removeItem('bms_codigo_ativo'); 
-  sessionStorage.clear();
   location.reload(); 
 }
 </script>

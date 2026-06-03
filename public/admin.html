@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Admin BMS</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2=family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
 <style>
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 :root{
@@ -30,7 +30,7 @@
 
 body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text-main);min-height:100vh;width:100%;overflow-x:hidden}
 
-#painel,#clientesPage,#dashAdmin{
+#login,#painel,#clientesPage,#dashAdmin{
   position:relative;
   z-index:1;
   width:100%;
@@ -43,6 +43,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text-main);
   align-items:center;
   justify-content:center;
 }
+#login{display:flex}
 #painel.active,#clientesPage.active,#dashAdmin.active{display:flex}
 
 #painel, #clientesPage, #dashAdmin {
@@ -69,6 +70,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text-main);
   box-shadow: var(--neon-glow);
 }
 
+#login .card { max-width:440px }
 #dashAdmin .card { width:100%; max-width:100%; margin-bottom:0 !important; }
 .card-cadastro { width: 100%; max-width: 100% !important; margin: 0 auto 12px auto !important; }
 
@@ -96,19 +98,6 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text-main);
   color: var(--text-muted);
 }
 
-.lista-separador-titulo {
-  font-size: 13px;
-  letter-spacing: 1.5px;
-  text-transform: uppercase;
-  width: 100%;
-  margin: 16px 0 8px 4px;
-  font-weight: 900;
-  color: var(--blue);
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
 input,select,button{width:100%;padding:16px;border-radius:14px;border:none;outline:none;font-size:16px;font-family:inherit;transition:all 0.2s ease}
 input,select{
   background:var(--input-bg);
@@ -132,7 +121,7 @@ button:active{transform:scale(0.98)}
 .btn-sec{background:transparent;border:1px solid var(--cyan);color:var(--cyan);box-shadow:none}
 .btn-clientes{background:transparent;border:1px solid var(--green);color:var(--green);box-shadow:none}
 
-button.del{background:transparent;border:1px solid var(--input-border);color:var(--text-muted);font-size:12px;padding:14px;box-shadow:none;font-weight:700;width:100%}
+button.del{background:transparent;border:1px solid var(--input-border);color:var(--text-muted);font-size:12px;padding:10px;box-shadow:none;font-weight:700;width:100%}
 button.del:hover{background:rgba(231,29,54,0.08);color:var(--red);border-color:var(--red)}
 
 button.edit{background:transparent;border:1px solid var(--cyan);color:var(--cyan);font-size:13px;padding:12px;margin-top:auto;box-shadow:none;font-weight:700}
@@ -181,7 +170,7 @@ button.logout:hover{background:rgba(231,29,54,0.08);color:var(--red);border-colo
 }
 
 #lista, #listaUsers { width: 100% }
-#listaUsers { display: flex; flex-direction: column; gap: 4px; }
+#listaUsers { display: flex; flex-direction: column; gap: 12px; }
 
 #lista .card {
   background:var(--card-bg);
@@ -199,10 +188,10 @@ button.logout:hover{background:rgba(231,29,54,0.08);color:var(--red);border-colo
   box-shadow: var(--neon-glow);
   width:100%;
 }
-#listaUsers .card { background:var(--card-bg); border:1px solid var(--card-border); border-radius:20px; padding:20px; cursor:default; width:100%; max-width:100% !important; margin-bottom: 12px !important; }
+#listaUsers .card { background:var(--card-bg); border:1px solid var(--card-border); border-radius:20px; padding:20px; cursor:default; width:100%; max-width:100% !important }
 #lista .card:hover{border-color:var(--cyan)}
 
-.card-empty{min-height:100px;display:flex;align-items:center;justify-content:center;color:var(--text-muted);font-size:14px; background: rgba(0,0,0,0.02); border: 1px dashed var(--input-border); border-radius: 16px; width: 100%;}
+.card-empty{grid-column:1/-1;min-height:180px;display:flex;align-items:center;justify-content:center;color:var(--text-muted);font-size:14px}
 
 .status{display:inline-flex;align-items:center;justify-content:center;gap:6px;font-size:11px;font-weight:700}
 .status::before{content:'';width:7px;height:7px;border-radius:50%;display:inline-block}
@@ -212,7 +201,6 @@ button.logout:hover{background:rgba(231,29,54,0.08);color:var(--red);border-colo
 .badge{display:inline-block;padding:4px 8px;border-radius:6px;font-size:10px;font-weight:700;margin-top:4px;text-align:center;max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .badge-green{background:rgba(46,196,182,0.1);color:var(--green);border:1px solid var(--green)}
 .badge-orange{background:rgba(255,159,28,0.1);color:var(--orange);border:1px solid var(--orange)}
-.badge-blue{background:rgba(0,119,182,0.1);color:var(--blue);border:1px solid var(--blue); margin-left:5px;}
 
 .card-code{font-size:13px;font-weight:800;font-family:monospace;color:var(--text-main);margin:6px 0;text-align:center;letter-spacing:0.2px;word-break:break-all}
 .card-top{display:flex;flex-direction:column;justify-content:flex-start;align-items:center;width:100%}
@@ -351,23 +339,11 @@ button.logout:hover{background:rgba(231,29,54,0.08);color:var(--red);border-colo
   -webkit-backdrop-filter:blur(10px) !important;
   z-index:99999 !important; 
   padding:20px !important;
-  overflow-y: auto;
 }
 .modal.active{
   display:flex !important; 
   align-items:center !important;
   justify-content:center !important;
-}
-.modal-content.small {
-  background: var(--card-bg);
-  border: 1px solid var(--card-border);
-  border-radius: 20px;
-  padding: 24px;
-  width: 100%;
-  max-width: 440px;
-  box-shadow: var(--neon-glow);
-  max-height: 90vh;
-  overflow-y: auto;
 }
 
 @media(max-width:599px){
@@ -401,6 +377,19 @@ button.logout:hover{background:rgba(231,29,54,0.08);color:var(--red);border-colo
 </head>
 <body>
 
+<div id="login">
+  <div class="title">SMART BMS</div>
+  <div class="user-info">Acesso Administrativo</div>
+  <div class="card">
+    <div class="label">Usuário</div>
+    <input id="user" placeholder="administrador" autocomplete="username" value="administrador">
+    <div class="label" style="margin-top:16px">Senha</div>
+    <input id="password" type="password" placeholder="••••••••" autocomplete="current-password">
+    <button onclick="adminLogin()">ENTRAR NO PAINEL</button>
+    <div id="loginError" class="erro hidden"></div>
+  </div>
+</div>
+
 <div id="painel">
   <div class="title" style="font-size:clamp(28px,6vw,32px);margin-bottom:4px">SMART BMS</div>
   <div class="user-info">Painel Administrativo</div>
@@ -433,7 +422,7 @@ button.logout:hover{background:rgba(231,29,54,0.08);color:var(--red);border-colo
 
 <div id="clientesPage">
   <div class="title" style="font-size:clamp(28px,6vw,32px);margin-bottom:4px">SMART BMS</div>
-  <div class="user-info">Lista Geral de Usuários</div>
+  <div class="user-info">Clientes Cadastrados</div>
   
   <div style="background:transparent; border:none; box-shadow:none; padding:0; width:100%">
     <div id="listaUsers"></div>
@@ -562,21 +551,10 @@ button.logout:hover{background:rgba(231,29,54,0.08);color:var(--red);border-colo
   <div class="modal-content small">
     <h2 style="text-align:center;margin-bottom:16px;font-size:20px;font-weight:900;background:linear-gradient(90deg,var(--blue),var(--cyan));-webkit-background-clip:text;-webkit-text-fill-color:transparent">Editar Cliente</h2>
     <input id="editUserId" type="hidden">
-    
     <div class="label">Nome do Cliente</div>
     <input id="editUserNome" placeholder="Nome">
-    
     <div class="label" style="margin-top:12px">E-mail de Acesso</div>
     <input id="editUserEmail" placeholder="Email">
-    
-    <div class="label" style="margin-top:12px">Nova Senha (Deixe em branco para manter)</div>
-    <input id="editUserPassword" type="password" placeholder="••••••••">
-    
-    <div class="label" style="margin-top:12px">Tipo de Conta</div>
-    <select id="editUserRole" style="width:100%; margin-top:6px;">
-      <option value="user">Usuário Comum</option>
-      <option value="admin">Administrador</option>
-    </select>
     
     <button onclick="salvarUser()">SALVAR ALTERAÇÕES</button>
     <button class="btn-sec" style="margin-top:8px" onclick="closeEditUser()">← VOLTAR</button>
@@ -586,31 +564,55 @@ button.logout:hover{background:rgba(231,29,54,0.08);color:var(--red);border-colo
 </div>
 
 <script>
+// CONFIGURAÇÃO DA ROTA: Mapeada para o padrão serverless sem extensão do Cloudflare Pages Functions
 const API = '/api/bms';
-
-let adminToken = localStorage.getItem('admin_token') || sessionStorage.getItem('admin_token');
+let adminToken = sessionStorage.getItem('admin_token');
 let bmsList = [];
-let activeBmsCode = localStorage.getItem('admin_active_bms_code') || sessionStorage.getItem('admin_active_bms_code');
-let activeScreen = localStorage.getItem('admin_active_screen') || sessionStorage.getItem('admin_active_screen') || 'painel';
+let activeBmsCode = sessionStorage.getItem('admin_active_bms_code');
+let activeScreen = sessionStorage.getItem('admin_active_screen') || 'painel';
 
 let filtroAtivo = 'todas';
+
+let TIMEOUT_ADMIN_LOGIN = null;
 let TIMEOUT_ADMIN_MSG = null;
 
 let MQTT_CLIENT = null;
 let bmsTimeoutTimerAdmin = null;         
 let listaTimeoutsAdminCards = {};      
 
-if (adminToken !== 'admin_ok') {
-  localStorage.removeItem('admin_token');
-  sessionStorage.clear();
-  window.location.href = '/'; 
-} else {
+if(adminToken === 'admin_ok') {
   if (activeScreen === 'dashAdmin' && activeBmsCode) {
     showDashAdmin(activeBmsCode);
   } else if (activeScreen === 'clientesPage') {
     showClientesPage();
   } else {
     showPainelPage();
+  }
+}
+
+async function adminLogin(){
+  const user = document.getElementById('user').value;
+  const password = document.getElementById('password').value;
+  const errorEl = document.getElementById('loginError');
+  errorEl.classList.add('hidden');
+  clearTimeout(TIMEOUT_ADMIN_LOGIN);
+
+  try {
+    const r = await fetch(API+'?action=login_admin',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({user,password})});
+    const d = await r.json();
+    if(d.ok){
+      adminToken = d.token;
+      sessionStorage.setItem('admin_token', adminToken);
+      showPainelPage();
+    }else{
+      errorEl.textContent = d.error || 'Credenciais inválidas';
+      errorEl.classList.remove('hidden');
+      TIMEOUT_ADMIN_LOGIN = setTimeout(() => { errorEl.classList.add('hidden'); }, 3000);
+    }
+  } catch(e) {
+    errorEl.textContent = 'Erro de comunicação com o servidor';
+    errorEl.classList.remove('hidden');
+    TIMEOUT_ADMIN_LOGIN = setTimeout(() => { errorEl.classList.add('hidden'); }, 3000);
   }
 }
 
@@ -633,9 +635,9 @@ function fecharMqttAnterior() {
 function showPainelPage() {
   fecharMqttAnterior();
   activeScreen = 'painel';
-  localStorage.setItem('admin_active_screen', 'painel');
   sessionStorage.setItem('admin_active_screen', 'painel');
   
+  document.getElementById('login').style.display = 'none';
   document.getElementById('clientesPage').style.display = 'none';
   document.getElementById('clientesPage').classList.remove('active');
   document.getElementById('dashAdmin').style.display = 'none';
@@ -649,9 +651,9 @@ function showPainelPage() {
 function showClientesPage(){
   fecharMqttAnterior();
   activeScreen = 'clientesPage';
-  localStorage.setItem('admin_active_screen', 'clientesPage');
   sessionStorage.setItem('admin_active_screen', 'clientesPage');
   
+  document.getElementById('login').style.display = 'none';
   document.getElementById('painel').classList.remove('active');
   document.getElementById('painel').style.display = 'none';
   document.getElementById('dashAdmin').classList.remove('active');
@@ -666,12 +668,10 @@ function showDashAdmin(code) {
   fecharMqttAnterior();
   activeBmsCode = code;
   activeScreen = 'dashAdmin';
-  
-  localStorage.setItem('admin_active_bms_code', code);
-  localStorage.setItem('admin_active_screen', 'dashAdmin');
   sessionStorage.setItem('admin_active_bms_code', code);
   sessionStorage.setItem('admin_active_screen', 'dashAdmin');
   
+  document.getElementById('login').style.display = 'none';
   document.getElementById('painel').classList.remove('active');
   document.getElementById('painel').style.display = 'none';
   document.getElementById('clientesPage').classList.remove('active');
@@ -686,16 +686,7 @@ function showDashAdmin(code) {
 
 function mostrarClientes(){ showClientesPage(); }
 function voltarPainel(){ showPainelPage(); }
-
-function adminLogout(){ 
-  fecharMqttAnterior(); 
-  localStorage.removeItem('admin_token');
-  localStorage.removeItem('admin_active_screen');
-  localStorage.removeItem('admin_active_bms_code');
-  sessionStorage.clear(); 
-  window.location.href = '/'; 
-}
-
+function adminLogout(){ fecharMqttAnterior(); sessionStorage.clear(); location.reload(); }
 function authHeaders(){ return {'Content-Type':'application/json','Authorization':'Bearer '+adminToken}; }
 
 document.getElementById('code').oninput = e => {
@@ -790,6 +781,7 @@ async function enviarFirmwareOta() {
       statusMsg.textContent = 'Upload concluído! Conectando canal expresso via HiveMQ...';
       statusMsg.style.color = 'var(--cyan)';
 
+      // MOTOR DE DISPARO EXPRESSO (Corrige o bug de falso-desconectado do canal MQTT geral)
       const hostMqtt = "965bd6abd6f54692b84d710cab8327b4.s1.eu.hivemq.cloud"; 
       const portaMqtt = 8884;                     
       const userMqtt = "sl_bms_prod";             
@@ -836,7 +828,6 @@ async function enviarFirmwareOta() {
 
 function closeBmsModal(){
   activeBmsCode = null;
-  localStorage.removeItem('admin_active_bms_code');
   sessionStorage.removeItem('admin_active_bms_code');
   showPainelPage();
 }
@@ -1129,12 +1120,10 @@ function renderAdminCells(cells){
   }
 }
 
-function editarUser(id, nome, email, role){
+function editarUser(id, nome, email){
   document.getElementById('editUserId').value = id;
   document.getElementById('editUserNome').value = nome;
   document.getElementById('editUserEmail').value = email;
-  document.getElementById('editUserPassword').value = ''; 
-  document.getElementById('editUserRole').value = role || 'user';
   document.getElementById('editMsg').textContent = '';
   document.getElementById('modalEditUser').classList.add('active');
 }
@@ -1145,23 +1134,12 @@ async function salvarUser(){
   const id = document.getElementById('editUserId').value;
   const nome = document.getElementById('editUserNome').value;
   const email = document.getElementById('editUserEmail').value;
-  const password = document.getElementById('editUserPassword').value;
-  const role = document.getElementById('editUserRole').value;
   const msg = document.getElementById('editMsg');
 
-  const payload = { id: parseInt(id), nome, email, role };
-  if(password.trim() !== "") {
-    payload.password = password;
-  }
-
-  const r = await fetch(API+'?action=edit_user',{
-    method:'POST',
-    headers:authHeaders(),
-    body:JSON.stringify(payload)
-  });
+  const r = await fetch(API+'?action=edit_user',{method:'POST',headers:authHeaders(),body:JSON.stringify({id:parseInt(id),nome,email})});
   const d = await r.json();
   if(d.ok){
-    msg.textContent = 'Salvo com sucesso!';
+    msg.textContent = 'Salvo!';
     msg.style.color = 'var(--green)';
     setTimeout(()=>{closeEditUser();listarUsers();},1000);
   }else{
@@ -1321,19 +1299,11 @@ async function listarUsers(){
   if(r.status===401){adminLogout();return;}
   const d = await r.json();
   
-  // FILTRAGEM INTELIGENTE DE SEÇÃO: Divide os usuários do banco em dois grupos distintos
-  const administradores = d.filter(u => u.role === 'admin');
-  const clientesComuns = d.filter(u => u.role !== 'admin');
-
-  // Função auxiliar interna para gerar o HTML do card de forma limpa e estruturada
-  function gerarCardUsuarioHTML(u) {
-    const labelTipoConta = u.role === 'admin' ? '<span class="badge badge-blue">Administrador</span>' : '<span class="badge badge-green">Usuário</span>';
-    
-    return `
+  document.getElementById('listaUsers').innerHTML = d.map(u=>`
     <div class="card">
       <div class="card-top">
         <div style="text-align:center;margin-bottom:12px">
-          <b style="font-size:18px;color:var(--text-main)">${u.nome}</b> ${labelTipoConta}
+          <b style="font-size:18px;color:var(--text-main)">${u.nome}</b>
           <div style="opacity:.6;font-size:13px;margin-top:4px;word-break:break-all;font-family:monospace;color:var(--text-muted)">${u.email}</div>
           <div style="opacity:.5;font-size:11px;margin-top:4px;color:var(--text-muted)">Cadastro: ${new Date(u.created_at).toLocaleDateString('pt-BR')}</div>
         </div>
@@ -1342,36 +1312,23 @@ async function listarUsers(){
           <div class="value" style="color:var(--cyan);font-size:20px;margin:0">${u.bms_count}</div>
         </div>
       </div>
-      <div class="btn-group" style="display: flex; flex-direction: column; gap: 6px; width: 100%;">
-        <button class="edit" onclick="editarUser(${u.id},'${u.nome}','${u.email}','${u.role}')">EDITAR</button>
-        <button class="vincular" onclick="abrirModalVincular(${u.id}, '${u.nome}')" style="width:100%; margin-top:0;">+ VINCULAR BMS</button>
-        <button class="desvincular" onclick="abrirModalDesvincular(${u.id}, '${u.nome}')" style="width:100%; margin-top:0;">- DESVINCULAR BMS</button>
-        <button class="del" onclick="deletarUser(${u.id},'${u.nome}')" style="margin-top: 6px;">EXCLUIR USUÁRIO</button>
+      <div class="btn-group">
+        <button class="edit" onclick="editarUser(${u.id},'${u.nome}','${u.email}')">EDITAR</button>
+        <button class="del" onclick="deletarUser(${u.id},'${u.nome}')">EXCLUIR</button>
       </div>
+      <button class="vincular" onclick="abrirModalVincular(${u.id}, '${u.nome}')" style="width:100%">+ VINCULAR BMS</button>
+      <button class="desvincular" onclick="abrirModalDesvincular(${u.id}, '${u.nome}')" style="width:100%">- DESVINCULAR BMS</button>
     </div>
-    `;
-  }
-
-  let htmlResultado = '';
-
-  // 1. Renderiza Grupo de Administradores
-  htmlResultado += `<div class="lista-separador-titulo">🛠️ Administradores do Sistema (${administradores.length})</div>`;
-  if(administradores.length === 0) {
-    htmlResultado += `<div class="card-empty">Nenhum administrador cadastrado</div>`;
-  } else {
-    htmlResultado += administradores.map(gerarCardUsuarioHTML).join('');
-  }
-
-  // 2. Renderiza Grupo de Usuários Comuns
-  htmlResultado += `<div class="lista-separador-titulo" style="margin-top:28px; var(--green)">👥 Clientes Monitorados (${clientesComuns.length})</div>`;
-  if(clientesComuns.length === 0) {
-    htmlResultado += `<div class="card-empty">Nenhum cliente comum cadastrado</div>`;
-  } else {
-    htmlResultado += clientesComuns.map(gerarCardUsuarioHTML).join('');
-  }
-
-  document.getElementById('listaUsers').innerHTML = htmlResultado;
+  `).join('') || '<div class="card card-empty"><div>Nenhum cliente cadastrado</div></div>';
 }
+
+async function setupInicial() {
+  await carregarTudo();
+  if (activeScreen === 'clientesPage') {
+    await listarUsers();
+  }
+}
+if(adminToken === 'admin_ok') setupInicial();
 </script>
 </body>
 </html>
