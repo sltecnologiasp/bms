@@ -217,7 +217,7 @@ export async function onRequest({ request, env }) {
     // ROTA 4: SALVAR NOVA SENHA REDEFINIDA SOZINHO
     if (action === 'reset_password' && request.method === 'POST') {
       const { token, novaSenha } = await request.json();
-      if (!token || !novaSenha) return json({ ok: false, error: 'Dados incompletom' }, 400);
+      if (!token || !novaSenha) return json({ ok: false, error: 'Dados incompletos' }, 400);
 
       const user = await env.DB.prepare('SELECT id FROM users WHERE token_verificacao = ?').bind(token).first();
       if (!user) return json({ ok: false, error: 'Link de redefinição inválido ou já utilizado.' }, 400);
@@ -522,9 +522,10 @@ export async function onRequest({ request, env }) {
       return json({ ok: true });
     }
 
+    // CORREÇÃO EFETUADA AQUI: Removido termo incorreto gerado por corretor ortográfico
     if (action === 'user_bms' && request.method === 'GET') {
       if (!userId) return json({ ok: false, error: 'Login necessário' }, 401);
-      const { results } = await env.DB.prepare suicide(`
+      const { results } = await env.DB.prepare(`
         SELECT m.code, ub.bms_nome as nome, datetime(b.updated_at) || 'Z' as updated_at, b.soc, b.voltage
         FROM bms_master m
         LEFT JOIN user_bms ub ON ub.bms_code = m.code AND ub.user_id = m.user_id
