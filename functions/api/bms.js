@@ -30,7 +30,6 @@ export async function onRequest({ request, env }) {
           return json({ ok: false, error: 'Código inválido enviado pelo hardware' }, 400);
         }
         
-        // Insere na tabela bms_master. Se já existir, ignora para não dar erro de duplicidade
         await env.DB.prepare("INSERT OR IGNORE INTO bms_master (code, user_id) VALUES (?, NULL)").bind(code).run();
         return json({ ok: true, message: 'Hardware registrado com sucesso!' }, 200);
       } catch (dbErr) {
@@ -102,7 +101,7 @@ export async function onRequest({ request, env }) {
       const hash = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(senha));
       const senha_hash = Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2, '0')).join('');
       const token_verificacao = crypto.randomUUID();
-      await env.DB.prepare('INSERT INTO users (nome, email, senha_hash, email_verificado, token_verificacao) VALUES (?, ?, ?, 0, ?)')
+      await env.DB.prepare('INSERT INTO users (nome, email, senha_hash, email_verificado, token_verificacao, role) VALUES (?, ?, ?, 0, ?, "user")')
         .bind(nome, userEmail, senha_hash, token_verificacao).run();
 
       if (env.RESEND_API_KEY) {
@@ -234,7 +233,7 @@ export async function onRequest({ request, env }) {
       const { email, senha } = await request.json();
       const cleanEmail = (email || '').trim().toLowerCase();
 
-      const user = await env.DB.prepare('SELECT id, nome, email, senha_hash, email_verificado FROM users WHERE email = ?').bind(cleanEmail).first();
+      const user = await env.DB.prepare('SELECT id, nome, email, senha_hash, email_verificado, role FROM users WHERE email = ?').bind(cleanEmail).first();
       
       if (!user) {
         return json({ ok: false, error: 'E-mail não cadastrado' }, 401);
@@ -252,7 +251,7 @@ export async function onRequest({ request, env }) {
       }
 
       const token = btoa(`user:${user.id}:${Date.now()}`);
-      return json({ ok: true, token, user: { id: user.id, nome: user.nome, email: user.email } });
+      return json({ ok: true, token, user: { id: user.id, nome: user.nome, email: user.email, role: user.role || 'user' } });
     }
 
     // ROTA 6: LOGIN ADMIN
@@ -417,9 +416,10 @@ export async function onRequest({ request, env }) {
         return json({ ok: true });
       }
 
+      // LISTAR CLIENTES E SEUS RESPECTIVOS CARGOS (ROLE)
       if (action === 'all_users' && request.method === 'GET') {
         const { results } = await env.DB.prepare(`
-          SELECT u.id, u.nome, u.email, u.created_at, COUNT(bm.id) as bms_count
+          SELECT u.id, u.nome, u.email, u.created_at, u.role, COUNT(bm.id) as bms_count
           FROM users u
           LEFT JOIN bms_master bm ON bm.user_id = u.id
           GROUP BY u.id
@@ -428,9 +428,28 @@ export async function onRequest({ request, env }) {
         return json(results || []);
       }
 
+      // SALVAR ALTERAÇÕES COMPLETA DE USUÁRIO (NOME, EMAIL, PASSWORD, ROLE)
       if (action === 'edit_user' && request.method === 'POST') {
-        const { id, nome, email } = await request.json();
-        await env.DB.prepare('UPDATE users SET nome = ?, email = ? WHERE id = ?').bind(nome, email.trim().toLowerCase(), id).run();
+        const body = await request.json();
+        const { id, nome, email, role, password } = body;
+        
+        if (!id || !nome || !email || !role) {
+          return json({ ok: false, error: 'Campos obrigatórios ausentes.' }, 400);
+        }
+
+        if (password && password.trim() !== "") {
+          // Se uma nova senha foi enviada, gera o hash SHA-256 antes de salvar
+          const hash = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(password));
+          const senha_hash = Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2, '0')).join('');
+          
+          await env.DB.prepare('UPDATE users SET nome = ?, email = ?, role = ?, senha_hash = ? WHERE id = ?')
+            .bind(nome, email.trim().toLowerCase(), role, senha_hash, id).run();
+        } else {
+          // Se nenhuma senha foi preenchida, atualiza os dados preservando a antiga
+          await env.DB.prepare('UPDATE users SET nome = ?, email = ?, role = ? WHERE id = ?')
+            .bind(nome, email.trim().toLowerCase(), role, id).run();
+        }
+        
         return json({ ok: true });
       }
 
