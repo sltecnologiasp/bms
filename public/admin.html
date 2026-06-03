@@ -96,6 +96,19 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text-main);
   color: var(--text-muted);
 }
 
+.lista-separador-titulo {
+  font-size: 13px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  width: 100%;
+  margin: 16px 0 8px 4px;
+  font-weight: 900;
+  color: var(--blue);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
 input,select,button{width:100%;padding:16px;border-radius:14px;border:none;outline:none;font-size:16px;font-family:inherit;transition:all 0.2s ease}
 input,select{
   background:var(--input-bg);
@@ -168,7 +181,7 @@ button.logout:hover{background:rgba(231,29,54,0.08);color:var(--red);border-colo
 }
 
 #lista, #listaUsers { width: 100% }
-#listaUsers { display: flex; flex-direction: column; gap: 12px; }
+#listaUsers { display: flex; flex-direction: column; gap: 4px; }
 
 #lista .card {
   background:var(--card-bg);
@@ -186,10 +199,10 @@ button.logout:hover{background:rgba(231,29,54,0.08);color:var(--red);border-colo
   box-shadow: var(--neon-glow);
   width:100%;
 }
-#listaUsers .card { background:var(--card-bg); border:1px solid var(--card-border); border-radius:20px; padding:20px; cursor:default; width:100%; max-width:100% !important }
+#listaUsers .card { background:var(--card-bg); border:1px solid var(--card-border); border-radius:20px; padding:20px; cursor:default; width:100%; max-width:100% !important; margin-bottom: 12px !important; }
 #lista .card:hover{border-color:var(--cyan)}
 
-.card-empty{grid-column:1/-1;min-height:180px;display:flex;align-items:center;justify-content:center;color:var(--text-muted);font-size:14px}
+.card-empty{min-height:100px;display:flex;align-items:center;justify-content:center;color:var(--text-muted);font-size:14px; background: rgba(0,0,0,0.02); border: 1px dashed var(--input-border); border-radius: 16px; width: 100%;}
 
 .status{display:inline-flex;align-items:center;justify-content:center;gap:6px;font-size:11px;font-weight:700}
 .status::before{content:'';width:7px;height:7px;border-radius:50%;display:inline-block}
@@ -232,7 +245,7 @@ button.logout:hover{background:rgba(231,29,54,0.08);color:var(--red);border-colo
 }
 
 .gauge-card{padding:15px;min-height:230px;display:flex;flex-direction:column;gap:10px;justify-content:center}
-.gauge(width:min(190px,48vw);height:min(190px,48vw);margin:auto;border-radius:50%;background:conic-gradient(var(--green) 0deg,var(--cyan) 180deg,var(--gauge-empty) 180deg);position:relative;box-shadow:0 0 30px rgba(0,255,255,.05);transition:background .8s ease}
+.gauge{width:min(190px,48vw);height:min(190px,48vw);margin:auto;border-radius:50%;background:conic-gradient(var(--green) 0deg,var(--cyan) 180deg,var(--gauge-empty) 180deg);position:relative;box-shadow:0 0 30px rgba(0,255,255,.05);transition:background .8s ease}
 .gauge::before{content:'';position:absolute;inset:16px;border-radius:50%;background:var(--bg);transition: background 0.3s}
 .gauge-inner{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;align-items:center;z-index:2}
 .gauge-value{font-size:clamp(36px,9vw,52px);font-weight:900;color:var(--green)}
@@ -420,7 +433,7 @@ button.logout:hover{background:rgba(231,29,54,0.08);color:var(--red);border-colo
 
 <div id="clientesPage">
   <div class="title" style="font-size:clamp(28px,6vw,32px);margin-bottom:4px">SMART BMS</div>
-  <div class="user-info">Clientes Cadastrados</div>
+  <div class="user-info">Lista Geral de Usuários</div>
   
   <div style="background:transparent; border:none; box-shadow:none; padding:0; width:100%">
     <div id="listaUsers"></div>
@@ -575,7 +588,6 @@ button.logout:hover{background:rgba(231,29,54,0.08);color:var(--red);border-colo
 <script>
 const API = '/api/bms';
 
-// BARREIRA HIDRICA PERSISTENTE: Lê tokens de qualquer contexto seguro gravado
 let adminToken = localStorage.getItem('admin_token') || sessionStorage.getItem('admin_token');
 let bmsList = [];
 let activeBmsCode = localStorage.getItem('admin_active_bms_code') || sessionStorage.getItem('admin_active_bms_code');
@@ -588,7 +600,6 @@ let MQTT_CLIENT = null;
 let bmsTimeoutTimerAdmin = null;         
 let listaTimeoutsAdminCards = {};      
 
-// FILTRO DE SEGURANÇA SEGURO CONTRA INVADOES POR URL DIRECTA
 if (adminToken !== 'admin_ok') {
   localStorage.removeItem('admin_token');
   sessionStorage.clear();
@@ -1310,7 +1321,12 @@ async function listarUsers(){
   if(r.status===401){adminLogout();return;}
   const d = await r.json();
   
-  document.getElementById('listaUsers').innerHTML = d.map(u=>{
+  // FILTRAGEM INTELIGENTE DE SEÇÃO: Divide os usuários do banco em dois grupos distintos
+  const administradores = d.filter(u => u.role === 'admin');
+  const clientesComuns = d.filter(u => u.role !== 'admin');
+
+  // Função auxiliar interna para gerar o HTML do card de forma limpa e estruturada
+  function gerarCardUsuarioHTML(u) {
     const labelTipoConta = u.role === 'admin' ? '<span class="badge badge-blue">Administrador</span>' : '<span class="badge badge-green">Usuário</span>';
     
     return `
@@ -1333,7 +1349,28 @@ async function listarUsers(){
         <button class="del" onclick="deletarUser(${u.id},'${u.nome}')" style="margin-top: 6px;">EXCLUIR USUÁRIO</button>
       </div>
     </div>
-  `}).join('') || '<div class="card card-empty"><div>Nenhum cliente cadastrado</div></div>';
+    `;
+  }
+
+  let htmlResultado = '';
+
+  // 1. Renderiza Grupo de Administradores
+  htmlResultado += `<div class="lista-separador-titulo">🛠️ Administradores do Sistema (${administradores.length})</div>`;
+  if(administradores.length === 0) {
+    htmlResultado += `<div class="card-empty">Nenhum administrador cadastrado</div>`;
+  } else {
+    htmlResultado += administradores.map(gerarCardUsuarioHTML).join('');
+  }
+
+  // 2. Renderiza Grupo de Usuários Comuns
+  htmlResultado += `<div class="lista-separador-titulo" style="margin-top:28px; var(--green)">👥 Clientes Monitorados (${clientesComuns.length})</div>`;
+  if(clientesComuns.length === 0) {
+    htmlResultado += `<div class="card-empty">Nenhum cliente comum cadastrado</div>`;
+  } else {
+    htmlResultado += clientesComuns.map(gerarCardUsuarioHTML).join('');
+  }
+
+  document.getElementById('listaUsers').innerHTML = htmlResultado;
 }
 </script>
 </body>
