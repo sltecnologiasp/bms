@@ -30,6 +30,7 @@ export async function onRequest({ request, env }) {
           return json({ ok: false, error: 'Código inválido enviado pelo hardware' }, 400);
         }
         
+        // Insere na tabela bms_master. Se já existir, ignora para não dar erro de duplicidade
         await env.DB.prepare("INSERT OR IGNORE INTO bms_master (code, user_id) VALUES (?, NULL)").bind(code).run();
         return json({ ok: true, message: 'Hardware registrado com sucesso!' }, 200);
       } catch (dbErr) {
@@ -101,8 +102,7 @@ export async function onRequest({ request, env }) {
       const hash = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(senha));
       const senha_hash = Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2, '0')).join('');
       const token_verificacao = crypto.randomUUID();
-      
-      await env.DB.prepare('INSERT INTO users (nome, email, senha_hash, email_verificado, token_verificacao, role) VALUES (?, ?, ?, 0, ?, "user")')
+      await env.DB.prepare('INSERT INTO users (nome, email, senha_hash, email_verificado, token_verificacao) VALUES (?, ?, ?, 0, ?)')
         .bind(nome, userEmail, senha_hash, token_verificacao).run();
 
       if (env.RESEND_API_KEY) {
@@ -229,22 +229,12 @@ export async function onRequest({ request, env }) {
       return json({ ok: true });
     }
 
-    // ROTA 5: LOGIN USER / ADMIN UNIFICADO DA PÁGINA INICIAL
+    // ROTA 5: LOGIN USER
     if (action === 'login' && request.method === 'POST') {
       const { email, senha } = await request.json();
       const cleanEmail = (email || '').trim().toLowerCase();
 
-      // PONTE DE COMPATIBILIDADE: Captura o login clássico de texto 'administrador' com a senha padrão
-      if (cleanEmail === 'administrador' && senha === '426240637') {
-        return json({ 
-          ok: true, 
-          token: 'admin_ok', 
-          user: { id: 0, nome: 'Administrador Geral', email: 'admin@bms.app.br', role: 'admin' } 
-        });
-      }
-
-      // Validação regular no banco D1 para usuários e administradores reais por e-mail
-      const user = await env.DB.prepare('SELECT id, nome, email, senha_hash, email_verificado, role FROM users WHERE email = ?').bind(cleanEmail).first();
+      const user = await env.DB.prepare('SELECT id, nome, email, senha_hash, email_verificado FROM users WHERE email = ?').bind(cleanEmail).first();
       
       if (!user) {
         return json({ ok: false, error: 'E-mail não cadastrado' }, 401);
@@ -262,36 +252,14 @@ export async function onRequest({ request, env }) {
       }
 
       const token = btoa(`user:${user.id}:${Date.now()}`);
-      return json({ ok: true, token, user: { id: user.id, nome: user.nome, email: user.email, role: user.role || 'user' } });
+      return json({ ok: true, token, user: { id: user.id, nome: user.nome, email: user.email } });
     }
 
-    // ROTA 6: LOGIN ADMIN (MODO HÍBRIDO ADICIONAL DE BACKUP)
+    // ROTA 6: LOGIN ADMIN
     if (action === 'login_admin' && request.method === 'POST') {
       const { user, password } = await request.json();
-      const cleanUser = (user || '').trim().toLowerCase();
-
-      if (cleanUser === 'administrador' && password === '426240637') {
-        return json({ ok: true, token: 'admin_ok' });
-      }
-
-      const adminUser = await env.DB.prepare('SELECT id, senha_hash, email_verificado FROM users WHERE email = ? AND role = "admin"').bind(cleanUser).first();
-      
-      if (!adminUser) {
-        return json({ ok: false, error: 'Acesso administrativo negado ou e-mail inválido.' }, 401);
-      }
-
-      const hash = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(password));
-      const senha_hash = Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2, '0')).join('');
-
-      if (adminUser.senha_hash !== senha_hash) {
-        return json({ ok: false, error: 'Senha incorreta.' }, 401);
-      }
-
-      if (adminUser.email_verificado === 0) {
-        return json({ ok: false, error: 'Por favor, confirme seu e-mail antes de acessar.' }, 403);
-      }
-
-      return json({ ok: true, token: 'admin_ok' });
+      if (user === 'administrador' && password === '426240637') return json({ ok: true, token: 'admin_ok' });
+      return json({ ok: false, error: 'Credenciais inválidas' }, 401);
     }
 
     // ROTA 7: UPDATE TELEMETRIA DA EQUIPE/BMS (ADAPTADA PRO INVERSOR)
@@ -362,7 +330,7 @@ export async function onRequest({ request, env }) {
     // ROTAS PROTEGIDAS - EXCLUSIVAS DO ADMIN
     // ==========================================
     if (isAdmin) {
-      // RECEBER FIRMWARE .BIN DO FORMULÁRIO E SALVAR NO BUCKET CLOUDFLARE R2
+      // NOVA ROTA: RECEBER FILMEWARE .BIN DO FORMULÁRIO E SALVAR NO BUCKET CLOUDFLARE R2
       if (action === 'admin_upload_ota' && request.method === 'POST') {
         try {
           const formData = await request.formData();
@@ -449,10 +417,9 @@ export async function onRequest({ request, env }) {
         return json({ ok: true });
       }
 
-      // LISTAR CLIENTES E SEUS PRIVILÉGIOS (ROLE)
       if (action === 'all_users' && request.method === 'GET') {
         const { results } = await env.DB.prepare(`
-          SELECT u.id, u.nome, u.email, u.created_at, u.role, COUNT(bm.id) as bms_count
+          SELECT u.id, u.nome, u.email, u.created_at, COUNT(bm.id) as bms_count
           FROM users u
           LEFT JOIN bms_master bm ON bm.user_id = u.id
           GROUP BY u.id
@@ -461,26 +428,9 @@ export async function onRequest({ request, env }) {
         return json(results || []);
       }
 
-      // SALVAR EDICÃO INTEGRAL DO USUÁRIO NO MODAL (NOME, EMAIL, SENHA, CARGO)
       if (action === 'edit_user' && request.method === 'POST') {
-        const body = await request.json();
-        const { id, nome, email, role, password } = body;
-        
-        if (!id || !nome || !email || !role) {
-          return json({ ok: false, error: 'Campos obrigatórios ausentes.' }, 400);
-        }
-
-        if (password && password.trim() !== "") {
-          const hash = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(password));
-          const senha_hash = Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2, '0')).join('');
-          
-          await env.DB.prepare('UPDATE users SET nome = ?, email = ?, role = ?, senha_hash = ? WHERE id = ?')
-            .bind(nome, email.trim().toLowerCase(), role, senha_hash, id).run();
-        } else {
-          await env.DB.prepare('UPDATE users SET nome = ?, email = ?, role = ? WHERE id = ?')
-            .bind(nome, email.trim().toLowerCase(), role, id).run();
-        }
-        
+        const { id, nome, email } = await request.json();
+        await env.DB.prepare('UPDATE users SET nome = ?, email = ? WHERE id = ?').bind(nome, email.trim().toLowerCase(), id).run();
         return json({ ok: true });
       }
 
