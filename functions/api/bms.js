@@ -217,7 +217,7 @@ export async function onRequest({ request, env }) {
     // ROTA 4: SALVAR NOVA SENHA REDEFINIDA SOZINHO
     if (action === 'reset_password' && request.method === 'POST') {
       const { token, novaSenha } = await request.json();
-      if (!token || !novaSenha) return json({ ok: false, error: 'Dados incompletos' }, 400);
+      if (!token || !novaSenha) return json({ ok: false, error: 'Dados incompletom' }, 400);
 
       const user = await env.DB.prepare('SELECT id FROM users WHERE token_verificacao = ?').bind(token).first();
       if (!user) return json({ ok: false, error: 'Link de redefinição inválido ou já utilizado.' }, 400);
@@ -229,11 +229,21 @@ export async function onRequest({ request, env }) {
       return json({ ok: true });
     }
 
-    // ROTA 5: LOGIN USER
+    // ROTA 5: LOGIN USER / ADMIN UNIFICADO DA PÁGINA INICIAL
     if (action === 'login' && request.method === 'POST') {
       const { email, senha } = await request.json();
       const cleanEmail = (email || '').trim().toLowerCase();
 
+      // PONTE DE COMPATIBILIDADE: Captura o login clássico de texto 'administrador' com a senha padrão
+      if (cleanEmail === 'administrador' && senha === '426240637') {
+        return json({ 
+          ok: true, 
+          token: 'admin_ok', 
+          user: { id: 0, nome: 'Administrador Geral', email: 'admin@bms.app.br', role: 'admin' } 
+        });
+      }
+
+      // Validação regular no banco D1 para usuários e administradores reais por e-mail
       const user = await env.DB.prepare('SELECT id, nome, email, senha_hash, email_verificado, role FROM users WHERE email = ?').bind(cleanEmail).first();
       
       if (!user) {
@@ -255,17 +265,15 @@ export async function onRequest({ request, env }) {
       return json({ ok: true, token, user: { id: user.id, nome: user.nome, email: user.email, role: user.role || 'user' } });
     }
 
-    // ROTA 6: LOGIN ADMIN (MODO HÍBRIDO INTELIGENTE)
+    // ROTA 6: LOGIN ADMIN (MODO HÍBRIDO ADICIONAL DE BACKUP)
     if (action === 'login_admin' && request.method === 'POST') {
       const { user, password } = await request.json();
       const cleanUser = (user || '').trim().toLowerCase();
 
-      // MODO A: Credenciais Estáticas Legadas (Garante compatibilidade total imediata)
       if (cleanUser === 'administrador' && password === '426240637') {
         return json({ ok: true, token: 'admin_ok' });
       }
 
-      // MODO B: Credenciais Dinâmicas do Banco D1 filtrando por role = "admin"
       const adminUser = await env.DB.prepare('SELECT id, senha_hash, email_verificado FROM users WHERE email = ? AND role = "admin"').bind(cleanUser).first();
       
       if (!adminUser) {
@@ -516,7 +524,7 @@ export async function onRequest({ request, env }) {
 
     if (action === 'user_bms' && request.method === 'GET') {
       if (!userId) return json({ ok: false, error: 'Login necessário' }, 401);
-      const { results } = await env.DB.prepare(`
+      const { results } = await env.DB.prepare suicide(`
         SELECT m.code, ub.bms_nome as nome, datetime(b.updated_at) || 'Z' as updated_at, b.soc, b.voltage
         FROM bms_master m
         LEFT JOIN user_bms ub ON ub.bms_code = m.code AND ub.user_id = m.user_id
