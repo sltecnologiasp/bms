@@ -28,21 +28,6 @@
   --orange:#ff9f1c;
 }
 
-[data-theme="dark"] {
-  --bg: #05070d;
-  --card-bg: rgba(13, 20, 35, 0.65);
-  --card-border: rgba(0, 255, 255, .15);
-  --text-main: #ffffff;
-  --text-muted: #6b7c96;
-  --input-bg: rgba(13, 20, 35, 0.8);
-  --input-border: rgba(0, 255, 255, .25);
-  --input-text: #ffffff;
-  --input-placeholder: #6b7c96;
-  --gauge-empty: #1a2332;
-  --cell-bg: rgba(13, 20, 35, 0.8);
-  --cell-border: rgba(0, 255, 255, .15);
-}
-
 body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text-main);min-height:100vh;width:100%;overflow-x:hidden}
 
 #login,#painel,#clientesPage,#dashAdmin{
@@ -80,194 +65,1270 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text-main);
   border-radius:20px;
   padding:20px;
   width:100%;
-  margin-bottom:16px;
-  box-shadow:var(--neon-glow);
+  margin-top: 0 !important;
+  margin-bottom: 12px !important;
+  box-shadow: var(--neon-glow);
 }
 
-input, select {
-  width:100%;
-  padding:12px;
-  border-radius:8px;
-  border:1px solid var(--input-border);
+#login .card { max-width:440px }
+#dashAdmin .card { width:100%; max-width:100%; margin-bottom:0 !important; }
+.card-cadastro { width: 100%; max-width: 100% !important; margin: 0 auto 12px auto !important; }
+
+.card-wrapper-block {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 20px;
+  padding: 16px 14px 14px 14px;
+  width: 100%;
+  box-shadow: var(--neon-glow);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.section-block-title {
+  font-size: 11px;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  text-align: center;
+  width: 100%;
+  margin-top: 2px;
+  margin-bottom: 2px;
+  font-weight: 800;
+  color: var(--text-muted);
+}
+
+input,select,button{width:100%;padding:16px;border-radius:14px;border:none;outline:none;font-size:16px;font-family:inherit;transition:all 0.2s ease}
+input,select{
   background:var(--input-bg);
   color:var(--input-text);
-  font-family:'Inter',sans-serif;
-  font-size:14px;
+  border:1px solid var(--input-border);
+  text-align:center;
+  font-weight:600;
+}
+input{ font-family:monospace; letter-spacing:1px; font-size:16px; }
+input:focus,select:focus{
+  border-color:var(--cyan);
+  box-shadow: 0 0 10px rgba(0, 255, 255, 0.2);
 }
 input::placeholder{color:var(--input-placeholder)}
 
-button {
-  padding:12px 20px;
-  background:var(--cyan);
-  color:#fff;
-  border:none;
-  border-radius:8px;
-  font-weight:600;
-  cursor:pointer;
-  font-family:'Inter',sans-serif;
-  transition:all 0.2s;
-}
-button:hover{opacity:0.9;transform:translateY(-1px)}
-button:active{transform:translateY(0)}
+.label{font-size:11px;letter-spacing:1px;text-transform:uppercase;text-align:center;width:100%;margin-bottom:6px;font-weight:700;color:var(--text-muted)}
 
-.btn-green{background:var(--green)}
-.btn-red{background:var(--red)}
-.btn-orange{background:var(--orange)}
+button{background:linear-gradient(90deg,var(--blue),var(--cyan));color:#fff;font-weight:700;cursor:pointer;margin-top:12px;box-shadow:0 4px 20px rgba(0,128,255,0.25)}
+button:active{transform:scale(0.98)}
+
+.btn-sec{background:transparent;border:1px solid var(--cyan);color:var(--cyan);box-shadow:none}
+.btn-clientes{background:transparent;border:1px solid var(--green);color:var(--green);box-shadow:none}
+
+button.del{background:transparent;border:1px solid var(--input-border);color:var(--text-muted);font-size:12px;padding:10px;box-shadow:none;font-weight:700;width:100%}
+button.del:hover{background:rgba(231,29,54,0.08);color:var(--red);border-color:var(--red)}
+
+button.edit{background:transparent;border:1px solid var(--cyan);color:var(--cyan);font-size:13px;padding:12px;margin-top:auto;box-shadow:none;font-weight:700}
+button.edit:hover{background:rgba(0,180,216,0.08)}
+
+button.vincular{background:transparent;border:1px solid var(--green);color:var(--green);font-size:13px;padding:12px;margin-top:6px;box-shadow:none;font-weight:700}
+button.vincular:hover{background:rgba(46,196,182,0.08)}
+
+button.desvincular{background:transparent;border:1px solid var(--orange);color:var(--orange);font-size:13px;padding:12px;margin-top:6px;box-shadow:none;font-weight:700}
+button.desvincular:hover{background:rgba(255,159,28,0.08)}
+
+button.voltar{background:transparent;border:1px solid var(--green);color:var(--green);width:100%;max-width:100%;margin-top:8px;box-shadow:none;font-weight:700}
+button.voltar:hover{background:rgba(46,196,182,0.08)}
+
+button.logout{margin-top:16px;background:transparent;border:1px solid var(--input-border);color:var(--text-muted);max-width:440px;box-shadow:none;font-weight:700}
+button.logout:hover{background:rgba(231,29,54,0.08);color:var(--red);border-color:var(--red)}
+
+.grid{
+  display:grid !important;
+  grid-template-columns: repeat(2, 1fr) !important;
+  gap:5px !important; 
+  width:100% !important;
+  max-width:100% !important;
+  margin-top:0px !important;
+}
+
+.grid .card-inner-item {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  text-align: center !important;
+  padding: 12px !important;
+  background: var(--bg); 
+  border: 1px solid var(--card-border);
+  border-radius: 14px;
+}
+
+.value {
+  font-size: clamp(22px, 5.5vw, 28px);
+  font-weight: 800;
+  margin-top: 4px;
+  width: 100%;
+  text-align: center !important;
+  display: block !important;
+}
+
+#lista, #listaUsers { width: 100% }
+#listaUsers { display: flex; flex-direction: column; gap: 12px; }
+
+#lista .card {
+  background:var(--card-bg);
+  border:1px solid var(--card-border);
+  border-radius:16px;
+  padding:14px;
+  margin:0 !important;
+  margin-bottom:12px !important;
+  display:flex;
+  flex-direction:row;
+  align-items:center;
+  justify-content:space-between;
+  min-height:auto;
+  cursor:pointer;
+  box-shadow: var(--neon-glow);
+  width:100%;
+}
+#listaUsers .card { background:var(--card-bg); border:1px solid var(--card-border); border-radius:20px; padding:20px; cursor:default; width:100%; max-width:100% !important }
+#lista .card:hover{border-color:var(--cyan)}
+
+.card-empty{grid-column:1/-1;min-height:180px;display:flex;align-items:center;justify-content:center;color:var(--text-muted);font-size:14px}
+
+.status{display:inline-flex;align-items:center;justify-content:center;gap:6px;font-size:11px;font-weight:700}
+.status::before{content:'';width:7px;height:7px;border-radius:50%;display:inline-block}
+.status.on{color:var(--green)}.status.on::before{background:var(--green);box-shadow:0 0 8px var(--green)}
+.status.off{color:var(--red)}.status-dot.off::before,.status.off::before{background:var(--red);box-shadow:0 0 8px var(--red)}
+
+.badge{display:inline-block;padding:4px 8px;border-radius:6px;font-size:10px;font-weight:700;margin-top:4px;text-align:center;max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.badge-green{background:rgba(46,196,182,0.1);color:var(--green);border:1px solid var(--green)}
+.badge-orange{background:rgba(255,159,28,0.1);color:var(--orange);border:1px solid var(--orange)}
+
+.card-code{font-size:13px;font-weight:800;font-family:monospace;color:var(--text-main);margin:6px 0;text-align:center;letter-spacing:0.2px;word-break:break-all}
+.card-top{display:flex;flex-direction:column;justify-content:flex-start;align-items:center;width:100%}
+
+.filter-row {
+  display: flex;
+  gap: 8px;
+  width: 100%;
+  margin-top: 4px;
+}
+.filter-row button {
+  flex: 1;
+  padding: 12px 6px;
+  font-size: 11px;
+  border-radius: 12px;
+  margin-top: 0;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  background: var(--input-bg);
+  border: 1px solid var(--input-border);
+  color: var(--text-muted);
+  box-shadow: none;
+  white-space: nowrap;
+}
+.filter-row button.active {
+  background: linear-gradient(90deg, var(--blue), var(--cyan));
+  color: #fff;
+  border-color: transparent;
+  box-shadow: 0 4px 15px rgba(0, 128, 255, 0.15);
+}
+
+.gauge-card{padding:15px;min-height:230px;display:flex;flex-direction:column;gap:10px;justify-content:center}
+.gauge{width:min(190px,48vw);height:min(190px,48vw);margin:auto;border-radius:50%;background:conic-gradient(var(--green) 0deg,var(--cyan) 180deg,var(--gauge-empty) 180deg);position:relative;box-shadow:0 0 30px rgba(0,255,255,.05);transition:background .8s ease}
+.gauge::before{content:'';position:absolute;inset:16px;border-radius:50%;background:var(--bg);transition: background 0.3s}
+.gauge-inner{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;align-items:center;z-index:2}
+.gauge-value{font-size:clamp(36px,9vw,52px);font-weight:900;color:var(--green)}
+.gauge-label{opacity:.6;letter-spacing:1.5px;font-size:11px;color:var(--text-main)}
+
+.bar-wrap{margin-top:2px}
+.bar-label{display:flex;justify-content:center;align-items:center;gap:6px;margin-bottom:6px;font-size:13px;font-weight:600;}
+.bar-label span:first-child { color: var(--text-main); }
+.bar-label span:last-child { color: var(--cyan); font-weight: 700; }
+.bar{height:12px;background:var(--gauge-empty);border-radius:999px;overflow:hidden}
+.bar-fill{height:100%;width:0%;border-radius:999px;background:linear-gradient(90deg,var(--green),var(--cyan));transition:width.8s ease}
+
+.status-envelope-card {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 20px;
+  padding: 16px 14px 14px 14px;
+  width: 100%;
+  box-shadow: var(--neon-glow);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.status-triple-grid {
+  display: grid !important;
+  grid-template-columns: repeat(3, 1fr) !important;
+  gap: 5px !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  position: relative;
+}
+
+.status-triple-grid .card {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  text-align: center !important;
+  padding: 10px 4px !important;
+  min-height: 80px !important;
+  background: var(--bg) !important; 
+  border: 1px solid var(--card-border) !important;
+  box-shadow: none !important;
+  transition: all 0.3s ease !important;
+}
+
+.status-triple-grid .status-title {
+  font-size: 10px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.5px !important;
+  text-transform: uppercase !important;
+  color: var(--text-muted) !important;
+  margin-bottom: 4px !important;
+}
+
+.status-triple-grid .status-text {
+  font-size: 13px !important;
+  font-weight: 800 !important;
+}
+
+.triple-active {
+  border-color: var(--green) !important;
+  background: var(--card-bg) !important;
+  box-shadow: 0 0 10px var(--neon-pulse-color) !important;
+}
+.triple-active .status-text {
+  color: var(--green) !important;
+}
+
+.triple-inactive {
+  border-color: var(--card-border) !important;
+}
+.triple-inactive .status-text {
+  color: var(--red) !important;
+}
+
+.diff {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 5px; 
+  margin-top: 8px;
+}
+.diff-item{padding:10px 6px;border-radius:12px;background:var(--cell-bg);border:1px solid var(--cell-border);text-align:center}
+.diff-item span{display:block;margin-top:4px;font-size:clamp(16px,4.5vw,20px);font-weight:800;font-variant-numeric:tabular-nums}
+
+.cells{display:grid;grid-template-columns:repeat(auto-fill,minmax(85px,1fr));gap:12px;margin-top:12px;width:100%}
+.cell{background:var(--cell-bg);border-radius:12px;padding:10px 6px;border:1px solid var(--cell-border);display:flex;flex-direction:column;align-items:center;justify-content:center}
+.cell-num{font-size:11px;opacity:.6;margin-bottom:2px;color:var(--text-muted)}
+.cell-val{font-size:15px;font-weight:700;font-variant-numeric:tabular-nums;color:var(--text-main)}
+.cell.ok{border-color:var(--green)}
+.cell.warn{border-color:var(--orange)}
+.cell.crit{border-color:var(--red)}
+
+.modal{
+  display:none !important; 
+  position:fixed !important;
+  inset:0 !important;
+  width:100vw !important;
+  height:100vh !important;
+  background:rgba(3,5,10,0.6) !important;
+  backdrop-filter:blur(10px) !important;
+  -webkit-backdrop-filter:blur(10px) !important;
+  z-index:99999 !important; 
+  padding:20px !important;
+}
+.modal.active{
+  display:flex !important; 
+  align-items:center !important;
+  justify-content:center !important;
+}
+
+@media(max-width:599px){
+  #lista { 
+    display: grid !important; 
+    grid-template-columns: repeat(2, 1fr) !important; 
+    gap: 8px !important; 
+    width: 100% !important;
+  }
+  #lista .card {
+    min-height: 145px !important;
+    padding: 10px 8px !important;
+    flex-direction: column !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+  }
+  #lista .card button.del {
+    width: 100% !important;
+    padding: 6px !important;
+    font-size: 11px !important;
+    margin-top: 6px !important;
+  }
+}
+
+@media(min-width:600px){
+  #lista { grid-template-columns: repeat(4, 1fr); display: grid !important; gap: 12px !important;}
+  .filter-row button { font-size: 13px; padding: 14px; }
+}
 </style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.0.1/mqttws31.min.js" type="text/javascript"></script>
 </head>
 <body>
 
-<!-- TELA DE LOGIN ORIGINAL -->
 <div id="login">
-  <div class="card" style="max-width:400px">
-    <h1 class="title">ADMIN BMS</h1>
-    <p class="user-info">Acesso restrito</p>
-    <div style="display:flex;flex-direction:column;gap:12px">
-      <input type="text" id="loginUser" placeholder="Usuário">
-      <input type="password" id="loginPass" placeholder="Senha">
-      <button onclick="fazerLoginTemp()">Entrar</button>
-    </div>
+  <div class="title">SMART BMS</div>
+  <div class="user-info">Acesso Administrativo</div>
+  <div class="card">
+    <div class="label">Usuário</div>
+    <input id="user" placeholder="administrador" autocomplete="username" value="administrador">
+    <div class="label" style="margin-top:16px">Senha</div>
+    <input id="password" type="password" placeholder="••••••••" autocomplete="current-password">
+    <button onclick="adminLogin()">ENTRAR NO PAINEL</button>
+    <div id="loginError" class="erro hidden"></div>
   </div>
 </div>
 
-<!-- PAINEL PRINCIPAL ORIGINAL -->
 <div id="painel">
-  <h1 class="title">PAINEL ADMIN</h1>
-  <p class="user-info" id="userInfo">Carregando...</p>
-  
-  <button onclick="logout()" class="btn-red" style="margin-bottom:20px">Sair</button>
+  <div class="title" style="font-size:clamp(28px,6vw,32px);margin-bottom:4px">SMART BMS</div>
+  <div class="user-info">Painel Administrativo</div>
 
-  <!-- NOVO: CARD GERENCIAR USUÁRIOS -->
-  <div class="card" id="gerenciarUsuarios">
-    <h3 style="margin-bottom:4px">Gerenciar Usuários</h3>
-    <p style="color:var(--text-muted);font-size:13px;margin-bottom:16px">Crie usuários padrão ou administradores</p>
-    
-    <div style="display:flex;flex-direction:column;gap:12px">
-      <input id="novoNome" type="text" placeholder="Nome completo">
-      <input id="novoEmail" type="email" placeholder="E-mail">
-      <input id="novaSenha" type="password" placeholder="Senha">
-      
-      <select id="novaRole">
-        <option value="user">Usuário Padrão - acessa só index.html</option>
-        <option value="admin">Administrador - acessa painel admin</option>
-      </select>
-      
-      <button onclick="criarUsuario()" class="btn-green">Criar Usuário</button>
+  <div class="card card-cadastro">
+    <div class="label">Cadastrar BMS no Sistema</div>
+    <input id="code" placeholder="SL000000000000" maxlength="14" style="margin-top:8px">
+    <button class="btn-clientes" onclick="cad()">CADASTRAR BMS MASTER</button>
+    <button class="btn-sec" onclick="generarECadastrar()">GERAR CÓDIGO ALEATÓRIO</button>
+    <button class="btn-clientes" style="margin-top:24px" onclick="mostrarClientes()">VER CLIENTES CADASTRADOS</button>
+    <p id="msg" style="text-align:center;margin-top:12px;font-size:14px;font-weight:600"></p>
+  </div>
+
+  <div class="card" style="padding: 12px; display: flex; flex-direction: column; gap: 8px;">
+    <div class="label">Filtrar Visualização das BMS</div>
+    <div class="filter-row">
+      <button id="btn-filter-todas" class="active" onclick="alterarFiltroBms('todas')">TODAS (<span id="count-todas">0</span>)</button>
+      <button id="btn-filter-disponiveis" onclick="alterarFiltroBms('disponiveis')">DISPONÍVEIS (<span id="count-disponiveis">0</span>)</button>
+      <button id="btn-filter-online" onclick="alterarFiltroBms('online')">ONLINE (<span id="count-online">0</span>)</button>
     </div>
+  </div>
 
-    <div style="margin-top:24px">
-      <h4 style="margin-bottom:12px">Usuários Cadastrados</h4>
-      <div id="listaUsuarios">
-        <p style="color:var(--text-muted)">Carregando...</p>
+  <div style="width:100%; display:flex; flex-direction:column; margin-bottom:12px">
+    <div class="label" style="margin-bottom:8px" id="label-lista-titulo">Todas as BMS do Sistema</div>
+    <div id="lista" style="width:100%;"></div>
+  </div>
+  
+  <button class="logout" onclick="adminLogout()">SAIR DO PAINEL ADMIN</button>
+</div>
+
+<div id="clientesPage">
+  <div class="title" style="font-size:clamp(28px,6vw,32px);margin-bottom:4px">SMART BMS</div>
+  <div class="user-info">Clientes Cadastrados</div>
+  
+  <div style="background:transparent; border:none; box-shadow:none; padding:0; width:100%">
+    <div id="listaUsers"></div>
+  </div>
+  
+  <button class="voltar" onclick="voltarPainel()">← VOLTAR AO PAINEL</button>
+</div>
+
+<div id="dashAdmin">
+  <div class="title" style="font-size:clamp(28px,6vw,32px);margin-bottom:4px">SMART BMS</div>
+  <div style="text-align:center; margin-bottom:12px; margin-top: -6px">
+    <div id="modalBmsDono"></div>
+  </div>
+
+  <div class="card gauge-card">
+    <div class="gauge" id="adminSocGauge">
+      <div class="gauge-inner">
+        <div class="gauge-value" id="adminSocValor">0%</div>
+        <div class="gauge-label">STATE OF CHARGE</div>
+      </div>
+    </div>
+    <div class="bar-wrap">
+      <div class="bar-label"><span>Bateria</span><span id="adminSocBarTxt">0%</span></div>
+      <div class="bar"><div class="bar-fill" id="adminSocBar"></div></div>
+    </div>
+  </div>
+
+  <div class="card-wrapper-block">
+    <div id="modalBmsTitle" style="font-size:13px; font-weight:700; color:var(--text-muted); font-family:monospace; text-align:center; letter-spacing:1px; margin-bottom:0px">SL000000000000</div>
+    
+    <div class="status-triple-grid">
+      <div id="cardInversor" class="card triple-inactive">
+        <span class="status-title">Inversor</span>
+        <span id="txtInversor" class="status-text">Desconectado</span>
+      </div>
+      <div id="cardBms" class="card triple-inactive">
+        <span class="status-title">Smart BMS</span>
+        <span id="txtBms" class="status-text">Offline</span>
+      </div>
+      <div id="cardBateria" class="card triple-inactive">
+        <span class="status-title">Bateria</span>
+        <span id="txtBateria" class="status-text">Desconectada</span>
       </div>
     </div>
   </div>
 
-  <!-- SEU CONTEÚDO ORIGINAL DO PAINEL CONTINUA AQUI -->
-  <!-- Cole seus outros cards/divs originais abaixo -->
+  <div class="card-wrapper-block">
+    <div class="section-block-title">Informações do Inversor</div>
+    <div class="grid">
+      <div class="card-inner-item"><div class="label">Potência Ativa</div><div class="value" id="adminInvPotencia" style="color:var(--green)">0W</div></div>
+      <div class="card-inner-item"><div class="label">Tensão AC</div><div class="value" id="adminInvTensaoAC" style="color:var(--cyan)">0.0V</div></div>
+      <div class="card-inner-item"><div class="label">Frequência</div><div class="value" id="adminInvFrequencia" style="color:var(--orange)">0.0Hz</div></div>
+      <div class="card-inner-item"><div class="label">Geração do Dia</div><div class="value" id="adminInvGeracaoDia" style="color:var(--blue)">0.0kWh</div></div>
+    </div>
+  </div>
 
+  <div class="card-wrapper-block">
+    <div class="section-block-title">Informações da Bateria</div>
+    <div class="grid">
+      <div class="card-inner-item"><div class="label">SOC</div><div class="value" id="adminSoc" style="color:var(--green)">0%</div></div>
+      <div class="card-inner-item"><div class="label">Tensão</div><div class="value" id="adminVolt" style="color:var(--cyan)">0.0V</div></div>
+      <div class="card-inner-item"><div class="label">Corrente</div><div class="value" id="adminCorr" style="color:var(--orange)">0.0A</div></div>
+      <div class="card-inner-item"><div class="label">Temperatura</div><div class="value" id="adminTemp" style="color:var(--red)">0°C</div></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="section-block-title">Células - Tensão Individual</div>
+    <div class="diff">
+      <div class="diff-item">Min<span id="adminCelMin" style="color:var(--green)">0.00V</span></div>
+      <div class="diff-item">Max<span id="adminCelMax" style="color:var(--orange)">0.00V</span></div>
+      <div class="diff-item">Diferença<span id="adminCelDif" style="color:var(--red)">0.00V</span></div>
+      <div class="diff-item">Total<span id="adminCelTot" style="color:var(--cyan)">0</span></div>
+    </div>
+    <div id="adminCellsContent" class="cells"></div>
+  </div>
+
+  <div class="card-wrapper-block" style="margin-top: 12px; border: 1px solid rgba(0, 180, 216, 0.3);">
+    <div class="section-block-title" style="color: var(--cyan);">Atualização Remota de Firmware (OTA)</div>
+    <div style="padding: 12px 4px; display: flex; flex-direction: column; gap: 10px;">
+      <p style="font-size: 12px; color: var(--text-muted); line-height: 1.4; margin-bottom: 4px;">
+        Selecione o arquivo binário compilado (<strong>.bin</strong>) para forçar o ESP32 a baixar e instalar a nova versão automaticamente no próximo contato.
+      </p>
+      <div style="position: relative; display: flex; flex-direction: column; gap: 6px;">
+        <input type="file" id="arquivoOtaBin" accept=".bin" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--input-border); background: var(--input-bg); color: var(--text-main); font-size: 13px;">
+      </div>
+      <button onclick="enviarFirmwareOta()" id="btnOtaUpload" style="background: linear-gradient(90deg, var(--blue), var(--cyan)); width: 100%; border-radius: 10px; padding: 14px; font-weight: 700; font-size: 14px; cursor: pointer;">
+        ENVIAR E ATUALIZAR PLACA
+      </button>
+      <div id="msgOtaStatus" style="text-align: center; font-size: 12px; font-weight: 600; min-height: 16px; margin-top: 4px;"></div>
+    </div>
+  </div>
+
+  <button class="voltar" style="width:100%; margin-top:4px; padding:18px" onclick="closeBmsModal()">← VOLTAR À LISTA</button>
 </div>
 
-<!-- SUAS OUTRAS PÁGINAS ORIGINAIS -->
-<div id="clientesPage"></div>
-<div id="dashAdmin"></div>
+<div id="modalVincularBms" class="modal">
+  <div class="modal-content small">
+    <h2 style="text-align:center;margin-bottom:16px;font-size:20px;font-weight:900;background:linear-gradient(90deg,var(--green),var(--cyan));-webkit-background-clip:text;-webkit-text-fill-color:transparent">Vincular Nova BMS</h2>
+    <p id="txtVincularUser" style="text-align:center; font-size:14px; margin-bottom:16px; color:var(--text-muted)"></p>
+    <input id="vincularUserId" type="hidden">
+    
+    <div class="label">Selecione uma BMS Disponível</div>
+    <select id="selectBmsDisponiveis" style="width:100%; margin-top:6px;"></select>
+    
+    <button onclick="confirmarVinculoManual()" style="background:linear-gradient(90deg,var(--green),var(--cyan))">CONFIRMAR VÍNCULO</button>
+    <button class="btn-sec" style="margin-top:8px" onclick="fecharModalVincular()">CANCELAR</button>
+  </div>
+</div>
+
+<div id="modalDesvincularBms" class="modal">
+  <div class="modal-content small">
+    <h2 style="text-align:center;margin-bottom:16px;font-size:20px;font-weight:900;background:linear-gradient(90deg,var(--orange),var(--red));-webkit-background-clip:text;-webkit-text-fill-color:transparent">Desvincular BMS</h2>
+    <p id="txtDesvincularUser" style="text-align:center; font-size:14px; margin-bottom:16px; color:var(--text-muted)"></p>
+    <input id="desvincularUserId" type="hidden">
+    
+    <div class="label">Selecione a BMS para Remover</div>
+    <select id="selectBmsVinculadas" style="width:100%; margin-top:6px;"></select>
+    
+    <button onclick="confirmarDesvinculoManual()" style="background:linear-gradient(90deg,var(--orange),var(--red))">REMOVER VÍNCULO</button>
+    <button class="btn-sec" style="margin-top:8px" onclick="fecharModalDesvincular()">CANCELAR</button>
+  </div>
+</div>
+
+<div id="modalEditUser" class="modal">
+  <div class="modal-content small">
+    <h2 style="text-align:center;margin-bottom:16px;font-size:20px;font-weight:900;background:linear-gradient(90deg,var(--blue),var(--cyan));-webkit-background-clip:text;-webkit-text-fill-color:transparent">Editar Cliente</h2>
+    <input id="editUserId" type="hidden">
+    <div class="label">Nome do Cliente</div>
+    <input id="editUserNome" placeholder="Nome">
+    <div class="label" style="margin-top:12px">E-mail de Acesso</div>
+    <input id="editUserEmail" placeholder="Email">
+    
+    <button onclick="salvarUser()">SALVAR ALTERAÇÕES</button>
+    <button class="btn-sec" style="margin-top:8px" onclick="closeEditUser()">← VOLTAR</button>
+    
+    <p id="editMsg" style="text-align:center;margin-top:12px;font-size:14px;font-weight:600"></p>
+  </div>
+</div>
 
 <script>
-// ==========================================
-// LOGIN TEMPORÁRIO - TROCAR QUANDO API PRONTA
-// ==========================================
-function fazerLoginTemp() {
-  const user = document.getElementById('loginUser').value;
-  const pass = document.getElementById('loginPass').value;
-  
-  if (user === 'admin' && pass === '123') {
-    document.getElementById('login').style.display = 'none';
-    document.getElementById('painel').classList.add('active');
-    document.getElementById('userInfo').textContent = 'Logado como: Admin';
-    renderizarUsuarios();
+// CONFIGURAÇÃO DA ROTA: Mapeada para o padrão serverless sem extensão do Cloudflare Pages Functions
+const API = '/api/bms';
+let adminToken = sessionStorage.getItem('admin_token');
+let bmsList = [];
+let activeBmsCode = sessionStorage.getItem('admin_active_bms_code');
+let activeScreen = sessionStorage.getItem('admin_active_screen') || 'painel';
+
+let filtroAtivo = 'todas';
+
+let TIMEOUT_ADMIN_LOGIN = null;
+let TIMEOUT_ADMIN_MSG = null;
+
+let MQTT_CLIENT = null;
+let bmsTimeoutTimerAdmin = null;         
+let listaTimeoutsAdminCards = {};      
+
+if(adminToken === 'admin_ok') {
+  if (activeScreen === 'dashAdmin' && activeBmsCode) {
+    showDashAdmin(activeBmsCode);
+  } else if (activeScreen === 'clientesPage') {
+    showClientesPage();
   } else {
-    alert('Use admin / 123 por enquanto');
+    showPainelPage();
   }
 }
 
-function logout() {
-  localStorage.removeItem('bms_token');
-  location.reload();
+async function adminLogin(){
+  const user = document.getElementById('user').value;
+  const password = document.getElementById('password').value;
+  const errorEl = document.getElementById('loginError');
+  errorEl.classList.add('hidden');
+  clearTimeout(TIMEOUT_ADMIN_LOGIN);
+
+  try {
+    const r = await fetch(API+'?action=login_admin',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({user,password})});
+    const d = await r.json();
+    if(d.ok){
+      adminToken = d.token;
+      sessionStorage.setItem('admin_token', adminToken);
+      showPainelPage();
+    }else{
+      errorEl.textContent = d.error || 'Credenciais inválidas';
+      errorEl.classList.remove('hidden');
+      TIMEOUT_ADMIN_LOGIN = setTimeout(() => { errorEl.classList.add('hidden'); }, 3000);
+    }
+  } catch(e) {
+    errorEl.textContent = 'Erro de comunicação com o servidor';
+    errorEl.classList.remove('hidden');
+    TIMEOUT_ADMIN_LOGIN = setTimeout(() => { errorEl.classList.add('hidden'); }, 3000);
+  }
 }
 
-// ==========================================
-// GERENCIAMENTO DE USUÁRIOS - VERSÃO FAKE
-// TROCAR POR FETCH QUANDO API TIVER PRONTA
-// ==========================================
-let usuariosFake = [
-  {id: 1, nome: 'Admin Principal', email: 'admin@bms.com', role: 'admin'},
-  {id: 2, nome: 'João Cliente', email: 'joao@email.com', role: 'user'}
-];
+function fecharMqttAnterior() {
+  if (bmsTimeoutTimerAdmin) { clearTimeout(bmsTimeoutTimerAdmin); bmsTimeoutTimerAdmin = null; }
+  for (let k in listaTimeoutsAdminCards) {
+    if (listaTimeoutsAdminCards[k]) clearTimeout(listaTimeoutsAdminCards[k]);
+  }
+  listaTimeoutsAdminCards = {};
 
-function renderizarUsuarios() {
-  const div = document.getElementById('listaUsuarios');
-  if (usuariosFake.length === 0) {
-    div.innerHTML = '<p style="color:var(--text-muted)">Nenhum usuário cadastrado</p>';
-    return;
+  if (MQTT_CLIENT) {
+    try {
+      MQTT_CLIENT.disconnect();
+      console.log("[MQTT ADMIN] Instância finalizada.");
+    } catch(e) {}
+    MQTT_CLIENT = null;
+  }
+}
+
+function showPainelPage() {
+  fecharMqttAnterior();
+  activeScreen = 'painel';
+  sessionStorage.setItem('admin_active_screen', 'painel');
+  
+  document.getElementById('login').style.display = 'none';
+  document.getElementById('clientesPage').style.display = 'none';
+  document.getElementById('clientesPage').classList.remove('active');
+  document.getElementById('dashAdmin').style.display = 'none';
+  document.getElementById('dashAdmin').classList.remove('active');
+  
+  document.getElementById('painel').classList.add('active');
+  document.getElementById('painel').style.display = 'flex';
+  carregarTudo();
+}
+
+function showClientesPage(){
+  fecharMqttAnterior();
+  activeScreen = 'clientesPage';
+  sessionStorage.setItem('admin_active_screen', 'clientesPage');
+  
+  document.getElementById('login').style.display = 'none';
+  document.getElementById('painel').classList.remove('active');
+  document.getElementById('painel').style.display = 'none';
+  document.getElementById('dashAdmin').classList.remove('active');
+  document.getElementById('dashAdmin').style.display = 'none';
+  
+  document.getElementById('clientesPage').classList.add('active');
+  document.getElementById('clientesPage').style.display = 'flex';
+  listarUsers();
+}
+
+function showDashAdmin(code) {
+  fecharMqttAnterior();
+  activeBmsCode = code;
+  activeScreen = 'dashAdmin';
+  sessionStorage.setItem('admin_active_bms_code', code);
+  sessionStorage.setItem('admin_active_screen', 'dashAdmin');
+  
+  document.getElementById('login').style.display = 'none';
+  document.getElementById('painel').classList.remove('active');
+  document.getElementById('painel').style.display = 'none';
+  document.getElementById('clientesPage').classList.remove('active');
+  document.getElementById('clientesPage').style.display = 'none';
+  
+  document.getElementById('dashAdmin').classList.add('active');
+  document.getElementById('dashAdmin').style.display = 'flex';
+  
+  document.getElementById('modalBmsTitle').textContent = code;
+  conectarMqttParaDashboardAdmin();
+}
+
+function mostrarClientes(){ showClientesPage(); }
+function voltarPainel(){ showPainelPage(); }
+function adminLogout(){ fecharMqttAnterior(); sessionStorage.clear(); location.reload(); }
+function authHeaders(){ return {'Content-Type':'application/json','Authorization':'Bearer '+adminToken}; }
+
+document.getElementById('code').oninput = e => {
+  if(!e.target.value.startsWith('SL')) e.target.value = 'SL';
+  e.target.value = 'SL' + e.target.value.slice(2).replace(/[^0-9]/g,'').slice(0,12);
+};
+
+function gerarCodigoAleatorio(){
+  const numeros = Math.floor(Math.random() * 1000000000000).toString().padStart(12, '0');
+  return 'SL' + numeros;
+}
+
+async function generarECadastrar(){
+  const code = gerarCodigoAleatorio();
+  document.getElementById('code').value = code;
+  await cad();
+}
+
+async function cad(){
+  const code = document.getElementById('code').value;
+  const msgEl = document.getElementById('msg');
+  clearTimeout(TIMEOUT_ADMIN_MSG);
+
+  const r = await fetch(API+'?action=admin_add_master',{method:'POST',headers:authHeaders(),body:JSON.stringify({code})});
+  const d = await r.json();
+  msgEl.textContent = d.ok?'Cadastrada no sistema!':d.error;
+  msgEl.style.color = d.ok?'var(--green)':'var(--red)';
+  
+  if(d.ok){
+    document.getElementById('code').value='';
+    carregarTudo();
   }
   
-  div.innerHTML = usuariosFake.map(u => `
-    <div style="display:flex;justify-content:space-between;align-items:center;padding:12px;background:var(--cell-bg);border:1px solid var(--cell-border);border-radius:8px;margin-bottom:8px">
-      <div style="flex:1">
-        <strong style="font-size:15px">${u.nome}</strong><br>
-        <span style="font-size:13px;color:var(--text-muted)">${u.email}</span><br>
-        <span style="font-size:11px;padding:3px 8px;border-radius:4px;background:${u.role === 'admin' ? 'var(--orange)' : 'var(--blue)'};color:#fff;display:inline-block;margin-top:4px">
-          ${u.role === 'admin' ? 'Administrador' : 'Usuário Padrão'}
-        </span>
+  TIMEOUT_ADMIN_MSG = setTimeout(() => { msgEl.textContent = ''; }, 3000);
+}
+
+async function del(code){
+  event.stopPropagation();
+  if(!confirm(`Deletar ${code} do sistema?`))return;
+  await fetch(API+`?action=deletar&code=${code}`,{method:'DELETE',headers:authHeaders()});
+  carregarTudo();
+}
+
+function viewBmsDetails(code){ showDashAdmin(code); }
+
+async function enviarFirmwareOta() {
+  const fileInput = document.getElementById('arquivoOtaBin');
+  const statusMsg = document.getElementById('msgOtaStatus');
+  const btn = document.getElementById('btnOtaUpload');
+
+  if (!activeBmsCode) {
+    alert('Erro: Nenhuma placa BMS activa selecionada.');
+    return;
+  }
+  if (!fileInput.files || fileInput.files.length === 0) {
+    statusMsg.textContent = 'Por favor, selecione um arquivo .bin primeiro!';
+    statusMsg.style.color = 'var(--red)';
+    return;
+  }
+
+  const arquivo = fileInput.files[0];
+  if (!arquivo.name.endsWith('.bin')) {
+    statusMsg.textContent = 'Erro: O arquivo precisa ser obrigatoriamente extensão .bin!';
+    statusMsg.style.color = 'var(--red)';
+    return;
+  }
+
+  if (!confirm(`Deseja realmente enviar o firmware "${arquivo.name}" para a placa ${activeBmsCode}?`)) {
+    return;
+  }
+
+  btn.disabled = true;
+  btn.style.opacity = '0.6';
+  btn.textContent = 'UPLOADING FIRMWARE...';
+  statusMsg.textContent = 'Enviando arquivo para o servidor seguro...';
+  statusMsg.style.color = 'var(--cyan)';
+
+  const formData = new FormData();
+  formData.append('firmware', arquivo);
+  formData.append('code', activeBmsCode);
+
+  try {
+    const r = await fetch(API + '?action=admin_upload_ota', {
+      method: 'POST',
+      headers: { 'Authorization': 'Bearer ' + adminToken },
+      body: formData
+    });
+
+    const d = await r.json();
+
+    if (d && d.ok && d.url) {
+      statusMsg.textContent = 'Upload concluído! Conectando canal expresso via HiveMQ...';
+      statusMsg.style.color = 'var(--cyan)';
+
+      // MOTOR DE DISPARO EXPRESSO (Corrige o bug de falso-desconectado do canal MQTT geral)
+      const hostMqtt = "965bd6abd6f54692b84d710cab8327b4.s1.eu.hivemq.cloud"; 
+      const portaMqtt = 8884;                     
+      const userMqtt = "sl_bms_prod";             
+      const passMqtt = "SLtech2026@Bms";           
+      const otaClientId = "sl_admin_ota_trigger_" + Math.floor(Math.random() * 1000);
+
+      const otaClient = new Paho.MQTT.Client(hostMqtt, Number(portaMqtt), otaClientId);
+      
+      otaClient.connect({
+        userName: userMqtt, password: passMqtt, useSSL: true, timeout: 5,
+        onSuccess: function () {
+          const payloadOtaMqtt = JSON.stringify({ url: d.url });
+          const mensagemMqtt = new Paho.MQTT.Message(payloadOtaMqtt);
+          mensagemMqtt.destinationName = "sl_bms/" + activeBmsCode + "/ota";
+          otaClient.send(mensagemMqtt);
+          
+          statusMsg.textContent = 'Sucesso! Comando de atualização enviado em tempo real via MQTT.';
+          statusMsg.style.color = 'var(--green)';
+          fileInput.value = '';
+          
+          setTimeout(() => { try { otaClient.disconnect(); } catch(e){} }, 500);
+        },
+        onFailure: function () {
+          statusMsg.textContent = 'Upload OK, mas falha ao injetar comando no HiveMQ. O chip lerá no próximo ciclo.';
+          statusMsg.style.color = 'var(--orange)';
+        }
+      });
+
+    } else {
+      statusMsg.textContent = 'Falha: ' + (d.message || d.error || 'Erro desconhecido no servidor.');
+      statusMsg.style.color = 'var(--red)';
+    }
+  } catch (err) {
+    console.error(err);
+    statusMsg.textContent = 'Erro de conexão ao processar firmware.';
+    statusMsg.style.color = 'var(--red)';
+  } finally {
+    btn.disabled = false;
+    btn.style.opacity = '1';
+    btn.textContent = 'ENVIAR E ATUALIZAR PLACA';
+    setTimeout(() => { statusMsg.textContent = ''; }, 6000);
+  }
+}
+
+function closeBmsModal(){
+  activeBmsCode = null;
+  sessionStorage.removeItem('admin_active_bms_code');
+  showPainelPage();
+}
+
+function abrirModalVincular(userId, nomeCliente) {
+  document.getElementById('vincularUserId').value = userId;
+  document.getElementById('txtVincularUser').textContent = `Cliente: ${nomeCliente}`;
+  
+  const select = document.getElementById('selectBmsDisponiveis');
+  select.innerHTML = '<option value="">Carregando baterias livres...</option>';
+  
+  const livres = bmsList.filter(b => !b.user_id);
+  
+  if (livres.length === 0) {
+    select.innerHTML = '<option value="">Nenhuma BMS disponível no banco</option>';
+  } else {
+    select.innerHTML = '<option value="">-- Selecione uma BMS --</option>' + 
+      livres.map(b => `<option value="${b.code}">${b.code}</option>`).join('');
+  }
+  
+  document.getElementById('modalVincularBms').classList.add('active');
+}
+
+function fecharModalVincular() { document.getElementById('modalVincularBms').classList.remove('active'); }
+
+async function confirmarVinculoManual() {
+  const userId = document.getElementById('vincularUserId').value;
+  const code = document.getElementById('selectBmsDisponiveis').value;
+  
+  if (!code) { alert('Selecione uma BMS válida da lista.'); return; }
+  if (!confirm(`Confirmar o vínculo da bateria ${code} para este cliente?`)) return;
+
+  try {
+    const r = await fetch(API + '?action=admin_force_bind', {
+      method: 'POST',
+      headers: authHeaders(),
+      body: JSON.stringify({ userId: parseInt(userId), code })
+    });
+    const d = await r.json();
+    if (d.ok) {
+      alert('BMS vinculada com sucesso!');
+      fecharModalVincular();
+      await carregarTudo();
+      listarUsers();
+    } else { alert('Erro: ' + d.error); }
+  } catch (e) { alert('Erro ao processar vínculo.'); }
+}
+
+async function abrirModalDesvincular(userId, nomeCliente) {
+  document.getElementById('desvincularUserId').value = userId;
+  document.getElementById('txtDesvincularUser').textContent = `Cliente: ${nomeCliente}`;
+  
+  const select = document.getElementById('selectBmsVinculadas');
+  select.innerHTML = '<option value="">Buscando conexões...</option>';
+  
+  const vinculadas = bmsList.filter(b => b.user_id == userId);
+  
+  if (vinculadas.length === 0) {
+    select.innerHTML = '<option value="">Este usuário não possui nenhuma BMS</option>';
+  } else {
+    select.innerHTML = '<option value="">-- Selecione la BMS para remover --</option>' + 
+      vinculadas.map(b => `<option value="${b.code}">${b.code}</option>`).join('');
+  }
+  
+  document.getElementById('modalDesvincularBms').classList.add('active');
+}
+
+function fecharModalDesvincular() { document.getElementById('modalDesvincularBms').classList.remove('active'); }
+
+async function confirmarDesvinculoManual() {
+  const userId = document.getElementById('desvincularUserId').value;
+  const code = document.getElementById('selectBmsVinculadas').value;
+  
+  if (!code) { alert('Selecione a BMS que deseja desvincular.'); return; }
+  if (!confirm(`⚠️ ALERTA DE SEGURANÇA:\n\nTem certeza que deseja apagar o vínculo e remover a BMS ${code} da conta deste cliente?`)) return;
+
+  try {
+    const r = await fetch(API + `?action=admin_force_unbind&userId=${userId}&code=${code}`, {
+      method: 'DELETE',
+      headers: authHeaders()
+    });
+    const d = await r.json();
+    if (d.ok) {
+      alert('BMS desvinculada com sucesso!');
+      fecharModalDesvincular();
+      await carregarTudo();
+      listarUsers();
+    } else { alert('Erro: ' + d.error); }
+  } catch (e) { alert('Erro ao deletar vínculo.'); }
+}
+
+function gerenciarLayoutStatus(elementoCard, elementoTxt, ativo, textoAtivo, textoInativo) {
+  const novaClasse = ativo ? "card triple-active" : "card triple-inactive";
+  const novoTexto = ativo ? textoAtivo : textoInativo;
+  
+  if (elementoCard.className !== novaClasse) {
+    elementoCard.className = novaClasse;
+  }
+  if (elementoTxt.textContent !== novoTexto) {
+    elementoTxt.textContent = novoTexto;
+  }
+}
+
+function conectarMqttParaDashboardAdmin() {
+  configurarInterfaceDashboardOfflineAdmin();
+
+  const bmsInfo = bmsList.find(b => b.code === activeBmsCode) || {};
+  document.getElementById('modalBmsDono').innerHTML = bmsInfo.user_id ? 
+    `<span class="badge badge-orange" style="font-size:12px; padding:6px 12px;">Vinculada: ${bmsInfo.dono_nome || bmsInfo.dono_email}</span>` : 
+    `<span class="badge badge-green" style="font-size:12px; padding:6px 12px;">Disponível / Livre</span>`;
+
+  const hostMqtt = "965bd6abd6f54692b84d710cab8327b4.s1.eu.hivemq.cloud"; 
+  const portaMqtt = 8884;                     
+  const userMqtt = "sl_bms_prod";             
+  const passMqtt = "SLtech2026@Bms";           
+  const clientRandomId = "sl_admin_dash_client_" + Math.floor(Math.random() * 10000);
+
+  MQTT_CLIENT = new Paho.MQTT.Client(hostMqtt, Number(portaMqtt), clientRandomId);
+
+  MQTT_CLIENT.onConnectionLost = function () { configurarInterfaceDashboardOfflineAdmin(); };
+  MQTT_CLIENT.onMessageArrived = function (message) {
+    try {
+      const d = JSON.parse(message.payloadString);
+      processarERenderizarDadosAdminMqtt(d);
+    } catch (err) {}
+  };
+
+  MQTT_CLIENT.connect({
+    userName: userMqtt, password: passMqtt, useSSL: true, timeout: 3,
+    onSuccess: function () {
+      MQTT_CLIENT.subscribe("sl_bms/" + activeBmsCode + "/telemetria");
+    },
+    onFailure: function () { configurarInterfaceDashboardOfflineAdmin(); }
+  });
+}
+
+function configurarInterfaceDashboardOfflineAdmin() {
+  const cardInv = document.getElementById('cardInversor');
+  const txtInv = document.getElementById('txtInversor');
+  const cardBms = document.getElementById('cardBms');
+  const txtBms = document.getElementById('txtBms');
+  const cardBat = document.getElementById('cardBateria');
+  const txtBat = document.getElementById('txtBateria');
+
+  const adminSocGauge = document.getElementById('adminSocGauge');
+  const adminSocValor = document.getElementById('adminSocValor');
+  const adminSocBarTxt = document.getElementById('adminSocBarTxt');
+  const adminSocBar = document.getElementById('adminSocBar');
+
+  gerenciarLayoutStatus(cardBms, txtBms, false, "Online", "Offline");
+  gerenciarLayoutStatus(cardInv, txtInv, false, "Conectado", "Desconectado");
+  gerenciarLayoutStatus(cardBat, txtBat, false, "Conectada", "Desconectada");
+
+  document.getElementById('adminInvPotencia').textContent = '0W';
+  document.getElementById('adminInvTensaoAC').textContent = '0.0V';
+  document.getElementById('adminInvFrequencia').textContent = '0.0Hz';
+  document.getElementById('adminInvGeracaoDia').textContent = '0.0kWh';
+
+  document.getElementById('adminSoc').textContent = '0%';
+  document.getElementById('adminVolt').textContent = '0.0V';
+  document.getElementById('adminCorr').textContent = '0.0A';
+  document.getElementById('adminTemp').textContent = '0°C';
+  
+  adminSocValor.textContent = '0%';
+  adminSocBarTxt.textContent = '0%';
+  adminSocBar.style.width = '0%';
+  adminSocGauge.style.background = 'var(--gauge-empty)';
+  
+  renderAdminCells([]);
+}
+
+function processarERenderizarDadosAdminMqtt(d) {
+  if (bmsTimeoutTimerAdmin) clearTimeout(bmsTimeoutTimerAdmin);
+  bmsTimeoutTimerAdmin = setTimeout(function() {
+    configurarInterfaceDashboardOfflineAdmin();
+  }, 5000);
+
+  const cardInv = document.getElementById('cardInversor');
+  const txtInv = document.getElementById('txtInversor');
+  const cardBms = document.getElementById('cardBms');
+  const txtBms = document.getElementById('txtBms');
+  const cardBat = document.getElementById('cardBateria');
+  const txtBat = document.getElementById('txtBateria');
+
+  const adminSocGauge = document.getElementById('adminSocGauge');
+  const adminSocValor = document.getElementById('adminSocValor');
+  const adminSocBarTxt = document.getElementById('adminSocBarTxt');
+  const adminSocBar = document.getElementById('adminSocBar');
+
+  gerenciarLayoutStatus(cardBms, txtBms, true, "Online", "Offline");
+  
+  const invAtivo = (d.inversor_conectado !== undefined) ? d.inversor_conectado : true;
+  gerenciarLayoutStatus(cardInv, txtInv, invAtivo, "Conectado", "Desconectado");
+
+  const batAtiva = (d.bateria_conectada !== undefined) ? d.bateria_conectada : true;
+  gerenciarLayoutStatus(cardBat, txtBat, batAtiva, "Conectada", "Desconectada");
+
+  if(!invAtivo) {
+    document.getElementById('adminInvPotencia').textContent = '0W';
+    document.getElementById('adminInvTensaoAC').textContent = '0.0V';
+    document.getElementById('adminInvFrequencia').textContent = '0.0Hz';
+    document.getElementById('adminInvGeracaoDia').textContent = '0.0kWh';
+  } else {
+    document.getElementById('adminInvPotencia').textContent = (d.inv_potencia !== undefined ? d.inv_potencia.toFixed(0) : '0') + 'W';
+    document.getElementById('adminInvTensaoAC').textContent = (d.inv_tensao_ac !== undefined ? d.inv_tensao_ac.toFixed(1) : '0.0') + 'V';
+    document.getElementById('adminInvFrequencia').textContent = (d.inv_frequencia !== undefined ? d.inv_frequencia.toFixed(1) : '0.0') + 'Hz';
+    document.getElementById('adminInvGeracaoDia').textContent = (d.inv_geracao_dia !== undefined ? d.inv_geracao_dia.toFixed(1) : '0.0') + 'kWh';
+  }
+
+  if(!batAtiva) {
+    document.getElementById('adminSoc').textContent = '0%';
+    document.getElementById('adminVolt').textContent = '0.0V';
+    document.getElementById('adminCorr').textContent = '0.0A';
+    document.getElementById('adminTemp').textContent = '0°C';
+    adminSocValor.textContent = '0%';
+    adminSocBarTxt.textContent = '0%';
+    adminSocBar.style.width = '0%';
+    adminSocGauge.style.background = 'var(--gauge-empty)';
+  } else {
+    const socVal = d.soc ? parseInt(d.soc) : 0;
+    document.getElementById('adminSoc').textContent = socVal + '%';
+    document.getElementById('adminVolt').textContent = (d.voltage ? d.voltage.toFixed(2) : '0.00') + 'V';
+    document.getElementById('adminCorr').textContent = (d.current ? d.current.toFixed(1) : '0.0') + 'A';
+    document.getElementById('adminTemp').textContent = (d.temp ? d.temp.toFixed(1) : '0.0') + '°C';
+    
+    adminSocValor.textContent = socVal + '%';
+    adminSocBarTxt.textContent = socVal + '%';
+    adminSocBar.style.width = socVal + '%';
+    const deg = socVal * 3.6;
+    adminSocGauge.style.background = `conic-gradient(var(--green) 0deg, var(--cyan) ${deg}deg, var(--gauge-empty) ${deg}deg)`;
+  }
+  
+  renderAdminCells(d.cells || []);
+}
+
+function renderAdminCells(cells){
+  const container = document.getElementById('adminCellsContent');
+  if(!container) return;
+  if(!cells || cells.length === 0){
+    container.innerHTML = '<div style="grid-column:1/-1;text-align:center;opacity:.5;padding:10px;font-size:13px;color:var(--text-muted)">Sem dados</div>';
+    document.getElementById('adminCelMin').textContent = '0.00V';
+    document.getElementById('adminCelMax').textContent = '0.00V';
+    document.getElementById('adminCelDif').textContent = '0.00V';
+    document.getElementById('adminCelTot').textContent = '0';
+    return;
+  }
+
+  let vals = [];
+  for(let i=0; i<cells.length; i++){
+    let v = parseFloat(cells[i]);
+    if(v > 0) vals.push(v);
+  }
+
+  if(vals.length === 0) return;
+
+  const min = Math.min.apply(null, vals);
+  const max = Math.max.apply(null, vals);
+  const dif = max - min;
+
+  document.getElementById('adminCelMin').textContent = min.toFixed(2) + 'V';
+  document.getElementById('adminCelMax').textContent = max.toFixed(2) + 'V';
+  document.getElementById('adminCelDif').textContent = dif.toFixed(2) + 'V';
+  document.getElementById('adminCelTot').textContent = cells.length;
+
+  if (container.children.length !== cells.length || container.querySelector('div[style*="grid-column"]')) {
+    let html = '';
+    for(let i=0; i<cells.length; i++){
+      html += `<div class="cell" id="adm-c-box-${i}"><div class="cell-num">C${i+1}</div><div class="cell-val" id="adm-c-val-${i}">0.00V</div></div>`;
+    }
+    container.innerHTML = html;
+  }
+
+  for(let i=0; i<cells.length; i++){
+    let val = parseFloat(cells[i]);
+    let valStr = val.toFixed(2) + 'V';
+    let cls = 'ok';
+    if(val < 3.2 || val > 4.2) cls = 'crit';
+    else if(val < 3.4 || val > 4.15) cls = 'warn';
+    let novaClasse = 'cell ' + cls;
+
+    let cellBox = document.getElementById('adm-c-box-'+i);
+    let cellVal = document.getElementById('adm-c-val-'+i);
+
+    if (cellVal && cellVal.textContent !== valStr) {
+      cellVal.textContent = valStr;
+    }
+    if (cellBox && cellBox.className !== novaClasse) {
+      cellBox.className = novaClasse;
+    }
+  }
+}
+
+function editarUser(id, nome, email){
+  document.getElementById('editUserId').value = id;
+  document.getElementById('editUserNome').value = nome;
+  document.getElementById('editUserEmail').value = email;
+  document.getElementById('editMsg').textContent = '';
+  document.getElementById('modalEditUser').classList.add('active');
+}
+
+function closeEditUser(){ document.getElementById('modalEditUser').classList.remove('active'); }
+
+async function salvarUser(){
+  const id = document.getElementById('editUserId').value;
+  const nome = document.getElementById('editUserNome').value;
+  const email = document.getElementById('editUserEmail').value;
+  const msg = document.getElementById('editMsg');
+
+  const r = await fetch(API+'?action=edit_user',{method:'POST',headers:authHeaders(),body:JSON.stringify({id:parseInt(id),nome,email})});
+  const d = await r.json();
+  if(d.ok){
+    msg.textContent = 'Salvo!';
+    msg.style.color = 'var(--green)';
+    setTimeout(()=>{closeEditUser();listarUsers();},1000);
+  }else{
+    msg.textContent = d.error;
+    msg.style.color = 'var(--red)';
+  }
+}
+
+async function deletarUser(id, nome){
+  if(!confirm(`Deletar cliente ${nome}? Todas as BMS dele serão removidas.`))return;
+  await fetch(API+`?action=delete_user&id=${id}`,{method:'DELETE',headers:authHeaders()});
+  listarUsers();
+}
+
+async function carregarTudo(){
+  if (!adminToken) return;
+  const rBms = await fetch(API+'?action=admin_list_master',{headers:authHeaders()});
+  const dBms = await rBms.json();
+  
+  bmsList = dBms.sort((a, b) => {
+    if (a.online && !b.online) return -1;
+    if (!a.online && b.online) return 1;
+    return (b.updated_at ? new Date(b.updated_at).getTime() : 0) - (a.updated_at ? new Date(a.updated_at).getTime() : 0);
+  });
+
+  if(activeScreen === 'painel') {
+    atualizarHTMLListaBms();
+  }
+}
+
+function atualizarContadoresFiltro() {
+  const totalTodas = bmsList.length;
+  const totalDisponiveis = bmsList.filter(b => !b.user_id).length;
+  const totalOnline = bmsList.filter(b => b.online).length;
+
+  document.getElementById('count-todas').textContent = totalTodas;
+  document.getElementById('count-disponiveis').textContent = totalDisponiveis;
+  document.getElementById('count-online').textContent = totalOnline;
+}
+
+function alterarFiltroBms(novoFiltro) {
+  filtroAtivo = novoFiltro;
+  
+  document.getElementById('btn-filter-todas').classList.remove('active');
+  document.getElementById('btn-filter-disponiveis').classList.remove('active');
+  document.getElementById('btn-filter-online').classList.remove('active');
+  
+  document.getElementById('btn-filter-' + novoFiltro).classList.add('active');
+  
+  const titulos = {
+    'todas': 'Todas as BMS do Sistema',
+    'disponiveis': 'BMS Disponíveis (Livres)',
+    'online': 'BMS Conectadas (Online)'
+  };
+  document.getElementById('label-lista-titulo').textContent = titulos[novoFiltro];
+  
+  atualizarHTMLListaBms();
+}
+
+function atualizarHTMLListaBms() {
+  let bmsFiltradas = bmsList;
+  
+  if (filtroAtivo === 'disponiveis') {
+    bmsFiltradas = bmsList.filter(b => !b.user_id);
+  } else if (filtroAtivo === 'online') {
+    bmsFiltradas = bmsList.filter(b => b.online);
+  }
+
+  document.getElementById('lista').innerHTML = bmsFiltradas.map(b=>{
+    const dono = b.user_id? `<span class="badge badge-orange">Vinculada</span>` : `<span class="badge badge-green">Disponível</span>`;
+    const statusClass = b.online ? 'on' : 'off';
+    const statusText = b.online ? 'Online' : 'Offline';
+
+    return `
+    <div class="card" id="admin-card-lista-${b.code}" onclick="viewBmsDetails('${b.code}')">
+      <div style="display:flex; flex-direction:column; align-items:center; width: 100%;">
+        <span class="status ${statusClass}" id="admin-dot-lista-${b.code}">${statusText}</span>
+        <div class="card-code">${b.code}</div>
+        <div style="margin-top: 2px;">${dono}</div>
       </div>
-      <button onclick="deletarUsuario(${u.id})" class="btn-red" style="padding:8px 14px;font-size:13px">
-        Excluir
-      </button>
+      <button class="del" onclick="del('${b.code}')">EXCLUIR</button>
     </div>
-  `).join('');
+  `}).join('') || `<div class="card card-empty"><div>Nenhuma BMS encontrada neste filtro</div></div>`;
+
+  atualizarContadoresFiltro();
+  conectarMqttParaListaGeralAdmin();
 }
 
-function criarUsuario() {
-  const nome = document.getElementById('novoNome').value.trim();
-  const email = document.getElementById('novoEmail').value.trim();
-  const senha = document.getElementById('novaSenha').value;
-  const role = document.getElementById('novaRole').value;
+function conectarMqttParaListaGeralAdmin() {
+  const hostMqtt = "965bd6abd6f54692b84d710cab8327b4.s1.eu.hivemq.cloud"; 
+  const portaMqtt = 8884;                     
+  const userMqtt = "sl_bms_prod";             
+  const passMqtt = "SLtech2026@Bms";           
+  const clientRandomId = "sl_admin_list_client_" + Math.floor(Math.random() * 10000);
+
+  MQTT_CLIENT = new Paho.MQTT.Client(hostMqtt, Number(portaMqtt), clientRandomId);
+
+  MQTT_CLIENT.onConnectionLost = function () {};
+  MQTT_CLIENT.onMessageArrived = function (message) {
+    try {
+      const topicoLido = message.destinationName;
+      const partesTopico = topicoLido.split('/');
+      const idPlacaEmissora = partesTopico[1]; 
+
+      let dispositivoNoObjeto = bmsList.find(b => b.code === idPlacaEmissora);
+      let statusAnteriorEraOffline = dispositivoNoObjeto ? !dispositivoNoObjeto.online : true;
+
+      if (dispositivoNoObjeto) {
+        dispositivoNoObjeto.online = true;
+      }
+
+      if (statusAnteriorEraOffline && activeScreen === 'painel') {
+        bmsList.sort((a, b) => {
+          if (a.online && !b.online) return -1;
+          if (!a.online && b.online) return 1;
+          return (b.updated_at ? new Date(b.updated_at).getTime() : 0) - (a.updated_at ? new Date(a.updated_at).getTime() : 0);
+        });
+        atualizarHTMLListaBms();
+      }
+
+      const cardElemento = document.getElementById('admin-card-lista-' + idPlacaEmissora);
+      const dotElemento = document.getElementById('admin-dot-lista-' + idPlacaEmissora);
+
+      if (cardElemento && dotElemento) {
+        cardElemento.querySelector('.status').className = "status on";
+        dotElemento.textContent = "Online";
+
+        if (listaTimeoutsAdminCards[idPlacaEmissora]) clearTimeout(listaTimeoutsAdminCards[idPlacaEmissora]);
+        listaTimeoutsAdminCards[idPlacaEmissora] = setTimeout(function() {
+          if (dispositivoNoObjeto) dispositivoNoObjeto.online = false;
+          
+          if (activeScreen === 'painel') {
+            bmsList.sort((a, b) => {
+              if (a.online && !b.online) return -1;
+              if (!a.online && b.online) return 1;
+              return (b.updated_at ? new Date(b.updated_at).getTime() : 0) - (a.updated_at ? new Date(a.updated_at).getTime() : 0);
+            });
+            atualizarHTMLListaBms();
+          }
+        }, 5000);
+      }
+      atualizarContadoresFiltro();
+    } catch (err) {}
+  };
+
+  MQTT_CLIENT.connect({
+    userName: userMqtt, password: passMqtt, useSSL: true, timeout: 3,
+    onSuccess: function () {
+      MQTT_CLIENT.subscribe("sl_bms/+/telemetria");
+    }
+  });
+}
+
+async function listarUsers(){
+  if (!adminToken) return;
+  const r = await fetch(API+'?action=all_users',{headers:authHeaders()});
+  if(r.status===401){adminLogout();return;}
+  const d = await r.json();
   
-  if (!nome || !email || !senha) {
-    alert('Preenche todos os campos');
-    return;
+  document.getElementById('listaUsers').innerHTML = d.map(u=>`
+    <div class="card">
+      <div class="card-top">
+        <div style="text-align:center;margin-bottom:12px">
+          <b style="font-size:18px;color:var(--text-main)">${u.nome}</b>
+          <div style="opacity:.6;font-size:13px;margin-top:4px;word-break:break-all;font-family:monospace;color:var(--text-muted)">${u.email}</div>
+          <div style="opacity:.5;font-size:11px;margin-top:4px;color:var(--text-muted)">Cadastro: ${new Date(u.created_at).toLocaleDateString('pt-BR')}</div>
+        </div>
+        <div class="data-item" style="text-align:left;display:flex;justify-content:space-between;align-items:center;padding:8px 12px;width:100%">
+          <div class="label" style="text-align:left;margin:0">BMS Atreladas</div>
+          <div class="value" style="color:var(--cyan);font-size:20px;margin:0">${u.bms_count}</div>
+        </div>
+      </div>
+      <div class="btn-group">
+        <button class="edit" onclick="editarUser(${u.id},'${u.nome}','${u.email}')">EDITAR</button>
+        <button class="del" onclick="deletarUser(${u.id},'${u.nome}')">EXCLUIR</button>
+      </div>
+      <button class="vincular" onclick="abrirModalVincular(${u.id}, '${u.nome}')" style="width:100%">+ VINCULAR BMS</button>
+      <button class="desvincular" onclick="abrirModalDesvincular(${u.id}, '${u.nome}')" style="width:100%">- DESVINCULAR BMS</button>
+    </div>
+  `).join('') || '<div class="card card-empty"><div>Nenhum cliente cadastrado</div></div>';
+}
+
+async function setupInicial() {
+  await carregarTudo();
+  if (activeScreen === 'clientesPage') {
+    await listarUsers();
   }
-  
-  if (!email.includes('@')) {
-    alert('E-mail inválido');
-    return;
-  }
-  
-  const novoId = usuariosFake.length > 0 ? Math.max(...usuariosFake.map(u => u.id)) + 1 : 1;
-  usuariosFake.push({id: novoId, nome, email, role});
-  
-  document.getElementById('novoNome').value = '';
-  document.getElementById('novoEmail').value = '';
-  document.getElementById('novaSenha').value = '';
-  document.getElementById('novaRole').value = 'user';
-  
-  renderizarUsuarios();
-  alert('Usuário criado! Quando a API tiver pronta, vai salvar no banco de verdade.');
 }
-
-function deletarUsuario(id) {
-  if (!confirm('Tem certeza que quer excluir este usuário?')) return;
-  usuariosFake = usuariosFake.filter(u => u.id !== id);
-  renderizarUsuarios();
-}
-
-// ==========================================
-// SEU CÓDIGO ORIGINAL CONTINUA AQUI
-// ==========================================
-document.addEventListener('DOMContentLoaded', () => {
-  // Não faz nada por enquanto, espera login
-});
+if(adminToken === 'admin_ok') setupInicial();
 </script>
-
 </body>
 </html>
