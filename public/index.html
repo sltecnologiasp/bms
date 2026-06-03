@@ -16,7 +16,6 @@
 <meta property="og:url" content="https://bms.app.br/">
 <meta property="og:title" content="SMART BMS">
 <meta property="og:description" content="Gerenciamento e Monitoramento Avançado de Baterias em Tempo Real - SL Tecnologia">
-<meta property="og:url" content="https://bms.app.br/1000229030.png">
 <meta property="og:image" content="https://bms.app.br/1000229030.png">
 <meta property="og:image:secure_url" content="https://bms.app.br/1000229030.png">
 <meta property="og:image:width" content="300">
@@ -253,7 +252,7 @@ button:active{transform:scale(0.98)}
 .bms-item h3{color:var(--text-main);font-size:19px;font-weight:800;margin-bottom:4px;width:100%}
 .bms-item p{color:var(--text-muted);font-size:13px;font-family:monospace;margin-bottom:8px;width:100%}
 
-.status-dot{display:inline-flex;align-items:center;justify-content:center;gap:6px;font-size:12px;font-weight:700;margin-bottom:14px;width:100%}
+.status-dot{display:inline-flex;align-items:center;justify-content:center;gap:12px;font-size:12px;font-weight:700;margin-bottom:14px;width:100%}
 .status-dot::before{content:'';width:8px;height:8px;border-radius:50%;display:inline-block}
 .status-dot.on{color:var(--green)}.status-dot.on::before{background:var(--green);box-shadow:0 0 8px var(--green)}
 .status-dot.off{color:var(--red)}.status-dot.off::before{background:var(--red);box-shadow:0 0 8px var(--red)}
@@ -827,11 +826,23 @@ window.onload = function(){
     return;
   }
 
-  if(TOKEN && USER){
-    if(CODIGO){ abrirDash(CODIGO); } else { mostrarLista(); }
-  }else{
+  // FAXINA DE CACHE INTEGRADA: Limpa resíduos antigos de sessões desatualizadas[cite: 3]
+  if (!TOKEN || !USER || typeof USER !== 'object' || !USER.role) {
+    localStorage.removeItem('bms_token');
+    localStorage.removeItem('bms_user');
+    localStorage.removeItem('bms_codigo_ativo');
+    localStorage.removeItem('admin_token');
+    localStorage.removeItem('admin_active_screen');
+    sessionStorage.clear();
+    
+    TOKEN = null;
+    USER = null;
+    CODIGO = null;
+    
     esconderTudo();
     document.getElementById('login').classList.remove('hidden');
+  } else {
+    if(CODIGO){ abrirDash(CODIGO); } else { mostrarLista(); }
   }
 
   var bmsInput = document.getElementById('bms-code');
@@ -1635,18 +1646,6 @@ function atualizarGauge(soc){
   document.getElementById('socBarTxt').textContent = soc + '%';
   bar.style.width = soc + '%';
   gauge.style.background = 'conic-gradient(var(--green) 0deg,var(--cyan) '+(soc * 3.6)+'deg,var(--gauge-empty) '+(soc * 3.6)+'deg)';
-}
-
-function togglePass(inputId, iconEl) {
-  var input = document.getElementById(inputId);
-  if (!input) return;
-  if (input.type === "password") {
-    input.type = "text";
-    iconEl.style.opacity = ".8";
-  } else {
-    input.type = "password";
-    iconEl.style.opacity = ".3";
-  }
 }
 
 function gerenciarLayoutStatus(elementoCard, elementoTxt, ativo, textoAtivo, textoInativo) {
