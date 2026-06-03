@@ -779,6 +779,9 @@ var bmsTimeoutTimer = null;
 var listaPlacasRegistradas = [];   
 var listaTimeoutsDispositivos = {}; 
 
+// CONFIGURAÇÃO DO TIMEOUT EM MILISSEGUNDOS (15 SEGUNDOS DE TOLERÂNCIA CONTRA OSCILAÇÕES)
+var TEMPO_TIMEOUT_CONEXAO = 15000;
+
 try{USER = JSON.parse(localStorage.getItem('bms_user')||'null');}catch(e){}
 
 var temaSalvo = localStorage.getItem('bms_theme') || 'light';
@@ -1344,49 +1347,51 @@ function carregarListaUmaVez() {
 }
 
 function conectarMqttParaListaDispositivos() {
-  const hostMqtt = "965bd6abd6f54692b84d710cab8327b4.s1.eu.hivemq.cloud"; 
-  const portaMqtt = 8884;                     
-  const userMqtt = "sl_bms_prod";             
-  const passMqtt = "SLtech2026@Bms";           
-  const clientRandomId = "sl_list_client_" + Math.floor(Math.random() * 10000);
+  // CHAMADA DINÂMICA DE CREDENCIAIS (BLINDAGEM CONTRA HACKERS)
+  fetch(API + '?action=get_mqtt_credentials', { headers: {'Authorization': 'Bearer ' + TOKEN} })
+  .then(function(res) { return res.json(); })
+  .then(function(cred) {
+    if (!cred.ok) return;
 
-  MQTT_CLIENT = new Paho.MQTT.Client(hostMqtt, Number(portaMqtt), clientRandomId);
+    var clientRandomId = cred.clientPrefix + "list_" + Math.floor(Math.random() * 10000);
+    MQTT_CLIENT = new Paho.MQTT.Client(cred.host, Number(cred.port), clientRandomId);
 
-  MQTT_CLIENT.onConnectionLost = function () { console.log("[MQTT LISTA] Conexão suspensa."); };
+    MQTT_CLIENT.onConnectionLost = function () { console.log("[MQTT LISTA] Conexão suspensa."); };
 
-  MQTT_CLIENT.onMessageArrived = function (message) {
-    try {
-      const topicoLido = message.destinationName; 
-      const partesTopico = topicoLido.split('/');
-      const idPlacaEmissora = partesTopico[1]; 
+    MQTT_CLIENT.onMessageArrived = function (message) {
+      try {
+        const topicoLido = message.destinationName; 
+        const partesTopico = topicoLido.split('/');
+        const idPlacaEmissora = partesTopico[1]; 
 
-      if (listaPlacasRegistradas.indexOf(idPlacaEmissora) !== -1) {
-        var cardElemento = document.getElementById('card-lista-' + idPlacaEmissora);
-        var dotElemento = document.getElementById('dot-lista-' + idPlacaEmissora);
+        if (listaPlacasRegistradas.indexOf(idPlacaEmissora) !== -1) {
+          var cardElemento = document.getElementById('card-lista-' + idPlacaEmissora);
+          var dotElemento = document.getElementById('dot-lista-' + idPlacaEmissora);
 
-        if (cardElemento && dotElemento) {
-          cardElemento.className = "bms-item online-active";
-          dotElemento.className = "status-dot on";
-          dotElemento.textContent = "Online";
+          if (cardElemento && dotElemento) {
+            cardElemento.className = "bms-item online-active";
+            dotElemento.className = "status-dot on";
+            dotElemento.textContent = "Online";
 
-          if (listaTimeoutsDispositivos[idPlacaEmissora]) clearTimeout(listaTimeoutsDispositivos[idPlacaEmissora]);
-          listaTimeoutsDispositivos[idPlacaEmissora] = setTimeout(function() {
-            cardElemento.className = "bms-item";
-            dotElemento.className = "status-dot off";
-            dotElemento.textContent = "Offline";
-          }, 5000); 
+            if (listaTimeoutsDispositivos[idPlacaEmissora]) clearTimeout(listaTimeoutsDispositivos[idPlacaEmissora]);
+            listaTimeoutsDispositivos[idPlacaEmissora] = setTimeout(function() {
+              cardElemento.className = "bms-item";
+              dotElemento.className = "status-dot off";
+              dotElemento.textContent = "Offline";
+            }, TEMPO_TIMEOUT_CONEXAO); // USA O NOVO TIMEOUT DE 15s
+          }
         }
-      }
-    } catch (err) {}
-  };
+      } catch (err) {}
+    };
 
-  MQTT_CLIENT.connect({
-    userName: userMqtt, password: passMqtt, useSSL: true, timeout: 3,
-    onSuccess: function () {
-      console.log("[MQTT LISTA] Ouvindo atividade na nuvem...");
-      MQTT_CLIENT.subscribe("sl_bms/+/telemetria");
-    }
-  });
+    MQTT_CLIENT.connect({
+      userName: cred.user, password: cred.pass, useSSL: true, timeout: 5,
+      onSuccess: function () {
+        console.log("[MQTT LISTA] Ouvindo atividade na nuvem com chave dinâmica...");
+        MQTT_CLIENT.subscribe("sl_bms/+/telemetria");
+      }
+    });
+  }).catch(function(err){});
 }
 
 function abrirDash(code){
@@ -1401,43 +1406,44 @@ function abrirDash(code){
   
   configurarInterfaceEstadoOffline();
 
-  const hostMqtt = "965bd6abd6f54692b84d710cab8327b4.s1.eu.hivemq.cloud"; 
-  const portaMqtt = 8884;                     
-  const userMqtt = "sl_bms_prod";             
-  const passMqtt = "SLtech2026@Bms";           
-  
-  const clientRandomId = "sl_web_client_" + Math.floor(Math.random() * 10000);
+  // CHAMADA DINÂMICA DE CREDENCIAIS PARA O PAINEL PRINCIPAL DO USUÁRIO
+  fetch(API + '?action=get_mqtt_credentials', { headers: {'Authorization': 'Bearer ' + TOKEN} })
+  .then(function(res) { return res.json(); })
+  .then(function(cred) {
+    if (!cred.ok) return;
 
-  MQTT_CLIENT = new Paho.MQTT.Client(hostMqtt, Number(portaMqtt), clientRandomId);
+    var clientRandomId = cred.clientPrefix + "dash_" + Math.floor(Math.random() * 10000);
+    MQTT_CLIENT = new Paho.MQTT.Client(cred.host, Number(cred.port), clientRandomId);
 
-  MQTT_CLIENT.onConnectionLost = function (responseObject) {
-    console.log("[MQTT] Conexão finalizada ou perdida.");
-    configurarInterfaceEstadoOffline();
-  };
-
-  MQTT_CLIENT.onMessageArrived = function (message) {
-    try {
-      const d = JSON.parse(message.payloadString);
-      processarERenderizarDadosMqtt(d);
-    } catch (err) {
-      console.error("[MQTT] Erro de processamento do payload:", err);
-    }
-  };
-
-  MQTT_CLIENT.connect({
-    userName: userMqtt,
-    password: passMqtt,
-    useSSL: true, 
-    timeout: 3,
-    onSuccess: function () {
-      console.log("[MQTT] Conectado com sucesso. Ouvindo dispositivo: " + CODIGO);
-      MQTT_CLIENT.subscribe("sl_bms/" + CODIGO + "/telemetria");
-    },
-    onFailure: function (err) {
-      console.error("[MQTT] Falha na autenticação:", err);
+    MQTT_CLIENT.onConnectionLost = function (responseObject) {
+      console.log("[MQTT] Conexão finalizada ou perdida.");
       configurarInterfaceEstadoOffline();
-    }
-  });
+    };
+
+    MQTT_CLIENT.onMessageArrived = function (message) {
+      try {
+        const d = JSON.parse(message.payloadString);
+        processarERenderizarDadosMqtt(d);
+      } catch (err) {
+        console.error("[MQTT] Erro de processamento do payload:", err);
+      }
+    };
+
+    MQTT_CLIENT.connect({
+      userName: cred.user,
+      password: cred.pass,
+      useSSL: true, 
+      timeout: 5,
+      onSuccess: function () {
+        console.log("[MQTT] Conectado via canal dinâmico. Ouvindo dispositivo: " + CODIGO);
+        MQTT_CLIENT.subscribe("sl_bms/" + CODIGO + "/telemetria");
+      },
+      onFailure: function (err) {
+        console.error("[MQTT] Falha na autenticação:", err);
+        configurarInterfaceEstadoOffline();
+      }
+    });
+  }).catch(function(e) { configurarInterfaceEstadoOffline(); });
 }
 
 function configurarInterfaceEstadoOffline() {
@@ -1468,9 +1474,9 @@ function configurarInterfaceEstadoOffline() {
 function processarERenderizarDadosMqtt(d) {
   if (bmsTimeoutTimer) clearTimeout(bmsTimeoutTimer);
   bmsTimeoutTimer = setTimeout(function() {
-    console.log("[SISTEMA] Fluxo interrompido por mais de 5s. Forçando queda do painel.");
+    console.log("[SISTEMA] Fluxo interrompido. Forçando queda do painel após tolerância de 15s.");
     configurarInterfaceEstadoOffline(); 
-  }, 5000); 
+  }, TEMPO_TIMEOUT_CONEXAO); // SE CONEXÃO SUMIR POR MAIS DE 15 SEGUNDOS, DECLARA OFFLINE
 
   var cardInv = document.getElementById('cardInversor');
   var txtInv = document.getElementById('txtInversor');
