@@ -325,7 +325,6 @@ button:active{transform:scale(0.98)}
   text-align: center !important;
   padding: 10px 4px !important;
   min-height: 80px !important;
-  background: var(--bg) !important;
   border: 1px solid var(--card-border) !important;
   box-shadow: none !important;
   transition: all 0.3s ease !important;
@@ -1123,17 +1122,22 @@ function cadastrar(){
       iniciarCronometroEspera(email);
     } else { 
       if (e) { 
-        if(d.error === 'E-mail já cadastrado') {
-          e.innerHTML = 'E-mail já cadastrado. <br><button onclick="reenviarEmailAtivacao(\''+email+'\')" style="padding:10px 14px; font-size:12px; margin-top:8px; border-radius:10px; font-weight:700; color:#fff; cursor:pointer; border:none; background:linear-gradient(90deg,var(--orange),var(--red)); box-shadow:0 4px 12px rgba(255,159,28,0.2);">REENVIAR LINK DE ATIVAÇÃO</button>';
+        // RESET DE ESTILOS GLOBAIS E INJEÇÃO DO BOTÃO COMPLETO DE REENVIO DE FORMA LIMPA
+        e.style.color = '';
+        e.style.background = '';
+        e.style.borderColor = '';
+        
+        if(d.error === 'E-mail já cadastrado' || d.error === 'E-mail aguardando ativação') {
+          e.innerHTML = 'Este e-mail já está cadastrado!<br><button onclick="event.preventDefault(); reenviarEmailAtivacao(\''+email+'\')" style="width:100%; padding:12px; font-size:13px; margin-top:10px; border-radius:10px; font-weight:700; color:#fff; cursor:pointer; border:none; background:linear-gradient(90deg,var(--orange),var(--red)); box-shadow:0 4px 12px rgba(255,159,28,0.25); display:block;">REENVIAR LINK DE ATIVAÇÃO</button>';
           e.classList.remove('hidden');
-        } else if(d.error === 'E-mail já cadastrado e confirmado!') {
+        } else if(d.error === 'E-mail já cadastrado and confirmed') {
           alert('Este e-mail já está verificado e ativo no sistema!');
           mostrarLogin();
           return;
         } else {
           e.textContent = d.error; 
           e.classList.remove('hidden');
-          TIMEOUT_ERRO_CADASTRO = setTimeout(function() { e.classList.add('hidden'); }, 3000);
+          TIMEOUT_ERRO_CADASTRO = setTimeout(function() { e.classList.add('hidden'); }, 4000);
         }
       } 
     }
@@ -1347,7 +1351,6 @@ function carregarListaUmaVez() {
 }
 
 function conectarMqttParaListaDispositivos() {
-  // CHAMADA DINÂMICA DE CREDENCIAIS (BLINDAGEM CONTRA HACKERS)
   fetch(API + '?action=get_mqtt_credentials', { headers: {'Authorization': 'Bearer ' + TOKEN} })
   .then(function(res) { return res.json(); })
   .then(function(cred) {
@@ -1378,7 +1381,7 @@ function conectarMqttParaListaDispositivos() {
               cardElemento.className = "bms-item";
               dotElemento.className = "status-dot off";
               dotElemento.textContent = "Offline";
-            }, TEMPO_TIMEOUT_CONEXAO); // USA O NOVO TIMEOUT DE 15s
+            }, TEMPO_TIMEOUT_CONEXAO); 
           }
         }
       } catch (err) {}
@@ -1406,7 +1409,6 @@ function abrirDash(code){
   
   configurarInterfaceEstadoOffline();
 
-  // CHAMADA DINÂMICA DE CREDENCIAIS PARA O PAINEL PRINCIPAL DO USUÁRIO
   fetch(API + '?action=get_mqtt_credentials', { headers: {'Authorization': 'Bearer ' + TOKEN} })
   .then(function(res) { return res.json(); })
   .then(function(cred) {
@@ -1471,12 +1473,13 @@ function configurarInterfaceEstadoOffline() {
   renderCelulas([]);
 }
 
+// PRONTO PARA PROCESSAR OS FLUXOS DINÂMICOS
 function processarERenderizarDadosMqtt(d) {
   if (bmsTimeoutTimer) clearTimeout(bmsTimeoutTimer);
   bmsTimeoutTimer = setTimeout(function() {
     console.log("[SISTEMA] Fluxo interrompido. Forçando queda do painel após tolerância de 15s.");
     configurarInterfaceEstadoOffline(); 
-  }, TEMPO_TIMEOUT_CONEXAO); // SE CONEXÃO SUMIR POR MAIS DE 15 SEGUNDOS, DECLARA OFFLINE
+  }, TEMPO_TIMEOUT_CONEXAO); 
 
   var cardInv = document.getElementById('cardInversor');
   var txtInv = document.getElementById('txtInversor');
