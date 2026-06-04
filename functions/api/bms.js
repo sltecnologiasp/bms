@@ -15,23 +15,18 @@ export async function onRequest({ request, env }) {
     headers: {...cors, 'Content-Type': 'application/json' }
   });
 
-  // =========================================================================
   // FUNÇÃO AUXILIAR DE CRIPTOGRAFIA PARA O NOVO TOKEN SEGURO (HMAC-SHA256)
-  // =========================================================================
   async function gerarAssinaturaToken(texto, segredo) {
     const encoder = new TextEncoder();
     const keyData = encoder.encode(segredo);
     const messageData = encoder.encode(texto);
     
-    // Importa a chave secreta usando o algoritmo HMAC
     const key = await crypto.subtle.importKey(
       'raw', keyData, { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']
     );
     
-    // Gera a assinatura digital baseada no segredo do servidor
     const signature = await crypto.subtle.sign('HMAC', key, messageData);
     
-    // Transforma o resultado binário em uma string Hexadecimal estável
     return Array.from(new Uint8Array(signature))
       .map(b => b.toString(16).padStart(2, '0'))
       .join('');
@@ -41,6 +36,43 @@ export async function onRequest({ request, env }) {
     // =========================================================================
     // ROTAS PÚBLICAS CRÍTICAS (PROCESSADAS NO TOPO ABSOLUTO SEM EXIGIR TOKEN)
     // =========================================================================
+
+    // ROTA ADICIONAL: REENVIO DE LINK DE ATIVAÇÃO (CORRIGIDA E ISOLADA)
+    if (action === 'resend_verification' && request.method === 'POST') {
+      const { email } = await request.json();
+      const userEmail = (email || '').trim().toLowerCase();
+      if (!userEmail) return json({ ok: false, error: 'E-mail inválido' }, 400);
+
+      const user = await env.DB.prepare('SELECT id, nome, email_verificado FROM users WHERE email = ?').bind(userEmail).first();
+      
+      if (!user) return json({ ok: false, error: 'E-mail não encontrado no sistema' }, 404);
+      if (user.email_verificado === 1) return json({ ok: false, error: 'Este e-mail já está verificado e ativo.' }, 400);
+
+      const novo_token = crypto.randomUUID();
+      await env.DB.prepare('UPDATE users SET token_verificacao = ? WHERE id = ?').bind(novo_token, user.id).run();
+
+      if (env.RESEND_API_KEY) {
+        const verifyLink = `${url.origin}${url.pathname}?action=verify_email&token=${novo_token}`;
+        await fetch('https://api.resend.com/emails', {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${env.RESEND_API_KEY}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            from: 'SMART BMS <nao-responda@bms.app.br>',
+            to: userEmail,
+            subject: 'Novo link de ativação - SMART BMS',
+            html: `
+              <div style="font-family: sans-serif; max-width: 600px; margin: auto; padding: 24px; background: #05070d; color: #ffffff; border-radius: 12px; border: 1px solid rgba(0,255,255,0.1);">
+                <h2 style="color: #00ffff; text-align: center; margin-top: 0;">SMART BMS</h2>
+                <h3 style="text-align: center; color: #fff;">Olá, ${user.nome}!</h3>
+                <p style="text-align: center; color: #a1aab8; line-height: 1.6;">Aqui está o seu novo link solicitado para ativar a conta. Clique no botão abaixo:</p>
+                <div style="text-align: center; margin: 36px 0;"><a href="${verifyLink}" style="background: linear-gradient(90deg, #0080ff, #00ffff); color: #ffffff; padding: 16px 32px; text-decoration: none; border-radius: 12px; font-weight: bold; font-size: 16px;">ATIVAR MINHA CONTA</a></div>
+              </div>
+            `
+          })
+        }).catch(err => console.log('Erro ao reenviar e-mail:', err));
+      }
+      return json({ ok: true });
+    }
 
     // ROTA EXPRESSA: AUTO-CADASTRO DO HARDWARE ESP32 VIA eFUSE/MAC
     if (action === 'device_auto_register' && request.method === 'POST') {
@@ -105,18 +137,18 @@ export async function onRequest({ request, env }) {
       `, { headers: { 'Content-Type': 'text/html; charset=utf-8' } });
     }
 
-    // ROTA 2: CADASTRO COM DISPARO DO RESEND
+    // ROTA 2: CADASTRO USER
     if ((action === 'register' || action === 'register_user') && request.method === 'POST') {
-      const { nome, email, resignation, senha } = await request.json();
-      const userEmail = (email || resignation || '').trim().toLowerCase();
+      const { nome, email, senha } = await request.json();
+      const userEmail = (email || '').trim().toLowerCase();
       if (!nome || !userEmail || !senha) return json({ ok: false, error: 'Dados inválidos' }, 400);
       
       const exists = await env.DB.prepare('SELECT email_verificado FROM users WHERE email = ?').bind(userEmail).first();
       if (exists) {
         if (exists.email_verificado === 1) {
-          return json({ ok: false, error: 'E-mail já cadastrado e confirmado!' }, 400);
+          return json({ ok: false, error: 'E-mail já cadastrado and confirmed' }, 400);
         } else {
-          return json({ ok: false, error: 'E-mail já cadastrado!' }, 400);
+          return json({ ok: false, error: 'E-mail já cadastrado' }, 400);
         }
       }
 
@@ -145,43 +177,6 @@ export async function onRequest({ request, env }) {
             `
           })
         }).catch(err => console.log('Erro ao enviar e-mail:', err));
-      }
-      return json({ ok: true });
-    }
-
-    // ROTA ADICIONAL: REENVIO DE LINK DE ATIVAÇÃO
-    if (action === 'resend_verification' && request.method === 'POST') {
-      const { email } = await request.json();
-      const userEmail = (email || '').trim().toLowerCase();
-      if (!userEmail) return json({ ok: false, error: 'E-mail inválido' }, 400);
-
-      const user = await env.DB.prepare('SELECT id, nome, email_verificado FROM users WHERE email = ?').bind(userEmail).first();
-      
-      if (!user) return json({ ok: false, error: 'E-mail não encontrado no sistema' }, 404);
-      if (user.email_verificado === 1) return json({ ok: false, error: 'Este e-mail já está verificado e ativo.' }, 400);
-
-      const novo_token = crypto.randomUUID();
-      await env.DB.prepare('UPDATE users SET token_verificacao = ? WHERE id = ?').bind(novo_token, user.id).run();
-
-      if (env.RESEND_API_KEY) {
-        const verifyLink = `${url.origin}${url.pathname}?action=verify_email&token=${novo_token}`;
-        await fetch('https://api.resend.com/emails', {
-          method: 'POST',
-          headers: { 'Authorization': `Bearer ${env.RESEND_API_KEY}`, 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            from: 'SMART BMS <nao-responda@bms.app.br>',
-            to: userEmail,
-            subject: 'Novo link de ativação - SMART BMS',
-            html: `
-              <div style="font-family: sans-serif; max-width: 600px; margin: auto; padding: 24px; background: #05070d; color: #ffffff; border-radius: 12px; border: 1px solid rgba(0,255,255,0.1);">
-                <h2 style="color: #00ffff; text-align: center; margin-top: 0;">SMART BMS</h2>
-                <h3 style="text-align: center; color: #fff;">Olá, ${user.nome}!</h3>
-                <p style="text-align: center; color: #a1aab8; line-height: 1.6;">Aqui está o seu novo link solicitado para ativar a conta. Clique no botão abaixo:</p>
-                <div style="text-align: center; margin: 36px 0;"><a href="${verifyLink}" style="background: linear-gradient(90deg, #0080ff, #00ffff); color: #ffffff; padding: 16px 32px; text-decoration: none; border-radius: 12px; font-weight: bold; font-size: 16px;">ATIVAR MINHA CONTA</a></div>
-              </div>
-            `
-          })
-        }).catch(err => console.log('Erro ao reenviar e-mail:', err));
       }
       return json({ ok: true });
     }
@@ -250,7 +245,7 @@ export async function onRequest({ request, env }) {
       return json({ ok: true });
     }
 
-    // ROTA 5: LOGIN USER (CRIAÇÃO DO TOKEN CRIPTOGRAFADO)
+    // ROTA 5: LOGIN USER
     if (action === 'login' && request.method === 'POST') {
       const { email, senha } = await request.json();
       const cleanEmail = (email || '').trim().toLowerCase();
@@ -272,7 +267,6 @@ export async function onRequest({ request, env }) {
         return json({ ok: false, error: 'Confirme seu e-mail na caixa de entrada antes de acessar.' }, 403);
       }
 
-      // ASSINATURA DIGITAL COMPLETA PARA SEGURANÇA
       const JWT_SECRET = env.JWT_SECRET || "MudeEsseTextoNoPainelCloudflare123!";
       const payloadTexto = `user:${user.id}:${Date.now()}`;
       const payloadB64 = btoa(payloadTexto);
@@ -282,7 +276,7 @@ export async function onRequest({ request, env }) {
       return json({ ok: true, token: tokenSeguro, user: { id: user.id, nome: user.nome, email: user.email } });
     }
 
-    // ROTA 6: LOGIN ADMIN (LENDO CLOUDFLARE E GERANDO TOKEN SEGURO)
+    // ROTA 6: LOGIN ADMIN
     if (action === 'login_admin' && request.method === 'POST') {
       const { user, password } = await request.json();
       
@@ -356,7 +350,6 @@ export async function onRequest({ request, env }) {
       const dadosOriginaisB64 = partesToken[0];
       const assinaturaRecebida = partesToken[1];
       
-      // Conferir se a assinatura confere com a gravada em nosso segredo privado
       const assinaturaConferida = await gerarAssinaturaToken(dadosOriginaisB64, JWT_SECRET);
       
       if (assinaturaRecebida !== assinaturaConferida) {
