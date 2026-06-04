@@ -1126,7 +1126,7 @@ function cadastrar(){
         if(d.error === 'E-mail já cadastrado') {
           e.innerHTML = 'E-mail já cadastrado. <br><button onclick="reenviarEmailAtivacao(\''+email+'\')" style="padding:10px 14px; font-size:12px; margin-top:8px; border-radius:10px; font-weight:700; color:#fff; cursor:pointer; border:none; background:linear-gradient(90deg,var(--orange),var(--red)); box-shadow:0 4px 12px rgba(255,159,28,0.2);">REENVIAR LINK DE ATIVAÇÃO</button>';
           e.classList.remove('hidden');
-        } else if(d.error === 'E-mail já cadastrado and confirmed') {
+        } else if(d.error === 'E-mail já cadastrado e confirmado!') {
           alert('Este e-mail já está verificado e ativo no sistema!');
           mostrarLogin();
           return;
