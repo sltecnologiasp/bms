@@ -89,6 +89,11 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text-main);
   padding:12px 12px;
 }
 
+/* Espaçamento dedicado para descolar o conjunto do topo da tela em dispositivos móveis */
+#lista, #configuracoesPage, #dash {
+  padding-top: 44px !important;
+}
+
 #login, #cadastro, #redefinir {
   display:flex;
   flex-direction:column;
@@ -1121,26 +1126,24 @@ function cadastrar(){
     if(d.ok){
       iniciarCronometroEspera(email);
     } else { 
-      if (e) { 
-        // RESET DE ESTILOS GLOBAIS E INJEÇÃO DO BOTÃO COMPLETO DE REENVIO DE FORMA LIMPA
-        e.style.color = '';
-        e.style.background = '';
-        e.style.borderColor = '';
-        
-        if(d.error === 'E-mail já cadastrado' || d.error === 'E-mail aguardando ativação') {
-          e.innerHTML = 'Este e-mail já está cadastrado!<br><button onclick="event.preventDefault(); reenviarEmailAtivacao(\''+email+'\')" style="width:100%; padding:12px; font-size:13px; margin-top:10px; border-radius:10px; font-weight:700; color:#fff; cursor:pointer; border:none; background:linear-gradient(90deg,var(--orange),var(--red)); box-shadow:0 4px 12px rgba(255,159,28,0.25); display:block;">REENVIAR LINK DE ATIVAÇÃO</button>';
-          e.classList.remove('hidden');
-        } else if(d.error === 'E-mail já cadastrado and confirmed') {
-          alert('Este e-mail já está verificado e ativo no sistema!');
-          mostrarLogin();
-          return;
-        } else {
-          e.textContent = d.error; 
-          e.classList.remove('hidden');
-          TIMEOUT_ERRO_CADASTRO = setTimeout(function() { e.classList.add('hidden'); }, 4000);
-        }
-      } 
-    }
+      // RESET DE ESTILOS GLOBAIS E INJEÇÃO DO BOTÃO COMPLETO DE REENVIO DE FORMA LIMPA
+      e.style.color = '';
+      e.style.background = '';
+      e.style.borderColor = '';
+      
+      if(d.error === 'E-mail já cadastrado' || d.error === 'E-mail aguardando ativação') {
+        e.innerHTML = 'Este e-mail já está cadastrado!<br><button onclick="event.preventDefault(); reenviarEmailAtivacao(\''+email+'\')" style="width:100%; padding:12px; font-size:13px; margin-top:10px; border-radius:10px; font-weight:700; color:#fff; cursor:pointer; border:none; background:linear-gradient(90deg,var(--orange),var(--red)); box-shadow:0 4px 12px rgba(255,159,28,0.25); display:block;">REENVIAR LINK DE ATIVAÇÃO</button>';
+        e.classList.remove('hidden');
+      } else if(d.error === 'E-mail já cadastrado and confirmed') {
+        alert('Este e-mail já está verificado e ativo no sistema!');
+        mostrarLogin();
+        return;
+      } else {
+        e.textContent = d.error; 
+        e.classList.remove('hidden');
+        TIMEOUT_ERRO_CADASTRO = setTimeout(function() { e.classList.add('hidden'); }, 4000);
+      }
+    } 
   })
   .catch(function(err){
     if (e) { 
@@ -1473,7 +1476,6 @@ function configurarInterfaceEstadoOffline() {
   renderCelulas([]);
 }
 
-// PRONTO PARA PROCESSAR OS FLUXOS DINÂMICOS
 function processarERenderizarDadosMqtt(d) {
   if (bmsTimeoutTimer) clearTimeout(bmsTimeoutTimer);
   bmsTimeoutTimer = setTimeout(function() {
