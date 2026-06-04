@@ -121,16 +121,16 @@ button:active{transform:scale(0.98)}
 .btn-sec{background:transparent;border:1px solid var(--cyan);color:var(--cyan);box-shadow:none}
 .btn-clientes{background:transparent;border:1px solid var(--green);color:var(--green);box-shadow:none}
 
-button.del{background:transparent;border:1px solid var(--input-border);color:var(--text-muted);font-size:12px;padding:10px;box-shadow:none;font-weight:700;width:100%}
+button.del{background:transparent;border:1px solid var(--input-border);color:var(--text-muted);font-size:12px;padding:14px;box-shadow:none;font-weight:700;width:100%}
 button.del:hover{background:rgba(231,29,54,0.08);color:var(--red);border-color:var(--red)}
 
-button.edit{background:transparent;border:1px solid var(--cyan);color:var(--cyan);font-size:13px;padding:12px;margin-top:auto;box-shadow:none;font-weight:700}
+button.edit{background:transparent;border:1px solid var(--cyan);color:var(--cyan);font-size:13px;padding:14px;margin-top:auto;box-shadow:none;font-weight:700}
 button.edit:hover{background:rgba(0,180,216,0.08)}
 
-button.vincular{background:transparent;border:1px solid var(--green);color:var(--green);font-size:13px;padding:12px;margin-top:6px;box-shadow:none;font-weight:700}
+button.vincular{background:transparent;border:1px solid var(--green);color:var(--green);font-size:13px;padding:14px;margin-top:6px;box-shadow:none;font-weight:700}
 button.vincular:hover{background:rgba(46,196,182,0.08)}
 
-button.desvincular{background:transparent;border:1px solid var(--orange);color:var(--orange);font-size:13px;padding:12px;margin-top:6px;box-shadow:none;font-weight:700}
+button.desvincular{background:transparent;border:1px solid var(--orange);color:var(--orange);font-size:13px;padding:14px;margin-top:6px;box-shadow:none;font-weight:700}
 button.desvincular:hover{background:rgba(255,159,28,0.08)}
 
 button.voltar{background:transparent;border:1px solid var(--green);color:var(--green);width:100%;max-width:100%;margin-top:8px;box-shadow:none;font-weight:700}
@@ -360,12 +360,6 @@ button.logout:hover{background:rgba(231,29,54,0.08);color:var(--red);border-colo
     justify-content: space-between !important;
     align-items: center !important;
   }
-  #lista .card button.del {
-    width: 100% !important;
-    padding: 6px !important;
-    font-size: 11px !important;
-    margin-top: 6px !important;
-  }
 }
 
 @media(min-width:600px){
@@ -539,7 +533,7 @@ button.logout:hover{background:rgba(231,29,54,0.08);color:var(--red);border-colo
     <p id="txtDesvincularUser" style="text-align:center; font-size:14px; margin-bottom:16px; color:var(--text-muted)"></p>
     <input id="desvincularUserId" type="hidden">
     
-    <div class="label">Selecione a BMS para Remover</div>
+    <div class="label">Selecione la BMS para remover</div>
     <select id="selectBmsVinculadas" style="width:100%; margin-top:6px;"></select>
     
     <button onclick="confirmarDesvinculoManual()" style="background:linear-gradient(90deg,var(--orange),var(--red))">REMOVER VÍNCULO</button>
@@ -579,7 +573,6 @@ let MQTT_CLIENT = null;
 let bmsTimeoutTimerAdmin = null;         
 let listaTimeoutsAdminCards = {};      
 
-// VARIÁVEL GLOBAL DE TIMEOUT DE DISPOSITIVOS (15 SEGUNDOS)
 const TEMPO_TIMEOUT_CONEXAO = 15000;
 
 if(adminToken) {
@@ -783,7 +776,6 @@ async function enviarFirmwareOta() {
       statusMsg.textContent = 'Upload concluído! Resolvendo canal expresso via HiveMQ...';
       statusMsg.style.color = 'var(--cyan)';
 
-      // SOLICITAÇÃO DINÂMICA DE CREDENCIAIS MQTT PARA O DISPARO DO OTA (BLINDAGEM CONTRA FALHAS)
       const rCred = await fetch(API + '?action=get_mqtt_credentials', { headers: { 'Authorization': 'Bearer ' + adminToken } });
       const cred = await rCred.json();
 
@@ -894,7 +886,7 @@ async function abrirModalDesvincular(userId, nomeCliente) {
   if (vinculadas.length === 0) {
     select.innerHTML = '<option value="">Este usuário não possui nenhuma BMS</option>';
   } else {
-    select.innerHTML = '<option value="">-- Selecione a BMS para remover --</option>' + 
+    select.innerHTML = '<option value="">-- Selecione la BMS para remover --</option>' + 
       vinculadas.map(b => `<option value="${b.code}">${b.code}</option>`).join('');
   }
   
@@ -1010,7 +1002,7 @@ function processarERenderizarDadosAdminMqtt(d) {
   if (bmsTimeoutTimerAdmin) clearTimeout(bmsTimeoutTimerAdmin);
   bmsTimeoutTimerAdmin = setTimeout(function() {
     configurarInterfaceDashboardOfflineAdmin();
-  }, TEMPO_TIMEOUT_CONEXAO); // TIMEOUT AJUSTADO DE 5s PARA 15s CONTRA OSCILAÇÕES
+  }, TEMPO_TIMEOUT_CONEXAO); 
 
   const cardInv = document.getElementById('cardInversor');
   const txtInv = document.getElementById('txtInversor');
@@ -1286,7 +1278,7 @@ async function conectarMqttParaListaGeralAdmin() {
               });
               atualizarHTMLListaBms();
             }
-          }, TEMPO_TIMEOUT_CONEXAO); // TIMEOUT DE LISTAGEM ADMIN AJUSTADO PARA 15s
+          }, TEMPO_TIMEOUT_CONEXAO); 
         }
         atualizarContadoresFiltro();
       } catch (err) {}
@@ -1320,12 +1312,12 @@ async function listarUsers(){
           <div class="value" style="color:var(--cyan);font-size:20px;margin:0">${u.bms_count}</div>
         </div>
       </div>
-      <div class="btn-group">
-        <button class="edit" onclick="editarUser(${u.id},'${u.nome}','${u.email}')">EDITAR</button>
-        <button class="del" onclick="deletarUser(${u.id},'${u.nome}')">EXCLUIR</button>
+      <div class="btn-group" style="width:100%">
+        <button class="edit" onclick="editarUser(${u.id},'${u.nome}','${u.email}')" style="width:100%">EDITAR DETALHES</button>
       </div>
       <button class="vincular" onclick="abrirModalVincular(${u.id}, '${u.nome}')" style="width:100%">+ VINCULAR BMS</button>
       <button class="desvincular" onclick="abrirModalDesvincular(${u.id}, '${u.nome}')" style="width:100%">- DESVINCULAR BMS</button>
+      <button class="del" onclick="deletarUser(${u.id},'${u.nome}')" style="width:100%; margin-top:6px;">EXCLUIR CLIENTE</button>
     </div>
   `).join('') || '<div class="card card-empty"><div>Nenhum cliente cadastrado</div></div>';
 }
