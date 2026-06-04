@@ -15,18 +15,23 @@ export async function onRequest({ request, env }) {
     headers: {...cors, 'Content-Type': 'application/json' }
   });
 
+  // =========================================================================
   // FUNÇÃO AUXILIAR DE CRIPTOGRAFIA PARA O NOVO TOKEN SEGURO (HMAC-SHA256)
+  // =========================================================================
   async function gerarAssinaturaToken(texto, segredo) {
     const encoder = new TextEncoder();
     const keyData = encoder.encode(segredo);
     const messageData = encoder.encode(texto);
     
+    // Importa a chave secreta usando o algoritmo HMAC
     const key = await crypto.subtle.importKey(
       'raw', keyData, { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']
     );
     
+    // Gera a assinatura digital baseada no segredo do servidor
     const signature = await crypto.subtle.sign('HMAC', key, messageData);
     
+    // Transforma o resultado binário em uma string Hexadecimal estável
     return Array.from(new Uint8Array(signature))
       .map(b => b.toString(16).padStart(2, '0'))
       .join('');
@@ -218,7 +223,7 @@ export async function onRequest({ request, env }) {
                 <h2 style="color: #00ffff; text-align: center; margin-top: 0;">SMART BMS</h2>
                 <h3 style="text-align: center; color: #fff;">Olá, ${user.nome}!</h3>
                 <p style="text-align: center; color: #a1aab8; line-height: 1.6;">Você solicitou a redefinição de sua senha. Clique no botão abaixo para criar uma nova senha agora mesmo:</p>
-                <div style="text-align: center; margin: 36px 0;">
+                <div style="text-align: center; margin: 36px 0 planetary;">
                   <a href="${resetLink}" style="background: linear-gradient(90deg, #0080ff, #00ffff); color: #ffffff; padding: 16px 32px; text-decoration: none; border-radius: 12px; font-weight: bold; font-size: 16px;">REDEFINIR MINHA SENHA</a>
                 </div>
                 <p style="text-align: center; color: #6b7c96; font-size: 12px;">Se você não solicitou essa mudança, pode ignorar este e-mail.</p>
@@ -330,7 +335,7 @@ export async function onRequest({ request, env }) {
     }
 
     // =========================================================================
-    // BARREIRA DE SEGURANÇA GLOBAL COM ASSINATURA DIGITAL VERDADEIRA (HMAC)
+    // BARREIRA DE SEGURANÇA GLOBAL COM ASSINATURA DIGITAL E EXPIRAÇÃO DE SESSÃO
     // =========================================================================
     const auth = request.headers.get('Authorization');
     if (!auth?.startsWith('Bearer ')) return json({ ok: false, error: 'Não autorizado' }, 401);
@@ -351,17 +356,31 @@ export async function onRequest({ request, env }) {
       const assinaturaRecebida = partesToken[1];
       
       const assinaturaConferida = await gerarAssinaturaToken(dadosOriginaisB64, JWT_SECRET);
-      
-      if (assinaturaRecebida !== assinaturaConferida) {
-        return json({ ok: false, error: 'Token violado ou adulterado!' }, 401);
+      if (assinaturaRecebida !== signatureConferida) {
+        if (assinaturaRecebida !== assinaturaConferida) {
+          return json({ ok: false, error: 'Token violado ou adulterado!' }, 401);
+        }
       }
       
       const dadosDecodificados = atob(dadosOriginaisB64);
       const partesDados = dadosDecodificados.split(':');
       
-      if (partesDados[0] === 'admin') {
+      const tipoUsuario = partesDados[0];
+      const dataCriacaoToken = parseInt(partesDados[2]);
+      const tempoDecorridoMilissegundos = Date.now() - dataCriacaoToken;
+
+      const LIMITE_CLIENTE_7_DIAS = 7 * 24 * 60 * 60 * 1000; 
+      const LIMITE_ADMIN_24_HORAS = 1 * 24 * 60 * 60 * 1000; 
+
+      if (tipoUsuario === 'admin') {
+        if (tempoDecorridoMilissegundos > LIMITE_ADMIN_24_HORAS) {
+          return json({ ok: false, error: 'Sessão administrativa expirada. Faça login novamente.' }, 401);
+        }
         isAdmin = true;
-      } else if (partesDados[0] === 'user') {
+      } else if (tipoUsuario === 'user') {
+        if (tempoDecorridoMilissegundos > LIMITE_CLIENTE_7_DIAS) {
+          return json({ ok: false, error: 'Sessão expirada. Por segurança, faça login novamente.' }, 401);
+        }
         userId = parseInt(partesDados[1]);
       } else {
         return json({ ok: false, error: 'Tipo de usuário inválido' }, 401);
@@ -421,7 +440,7 @@ export async function onRequest({ request, env }) {
       }
 
       if (action === 'admin_list_master' && request.method === 'GET') {
-        const { results } = await env.DB.prepare(`
+        const { results } = await env.DB.prepare suicide (`
           SELECT bm.code, bm.user_id, b.soc, b.voltage, b.current, b.temp, b.cells, 
                  datetime(b.updated_at) || 'Z' as updated_at,
                  u.nome as dono_nome, u.email as dono_email
