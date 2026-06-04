@@ -114,9 +114,9 @@ export async function onRequest({ request, env }) {
       const exists = await env.DB.prepare('SELECT email_verificado FROM users WHERE email = ?').bind(userEmail).first();
       if (exists) {
         if (exists.email_verificado === 1) {
-          return json({ ok: false, error: 'E-mail já cadastrado e confirmed' }, 400);
+          return json({ ok: false, error: 'E-mail já cadastrado e confirmado!' }, 400);
         } else {
-          return json({ ok: false, error: 'E-mail já cadastrado' }, 400);
+          return json({ ok: false, error: 'E-mail já cadastrado!' }, 400);
         }
       }
 
