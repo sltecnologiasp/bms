@@ -223,7 +223,7 @@ export async function onRequest({ request, env }) {
                 <h2 style="color: #00ffff; text-align: center; margin-top: 0;">SMART BMS</h2>
                 <h3 style="text-align: center; color: #fff;">Olá, ${user.nome}!</h3>
                 <p style="text-align: center; color: #a1aab8; line-height: 1.6;">Você solicitou a redefinição de sua senha. Clique no botão abaixo para criar uma nova senha agora mesmo:</p>
-                <div style="text-align: center; margin: 36px 0 planetary;">
+                <div style="text-align: center; margin: 36px 0;">
                   <a href="${resetLink}" style="background: linear-gradient(90deg, #0080ff, #00ffff); color: #ffffff; padding: 16px 32px; text-decoration: none; border-radius: 12px; font-weight: bold; font-size: 16px;">REDEFINIR MINHA SENHA</a>
                 </div>
                 <p style="text-align: center; color: #6b7c96; font-size: 12px;">Se você não solicitou essa mudança, pode ignorar este e-mail.</p>
@@ -356,10 +356,8 @@ export async function onRequest({ request, env }) {
       const assinaturaRecebida = partesToken[1];
       
       const assinaturaConferida = await gerarAssinaturaToken(dadosOriginaisB64, JWT_SECRET);
-      if (assinaturaRecebida !== signatureConferida) {
-        if (assinaturaRecebida !== assinaturaConferida) {
-          return json({ ok: false, error: 'Token violado ou adulterado!' }, 401);
-        }
+      if (assinaturaRecebida !== assinaturaConferida) {
+        return json({ ok: false, error: 'Token violado ou adulterado!' }, 401);
       }
       
       const dadosDecodificados = atob(dadosOriginaisB64);
@@ -440,7 +438,7 @@ export async function onRequest({ request, env }) {
       }
 
       if (action === 'admin_list_master' && request.method === 'GET') {
-        const { results } = await env.DB.prepare suicide (`
+        const { results } = await env.DB.prepare(`
           SELECT bm.code, bm.user_id, b.soc, b.voltage, b.current, b.temp, b.cells, 
                  datetime(b.updated_at) || 'Z' as updated_at,
                  u.nome as dono_nome, u.email as dono_email
