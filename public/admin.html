@@ -1457,8 +1457,8 @@ function configurarInterfaceDashboardOfflineAdmin() {
   if(document.getElementById('adminHeap')) setTextAdminSafe('adminHeap', '--');
   if(document.getElementById('adminUptime')) setTextAdminSafe('adminUptime', '--');
   if(document.getElementById('adminFw')) setTextAdminSafe('adminFw', '--');
-  setTextAdminSafe('adminLastReset', item.last_reset || '--');
-  setTextAdminSafe('adminLastEvent', item.last_event || '--');
+  setTextAdminSafe('adminLastReset', '--');
+  setTextAdminSafe('adminLastEvent', '--');
   if(document.getElementById('adminEspModel')) setTextAdminSafe('adminEspModel', '--');
   if(document.getElementById('adminChipRevision')) setTextAdminSafe('adminChipRevision', '--');
   if(document.getElementById('adminFlashMb')) setTextAdminSafe('adminFlashMb', '-- MB');
@@ -1533,6 +1533,8 @@ function processarERenderizarDadosAdminMqtt(d) {
     setTextAdminSafe('adminUptime', up > 0 ? Math.floor(up / 3600) + 'h ' + Math.floor((up % 3600) / 60) + 'm' : '--');
   }
   if(document.getElementById('adminFw')) setTextAdminSafe('adminFw', escapeHtmlAdmin(d.fw || d.firmware || '--'));
+  setTextAdminSafe('adminLastReset', escapeHtmlAdmin(d.last_reset || '--'));
+  setTextAdminSafe('adminLastEvent', escapeHtmlAdmin(d.last_event || '--'));
   if(document.getElementById('adminEspModel')) setTextAdminSafe('adminEspModel', escapeHtmlAdmin(d.esp_model || d.chip_model || '--'));
   if(document.getElementById('adminChipRevision')) setTextAdminSafe('adminChipRevision', (d.chip_revision !== undefined ? numeroSeguro(d.chip_revision, 0).toFixed(0) : '--'));
   if(document.getElementById('adminFlashMb')) setTextAdminSafe('adminFlashMb', (d.flash_mb !== undefined ? numeroSeguro(d.flash_mb, 0).toFixed(0) + ' MB' : '-- MB'));
@@ -1831,3 +1833,5 @@ if(adminToken) setupInicial();
 </script>
 </body>
 </html>
+
+<!-- adminLastResetFromItemFix -->
