@@ -16,11 +16,23 @@ export async function onRequest({ request, env }) {
   });
 
   function normalizarCodigoBms(code) {
-    return String(code || '').trim().toUpperCase();
+    let v = String(code || '').trim().toUpperCase().replace(/[^0-9A-F]/g, '');
+    if (v.startsWith('5L')) v = v.slice(2);
+    if (String(code || '').trim().toUpperCase().startsWith('SL')) v = String(code || '').trim().toUpperCase().slice(2).replace(/[^0-9A-F]/g, '');
+    return 'SL' + v.slice(0, 12);
   }
 
   function validarCodigoBmsHex(code) {
     return /^SL[0-9A-F]{12}$/.test(normalizarCodigoBms(code));
+  }
+
+  function numeroSeguro(valor, fallback = 0) {
+    const n = Number(valor);
+    return Number.isFinite(n) ? n : fallback;
+  }
+
+  function textoSeguro(valor, limite = 64) {
+    return String(valor || '').trim().slice(0, limite);
   }
 
   // =========================================================================
@@ -117,6 +129,55 @@ export async function onRequest({ request, env }) {
       headers.set('Access-Control-Allow-Origin', '*'); 
       return new Response(object.body, { headers });
     }
+
+    // ESP32 consulta OTA pendente ao iniciar ou periodicamente.
+    // Funciona apenas se a tabela ota_queue existir.
+    if (action === 'esp_check_ota' && request.method === 'GET') {
+      const code = normalizarCodigoBms(url.searchParams.get('code'));
+      if (!validarCodigoBmsHex(code)) return json({ ok: false, error: 'Código inválido' }, 400);
+
+      try {
+        const ota = await env.DB.prepare(`
+          SELECT id, code, url, status, file_name, size, created_at
+          FROM ota_queue
+          WHERE code = ? AND status = 'pending'
+          ORDER BY id DESC
+          LIMIT 1
+        `).bind(code).first();
+
+        if (!ota) return json({ ok: true, update: false });
+
+        await env.DB.prepare(`
+          UPDATE ota_queue SET status = 'delivered', delivered_at = datetime('now')
+          WHERE id = ?
+        `).bind(ota.id).run();
+
+        return json({ ok: true, update: true, id: ota.id, url: ota.url, file: ota.file_name, size: ota.size });
+      } catch (err) {
+        return json({ ok: true, update: false, note: 'ota_queue ausente ou indisponível' });
+      }
+    }
+
+    // ESP32 confirma resultado da OTA.
+    if (action === 'esp_confirm_ota' && request.method === 'POST') {
+      const body = await request.json();
+      const code = normalizarCodigoBms(body.code);
+      const id = Number(body.id || 0);
+      const status = body.ok ? 'confirmed' : 'failed';
+
+      if (!validarCodigoBmsHex(code)) return json({ ok: false, error: 'Código inválido' }, 400);
+
+      try {
+        if (id > 0) {
+          await env.DB.prepare(`
+            UPDATE ota_queue SET status = ?, confirmed_at = datetime('now')
+            WHERE id = ? AND code = ?
+          `).bind(status, id, code).run();
+        }
+      } catch (err) {}
+      return json({ ok: true });
+    }
+
 
     // ROTA 1: VERIFICAÇÃO DE E-MAIL
     if (action === 'verify_email' && request.method === 'GET') {
@@ -312,34 +373,76 @@ export async function onRequest({ request, env }) {
     if (action === 'update' && request.method === 'POST') {
       const body = await request.json();
       const code = normalizarCodigoBms(body.code);
-      const { soc, voltage, current, temp, cells } = body;
-      
+
+      if (!validarCodigoBmsHex(code)) {
+        return json({ ok: false, error: 'Code inválido. Use SL + 12 HEX.' }, 400);
+      }
+
+      const soc = Math.max(0, Math.min(100, numeroSeguro(body.soc, 0)));
+      const voltage = numeroSeguro(body.voltage, 0);
+      const current = numeroSeguro(body.current, 0);
+      const temp = numeroSeguro(body.temp, 0);
+      const cells = Array.isArray(body.cells) ? body.cells.slice(0, 32).map(v => numeroSeguro(v, 0)) : [];
+
       const inversor_conectado = body.inversor_conectado !== undefined ? (body.inversor_conectado ? 1 : 0) : 1;
       const bateria_conectada = body.bateria_conectada !== undefined ? (body.bateria_conectada ? 1 : 0) : 1;
-      const inv_potencia = body.inv_potencia || 0;
-      const inv_tensao_ac = body.inv_tensao_ac || 0;
-      const inv_frequencia = body.inv_frequencia || 0;
-      const inv_geracao_dia = body.inv_geracao_dia || 0;
+      const inv_potencia = numeroSeguro(body.inv_potencia, 0);
+      const inv_tensao_ac = numeroSeguro(body.inv_tensao_ac, 0);
+      const inv_frequencia = numeroSeguro(body.inv_frequencia, 0);
+      const inv_geracao_dia = numeroSeguro(body.inv_geracao_dia, 0);
 
-      if (!validarCodigoBmsHex(code)) return json({ ok: false, error: 'Code inválido. Use SL + 12 HEX.' }, 400);
-      
-      await env.DB.prepare(`
-        INSERT INTO bms (
-          code, soc, voltage, current, temp, cells, online, updated_at,
+      const heap = numeroSeguro(body.heap, 0);
+      const rssi = numeroSeguro(body.rssi, 0);
+      const uptime = numeroSeguro(body.uptime, 0);
+      const fw = textoSeguro(body.fw || body.firmware || '', 32);
+      const esp_model = textoSeguro(body.esp_model || body.chip_model || '', 48);
+      const chip_revision = numeroSeguro(body.chip_revision, 0);
+      const flash_mb = numeroSeguro(body.flash_mb, 0);
+      const psram = body.psram ? 1 : 0;
+
+      // Tenta gravar campos novos de saúde do ESP32.
+      // Se o banco ainda não tiver as colunas novas, cai automaticamente no modo compatível antigo.
+      try {
+        await env.DB.prepare(`
+          INSERT INTO bms (
+            code, soc, voltage, current, temp, cells, online, updated_at,
+            inversor_conectado, bateria_conectada, inv_potencia, inv_tensao_ac, inv_frequencia, inv_geracao_dia,
+            heap, rssi, uptime, fw, esp_model, chip_revision, flash_mb, psram
+          )
+          VALUES (?, ?, ?, ?, ?, ?, 1, datetime('now'), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+          ON CONFLICT(code) DO UPDATE SET
+            soc = excluded.soc, voltage = excluded.voltage, current = excluded.current,
+            temp = excluded.temp, cells = excluded.cells, online = 1, updated_at = datetime('now'),
+            inversor_conectado = excluded.inversor_conectado, bateria_conectada = excluded.bateria_conectada,
+            inv_potencia = excluded.inv_potencia, inv_tensao_ac = excluded.inv_tensao_ac,
+            inv_frequencia = excluded.inv_frequencia, inv_geracao_dia = excluded.inv_geracao_dia,
+            heap = excluded.heap, rssi = excluded.rssi, uptime = excluded.uptime,
+            fw = excluded.fw, esp_model = excluded.esp_model, chip_revision = excluded.chip_revision,
+            flash_mb = excluded.flash_mb, psram = excluded.psram
+        `).bind(
+          code, soc, voltage, current, temp, JSON.stringify(cells),
+          inversor_conectado, bateria_conectada, inv_potencia, inv_tensao_ac, inv_frequencia, inv_geracao_dia,
+          heap, rssi, uptime, fw, esp_model, chip_revision, flash_mb, psram
+        ).run();
+      } catch (errHealthColumns) {
+        await env.DB.prepare(`
+          INSERT INTO bms (
+            code, soc, voltage, current, temp, cells, online, updated_at,
+            inversor_conectado, bateria_conectada, inv_potencia, inv_tensao_ac, inv_frequencia, inv_geracao_dia
+          )
+          VALUES (?, ?, ?, ?, ?, ?, 1, datetime('now'), ?, ?, ?, ?, ?, ?)
+          ON CONFLICT(code) DO UPDATE SET
+            soc = excluded.soc, voltage = excluded.voltage, current = excluded.current,
+            temp = excluded.temp, cells = excluded.cells, online = 1, updated_at = datetime('now'),
+            inversor_conectado = excluded.inversor_conectado, bateria_conectada = excluded.bateria_conectada,
+            inv_potencia = excluded.inv_potencia, inv_tensao_ac = excluded.inv_tensao_ac,
+            inv_frequencia = excluded.inv_frequencia, inv_geracao_dia = excluded.inv_geracao_dia
+        `).bind(
+          code, soc, voltage, current, temp, JSON.stringify(cells),
           inversor_conectado, bateria_conectada, inv_potencia, inv_tensao_ac, inv_frequencia, inv_geracao_dia
-        )
-        VALUES (?, ?, ?, ?, ?, ?, 1, datetime('now'), ?, ?, ?, ?, ?, ?)
-        ON CONFLICT(code) DO UPDATE SET
-          soc = excluded.soc, voltage = excluded.voltage, current = excluded.current,
-          temp = excluded.temp, cells = excluded.cells, online = 1, updated_at = datetime('now'),
-          inversor_conectado = excluded.inversor_conectado, bateria_conectada = excluded.bateria_conectada,
-          inv_potencia = excluded.inv_potencia, inv_tensao_ac = excluded.inv_tensao_ac,
-          inv_frequencia = excluded.inv_frequencia, inv_geracao_dia = excluded.inv_geracao_dia
-      `).bind(
-        code, soc || 0, voltage || 0, current || 0, temp || 0, JSON.stringify(cells || []),
-        inversor_conectado, bateria_conectada, inv_potencia, inv_tensao_ac, inv_frequencia, inv_geracao_dia
-      ).run();
-      
+        ).run();
+      }
+
       return json({ ok: true });
     }
 
@@ -432,6 +535,8 @@ export async function onRequest({ request, env }) {
           const code = normalizarCodigoBms(formData.get('code'));
 
           if (!file || !validarCodigoBmsHex(code)) return json({ ok: false, error: 'Arquivo ou código do dispositivo inválido.' }, 400);
+          if (!String(file.name || '').toLowerCase().endsWith('.bin')) return json({ ok: false, error: 'Envie um arquivo .bin válido.' }, 400);
+          if (file.size <= 0 || file.size > 8 * 1024 * 1024) return json({ ok: false, error: 'Arquivo vazio ou maior que 8 MB.' }, 400);
           if (!env.FIRMWARES_BUCKET) return json({ ok: false, error: 'Configuração do bucket R2 não vinculada.' }, 500);
 
           const keyName = `firmwares/${code}_${Date.now()}.bin`;
@@ -439,7 +544,30 @@ export async function onRequest({ request, env }) {
             httpMetadata: { contentType: 'application/octet-stream' }
           });
 
-          const publicUrl = `${url.origin}/api/bms?action=download_bin&key=${keyName}`;
+          const publicUrl = `${url.origin}/api/bms?action=download_bin&key=${encodeURIComponent(keyName)}`;
+
+          // Opcional: se existir tabela ota_queue, salva atualização pendente.
+          // SQL sugerido:
+          // CREATE TABLE IF NOT EXISTS ota_queue (
+          //   id INTEGER PRIMARY KEY AUTOINCREMENT,
+          //   code TEXT NOT NULL,
+          //   url TEXT NOT NULL,
+          //   status TEXT DEFAULT 'pending',
+          //   file_name TEXT,
+          //   size INTEGER,
+          //   created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+          //   delivered_at TEXT,
+          //   confirmed_at TEXT
+          // );
+          try {
+            await env.DB.prepare(`
+              INSERT INTO ota_queue (code, url, status, file_name, size, created_at)
+              VALUES (?, ?, 'pending', ?, ?, datetime('now'))
+            `).bind(code, publicUrl, String(file.name || 'firmware.bin'), file.size || 0).run();
+          } catch (queueErr) {
+            // Mantém compatibilidade se a tabela ainda não existir.
+          }
+
           return json({ ok: true, url: publicUrl });
         } catch (uploadErr) {
           return json({ ok: false, error: 'Falha interna na gravação do R2: ' + uploadErr.message }, 500);
@@ -447,15 +575,30 @@ export async function onRequest({ request, env }) {
       }
 
       if (action === 'admin_list_master' && request.method === 'GET') {
-        const { results } = await env.DB.prepare(`
-          SELECT bm.code, bm.user_id, b.soc, b.voltage, b.current, b.temp, b.cells, 
-                 datetime(b.updated_at) || 'Z' as updated_at,
-                 u.nome as dono_nome, u.email as dono_email
-          FROM bms_master bm
-          LEFT JOIN bms b ON b.code = bm.code
-          LEFT JOIN users u ON u.id = bm.user_id
-        `).all();
-        
+        let results = [];
+        try {
+          const query = await env.DB.prepare(`
+            SELECT bm.code, bm.user_id, b.soc, b.voltage, b.current, b.temp, b.cells,
+                   b.heap, b.rssi, b.uptime, b.fw, b.esp_model, b.chip_revision, b.flash_mb, b.psram,
+                   datetime(b.updated_at) || 'Z' as updated_at,
+                   u.nome as dono_nome, u.email as dono_email
+            FROM bms_master bm
+            LEFT JOIN bms b ON b.code = bm.code
+            LEFT JOIN users u ON u.id = bm.user_id
+          `).all();
+          results = query.results || [];
+        } catch (errHealthColumns) {
+          const query = await env.DB.prepare(`
+            SELECT bm.code, bm.user_id, b.soc, b.voltage, b.current, b.temp, b.cells, 
+                   datetime(b.updated_at) || 'Z' as updated_at,
+                   u.nome as dono_nome, u.email as dono_email
+            FROM bms_master bm
+            LEFT JOIN bms b ON b.code = bm.code
+            LEFT JOIN users u ON u.id = bm.user_id
+          `).all();
+          results = query.results || [];
+        }
+
         const now = Date.now();
         const data = (results || []).map(item => ({
           ...item,
