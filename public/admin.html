@@ -722,7 +722,6 @@ function normalizarCodigoBmsAdmin(code) {
 
 function validarCodigoBmsAdmin(code) {
   return /^SL[0-9A-F]{12}$/.test(normalizarCodigoBmsAdmin(code));
-}$/.test(String(code || '').trim().toUpperCase());
 }
 
 function numeroSeguro(valor, fallback) {
