@@ -502,8 +502,6 @@ button.logout:hover{background:rgba(231,29,54,0.08);color:var(--red);border-colo
       <div class="card-inner-item"><div class="label">Heap Livre</div><div class="value" id="adminHeap" style="color:var(--green)">--</div></div>
       <div class="card-inner-item"><div class="label">Uptime</div><div class="value" id="adminUptime" style="color:var(--orange)">--</div></div>
       <div class="card-inner-item"><div class="label">Firmware</div><div class="value" id="adminFw" style="color:var(--blue);font-size:18px">--</div></div>
-      <div class="card-inner-item"><div class="label">Modelo</div><div class="value" id="adminEspModel" style="color:var(--cyan);font-size:18px">--</div></div>
-      <div class="card-inner-item"><div class="label">Última Comunicação</div><div class="value" id="adminLastSeen" style="color:var(--green);font-size:18px">--</div></div>
     </div>
   </div>
 
@@ -697,33 +695,15 @@ function voltarPainel(){ showPainelPage(); }
 function adminLogout(){ fecharMqttAnterior(); sessionStorage.clear(); location.reload(); }
 function authHeaders(){ return {'Content-Type':'application/json','Authorization':'Bearer '+adminToken}; }
 
-function normalizarCodigoBmsAdmin(code) {
+function normalizarCodigoBmsAdminSeguro(code) {
   let raw = String(code || '').trim().toUpperCase();
   let v = raw.startsWith('SL') ? raw.slice(2) : raw;
   v = v.replace(/[^0-9A-F]/g, '').slice(0, 12);
   return 'SL' + v;
 }
 
-function validarCodigoBmsAdmin(code) {
-  return /^SL[0-9A-F]{12}$/.test(normalizarCodigoBmsAdmin(code));
-}
-
-function escapeHtmlAdmin(valor) {
-  return String(valor === undefined || valor === null ? '' : valor)
-    .replace(/&/g, '&amp;').replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;').replace(/"/g, '&quot;')
-    .replace(/'/g, '&#39;');
-}
-
-function escapeJsAdmin(valor) {
-  return String(valor === undefined || valor === null ? '' : valor)
-    .replace(/\\/g, '\\\\').replace(/'/g, "\\'")
-    .replace(/"/g, '\\"').replace(/\n/g, '\\n').replace(/\r/g, '\\r');
-}
-
-function numeroSeguro(valor, fallback) {
-  const n = Number(valor);
-  return Number.isFinite(n) ? n : fallback;
+function validarCodigoBmsAdminSeguro(code) {
+  return /^SL[0-9A-F]{12}$/.test(normalizarCodigoBmsAdminSeguro(code));
 }
 
 
@@ -745,6 +725,17 @@ function escapeJsAdmin(valor) {
     .replace(/\r/g, '\\r');
 }
 
+function normalizarCodigoBmsAdmin(code) {
+  let v = String(code || '').trim().toUpperCase().replace(/[^0-9A-F]/g, '');
+  if (v.startsWith('5L')) v = 'SL' + v.slice(2); // proteção contra digitação errada comum
+  if (v.startsWith('SL')) v = v.slice(2);
+  return 'SL' + v.slice(0, 12);
+}
+
+function validarCodigoBmsAdmin(code) {
+  return /^SL[0-9A-F]{12}$/.test(normalizarCodigoBmsAdmin(code));
+}
+
 function numeroSeguro(valor, fallback) {
   const n = Number(valor);
   return Number.isFinite(n) ? n : fallback;
@@ -755,12 +746,10 @@ document.getElementById('code').oninput = e => {
   e.target.value = e.target.value.toUpperCase().replace(/[^0-9A-FSL]/g, '').slice(0, 14);
 };
 
-};
-
 function gerarCodigoAleatorio(){
   let hex = '';
   const chars = '0123456789ABCDEF';
-  for(let i = 0; i < 12; i++) hex += chars[Math.floor(Math.random() * chars.length)];
+  for(let i=0;i<12;i++) hex += chars[Math.floor(Math.random()*chars.length)];
   return 'SL' + hex;
 }
 
@@ -771,11 +760,11 @@ async function generarECadastrar(){
 }
 
 async function cad(){
-  const code = normalizarCodigoBmsAdmin(document.getElementById('code').value);
+  const code = normalizarCodigoBmsAdminSeguro(document.getElementById('code').value);
   const msgEl = document.getElementById('msg');
   clearTimeout(TIMEOUT_ADMIN_MSG);
 
-  if (!validarCodigoBmsAdmin(code)) {
+  if (!validarCodigoBmsAdminSeguro(code)) {
     msgEl.textContent = 'Código inválido. Digite os 12 caracteres HEX do eFuse ou SL + 12 caracteres.';
     msgEl.style.color = 'var(--red)';
     TIMEOUT_ADMIN_MSG = setTimeout(() => { msgEl.textContent = ''; }, 3000);
@@ -784,17 +773,17 @@ async function cad(){
 
   try {
     const r = await fetch(API+'?action=admin_add_master',{method:'POST',headers:authHeaders(),body:JSON.stringify({code})});
-    if(r.status === 401){ adminLogout(); return; }
+    if(r.status===401){adminLogout();return;}
     const d = await r.json();
-    msgEl.textContent = d.ok ? 'Cadastrada no sistema!' : (d.error || 'Erro ao cadastrar BMS.');
-    msgEl.style.color = d.ok ? 'var(--green)' : 'var(--red)';
+    msgEl.textContent = d.ok?'Cadastrada no sistema!':(d.error || 'Erro ao cadastrar BMS');
+    msgEl.style.color = d.ok?'var(--green)':'var(--red)';
 
     if(d.ok){
       document.getElementById('code').value='';
       carregarTudo();
     }
   } catch(e) {
-    msgEl.textContent = 'Erro de conexão com a API.';
+    msgEl.textContent = 'Erro de comunicação com a API';
     msgEl.style.color = 'var(--red)';
   }
 
@@ -1174,16 +1163,6 @@ function processarERenderizarDadosAdminMqtt(d) {
     document.getElementById('adminUptime').textContent = up > 0 ? Math.floor(up / 3600) + 'h ' + Math.floor((up % 3600) / 60) + 'm' : '--';
   }
   if(document.getElementById('adminFw')) document.getElementById('adminFw').textContent = escapeHtmlAdmin(d.fw || d.firmware || '--');
-
-  if(document.getElementById('adminRssi')) document.getElementById('adminRssi').textContent = (d.rssi !== undefined ? numeroSeguro(d.rssi, 0).toFixed(0) + ' dBm' : '-- dBm');
-  if(document.getElementById('adminHeap')) document.getElementById('adminHeap').textContent = (d.heap !== undefined ? numeroSeguro(d.heap, 0).toFixed(0) : '--');
-  if(document.getElementById('adminUptime')) {
-    const up = numeroSeguro(d.uptime, 0);
-    document.getElementById('adminUptime').textContent = up > 0 ? Math.floor(up / 3600) + 'h ' + Math.floor((up % 3600) / 60) + 'm' : '--';
-  }
-  if(document.getElementById('adminFw')) document.getElementById('adminFw').textContent = escapeHtmlAdmin(d.fw || d.firmware || '--');
-  if(document.getElementById('adminEspModel')) document.getElementById('adminEspModel').textContent = escapeHtmlAdmin(d.esp_model || d.chip_model || '--');
-  if(document.getElementById('adminLastSeen')) document.getElementById('adminLastSeen').textContent = d.updated_at ? new Date(d.updated_at).toLocaleString('pt-BR') : '--';
 
   renderAdminCells(d.cells || []);
 }
