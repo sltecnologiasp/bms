@@ -4,7 +4,11 @@
   <link rel="manifest" href="/manifest.json">
 <script>
   if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/sw.js');
+    window.addEventListener('load', function(){
+      navigator.serviceWorker.register('/sw.js')
+        .then(function(){ console.log('[PWA] Service Worker registrado.'); })
+        .catch(function(err){ console.warn('[PWA] Service Worker falhou:', err); });
+    });
   }
 </script>
   
@@ -615,7 +619,7 @@ button:active{transform:scale(0.98)}
     <div class="label">Adicionar dispositivo</div>
     
     <div class="qr-input-row">
-      <input id="bms-code" placeholder="SL000000000000" maxlength="14">
+      <input id="bms-code" placeholder="Digite o código eFuse" maxlength="14">
       <button class="btn-qr-scan" onclick="abrirScannerCamera()" title="Escanear QR Code">
         <svg viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" d="M3 7V5a2 2 0 012-2h2m10 0h2a2 2 0 012 2v2m0 10v2a2 2 0 01-2 2h-2M7 21H5a2 2 0 01-2-2v-2M12 7v10m-3-5h6" />
@@ -813,6 +817,17 @@ window.addEventListener('beforeunload', function(e) {
 });
 
 
+function normalizarCodigoBmsCliente(code) {
+  var raw = String(code || '').trim().toUpperCase();
+  var v = raw.startsWith('SL') ? raw.slice(2) : raw;
+  v = v.replace(/[^0-9A-F]/g, '').slice(0, 12);
+  return 'SL' + v;
+}
+
+function validarCodigoBmsCliente(code) {
+  return /^SL[0-9A-F]{12}$/.test(normalizarCodigoBmsCliente(code));
+}
+
 function parseDataSmartBms(valor){
   if(!valor) return null;
 
@@ -822,7 +837,6 @@ function parseDataSmartBms(valor){
   var d = new Date(s);
 
   if(isNaN(d.getTime())){
-    // D1 costuma vir como "YYYY-MM-DD HH:mm:ss" em UTC
     d = new Date(s.replace(' ', 'T') + 'Z');
   }
 
@@ -851,8 +865,7 @@ function formatarUltimoOnlineSmartBms(valor){
       relativo = 'há ' + horas + ' h';
     } else {
       var dias = Math.floor(horas / 24);
-      if(dias === 1) relativo = 'há 1 dia';
-      else relativo = 'há ' + dias + ' dias';
+      relativo = dias === 1 ? 'há 1 dia' : 'há ' + dias + ' dias';
     }
   }
 
@@ -929,8 +942,7 @@ window.onload = function(){
 };
 
 function formatarBmsTextInput(inputElement) {
-  if(!inputElement.value.startsWith('SL')) inputElement.value = 'SL';
-  inputElement.value = 'SL' + inputElement.value.slice(2).replace(/[^0-9]/g,'').slice(0,12);
+  inputElement.value = inputElement.value.toUpperCase().replace(/[^0-9A-FSL]/g, '').slice(0, 14);
 }
 
 function abrirScannerCamera() {
@@ -1425,6 +1437,7 @@ function carregarListaUmaVez() {
       html += '<h3>'+b.nome+'</h3>';
       html += '<p>'+b.code+'</p>';
       html += '<span class="status-dot off" id="dot-lista-' + b.code + '">Offline</span>';
+      html += '<div class="ultimo-online-dispositivo" id="last-lista-' + b.code + '" data-updated-at="' + (b.updated_at || '') + '">' + formatarUltimoOnlineSmartBms(b.updated_at) + '</div>';
       html += '<button class="btn-item-del" onclick="event.stopPropagation();removerBms(\''+b.code+'\',\''+b.nome+'\')">Excluir Dispositivo</button>';
       html += '</div>';
     }
@@ -1632,9 +1645,12 @@ function removerBms(code, nome){
 }
 
 function addBms(){
-  var code = document.getElementById('bms-code').value.trim();
+  var code = normalizarCodigoBmsCliente(document.getElementById('bms-code').value);
   var nome = document.getElementById('bms-nome').value.trim();
-  if(code.length !== 14) return alert('Código inválido.');
+
+  if(!validarCodigoBmsCliente(code)) {
+    return alert('Código inválido. Digite os 12 caracteres HEX do eFuse ou SL + 12 caracteres.');
+  }
 
   fetch(API + '?action=add_bms', {
     method:'POST',
@@ -1646,12 +1662,12 @@ function addBms(){
     if(d.ok){
       document.getElementById('bms-code').value = '';
       document.getElementById('bms-nome').value = '';
-      
+
       var cortina = document.getElementById('cortina-dispositivos');
       var btn = document.getElementById('btn-toggle-cortina');
       if(cortina) cortina.classList.add('aberta');
       if(btn) btn.textContent = 'OCULTAR DISPOSITIVOS';
-      
+
       carregarListaUmaVez(); 
     } else { alert('Erro: ' + d.error); }
   });
