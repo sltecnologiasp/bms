@@ -741,9 +741,12 @@ async function carregarResumoOta(){
   if(!adminToken) return;
 
   try{
-    const r = await fetch(API + '?action=ota_stats', {
-      headers:{'Authorization':'Bearer ' + adminToken}
+    const r = await fetch(API + '?action=ota_stats&_=' + Date.now(), {
+      method:'GET',
+      headers:{'Authorization':'Bearer ' + adminToken},
+      cache:'no-store'
     });
+
     const d = await r.json();
 
     if(!d.ok){
@@ -752,10 +755,20 @@ async function carregarResumoOta(){
     }
 
     const counts = d.counts || {};
-    document.getElementById('otaStatPending').textContent = counts.pending || 0;
-    document.getElementById('otaStatDelivered').textContent = counts.delivered || 0;
-    document.getElementById('otaStatConfirmed').textContent = counts.confirmed || 0;
-    document.getElementById('otaStatFailed').textContent = counts.failed || 0;
+    const pending = Number(counts.pending || 0);
+    const delivered = Number(counts.delivered || 0);
+    const confirmed = Number(counts.confirmed || 0);
+    const failed = Number(counts.failed || 0);
+
+    const elPending = document.getElementById('otaStatPending');
+    const elDelivered = document.getElementById('otaStatDelivered');
+    const elConfirmed = document.getElementById('otaStatConfirmed');
+    const elFailed = document.getElementById('otaStatFailed');
+
+    if(elPending) elPending.textContent = pending;
+    if(elDelivered) elDelivered.textContent = delivered;
+    if(elConfirmed) elConfirmed.textContent = confirmed;
+    if(elFailed) elFailed.textContent = failed;
 
     setMsgOtaMassa('Status OTA atualizado', 'var(--green)');
   }catch(e){
@@ -808,6 +821,7 @@ async function enviarOtaMassa(tipo){
       setMsgOtaMassa('OTA criada: ' + (d.queued || 0) + ' dispositivo(s) na fila.', 'var(--green)');
       input.value = '';
       await carregarResumoOta();
+      setTimeout(carregarResumoOta, 1200);
       return;
     }
 
@@ -850,6 +864,7 @@ function showPainelPage() {
   document.getElementById('painel').classList.add('active');
   document.getElementById('painel').style.display = 'flex';
   carregarTudo();
+  carregarResumoOta();
 }
 
 function showClientesPage(){
