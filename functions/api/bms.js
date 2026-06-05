@@ -524,10 +524,180 @@ export async function onRequest({ request, env }) {
       });
     }
 
+
+    async function garantirTabelaOtaQueue() {
+      await env.DB.prepare(`
+        CREATE TABLE IF NOT EXISTS ota_queue (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          code TEXT NOT NULL,
+          url TEXT NOT NULL,
+          status TEXT DEFAULT 'pending',
+          file_name TEXT,
+          size INTEGER,
+          created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+          delivered_at TEXT,
+          confirmed_at TEXT
+        )
+      `).run();
+    }
+
+    async function salvarFirmwareR2ParaOta(formData, url, escopoLabel) {
+      const file = formData.get('firmware');
+
+      if (!file) throw new Error('Arquivo firmware não enviado.');
+      if (!String(file.name || '').toLowerCase().endsWith('.bin')) throw new Error('Envie um arquivo .bin válido.');
+      if (file.size <= 0 || file.size > 8 * 1024 * 1024) throw new Error('Arquivo vazio ou maior que 8 MB.');
+      if (!env.FIRMWARES_BUCKET) throw new Error('Configuração do bucket R2 não vinculada.');
+      if (!env.DB) throw new Error('Banco D1 env.DB não está vinculado ao Worker.');
+
+      const keyName = `firmwares/MASS_${escopoLabel}_${Date.now()}.bin`;
+
+      await env.FIRMWARES_BUCKET.put(keyName, file.stream(), {
+        httpMetadata: { contentType: 'application/octet-stream' }
+      });
+
+      const publicUrl = `${url.origin}/api/bms?action=download_bin&key=${encodeURIComponent(keyName)}`;
+
+      return {
+        file,
+        keyName,
+        publicUrl,
+        fileName: String(file.name || 'firmware.bin'),
+        fileSize: Number(file.size || 0)
+      };
+    }
+
     // ==========================================
     // ROTAS PROTEGIDAS - EXCLUSIVAS DO ADMIN
     // ==========================================
     if (isAdmin) {
+
+      if (action === 'ota_stats' && request.method === 'GET') {
+        try {
+          await garantirTabelaOtaQueue();
+
+          const { results } = await env.DB.prepare(`
+            SELECT status, COUNT(*) as total
+            FROM ota_queue
+            GROUP BY status
+          `).all();
+
+          const counts = {
+            pending: 0,
+            delivered: 0,
+            confirmed: 0,
+            failed: 0
+          };
+
+          for (const row of (results || [])) {
+            counts[row.status] = row.total;
+          }
+
+          return json({ ok: true, counts });
+        } catch (err) {
+          return json({ ok: false, error: 'Falha ao consultar status OTA: ' + (err?.message || String(err)) }, 500);
+        }
+      }
+
+      if (action === 'admin_ota_queue' && request.method === 'GET') {
+        try {
+          await garantirTabelaOtaQueue();
+
+          const codeParam = url.searchParams.get('code');
+          let query;
+
+          if (codeParam) {
+            const code = normalizarCodigoBms(codeParam);
+            query = await env.DB.prepare(`
+              SELECT * FROM ota_queue
+              WHERE code = ?
+              ORDER BY id DESC
+              LIMIT 50
+            `).bind(code).all();
+          } else {
+            query = await env.DB.prepare(`
+              SELECT * FROM ota_queue
+              ORDER BY id DESC
+              LIMIT 50
+            `).all();
+          }
+
+          return json({ ok: true, rows: query.results || [] });
+        } catch (err) {
+          return json({ ok: false, error: 'Falha ao consultar fila OTA: ' + (err?.message || String(err)) }, 500);
+        }
+      }
+
+      if ((action === 'ota_mass_all' || action === 'ota_mass_online') && request.method === 'POST') {
+        try {
+          await garantirTabelaOtaQueue();
+
+          const formData = await request.formData();
+          const fw = await salvarFirmwareR2ParaOta(formData, url, action === 'ota_mass_online' ? 'ONLINE' : 'ALL');
+
+          let devices = [];
+
+          if (action === 'ota_mass_online') {
+            const nowMs = Date.now();
+
+            const query = await env.DB.prepare(`
+              SELECT bm.code, datetime(b.updated_at) || 'Z' as updated_at
+              FROM bms_master bm
+              LEFT JOIN bms b ON b.code = bm.code
+              WHERE b.updated_at IS NOT NULL
+            `).all();
+
+            devices = (query.results || [])
+              .filter(item => item.updated_at && (nowMs - new Date(item.updated_at).getTime() < 8000))
+              .map(item => item.code);
+          } else {
+            const query = await env.DB.prepare(`
+              SELECT code
+              FROM bms_master
+              ORDER BY id ASC
+            `).all();
+
+            devices = (query.results || []).map(item => item.code);
+          }
+
+          devices = [...new Set(devices.map(normalizarCodigoBms).filter(validarCodigoBmsHex))];
+
+          if (!devices.length) {
+            return json({
+              ok: false,
+              error: action === 'ota_mass_online'
+                ? 'Nenhum dispositivo online encontrado para OTA.'
+                : 'Nenhum dispositivo cadastrado encontrado para OTA.',
+              r2_key: fw.keyName,
+              url: fw.publicUrl
+            }, 400);
+          }
+
+          const stmt = env.DB.prepare(`
+            INSERT INTO ota_queue (code, url, status, file_name, size, created_at)
+            VALUES (?, ?, 'pending', ?, ?, datetime('now'))
+          `);
+
+          const batch = devices.map(code =>
+            stmt.bind(code, fw.publicUrl, fw.fileName, fw.fileSize)
+          );
+
+          await env.DB.batch(batch);
+
+          return json({
+            ok: true,
+            scope: action === 'ota_mass_online' ? 'online' : 'all',
+            queued: devices.length,
+            url: fw.publicUrl,
+            r2_key: fw.keyName,
+            file_name: fw.fileName,
+            size: fw.fileSize
+          });
+        } catch (err) {
+          return json({ ok: false, error: 'Falha ao criar OTA em massa: ' + (err?.message || String(err)) }, 500);
+        }
+      }
+
       if (action === 'admin_upload_ota' && request.method === 'POST') {
         try {
           const formData = await request.formData();
