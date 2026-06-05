@@ -431,6 +431,19 @@ button.logout:hover{background:rgba(231,29,54,0.08);color:var(--red);border-colo
   .ota-mass-actions{grid-template-columns:1fr;}
 }
 
+
+/* OTA: botões no mesmo padrão visual dos cards principais */
+#cardOtaMassa button{
+  width:100%;
+  margin-top:12px;
+}
+#cardOtaMassa .btn-clientes{
+  background:transparent;
+  border:1px solid var(--green);
+  color:var(--green);
+  box-shadow:none;
+}
+
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.0.1/mqttws31.min.js" type="text/javascript"></script>
 </head>
@@ -457,23 +470,22 @@ button.logout:hover{background:rgba(231,29,54,0.08);color:var(--red);border-colo
     <div class="label">Cadastrar BMS no Sistema</div>
     <input id="code" placeholder="Digite o código eFuse" maxlength="14" style="margin-top:8px">
     <button class="btn-clientes" onclick="cad()">CADASTRAR BMS MASTER</button>
-    <button class="btn-sec" onclick="generarECadastrar()">GERAR CÓDIGO ALEATÓRIO</button>
     <button class="btn-clientes" style="margin-top:24px" onclick="mostrarClientes()">VER CLIENTES CADASTRADOS</button>
     <p id="msg" style="text-align:center;margin-top:12px;font-size:14px;font-weight:600"></p>
   </div>
 
 
   <div class="card card-cadastro" id="cardOtaMassa">
-    <div class="label">Gerenciamento OTA</div>
+    <div class="label">Atualização de Dispositivos</div>
     <p style="font-size:12px;color:var(--text-muted);line-height:1.45;text-align:center;margin:4px 0 10px 0">
       Envie um firmware <strong>.bin</strong> para criar atualização remota em massa na fila OTA.
     </p>
 
     <input type="file" id="arquivoOtaMassaBin" accept=".bin" style="width:100%;padding:10px;border-radius:8px;border:1px solid var(--input-border);background:var(--input-bg);color:var(--text-main);font-size:13px;letter-spacing:0;text-align:left">
 
-    <div class="ota-mass-actions" style="margin-top:10px">
-      <button onclick="enviarOtaMassa('all')" id="btnOtaTodos">OTA TODOS</button>
-      <button class="btn-clientes" onclick="enviarOtaMassa('online')" id="btnOtaOnline">OTA SOMENTE ONLINE</button>
+    <div style="display:flex;flex-direction:column;width:100%;margin-top:10px">
+      <button onclick="enviarOtaMassa('all')" id="btnOtaTodos">ATUALIZAR TODOS</button>
+      <button class="btn-clientes" onclick="limparPendentesOta()" id="btnOtaOnline">LIMPAR PENDENTES</button>
     </div>
 
     <button class="btn-sec" onclick="carregarResumoOta()" style="margin-top:8px">ATUALIZAR STATUS OTA</button>
@@ -773,6 +785,36 @@ async function carregarResumoOta(){
     setMsgOtaMassa('Status OTA atualizado', 'var(--green)');
   }catch(e){
     setMsgOtaMassa('Falha ao consultar status OTA', 'var(--red)');
+  }
+}
+
+
+async function limparPendentesOta(){
+  if(!adminToken) return;
+
+  if(!confirm('Remover todas as OTAs pendentes? Dispositivos, clientes e firmwares não serão apagados.')){
+    return;
+  }
+
+  try{
+    setMsgOtaMassa('Limpando pendentes...', 'var(--cyan)');
+
+    const r = await fetch(API + '?action=ota_clear_pending', {
+      method:'POST',
+      headers:{'Authorization':'Bearer ' + adminToken}
+    });
+
+    const d = await r.json();
+
+    if(d.ok){
+      setMsgOtaMassa('Pendentes removidos: ' + (d.deleted || 0), 'var(--green)');
+      await carregarResumoOta();
+      return;
+    }
+
+    setMsgOtaMassa(d.error || 'Falha ao limpar pendentes.', 'var(--red)');
+  }catch(e){
+    setMsgOtaMassa('Erro de comunicação ao limpar pendentes.', 'var(--red)');
   }
 }
 
