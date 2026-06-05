@@ -572,6 +572,24 @@ export async function onRequest({ request, env }) {
     // ==========================================
     if (isAdmin) {
 
+      if (action === 'ota_clear_pending' && request.method === 'POST') {
+        try {
+          await garantirTabelaOtaQueue();
+
+          const result = await env.DB.prepare(`
+            DELETE FROM ota_queue
+            WHERE status = 'pending'
+          `).run();
+
+          return json({
+            ok: true,
+            deleted: result?.meta?.changes || 0
+          });
+        } catch (err) {
+          return json({ ok: false, error: 'Falha ao limpar pendentes OTA: ' + (err?.message || String(err)) }, 500);
+        }
+      }
+
       if (action === 'ota_stats' && request.method === 'GET') {
         try {
           await garantirTabelaOtaQueue();
