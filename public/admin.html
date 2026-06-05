@@ -392,6 +392,45 @@ button.logout:hover{background:rgba(231,29,54,0.08);color:var(--red);border-colo
   text-overflow:ellipsis;
 }
 
+
+.ota-mass-grid{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:8px;
+  width:100%;
+  margin-top:8px;
+}
+.ota-mass-stat{
+  background:var(--cell-bg);
+  border:1px solid var(--cell-border);
+  border-radius:12px;
+  padding:10px 6px;
+  text-align:center;
+}
+.ota-mass-stat .label{
+  margin-bottom:2px;
+  font-size:9px;
+}
+.ota-mass-stat .value{
+  font-size:18px;
+  margin-top:0;
+}
+.ota-mass-actions{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:8px;
+  width:100%;
+}
+.ota-mass-actions button{
+  margin-top:0;
+  font-size:12px;
+  padding:14px 8px;
+}
+@media(max-width:599px){
+  .ota-mass-grid{grid-template-columns:repeat(2,1fr);}
+  .ota-mass-actions{grid-template-columns:1fr;}
+}
+
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.0.1/mqttws31.min.js" type="text/javascript"></script>
 </head>
@@ -421,6 +460,44 @@ button.logout:hover{background:rgba(231,29,54,0.08);color:var(--red);border-colo
     <button class="btn-sec" onclick="generarECadastrar()">GERAR CÓDIGO ALEATÓRIO</button>
     <button class="btn-clientes" style="margin-top:24px" onclick="mostrarClientes()">VER CLIENTES CADASTRADOS</button>
     <p id="msg" style="text-align:center;margin-top:12px;font-size:14px;font-weight:600"></p>
+  </div>
+
+
+  <div class="card card-cadastro" id="cardOtaMassa">
+    <div class="label">Gerenciamento OTA</div>
+    <p style="font-size:12px;color:var(--text-muted);line-height:1.45;text-align:center;margin:4px 0 10px 0">
+      Envie um firmware <strong>.bin</strong> para criar atualização remota em massa na fila OTA.
+    </p>
+
+    <input type="file" id="arquivoOtaMassaBin" accept=".bin" style="width:100%;padding:10px;border-radius:8px;border:1px solid var(--input-border);background:var(--input-bg);color:var(--text-main);font-size:13px;letter-spacing:0;text-align:left">
+
+    <div class="ota-mass-actions" style="margin-top:10px">
+      <button onclick="enviarOtaMassa('all')" id="btnOtaTodos">OTA TODOS</button>
+      <button class="btn-clientes" onclick="enviarOtaMassa('online')" id="btnOtaOnline">OTA SOMENTE ONLINE</button>
+    </div>
+
+    <button class="btn-sec" onclick="carregarResumoOta()" style="margin-top:8px">ATUALIZAR STATUS OTA</button>
+
+    <div class="ota-mass-grid">
+      <div class="ota-mass-stat">
+        <div class="label">Pendentes</div>
+        <div class="value" id="otaStatPending" style="color:var(--orange)">0</div>
+      </div>
+      <div class="ota-mass-stat">
+        <div class="label">Entregues</div>
+        <div class="value" id="otaStatDelivered" style="color:var(--cyan)">0</div>
+      </div>
+      <div class="ota-mass-stat">
+        <div class="label">Confirmadas</div>
+        <div class="value" id="otaStatConfirmed" style="color:var(--green)">0</div>
+      </div>
+      <div class="ota-mass-stat">
+        <div class="label">Falharam</div>
+        <div class="value" id="otaStatFailed" style="color:var(--red)">0</div>
+      </div>
+    </div>
+
+    <div id="msgOtaMassaStatus" style="text-align:center;font-size:12px;font-weight:700;min-height:16px;margin-top:10px;color:var(--text-muted)"></div>
   </div>
 
   <div class="card" style="padding: 12px; display: flex; flex-direction: column; gap: 8px;">
@@ -649,6 +726,97 @@ async function adminLogin(){
     errorEl.textContent = 'Erro de comunicação com o servidor';
     errorEl.classList.remove('hidden');
     TIMEOUT_ADMIN_LOGIN = setTimeout(() => { errorEl.classList.add('hidden'); }, 3000);
+  }
+}
+
+
+function setMsgOtaMassa(texto, cor){
+  const el = document.getElementById('msgOtaMassaStatus');
+  if(!el) return;
+  el.textContent = texto || '';
+  el.style.color = cor || 'var(--text-muted)';
+}
+
+async function carregarResumoOta(){
+  if(!adminToken) return;
+
+  try{
+    const r = await fetch(API + '?action=ota_stats', {
+      headers:{'Authorization':'Bearer ' + adminToken}
+    });
+    const d = await r.json();
+
+    if(!d.ok){
+      setMsgOtaMassa(d.error || 'Erro ao carregar status OTA', 'var(--red)');
+      return;
+    }
+
+    const counts = d.counts || {};
+    document.getElementById('otaStatPending').textContent = counts.pending || 0;
+    document.getElementById('otaStatDelivered').textContent = counts.delivered || 0;
+    document.getElementById('otaStatConfirmed').textContent = counts.confirmed || 0;
+    document.getElementById('otaStatFailed').textContent = counts.failed || 0;
+
+    setMsgOtaMassa('Status OTA atualizado', 'var(--green)');
+  }catch(e){
+    setMsgOtaMassa('Falha ao consultar status OTA', 'var(--red)');
+  }
+}
+
+async function enviarOtaMassa(tipo){
+  const input = document.getElementById('arquivoOtaMassaBin');
+  const file = input && input.files ? input.files[0] : null;
+
+  if(!file){
+    setMsgOtaMassa('Selecione um arquivo .bin primeiro.', 'var(--orange)');
+    return;
+  }
+
+  if(!String(file.name || '').toLowerCase().endsWith('.bin')){
+    setMsgOtaMassa('Arquivo inválido. Envie somente .bin.', 'var(--red)');
+    return;
+  }
+
+  const acao = tipo === 'online' ? 'ota_mass_online' : 'ota_mass_all';
+  const btnTodos = document.getElementById('btnOtaTodos');
+  const btnOnline = document.getElementById('btnOtaOnline');
+
+  if(!confirm(tipo === 'online'
+    ? 'Enviar OTA para todos os dispositivos ONLINE agora?'
+    : 'Enviar OTA para TODOS os dispositivos cadastrados agora?')){
+    return;
+  }
+
+  try{
+    if(btnTodos) btnTodos.disabled = true;
+    if(btnOnline) btnOnline.disabled = true;
+
+    setMsgOtaMassa('Enviando firmware para OTA em massa...', 'var(--cyan)');
+
+    const fd = new FormData();
+    fd.append('firmware', file);
+
+    const r = await fetch(API + '?action=' + acao, {
+      method:'POST',
+      headers:{'Authorization':'Bearer ' + adminToken},
+      body:fd
+    });
+
+    const d = await r.json();
+
+    if(d.ok){
+      setMsgOtaMassa('OTA criada: ' + (d.queued || 0) + ' dispositivo(s) na fila.', 'var(--green)');
+      input.value = '';
+      await carregarResumoOta();
+      return;
+    }
+
+    setMsgOtaMassa(d.error || 'Falha ao criar OTA em massa.', 'var(--red)');
+  }catch(e){
+    setMsgOtaMassa('Erro de comunicação ao enviar OTA em massa.', 'var(--red)');
+  }finally{
+    if(btnTodos) btnTodos.disabled = false;
+    if(btnOnline) btnOnline.disabled = false;
   }
 }
 
