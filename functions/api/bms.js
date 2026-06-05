@@ -609,8 +609,11 @@ export async function onRequest({ request, env }) {
       }
 
       if (action === 'admin_force_bind' && request.method === 'POST') {
-        const { userId, code } = await request.json();
-        if (!userId || !code) return json({ ok: false, error: 'Dados incompletos' }, 400);
+        const bodyBind = await request.json();
+        const userId = parseInt(bodyBind.userId);
+        const code = normalizarCodigoBms(bodyBind.code);
+
+        if (!userId || !validarCodigoBmsHex(code)) return json({ ok: false, error: 'Dados incompletos ou código inválido' }, 400);
 
         await env.DB.prepare('UPDATE bms_master SET user_id = ? WHERE code = ?').bind(userId, code).run();
         await env.DB.prepare('INSERT OR IGNORE INTO bms (code, nome) VALUES (?, ?)').bind(code, code).run();
@@ -621,9 +624,9 @@ export async function onRequest({ request, env }) {
       }
 
       if (action === 'admin_force_unbind' && request.method === 'DELETE') {
-        const userId = url.searchParams.get('userId');
-        const code = url.searchParams.get('code');
-        if (!userId || !code) return json({ ok: false, error: 'Parâmetros incompletos' }, 400);
+        const userId = parseInt(url.searchParams.get('userId'));
+        const code = normalizarCodigoBms(url.searchParams.get('code'));
+        if (!userId || !validarCodigoBmsHex(code)) return json({ ok: false, error: 'Parâmetros incompletos ou código inválido' }, 400);
 
         await env.DB.prepare('UPDATE bms_master SET user_id = NULL WHERE code = ? AND user_id = ?').bind(code, userId).run();
         await env.DB.prepare('DELETE FROM user_bms WHERE user_id = ? AND bms_code = ?').bind(userId, code).run();
@@ -632,11 +635,17 @@ export async function onRequest({ request, env }) {
       }
 
       if (action === 'admin_add_master' && request.method === 'POST') {
-        const { code } = await request.json();
-        if (!code) return json({ ok: false, error: 'Código inválido' }, 400);
+        const bodyMaster = await request.json();
+        const code = normalizarCodigoBms(bodyMaster.code);
+
+        if (!validarCodigoBmsHex(code)) {
+          return json({ ok: false, error: 'Código inválido. Use 12 caracteres HEX do eFuse ou SL + 12 HEX.' }, 400);
+        }
+
         try {
           await env.DB.prepare('INSERT INTO bms_master (code, user_id) VALUES (?, NULL)').bind(code).run();
-          return json({ ok: true });
+          await env.DB.prepare('INSERT OR IGNORE INTO bms (code, nome) VALUES (?, ?)').bind(code, code).run();
+          return json({ ok: true, code });
         } catch (err) {
           return json({ ok: false, error: 'Este código de BMS já existe no sistema' }, 400);
         }
@@ -699,8 +708,8 @@ export async function onRequest({ request, env }) {
 
     if (action === 'remove_bms' && request.method === 'DELETE') {
       if (!userId) return json({ ok: false, error: 'Login necessário' }, 401);
-      const code = url.searchParams.get('code');
-      if (!code) return json({ ok: false, error: 'Code obrigatório' }, 400);
+      const code = normalizarCodigoBms(url.searchParams.get('code'));
+      if (!validarCodigoBmsHex(code)) return json({ ok: false, error: 'Code inválido' }, 400);
       const check = await env.DB.prepare('SELECT id FROM bms_master WHERE code = ? AND user_id = ?').bind(code, userId).first();
       if (!check) return json({ ok: false, error: 'BMS não encontrada na sua conta' }, 403);
       await env.DB.prepare('UPDATE bms_master SET user_id = NULL WHERE code = ?').bind(code).run();
@@ -726,8 +735,8 @@ export async function onRequest({ request, env }) {
     }
 
     if (action === 'data' && request.method === 'GET') {
-      const code = url.searchParams.get('code');
-      if (!code) return json({ ok: false, error: 'Code obrigatório' }, 400);
+      const code = normalizarCodigoBms(url.searchParams.get('code'));
+      if (!validarCodigoBmsHex(code)) return json({ ok: false, error: 'Code inválido' }, 400);
       if (userId && !isAdmin) {
         const check = await env.DB.prepare('SELECT id FROM user_bms WHERE user_id = ? AND bms_code = ?').bind(userId, code).first();
         if (!check) return json({ ok: false, error: 'Acesso negado' }, 403);
@@ -746,6 +755,14 @@ export async function onRequest({ request, env }) {
         inv_tensao_ac: data.inv_tensao_ac || 0,
         inv_frequencia: data.inv_frequencia || 0,
         inv_geracao_dia: data.inv_geracao_dia || 0,
+        heap: data.heap || 0,
+        rssi: data.rssi || 0,
+        uptime: data.uptime || 0,
+        fw: data.fw || '',
+        esp_model: data.esp_model || '',
+        chip_revision: data.chip_revision || 0,
+        flash_mb: data.flash_mb || 0,
+        psram: data.psram || 0,
         cells: JSON.parse(data.cells || '[]')
       });
     }
