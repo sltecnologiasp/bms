@@ -617,6 +617,8 @@ button.logout:hover{background:rgba(231,29,54,0.08);color:var(--red);border-colo
       <div class="card-inner-item"><div class="label">Firmware</div><div class="value" id="adminFw" style="color:var(--blue);font-size:18px">--</div></div>
       <div class="card-inner-item"><div class="label">Uptime</div><div class="value" id="adminUptime" style="color:var(--orange)">--</div></div>
       <div class="card-inner-item"><div class="label">Wi-Fi</div><div class="value" id="adminRssi" style="color:var(--cyan)">-- dBm</div></div>
+      <div class="card-inner-item"><div class="label">Último Reset</div><div class="value" id="adminLastReset" style="color:var(--red);font-size:20px">--</div></div>
+      <div class="card-inner-item"><div class="label">Último Evento</div><div class="value" id="adminLastEvent" style="color:var(--green);font-size:18px">--</div></div>
     </div>
   </div>
 
@@ -1455,6 +1457,8 @@ function configurarInterfaceDashboardOfflineAdmin() {
   if(document.getElementById('adminHeap')) setTextAdminSafe('adminHeap', '--');
   if(document.getElementById('adminUptime')) setTextAdminSafe('adminUptime', '--');
   if(document.getElementById('adminFw')) setTextAdminSafe('adminFw', '--');
+  setTextAdminSafe('adminLastReset', item.last_reset || '--');
+  setTextAdminSafe('adminLastEvent', item.last_event || '--');
   if(document.getElementById('adminEspModel')) setTextAdminSafe('adminEspModel', '--');
   if(document.getElementById('adminChipRevision')) setTextAdminSafe('adminChipRevision', '--');
   if(document.getElementById('adminFlashMb')) setTextAdminSafe('adminFlashMb', '-- MB');
