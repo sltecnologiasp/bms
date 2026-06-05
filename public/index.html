@@ -848,14 +848,14 @@ window.onload = function(){
 };
 
 function normalizarCodigoBmsCliente(code) {
-  let v = String(code || '').trim().toUpperCase().replace(/[^0-9A-F]/g, '');
-  if (v.startsWith('5L')) v = 'SL' + v.slice(2);
-  if (v.startsWith('SL')) v = v.slice(2);
-  return 'SL' + v.slice(0, 12);
+  let raw = String(code || '').trim().toUpperCase();
+  let v = raw.startsWith('SL') ? raw.slice(2) : raw;
+  v = v.replace(/[^0-9A-F]/g, '').slice(0, 12);
+  return 'SL' + v;
 }
 
 function formatarBmsTextInput(inputElement) {
-  inputElement.value = inputElement.value.toUpperCase().replace(/[^0-9A-F]/g, '').slice(0, 14);
+  inputElement.value = inputElement.value.toUpperCase().replace(/[^0-9A-FSL]/g, '').slice(0, 14);
 }
 
 function abrirScannerCamera() {
@@ -1552,7 +1552,7 @@ function removerBms(code, nome){
 function addBms(){
   var code = normalizarCodigoBmsCliente(document.getElementById('bms-code').value);
   var nome = document.getElementById('bms-nome').value.trim();
-  if(!/^SL[0-9A-F]{12}$/.test(code.toUpperCase())) return alert('Código inválido. Digite os 12 caracteres HEX do eFuse ou SL + 12 caracteres.');
+  if(!/^SL[0-9A-F]{12}$/.test(code)) return alert('Código inválido. Digite os 12 caracteres HEX do eFuse ou SL + 12 caracteres.');
 
   fetch(API + '?action=add_bms', {
     method:'POST',
@@ -1564,12 +1564,12 @@ function addBms(){
     if(d.ok){
       document.getElementById('bms-code').value = '';
       document.getElementById('bms-nome').value = '';
-      
+
       var cortina = document.getElementById('cortina-dispositivos');
       var btn = document.getElementById('btn-toggle-cortina');
       if(cortina) cortina.classList.add('aberta');
       if(btn) btn.textContent = 'OCULTAR DISPOSITIVOS';
-      
+
       carregarListaUmaVez(); 
     } else { alert('Erro: ' + d.error); }
   });
