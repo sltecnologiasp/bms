@@ -133,6 +133,7 @@ export async function onRequest({ request, env }) {
     // ESP32 consulta OTA pendente ao iniciar ou periodicamente.
     // Funciona apenas se a tabela ota_queue existir.
     if (action === 'esp_check_ota' && request.method === 'GET') {
+      await limparFilaOtaAutomaticamente();
       const code = normalizarCodigoBms(url.searchParams.get('code'));
       if (!validarCodigoBmsHex(code)) return json({ ok: false, error: 'Código inválido' }, 400);
 
@@ -399,6 +400,10 @@ export async function onRequest({ request, env }) {
       const chip_revision = numeroSeguro(body.chip_revision, 0);
       const flash_mb = numeroSeguro(body.flash_mb, 0);
       const psram = body.psram ? 1 : 0;
+      const last_reset = textoSeguro(body.last_reset || '', 32);
+      const last_event = textoSeguro(body.last_event || '', 64);
+
+      await garantirColunasDiagnosticoBms();
 
       // Tenta gravar campos novos de saúde do ESP32.
       // Se o banco ainda não tiver as colunas novas, cai automaticamente no modo compatível antigo.
@@ -407,9 +412,9 @@ export async function onRequest({ request, env }) {
           INSERT INTO bms (
             code, soc, voltage, current, temp, cells, online, updated_at,
             inversor_conectado, bateria_conectada, inv_potencia, inv_tensao_ac, inv_frequencia, inv_geracao_dia,
-            heap, rssi, uptime, fw, esp_model, chip_revision, flash_mb, psram
+            heap, rssi, uptime, fw, esp_model, chip_revision, flash_mb, psram, last_reset, last_event
           )
-          VALUES (?, ?, ?, ?, ?, ?, 1, datetime('now'), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+          VALUES (?, ?, ?, ?, ?, ?, 1, datetime('now'), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
           ON CONFLICT(code) DO UPDATE SET
             soc = excluded.soc, voltage = excluded.voltage, current = excluded.current,
             temp = excluded.temp, cells = excluded.cells, online = 1, updated_at = datetime('now'),
@@ -418,11 +423,12 @@ export async function onRequest({ request, env }) {
             inv_frequencia = excluded.inv_frequencia, inv_geracao_dia = excluded.inv_geracao_dia,
             heap = excluded.heap, rssi = excluded.rssi, uptime = excluded.uptime,
             fw = excluded.fw, esp_model = excluded.esp_model, chip_revision = excluded.chip_revision,
-            flash_mb = excluded.flash_mb, psram = excluded.psram
+            flash_mb = excluded.flash_mb, psram = excluded.psram,
+            last_reset = excluded.last_reset, last_event = excluded.last_event
         `).bind(
           code, soc, voltage, current, temp, JSON.stringify(cells),
           inversor_conectado, bateria_conectada, inv_potencia, inv_tensao_ac, inv_frequencia, inv_geracao_dia,
-          heap, rssi, uptime, fw, esp_model, chip_revision, flash_mb, psram
+          heap, rssi, uptime, fw, esp_model, chip_revision, flash_mb, psram, last_reset, last_event
         ).run();
       } catch (errHealthColumns) {
         await env.DB.prepare(`
@@ -442,6 +448,15 @@ export async function onRequest({ request, env }) {
           inversor_conectado, bateria_conectada, inv_potencia, inv_tensao_ac, inv_frequencia, inv_geracao_dia
         ).run();
       }
+
+
+      try {
+        await env.DB.prepare(`
+          UPDATE bms
+          SET last_reset = ?, last_event = ?
+          WHERE code = ?
+        `).bind(last_reset, last_event, code).run();
+      } catch(e) {}
 
       return json({ ok: true });
     }
@@ -525,6 +540,47 @@ export async function onRequest({ request, env }) {
     }
 
 
+
+    async function garantirColunasDiagnosticoBms() {
+      const colunas = await env.DB.prepare(`PRAGMA table_info(bms)`).all();
+      const nomes = new Set((colunas.results || []).map(c => c.name));
+
+      if (!nomes.has('last_reset')) {
+        try { await env.DB.prepare(`ALTER TABLE bms ADD COLUMN last_reset TEXT`).run(); } catch(e) {}
+      }
+
+      if (!nomes.has('last_event')) {
+        try { await env.DB.prepare(`ALTER TABLE bms ADD COLUMN last_event TEXT`).run(); } catch(e) {}
+      }
+    }
+
+    async function limparFilaOtaAutomaticamente() {
+      try {
+        await garantirTabelaOtaQueue();
+
+        await env.DB.prepare(`
+          UPDATE ota_queue
+          SET status='failed', confirmed_at=datetime('now')
+          WHERE status='pending'
+          AND created_at < datetime('now','-5 minutes')
+        `).run();
+
+        await env.DB.prepare(`
+          DELETE FROM ota_queue
+          WHERE status='failed'
+          AND COALESCE(confirmed_at, created_at) < datetime('now','-12 hours')
+        `).run();
+
+        await env.DB.prepare(`
+          DELETE FROM ota_queue
+          WHERE status='confirmed'
+          AND confirmed_at IS NOT NULL
+          AND confirmed_at < datetime('now','-3 days')
+        `).run();
+      } catch(e) {}
+    }
+
+
     async function garantirTabelaOtaQueue() {
       await env.DB.prepare(`
         CREATE TABLE IF NOT EXISTS ota_queue (
@@ -592,6 +648,7 @@ export async function onRequest({ request, env }) {
 
       if (action === 'ota_stats' && request.method === 'GET') {
         try {
+          await limparFilaOtaAutomaticamente();
           await garantirTabelaOtaQueue();
 
           const pending = await env.DB.prepare(`
@@ -655,6 +712,7 @@ export async function onRequest({ request, env }) {
 
       if ((action === 'ota_mass_all' || action === 'ota_mass_online') && request.method === 'POST') {
         try {
+          await limparFilaOtaAutomaticamente();
           await garantirTabelaOtaQueue();
 
           const formData = await request.formData();
