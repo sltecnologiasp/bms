@@ -15,6 +15,14 @@ export async function onRequest({ request, env }) {
     headers: {...cors, 'Content-Type': 'application/json' }
   });
 
+  function normalizarCodigoBms(code) {
+    return String(code || '').trim().toUpperCase();
+  }
+
+  function validarCodigoBmsHex(code) {
+    return /^SL[0-9A-F]{12}$/.test(normalizarCodigoBms(code));
+  }
+
   // =========================================================================
   // FUNÇÃO AUXILIAR DE CRIPTOGRAFIA PARA O NOVO TOKEN SEGURO (HMAC-SHA256)
   // =========================================================================
@@ -83,10 +91,10 @@ export async function onRequest({ request, env }) {
     if (action === 'device_auto_register' && request.method === 'POST') {
       try {
         const body = await request.json();
-        const { code } = body;
+        const code = normalizarCodigoBms(body.code);
         
-        if (!code || !code.startsWith('SL') || code.length !== 14) {
-          return json({ ok: false, error: 'Código inválido enviado pelo hardware' }, 400);
+        if (!validarCodigoBmsHex(code)) {
+          return json({ ok: false, error: 'Código inválido enviado pelo hardware. Use SL + 12 HEX.' }, 400);
         }
         
         await env.DB.prepare("INSERT OR IGNORE INTO bms_master (code, user_id) VALUES (?, NULL)").bind(code).run();
@@ -303,7 +311,8 @@ export async function onRequest({ request, env }) {
     // ROTA 7: UPDATE TELEMETRIA DA EQUIPE/BMS (ADAPTADA PRO INVERSOR)
     if (action === 'update' && request.method === 'POST') {
       const body = await request.json();
-      const { code, soc, voltage, current, temp, cells } = body;
+      const code = normalizarCodigoBms(body.code);
+      const { soc, voltage, current, temp, cells } = body;
       
       const inversor_conectado = body.inversor_conectado !== undefined ? (body.inversor_conectado ? 1 : 0) : 1;
       const bateria_conectada = body.bateria_conectada !== undefined ? (body.bateria_conectada ? 1 : 0) : 1;
@@ -312,7 +321,7 @@ export async function onRequest({ request, env }) {
       const inv_frequencia = body.inv_frequencia || 0;
       const inv_geracao_dia = body.inv_geracao_dia || 0;
 
-      if (!code) return json({ ok: false, error: 'Code obrigatório' }, 400);
+      if (!validarCodigoBmsHex(code)) return json({ ok: false, error: 'Code inválido. Use SL + 12 HEX.' }, 400);
       
       await env.DB.prepare(`
         INSERT INTO bms (
@@ -420,9 +429,9 @@ export async function onRequest({ request, env }) {
         try {
           const formData = await request.formData();
           const file = formData.get('firmware');
-          const code = formData.get('code');
+          const code = normalizarCodigoBms(formData.get('code'));
 
-          if (!file || !code) return json({ ok: false, error: 'Arquivo ou código do dispositivo ausente.' }, 400);
+          if (!file || !validarCodigoBmsHex(code)) return json({ ok: false, error: 'Arquivo ou código do dispositivo inválido.' }, 400);
           if (!env.FIRMWARES_BUCKET) return json({ ok: false, error: 'Configuração do bucket R2 não vinculada.' }, 500);
 
           const keyName = `firmwares/${code}_${Date.now()}.bin`;
@@ -491,8 +500,8 @@ export async function onRequest({ request, env }) {
       }
 
       if (action === 'deletar' && request.method === 'DELETE') {
-        const code = url.searchParams.get('code');
-        if (!code) return json({ ok: false, error: 'Código inválido' }, 400);
+        const code = normalizarCodigoBms(url.searchParams.get('code'));
+        if (!validarCodigoBmsHex(code)) return json({ ok: false, error: 'Código inválido' }, 400);
         await env.DB.prepare('DELETE FROM bms_master WHERE code = ?').bind(code).run();
         await env.DB.prepare('DELETE FROM user_bms WHERE bms_code = ?').bind(code).run();
         await env.DB.prepare('DELETE FROM bms WHERE code = ?').bind(code).run();
@@ -531,8 +540,10 @@ export async function onRequest({ request, env }) {
     // ==========================================
     if (action === 'add_bms' && request.method === 'POST') {
       if (!userId) return json({ ok: false, error: 'Login necessário' }, 401);
-      const { code, nome } = await request.json();
-      if (!code?.startsWith('SL') || code.length !== 14) return json({ ok: false, error: 'Código inválido. Use SL + 12 números' }, 400);
+      const bodyAdd = await request.json();
+      const code = normalizarCodigoBms(bodyAdd.code);
+      const nome = bodyAdd.nome;
+      if (!validarCodigoBmsHex(code)) return json({ ok: false, error: 'Código inválido. Use SL + 12 caracteres HEX (0-9 e A-F)' }, 400);
       const bms = await env.DB.prepare("SELECT id, user_id FROM bms_master WHERE code = ?").bind(code).first();
       if (!bms) return json({ ok: false, error: 'BMS não encontrada no sistema' });
       if (bms.user_id && bms.user_id !== userId) return json({ ok: false, error: 'Essa BMS já está vinculada a outra conta' });
