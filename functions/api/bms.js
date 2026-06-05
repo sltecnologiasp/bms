@@ -534,43 +534,140 @@ export async function onRequest({ request, env }) {
           const file = formData.get('firmware');
           const code = normalizarCodigoBms(formData.get('code'));
 
-          if (!file || !validarCodigoBmsHex(code)) return json({ ok: false, error: 'Arquivo ou código do dispositivo inválido.' }, 400);
-          if (!String(file.name || '').toLowerCase().endsWith('.bin')) return json({ ok: false, error: 'Envie um arquivo .bin válido.' }, 400);
-          if (file.size <= 0 || file.size > 8 * 1024 * 1024) return json({ ok: false, error: 'Arquivo vazio ou maior que 8 MB.' }, 400);
-          if (!env.FIRMWARES_BUCKET) return json({ ok: false, error: 'Configuração do bucket R2 não vinculada.' }, 500);
+          if (!file || !validarCodigoBmsHex(code)) {
+            return json({ ok: false, error: 'Arquivo ou código do dispositivo inválido.' }, 400);
+          }
+
+          if (!String(file.name || '').toLowerCase().endsWith('.bin')) {
+            return json({ ok: false, error: 'Envie um arquivo .bin válido.' }, 400);
+          }
+
+          if (file.size <= 0 || file.size > 8 * 1024 * 1024) {
+            return json({ ok: false, error: 'Arquivo vazio ou maior que 8 MB.' }, 400);
+          }
+
+          if (!env.FIRMWARES_BUCKET) {
+            return json({ ok: false, error: 'Configuração do bucket R2 não vinculada.' }, 500);
+          }
+
+          if (!env.DB) {
+            return json({ ok: false, error: 'Banco D1 env.DB não está vinculado ao Worker.' }, 500);
+          }
 
           const keyName = `firmwares/${code}_${Date.now()}.bin`;
+
           await env.FIRMWARES_BUCKET.put(keyName, file.stream(), {
             httpMetadata: { contentType: 'application/octet-stream' }
           });
 
           const publicUrl = `${url.origin}/api/bms?action=download_bin&key=${encodeURIComponent(keyName)}`;
 
-          // Opcional: se existir tabela ota_queue, salva atualização pendente.
-          // SQL sugerido:
-          // CREATE TABLE IF NOT EXISTS ota_queue (
-          //   id INTEGER PRIMARY KEY AUTOINCREMENT,
-          //   code TEXT NOT NULL,
-          //   url TEXT NOT NULL,
-          //   status TEXT DEFAULT 'pending',
-          //   file_name TEXT,
-          //   size INTEGER,
-          //   created_at TEXT DEFAULT CURRENT_TIMESTAMP,
-          //   delivered_at TEXT,
-          //   confirmed_at TEXT
-          // );
           try {
             await env.DB.prepare(`
+              CREATE TABLE IF NOT EXISTS ota_queue (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                code TEXT NOT NULL,
+                url TEXT NOT NULL,
+                status TEXT DEFAULT 'pending',
+                file_name TEXT,
+                size INTEGER,
+                created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+                delivered_at TEXT,
+                confirmed_at TEXT
+              )
+            `).run();
+
+            const insertResult = await env.DB.prepare(`
               INSERT INTO ota_queue (code, url, status, file_name, size, created_at)
               VALUES (?, ?, 'pending', ?, ?, datetime('now'))
-            `).bind(code, publicUrl, String(file.name || 'firmware.bin'), file.size || 0).run();
+            `).bind(
+              code,
+              publicUrl,
+              String(file.name || 'firmware.bin'),
+              Number(file.size || 0)
+            ).run();
+
+            const check = await env.DB.prepare(`
+              SELECT id, code, url, status, file_name, size, created_at
+              FROM ota_queue
+              WHERE code = ?
+              ORDER BY id DESC
+              LIMIT 1
+            `).bind(code).first();
+
+            if (!check) {
+              return json({
+                ok: false,
+                error: 'Firmware subiu para o R2, mas a fila OTA não foi criada no D1.',
+                r2_key: keyName,
+                url: publicUrl,
+                insert_meta: insertResult?.meta || null
+              }, 500);
+            }
+
+            return json({
+              ok: true,
+              url: publicUrl,
+              r2_key: keyName,
+              ota_queued: true,
+              ota_id: check.id,
+              ota_status: check.status,
+              code
+            });
+
           } catch (queueErr) {
-            // Mantém compatibilidade se a tabela ainda não existir.
+            return json({
+              ok: false,
+              error: 'Firmware subiu para o R2, mas falhou ao gravar ota_queue no D1: ' + (queueErr?.message || String(queueErr)),
+              r2_key: keyName,
+              url: publicUrl,
+              code
+            }, 500);
           }
 
-          return json({ ok: true, url: publicUrl });
         } catch (uploadErr) {
-          return json({ ok: false, error: 'Falha interna na gravação do R2: ' + uploadErr.message }, 500);
+          return json({ ok: false, error: 'Falha interna no upload OTA: ' + (uploadErr?.message || String(uploadErr)) }, 500);
+        }
+      }
+
+
+      if (action === 'admin_ota_queue' && request.method === 'GET') {
+        try {
+          await env.DB.prepare(`
+            CREATE TABLE IF NOT EXISTS ota_queue (
+              id INTEGER PRIMARY KEY AUTOINCREMENT,
+              code TEXT NOT NULL,
+              url TEXT NOT NULL,
+              status TEXT DEFAULT 'pending',
+              file_name TEXT,
+              size INTEGER,
+              created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+              delivered_at TEXT,
+              confirmed_at TEXT
+            )
+          `).run();
+
+          const codeParam = url.searchParams.get('code');
+          let query;
+          if (codeParam) {
+            const code = normalizarCodigoBms(codeParam);
+            query = await env.DB.prepare(`
+              SELECT * FROM ota_queue
+              WHERE code = ?
+              ORDER BY id DESC
+              LIMIT 20
+            `).bind(code).all();
+          } else {
+            query = await env.DB.prepare(`
+              SELECT * FROM ota_queue
+              ORDER BY id DESC
+              LIMIT 20
+            `).all();
+          }
+
+          return json({ ok: true, rows: query.results || [] });
+        } catch (err) {
+          return json({ ok: false, error: 'Falha ao consultar ota_queue: ' + (err?.message || String(err)) }, 500);
         }
       }
 
