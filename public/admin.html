@@ -494,6 +494,17 @@ button.logout:hover{background:rgba(231,29,54,0.08);color:var(--red);border-colo
     <div id="adminCellsContent" class="cells"></div>
   </div>
 
+  
+  <div class="card-wrapper-block">
+    <div class="section-block-title">Saúde do ESP32</div>
+    <div class="grid">
+      <div class="card-inner-item"><div class="label">Wi-Fi RSSI</div><div class="value" id="adminRssi" style="color:var(--cyan)">-- dBm</div></div>
+      <div class="card-inner-item"><div class="label">Heap Livre</div><div class="value" id="adminHeap" style="color:var(--green)">--</div></div>
+      <div class="card-inner-item"><div class="label">Uptime</div><div class="value" id="adminUptime" style="color:var(--orange)">--</div></div>
+      <div class="card-inner-item"><div class="label">Firmware</div><div class="value" id="adminFw" style="color:var(--blue);font-size:18px">--</div></div>
+    </div>
+  </div>
+
   <div class="card-wrapper-block" style="margin-top: 12px; border: 1px solid rgba(0, 180, 216, 0.3);">
     <div class="section-block-title" style="color: var(--cyan);">Atualização Remota de Firmware (OTA)</div>
     <div style="padding: 12px 4px; display: flex; flex-direction: column; gap: 10px;">
@@ -684,14 +695,44 @@ function voltarPainel(){ showPainelPage(); }
 function adminLogout(){ fecharMqttAnterior(); sessionStorage.clear(); location.reload(); }
 function authHeaders(){ return {'Content-Type':'application/json','Authorization':'Bearer '+adminToken}; }
 
+function escapeHtmlAdmin(valor) {
+  return String(valor === undefined || valor === null ? '' : valor)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function escapeJsAdmin(valor) {
+  return String(valor === undefined || valor === null ? '' : valor)
+    .replace(/\\/g, '\\\\')
+    .replace(/'/g, "\\'")
+    .replace(/"/g, '\\"')
+    .replace(/\n/g, '\\n')
+    .replace(/\r/g, '\\r');
+}
+
+function validarCodigoBmsAdmin(code) {
+  return /^SL[0-9A-F]{12}$/.test(String(code || '').trim().toUpperCase());
+}
+
+function numeroSeguro(valor, fallback) {
+  const n = Number(valor);
+  return Number.isFinite(n) ? n : fallback;
+}
+
+
 document.getElementById('code').oninput = e => {
   if(!e.target.value.startsWith('SL')) e.target.value = 'SL';
-  e.target.value = 'SL' + e.target.value.slice(2).replace(/[^0-9]/g,'').slice(0,12);
+  e.target.value = 'SL' + e.target.value.slice(2).toUpperCase().replace(/[^0-9A-F]/g,'').slice(0,12);
 };
 
 function gerarCodigoAleatorio(){
-  const numeros = Math.floor(Math.random() * 1000000000000).toString().padStart(12, '0');
-  return 'SL' + numeros;
+  let hex = '';
+  const chars = '0123456789ABCDEF';
+  for(let i = 0; i < 12; i++) hex += chars[Math.floor(Math.random() * chars.length)];
+  return 'SL' + hex;
 }
 
 async function generarECadastrar(){
@@ -720,9 +761,17 @@ async function cad(){
 
 async function del(code){
   event.stopPropagation();
-  if(!confirm(`Deletar ${code} do sistema?`))return;
-  await fetch(API+`?action=deletar&code=${code}`,{method:'DELETE',headers:authHeaders()});
-  carregarTudo();
+  code = String(code || '').trim().toUpperCase();
+  if(!validarCodigoBmsAdmin(code)) return alert('Código inválido.');
+  if(!confirm(`Deletar ${code} do sistema?`)) return;
+
+  try {
+    const r = await fetch(API+`?action=deletar&code=${encodeURIComponent(code)}`,{method:'DELETE',headers:authHeaders()});
+    if(r.status === 401){ adminLogout(); return; }
+    carregarTudo();
+  } catch(e) {
+    alert('Erro ao deletar dispositivo.');
+  }
 }
 
 function viewBmsDetails(code){ showDashAdmin(code); }
@@ -732,8 +781,8 @@ async function enviarFirmwareOta() {
   const statusMsg = document.getElementById('msgOtaStatus');
   const btn = document.getElementById('btnOtaUpload');
 
-  if (!activeBmsCode) {
-    alert('Erro: Nenhuma placa BMS activa selecionada.');
+  if (!activeBmsCode || !validarCodigoBmsAdmin(activeBmsCode)) {
+    alert('Erro: Nenhuma placa BMS ativa selecionada.');
     return;
   }
   if (!fileInput.files || fileInput.files.length === 0) {
@@ -743,8 +792,15 @@ async function enviarFirmwareOta() {
   }
 
   const arquivo = fileInput.files[0];
-  if (!arquivo.name.endsWith('.bin')) {
+  if (!arquivo.name.toLowerCase().endsWith('.bin')) {
     statusMsg.textContent = 'Erro: O arquivo precisa ser obrigatoriamente extensão .bin!';
+    statusMsg.style.color = 'var(--red)';
+    return;
+  }
+
+  const tamanhoMaximoBin = 8 * 1024 * 1024;
+  if (arquivo.size <= 0 || arquivo.size > tamanhoMaximoBin) {
+    statusMsg.textContent = 'Erro: arquivo .bin vazio ou maior que 8 MB.';
     statusMsg.style.color = 'var(--red)';
     return;
   }
@@ -791,7 +847,13 @@ async function enviarFirmwareOta() {
       otaClient.connect({
         userName: cred.user, password: cred.pass, useSSL: true, timeout: 5,
         onSuccess: function () {
-          const payloadOtaMqtt = JSON.stringify({ url: d.url });
+          const payloadOtaMqtt = JSON.stringify({
+            url: d.url,
+            code: activeBmsCode,
+            file: arquivo.name,
+            size: arquivo.size,
+            ts: Date.now()
+          });
           const mensagemMqtt = new Paho.MQTT.Message(payloadOtaMqtt);
           mensagemMqtt.destinationName = "sl_bms/" + activeBmsCode + "/ota";
           otaClient.send(mensagemMqtt);
@@ -843,7 +905,7 @@ function abrirModalVincular(userId, nomeCliente) {
     select.innerHTML = '<option value="">Nenhuma BMS disponível no banco</option>';
   } else {
     select.innerHTML = '<option value="">-- Selecione uma BMS --</option>' + 
-      livres.map(b => `<option value="${b.code}">${b.code}</option>`).join('');
+      livres.map(b => `<option value="${escapeHtmlAdmin(b.code)}">${escapeHtmlAdmin(b.code)}</option>`).join('');
   }
   
   document.getElementById('modalVincularBms').classList.add('active');
@@ -887,7 +949,7 @@ async function abrirModalDesvincular(userId, nomeCliente) {
     select.innerHTML = '<option value="">Este usuário não possui nenhuma BMS</option>';
   } else {
     select.innerHTML = '<option value="">-- Selecione la BMS para remover --</option>' + 
-      vinculadas.map(b => `<option value="${b.code}">${b.code}</option>`).join('');
+      vinculadas.map(b => `<option value="${escapeHtmlAdmin(b.code)}">${escapeHtmlAdmin(b.code)}</option>`).join('');
   }
   
   document.getElementById('modalDesvincularBms').classList.add('active');
@@ -996,6 +1058,10 @@ function configurarInterfaceDashboardOfflineAdmin() {
   adminSocGauge.style.background = 'var(--gauge-empty)';
   
   renderAdminCells([]);
+  if(document.getElementById('adminRssi')) document.getElementById('adminRssi').textContent = '-- dBm';
+  if(document.getElementById('adminHeap')) document.getElementById('adminHeap').textContent = '--';
+  if(document.getElementById('adminUptime')) document.getElementById('adminUptime').textContent = '--';
+  if(document.getElementById('adminFw')) document.getElementById('adminFw').textContent = '--';
 }
 
 function processarERenderizarDadosAdminMqtt(d) {
@@ -1030,10 +1096,10 @@ function processarERenderizarDadosAdminMqtt(d) {
     document.getElementById('adminInvFrequencia').textContent = '0.0Hz';
     document.getElementById('adminInvGeracaoDia').textContent = '0.0kWh';
   } else {
-    document.getElementById('adminInvPotencia').textContent = (d.inv_potencia !== undefined ? d.inv_potencia.toFixed(0) : '0') + 'W';
-    document.getElementById('adminInvTensaoAC').textContent = (d.inv_tensao_ac !== undefined ? d.inv_tensao_ac.toFixed(1) : '0.0') + 'V';
-    document.getElementById('adminInvFrequencia').textContent = (d.inv_frequencia !== undefined ? d.inv_frequencia.toFixed(1) : '0.0') + 'Hz';
-    document.getElementById('adminInvGeracaoDia').textContent = (d.inv_geracao_dia !== undefined ? d.inv_geracao_dia.toFixed(1) : '0.0') + 'kWh';
+    document.getElementById('adminInvPotencia').textContent = numeroSeguro(d.inv_potencia, 0).toFixed(0) + 'W';
+    document.getElementById('adminInvTensaoAC').textContent = numeroSeguro(d.inv_tensao_ac, 0).toFixed(1) + 'V';
+    document.getElementById('adminInvFrequencia').textContent = numeroSeguro(d.inv_frequencia, 0).toFixed(1) + 'Hz';
+    document.getElementById('adminInvGeracaoDia').textContent = numeroSeguro(d.inv_geracao_dia, 0).toFixed(1) + 'kWh';
   }
 
   if(!batAtiva) {
@@ -1046,11 +1112,11 @@ function processarERenderizarDadosAdminMqtt(d) {
     adminSocBar.style.width = '0%';
     adminSocGauge.style.background = 'var(--gauge-empty)';
   } else {
-    const socVal = d.soc ? parseInt(d.soc) : 0;
+    const socVal = Math.max(0, Math.min(100, parseInt(numeroSeguro(d.soc, 0))));
     document.getElementById('adminSoc').textContent = socVal + '%';
-    document.getElementById('adminVolt').textContent = (d.voltage ? d.voltage.toFixed(2) : '0.00') + 'V';
-    document.getElementById('adminCorr').textContent = (d.current ? d.current.toFixed(1) : '0.0') + 'A';
-    document.getElementById('adminTemp').textContent = (d.temp ? d.temp.toFixed(1) : '0.0') + '°C';
+    document.getElementById('adminVolt').textContent = numeroSeguro(d.voltage, 0).toFixed(2) + 'V';
+    document.getElementById('adminCorr').textContent = numeroSeguro(d.current, 0).toFixed(1) + 'A';
+    document.getElementById('adminTemp').textContent = numeroSeguro(d.temp, 0).toFixed(1) + '°C';
     
     adminSocValor.textContent = socVal + '%';
     adminSocBarTxt.textContent = socVal + '%';
@@ -1059,6 +1125,14 @@ function processarERenderizarDadosAdminMqtt(d) {
     adminSocGauge.style.background = `conic-gradient(var(--green) 0deg, var(--cyan) ${deg}deg, var(--gauge-empty) ${deg}deg)`;
   }
   
+  if(document.getElementById('adminRssi')) document.getElementById('adminRssi').textContent = (d.rssi !== undefined ? numeroSeguro(d.rssi, 0).toFixed(0) + ' dBm' : '-- dBm');
+  if(document.getElementById('adminHeap')) document.getElementById('adminHeap').textContent = (d.heap !== undefined ? numeroSeguro(d.heap, 0).toFixed(0) : '--');
+  if(document.getElementById('adminUptime')) {
+    const up = numeroSeguro(d.uptime, 0);
+    document.getElementById('adminUptime').textContent = up > 0 ? Math.floor(up / 3600) + 'h ' + Math.floor((up % 3600) / 60) + 'm' : '--';
+  }
+  if(document.getElementById('adminFw')) document.getElementById('adminFw').textContent = escapeHtmlAdmin(d.fw || d.firmware || '--');
+
   renderAdminCells(d.cells || []);
 }
 
@@ -1213,13 +1287,13 @@ function atualizarHTMLListaBms() {
     const statusText = b.online ? 'Online' : 'Offline';
 
     return `
-    <div class="card" id="admin-card-lista-${b.code}" onclick="viewBmsDetails('${b.code}')">
+    <div class="card" id="admin-card-lista-${escapeHtmlAdmin(b.code)}" onclick="viewBmsDetails('${escapeJsAdmin(b.code)}')">
       <div style="display:flex; flex-direction:column; align-items:center; width: 100%;">
-        <span class="status ${statusClass}" id="admin-dot-lista-${b.code}">${statusText}</span>
-        <div class="card-code">${b.code}</div>
+        <span class="status ${statusClass}" id="admin-dot-lista-${escapeHtmlAdmin(b.code)}">${statusText}</span>
+        <div class="card-code">${escapeHtmlAdmin(b.code)}</div>
         <div style="margin-top: 2px;">${dono}</div>
       </div>
-      <button class="del" onclick="del('${b.code}')">EXCLUIR</button>
+      <button class="del" onclick="del('${escapeJsAdmin(b.code)}')">EXCLUIR</button>
     </div>
   `}).join('') || `<div class="card card-empty"><div>Nenhuma BMS encontrada neste filtro</div></div>`;
 
@@ -1303,8 +1377,8 @@ async function listarUsers(){
     <div class="card">
       <div class="card-top">
         <div style="text-align:center;margin-bottom:12px">
-          <b style="font-size:18px;color:var(--text-main)">${u.nome}</b>
-          <div style="opacity:.6;font-size:13px;margin-top:4px;word-break:break-all;font-family:monospace;color:var(--text-muted)">${u.email}</div>
+          <b style="font-size:18px;color:var(--text-main)">${escapeHtmlAdmin(u.nome)}</b>
+          <div style="opacity:.6;font-size:13px;margin-top:4px;word-break:break-all;font-family:monospace;color:var(--text-muted)">${escapeHtmlAdmin(u.email)}</div>
           <div style="opacity:.5;font-size:11px;margin-top:4px;color:var(--text-muted)">Cadastro: ${new Date(u.created_at).toLocaleDateString('pt-BR')}</div>
         </div>
         <div class="data-item" style="text-align:left;display:flex;justify-content:space-between;align-items:center;padding:8px 12px;width:100%">
@@ -1313,11 +1387,11 @@ async function listarUsers(){
         </div>
       </div>
       <div class="btn-group" style="width:100%">
-        <button class="edit" onclick="editarUser(${u.id},'${u.nome}','${u.email}')" style="width:100%">EDITAR DETALHES</button>
+        <button class="edit" onclick="editarUser(${u.id},'${escapeHtmlAdmin(u.nome)}','${escapeHtmlAdmin(u.email)}')" style="width:100%">EDITAR DETALHES</button>
       </div>
-      <button class="vincular" onclick="abrirModalVincular(${u.id}, '${u.nome}')" style="width:100%">+ VINCULAR BMS</button>
-      <button class="desvincular" onclick="abrirModalDesvincular(${u.id}, '${u.nome}')" style="width:100%">- DESVINCULAR BMS</button>
-      <button class="del" onclick="deletarUser(${u.id},'${u.nome}')" style="width:100%; margin-top:6px;">EXCLUIR CLIENTE</button>
+      <button class="vincular" onclick="abrirModalVincular(${u.id}, '${escapeHtmlAdmin(u.nome)}')" style="width:100%">+ VINCULAR BMS</button>
+      <button class="desvincular" onclick="abrirModalDesvincular(${u.id}, '${escapeHtmlAdmin(u.nome)}')" style="width:100%">- DESVINCULAR BMS</button>
+      <button class="del" onclick="deletarUser(${u.id},'${escapeHtmlAdmin(u.nome)}')" style="width:100%; margin-top:6px;">EXCLUIR CLIENTE</button>
     </div>
   `).join('') || '<div class="card card-empty"><div>Nenhum cliente cadastrado</div></div>';
 }

@@ -848,8 +848,8 @@ window.onload = function(){
 };
 
 function formatarBmsTextInput(inputElement) {
-  if(!inputElement.value.startsWith('SL')) inputElement.value = 'SL';
-  inputElement.value = 'SL' + inputElement.value.slice(2).replace(/[^0-9]/g,'').slice(0,12);
+  if(!inputElement.value.toUpperCase().startsWith('SL')) inputElement.value = 'SL';
+  inputElement.value = 'SL' + inputElement.value.slice(2).toUpperCase().replace(/[^0-9A-F]/g,'').slice(0,12);
 }
 
 function abrirScannerCamera() {
@@ -1544,9 +1544,9 @@ function removerBms(code, nome){
 }
 
 function addBms(){
-  var code = document.getElementById('bms-code').value.trim();
+  var code = document.getElementById('bms-code').value.trim().toUpperCase();
   var nome = document.getElementById('bms-nome').value.trim();
-  if(code.length !== 14) return alert('Código inválido.');
+  if(!/^SL[0-9A-F]{12}$/.test(code.toUpperCase())) return alert('Código inválido. Use SL + 12 caracteres HEX (0-9 e A-F).');
 
   fetch(API + '?action=add_bms', {
     method:'POST',
