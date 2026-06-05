@@ -611,16 +611,12 @@ button.logout:hover{background:rgba(231,29,54,0.08);color:var(--red);border-colo
 
   
   <div class="card-wrapper-block">
-    <div class="section-block-title">Saúde do ESP32</div>
+    <div class="section-block-title">Status do Dispositivo</div>
     <div class="grid">
-      <div class="card-inner-item"><div class="label">Wi-Fi RSSI</div><div class="value" id="adminRssi" style="color:var(--cyan)">-- dBm</div></div>
-      <div class="card-inner-item"><div class="label">Heap Livre</div><div class="value" id="adminHeap" style="color:var(--green)">--</div></div>
-      <div class="card-inner-item"><div class="label">Uptime</div><div class="value" id="adminUptime" style="color:var(--orange)">--</div></div>
+      <div class="card-inner-item"><div class="label">Dispositivo</div><div class="value" id="adminEspModel" style="color:var(--cyan);font-size:22px">--</div></div>
       <div class="card-inner-item"><div class="label">Firmware</div><div class="value" id="adminFw" style="color:var(--blue);font-size:18px">--</div></div>
-      <div class="card-inner-item"><div class="label">Modelo ESP32</div><div class="value" id="adminEspModel" style="color:var(--cyan);font-size:18px">--</div></div>
-      <div class="card-inner-item"><div class="label">Revisão Chip</div><div class="value" id="adminChipRevision" style="color:var(--orange);font-size:18px">--</div></div>
-      <div class="card-inner-item"><div class="label">Flash</div><div class="value" id="adminFlashMb" style="color:var(--blue);font-size:18px">-- MB</div></div>
-      <div class="card-inner-item"><div class="label">PSRAM</div><div class="value" id="adminPsram" style="color:var(--green);font-size:18px">--</div></div>
+      <div class="card-inner-item"><div class="label">Uptime</div><div class="value" id="adminUptime" style="color:var(--orange)">--</div></div>
+      <div class="card-inner-item"><div class="label">Wi-Fi</div><div class="value" id="adminRssi" style="color:var(--cyan)">-- dBm</div></div>
     </div>
   </div>
 
@@ -950,6 +946,12 @@ function mostrarClientes(){ showClientesPage(); }
 function voltarPainel(){ showPainelPage(); }
 function adminLogout(){ fecharMqttAnterior(); sessionStorage.clear(); location.reload(); }
 function authHeaders(){ return {'Content-Type':'application/json','Authorization':'Bearer '+adminToken}; }
+
+
+function setTextAdminSafe(id, value){
+  const el = document.getElementById(id);
+  if(el) el.textContent = value;
+}
 
 function normalizarCodigoBmsAdminSeguro(code) {
   let raw = String(code || '').trim().toUpperCase();
@@ -1449,14 +1451,14 @@ function configurarInterfaceDashboardOfflineAdmin() {
   adminSocGauge.style.background = 'var(--gauge-empty)';
   
   renderAdminCells([]);
-  if(document.getElementById('adminRssi')) document.getElementById('adminRssi').textContent = '-- dBm';
-  if(document.getElementById('adminHeap')) document.getElementById('adminHeap').textContent = '--';
-  if(document.getElementById('adminUptime')) document.getElementById('adminUptime').textContent = '--';
-  if(document.getElementById('adminFw')) document.getElementById('adminFw').textContent = '--';
-  if(document.getElementById('adminEspModel')) document.getElementById('adminEspModel').textContent = '--';
-  if(document.getElementById('adminChipRevision')) document.getElementById('adminChipRevision').textContent = '--';
-  if(document.getElementById('adminFlashMb')) document.getElementById('adminFlashMb').textContent = '-- MB';
-  if(document.getElementById('adminPsram')) document.getElementById('adminPsram').textContent = '--';
+  if(document.getElementById('adminRssi')) setTextAdminSafe('adminRssi', '-- dBm');
+  if(document.getElementById('adminHeap')) setTextAdminSafe('adminHeap', '--');
+  if(document.getElementById('adminUptime')) setTextAdminSafe('adminUptime', '--');
+  if(document.getElementById('adminFw')) setTextAdminSafe('adminFw', '--');
+  if(document.getElementById('adminEspModel')) setTextAdminSafe('adminEspModel', '--');
+  if(document.getElementById('adminChipRevision')) setTextAdminSafe('adminChipRevision', '--');
+  if(document.getElementById('adminFlashMb')) setTextAdminSafe('adminFlashMb', '-- MB');
+  if(document.getElementById('adminPsram')) setTextAdminSafe('adminPsram', '--');
 }
 
 function processarERenderizarDadosAdminMqtt(d) {
@@ -1520,17 +1522,17 @@ function processarERenderizarDadosAdminMqtt(d) {
     adminSocGauge.style.background = `conic-gradient(var(--green) 0deg, var(--cyan) ${deg}deg, var(--gauge-empty) ${deg}deg)`;
   }
   
-  if(document.getElementById('adminRssi')) document.getElementById('adminRssi').textContent = (d.rssi !== undefined ? numeroSeguro(d.rssi, 0).toFixed(0) + ' dBm' : '-- dBm');
-  if(document.getElementById('adminHeap')) document.getElementById('adminHeap').textContent = (d.heap !== undefined ? numeroSeguro(d.heap, 0).toFixed(0) : '--');
+  if(document.getElementById('adminRssi')) setTextAdminSafe('adminRssi', (d.rssi !== undefined ? numeroSeguro(d.rssi, 0).toFixed(0) + ' dBm' : '-- dBm'));
+  if(document.getElementById('adminHeap')) setTextAdminSafe('adminHeap', (d.heap !== undefined ? numeroSeguro(d.heap, 0).toFixed(0) : '--'));
   if(document.getElementById('adminUptime')) {
     const up = numeroSeguro(d.uptime, 0);
-    document.getElementById('adminUptime').textContent = up > 0 ? Math.floor(up / 3600) + 'h ' + Math.floor((up % 3600) / 60) + 'm' : '--';
+    setTextAdminSafe('adminUptime', up > 0 ? Math.floor(up / 3600) + 'h ' + Math.floor((up % 3600) / 60) + 'm' : '--');
   }
-  if(document.getElementById('adminFw')) document.getElementById('adminFw').textContent = escapeHtmlAdmin(d.fw || d.firmware || '--');
-  if(document.getElementById('adminEspModel')) document.getElementById('adminEspModel').textContent = escapeHtmlAdmin(d.esp_model || d.chip_model || '--');
-  if(document.getElementById('adminChipRevision')) document.getElementById('adminChipRevision').textContent = (d.chip_revision !== undefined ? numeroSeguro(d.chip_revision, 0).toFixed(0) : '--');
-  if(document.getElementById('adminFlashMb')) document.getElementById('adminFlashMb').textContent = (d.flash_mb !== undefined ? numeroSeguro(d.flash_mb, 0).toFixed(0) + ' MB' : '-- MB');
-  if(document.getElementById('adminPsram')) document.getElementById('adminPsram').textContent = (d.psram ? 'SIM' : 'NÃO');
+  if(document.getElementById('adminFw')) setTextAdminSafe('adminFw', escapeHtmlAdmin(d.fw || d.firmware || '--'));
+  if(document.getElementById('adminEspModel')) setTextAdminSafe('adminEspModel', escapeHtmlAdmin(d.esp_model || d.chip_model || '--'));
+  if(document.getElementById('adminChipRevision')) setTextAdminSafe('adminChipRevision', (d.chip_revision !== undefined ? numeroSeguro(d.chip_revision, 0).toFixed(0) : '--'));
+  if(document.getElementById('adminFlashMb')) setTextAdminSafe('adminFlashMb', (d.flash_mb !== undefined ? numeroSeguro(d.flash_mb, 0).toFixed(0) + ' MB' : '-- MB'));
+  if(document.getElementById('adminPsram')) setTextAdminSafe('adminPsram', (d.psram ? 'SIM' : 'NÃO'));
 
   renderAdminCells(d.cells || []);
 }
