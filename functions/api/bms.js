@@ -576,24 +576,31 @@ export async function onRequest({ request, env }) {
         try {
           await garantirTabelaOtaQueue();
 
-          const { results } = await env.DB.prepare(`
-            SELECT status, COUNT(*) as total
-            FROM ota_queue
-            GROUP BY status
-          `).all();
+          const pending = await env.DB.prepare(`
+            SELECT COUNT(*) AS total FROM ota_queue WHERE status = 'pending'
+          `).first();
 
-          const counts = {
-            pending: 0,
-            delivered: 0,
-            confirmed: 0,
-            failed: 0
-          };
+          const delivered = await env.DB.prepare(`
+            SELECT COUNT(*) AS total FROM ota_queue WHERE status = 'delivered'
+          `).first();
 
-          for (const row of (results || [])) {
-            counts[row.status] = row.total;
-          }
+          const confirmed = await env.DB.prepare(`
+            SELECT COUNT(*) AS total FROM ota_queue WHERE status = 'confirmed'
+          `).first();
 
-          return json({ ok: true, counts });
+          const failed = await env.DB.prepare(`
+            SELECT COUNT(*) AS total FROM ota_queue WHERE status = 'failed'
+          `).first();
+
+          return json({
+            ok: true,
+            counts: {
+              pending: Number(pending?.total || 0),
+              delivered: Number(delivered?.total || 0),
+              confirmed: Number(confirmed?.total || 0),
+              failed: Number(failed?.total || 0)
+            }
+          });
         } catch (err) {
           return json({ ok: false, error: 'Falha ao consultar status OTA: ' + (err?.message || String(err)) }, 500);
         }
