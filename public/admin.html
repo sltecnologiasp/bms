@@ -390,7 +390,7 @@ button.logout:hover{background:rgba(231,29,54,0.08);color:var(--red);border-colo
 
   <div class="card card-cadastro">
     <div class="label">Cadastrar BMS no Sistema</div>
-    <input id="code" placeholder="SL000000000000" maxlength="14" style="margin-top:8px">
+    <input id="code" placeholder="Digite o código eFuse" maxlength="14" style="margin-top:8px">
     <button class="btn-clientes" onclick="cad()">CADASTRAR BMS MASTER</button>
     <button class="btn-sec" onclick="generarECadastrar()">GERAR CÓDIGO ALEATÓRIO</button>
     <button class="btn-clientes" style="margin-top:24px" onclick="mostrarClientes()">VER CLIENTES CADASTRADOS</button>
@@ -713,8 +713,16 @@ function escapeJsAdmin(valor) {
     .replace(/\r/g, '\\r');
 }
 
+function normalizarCodigoBmsAdmin(code) {
+  let v = String(code || '').trim().toUpperCase().replace(/[^0-9A-F]/g, '');
+  if (v.startsWith('5L')) v = 'SL' + v.slice(2); // proteção contra digitação errada comum
+  if (v.startsWith('SL')) v = v.slice(2);
+  return 'SL' + v.slice(0, 12);
+}
+
 function validarCodigoBmsAdmin(code) {
-  return /^SL[0-9A-F]{12}$/.test(String(code || '').trim().toUpperCase());
+  return /^SL[0-9A-F]{12}$/.test(normalizarCodigoBmsAdmin(code));
+}$/.test(String(code || '').trim().toUpperCase());
 }
 
 function numeroSeguro(valor, fallback) {
@@ -724,8 +732,7 @@ function numeroSeguro(valor, fallback) {
 
 
 document.getElementById('code').oninput = e => {
-  if(!e.target.value.startsWith('SL')) e.target.value = 'SL';
-  e.target.value = 'SL' + e.target.value.slice(2).toUpperCase().replace(/[^0-9A-F]/g,'').slice(0,12);
+  e.target.value = e.target.value.toUpperCase().replace(/[^0-9A-F]/g, '').slice(0, 14);
 };
 
 function gerarCodigoAleatorio(){
@@ -742,7 +749,7 @@ async function generarECadastrar(){
 }
 
 async function cad(){
-  const code = document.getElementById('code').value;
+  const code = normalizarCodigoBmsAdmin(document.getElementById('code').value);
   const msgEl = document.getElementById('msg');
   clearTimeout(TIMEOUT_ADMIN_MSG);
 
