@@ -700,7 +700,7 @@ export async function onRequest({ request, env }) {
         const data = (results || []).map(item => ({
           ...item,
           cells: JSON.parse(item.cells || '[]'),
-          online: item.updated_at && (now - new Date(item.updated_at).getTime() < 5000)
+          online: false
         }));
         return json(data);
       }
@@ -826,7 +826,7 @@ export async function onRequest({ request, env }) {
       const now = Date.now();
       const withOnline = (results || []).map(r => ({
         ...r,
-        online: r.updated_at && (now - new Date(r.updated_at).getTime() < 5000)
+        online: false
       }));
       return json(withOnline);
     }
@@ -841,7 +841,7 @@ export async function onRequest({ request, env }) {
       const data = await env.DB.prepare('SELECT *, datetime(updated_at) || "Z" as updated_at FROM bms WHERE code = ?').bind(code).first();
       if (!data) return json({ ok: false, error: 'BMS não encontrada' }, 404);
       
-      const online = data.updated_at && (Date.now() - new Date(data.updated_at).getTime() < 5000);
+      const online = false;
       
       return json({
         ...data,
