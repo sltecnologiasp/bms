@@ -415,6 +415,13 @@ button.logout:hover{background:rgba(231,29,54,0.08);color:var(--red);border-colo
 #otaResultadoCards .card{min-height:145px!important;padding:10px 8px!important;flex-direction:column!important;justify-content:center!important;align-items:center!important;margin:0!important}
 @media(min-width:600px){#otaResultadoCards{grid-template-columns:repeat(4,1fr);gap:12px}}
 
+
+/* MENSAGENS OTA TEMPORÁRIAS */
+#msgOtaMassaStatus,
+#msgOtaStatus{
+  transition: opacity .2s ease;
+}
+
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.0.1/mqttws31.min.js" type="text/javascript"></script>
 </head>
@@ -453,7 +460,7 @@ button.logout:hover{background:rgba(231,29,54,0.08);color:var(--red);border-colo
     </p>
     <input type="file" id="arquivoOtaMassaBin" accept=".bin" style="width:100%;padding:12px;border-radius:12px;border:1px solid var(--input-border);background:var(--input-bg);color:var(--text-main);font-size:13px;text-align:left;font-family:inherit;letter-spacing:0">
     <button onclick="enviarFirmwareOtaMassa()" id="btnOtaMassaUpload" class="btn-clientes">ATUALIZAR TODOS OS DISPOSITIVOS</button>
-      <button class="btn-sec" onclick="limparAtualizacoesOta()" id="btnOtaLimparStatus" style="width:100%; border-radius:10px; padding:14px; font-weight:700; font-size:14px; cursor:pointer; margin-top:8px; border-color:var(--orange); color:var(--orange);">
+      <button class="btn-sec" onclick="limparAtualizacoesOta()" id="btnOtaLimparStatus" style="width:100%; border-radius:14px; padding:16px; font-weight:800; font-size:16px; cursor:pointer; margin-top:12px; border-color:var(--orange); color:var(--orange); letter-spacing:.2px;">
         LIMPAR ATUALIZAÇÕES
       </button>
     <p id="msgOtaMassaStatus" style="text-align:center;margin-top:12px;font-size:13px;font-weight:700;min-height:16px"></p>
@@ -996,6 +1003,19 @@ function atualizarBotoesOtaStatus(){
 }
 
 
+
+function mostrarMensagemTemporariaAdmin(el, texto, cor){
+  if(!el) return;
+  if(el._timerMsgAdmin) clearTimeout(el._timerMsgAdmin);
+  el.textContent = texto || '';
+  el.style.color = cor || 'var(--text-muted)';
+  el.style.display = 'block';
+  el._timerMsgAdmin = setTimeout(function(){
+    el.textContent = '';
+    el.style.display = 'none';
+  }, 3000);
+}
+
 async function limparAtualizacoesOta(){
   if(!adminToken) return;
 
@@ -1043,21 +1063,18 @@ async function limparAtualizacoesOta(){
       setTimeout(carregarStatusOtaAdmin, 800);
 
       if(msg){
-        msg.textContent = 'Atualizações OTA limpas com sucesso.';
-        msg.style.color = 'var(--green)';
+        mostrarMensagemTemporariaAdmin(msg, 'Atualizações OTA limpas com sucesso.', 'var(--green)');
       }
     } else {
       if(msg){
-        msg.textContent = (d && d.error) ? d.error : 'Erro ao limpar atualizações.';
-        msg.style.color = 'var(--red)';
+        mostrarMensagemTemporariaAdmin(msg, (d && d.error) ? d.error : 'Erro ao limpar atualizações.', 'var(--red)');
       } else {
         alert((d && d.error) ? d.error : 'Erro ao limpar atualizações.');
       }
     }
   } catch(e){
     if(msg){
-      msg.textContent = 'Erro de comunicação ao limpar atualizações.';
-      msg.style.color = 'var(--red)';
+      mostrarMensagemTemporariaAdmin(msg, 'Erro de comunicação ao limpar atualizações.', 'var(--red)');
     } else {
       alert('Erro de comunicação ao limpar atualizações.');
     }
