@@ -631,6 +631,58 @@ export async function onRequest({ request, env }) {
       }
 
 
+      if (action === 'admin_ota_status' && request.method === 'GET') {
+        try {
+          await env.DB.prepare(`
+            CREATE TABLE IF NOT EXISTS ota_queue (
+              id INTEGER PRIMARY KEY AUTOINCREMENT,
+              code TEXT NOT NULL,
+              url TEXT NOT NULL,
+              status TEXT DEFAULT 'pending',
+              file_name TEXT,
+              size INTEGER,
+              created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+              delivered_at TEXT,
+              confirmed_at TEXT
+            )
+          `).run();
+
+          const query = await env.DB.prepare(`
+            SELECT id, code, status, file_name, size, created_at, delivered_at, confirmed_at
+            FROM ota_queue
+            ORDER BY id DESC
+            LIMIT 500
+          `).all();
+
+          const vistos = new Set();
+          const counts = { pending: 0, delivered: 0, confirmed: 0, failed: 0 };
+          const items = { pending: [], delivered: [], confirmed: [], failed: [] };
+
+          for (const row of (query.results || [])) {
+            const code = normalizarCodigoBms(row.code);
+            if (!validarCodigoBmsHex(code) || vistos.has(code)) continue;
+            vistos.add(code);
+
+            const st = ['pending','delivered','confirmed','failed'].includes(row.status) ? row.status : 'pending';
+            counts[st]++;
+            items[st].push({
+              id: row.id,
+              code,
+              status: st,
+              file_name: row.file_name || '',
+              size: row.size || 0,
+              created_at: row.created_at || '',
+              delivered_at: row.delivered_at || '',
+              confirmed_at: row.confirmed_at || ''
+            });
+          }
+
+          return json({ ok: true, counts, items });
+        } catch (err) {
+          return json({ ok: false, error: 'Falha ao consultar status OTA: ' + (err?.message || String(err)) }, 500);
+        }
+      }
+
       if (action === 'admin_ota_queue' && request.method === 'GET') {
         try {
           await env.DB.prepare(`
