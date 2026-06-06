@@ -366,6 +366,32 @@ button.logout:hover{background:rgba(231,29,54,0.08);color:var(--red);border-colo
   #lista { grid-template-columns: repeat(4, 1fr); display: grid !important; gap: 12px !important;}
   .filter-row button { font-size: 13px; padding: 14px; }
 }
+
+.ultimo-online-admin{
+  display:none;
+  font-size:10px;
+  color:var(--text-muted);
+  font-weight:700;
+  text-align:center;
+  margin-top:4px;
+  margin-bottom:4px;
+  width:100%;
+  line-height:1.25;
+}
+.badge-vinculo-unico{
+  display:inline-block;
+  padding:4px 8px;
+  border-radius:6px;
+  font-size:10px;
+  font-weight:800;
+  margin-top:4px;
+  text-align:center;
+  max-width:100%;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.0.1/mqttws31.min.js" type="text/javascript"></script>
 </head>
@@ -390,7 +416,7 @@ button.logout:hover{background:rgba(231,29,54,0.08);color:var(--red);border-colo
 
   <div class="card card-cadastro">
     <div class="label">Cadastrar BMS no Sistema</div>
-    <input id="code" placeholder="SL000000000000" maxlength="14" style="margin-top:8px">
+    <input id="code" placeholder="Digite o código da BMS" maxlength="32" style="margin-top:8px">
     <button class="btn-clientes" onclick="cad()">CADASTRAR BMS MASTER</button>
     <button class="btn-sec" onclick="generarECadastrar()">GERAR CÓDIGO ALEATÓRIO</button>
     <button class="btn-clientes" style="margin-top:24px" onclick="mostrarClientes()">VER CLIENTES CADASTRADOS</button>
@@ -494,6 +520,21 @@ button.logout:hover{background:rgba(231,29,54,0.08);color:var(--red);border-colo
     <div id="adminCellsContent" class="cells"></div>
   </div>
 
+  
+  <div class="card-wrapper-block">
+    <div class="section-block-title">Saúde do ESP32</div>
+    <div class="grid">
+      <div class="card-inner-item"><div class="label">Wi-Fi RSSI</div><div class="value" id="adminRssi" style="color:var(--cyan)">-- dBm</div></div>
+      <div class="card-inner-item"><div class="label">Heap Livre</div><div class="value" id="adminHeap" style="color:var(--green)">--</div></div>
+      <div class="card-inner-item"><div class="label">Uptime</div><div class="value" id="adminUptime" style="color:var(--orange)">--</div></div>
+      <div class="card-inner-item"><div class="label">Firmware</div><div class="value" id="adminFw" style="color:var(--blue);font-size:18px">--</div></div>
+      <div class="card-inner-item"><div class="label">Modelo ESP32</div><div class="value" id="adminEspModel" style="color:var(--cyan);font-size:18px">--</div></div>
+      <div class="card-inner-item"><div class="label">Revisão Chip</div><div class="value" id="adminChipRevision" style="color:var(--orange);font-size:18px">--</div></div>
+      <div class="card-inner-item"><div class="label">Flash</div><div class="value" id="adminFlashMb" style="color:var(--blue);font-size:18px">-- MB</div></div>
+      <div class="card-inner-item"><div class="label">PSRAM</div><div class="value" id="adminPsram" style="color:var(--green);font-size:18px">--</div></div>
+    </div>
+  </div>
+
   <div class="card-wrapper-block" style="margin-top: 12px; border: 1px solid rgba(0, 180, 216, 0.3);">
     <div class="section-block-title" style="color: var(--cyan);">Atualização Remota de Firmware (OTA)</div>
     <div style="padding: 12px 4px; display: flex; flex-direction: column; gap: 10px;">
@@ -573,7 +614,7 @@ let MQTT_CLIENT = null;
 let bmsTimeoutTimerAdmin = null;         
 let listaTimeoutsAdminCards = {};      
 
-const TEMPO_TIMEOUT_CONEXAO = 15000;
+const TEMPO_TIMEOUT_CONEXAO = 8000;
 
 if(adminToken) {
   if (activeScreen === 'dashAdmin' && activeBmsCode) {
@@ -676,6 +717,7 @@ function showDashAdmin(code) {
   document.getElementById('dashAdmin').style.display = 'flex';
   
   document.getElementById('modalBmsTitle').textContent = code;
+  aplicarSnapshotAdminD1(code);
   conectarMqttParaDashboardAdmin();
 }
 
@@ -684,14 +726,131 @@ function voltarPainel(){ showPainelPage(); }
 function adminLogout(){ fecharMqttAnterior(); sessionStorage.clear(); location.reload(); }
 function authHeaders(){ return {'Content-Type':'application/json','Authorization':'Bearer '+adminToken}; }
 
+function normalizarCodigoBmsAdminSeguro(code) {
+  return String(code || '').trim().toUpperCase().replace(/[^0-9A-Z]/g, '').slice(0, 32);
+}
+
+function validarCodigoBmsAdminSeguro(code) {
+  return /^[0-9A-Z]{3,32}$/.test(normalizarCodigoBmsAdminSeguro(code));
+}
+
+
+
+function parseDataAdminSmartBms(valor){
+  if(!valor) return null;
+  if(valor instanceof Date && !isNaN(valor.getTime())) return valor;
+
+  let s = String(valor).trim();
+  let d = new Date(s);
+
+  if(isNaN(d.getTime())){
+    d = new Date(s.replace(' ', 'T') + 'Z');
+  }
+
+  if(isNaN(d.getTime())) return null;
+  return d;
+}
+
+function formatarUltimoOnlineAdminSmartBms(valor){
+  const d = parseDataAdminSmartBms(valor);
+  if(!d) return 'Último online: --';
+
+  let diffMs = Date.now() - d.getTime();
+  if(diffMs < 0) diffMs = 0;
+
+  const min = Math.floor(diffMs / 60000);
+  let relativo = '';
+
+  if(min < 1){
+    relativo = 'agora mesmo';
+  } else if(min < 60){
+    relativo = 'há ' + min + ' min';
+  } else {
+    const horas = Math.floor(min / 60);
+    if(horas < 24){
+      relativo = 'há ' + horas + ' h';
+    } else {
+      const dias = Math.floor(horas / 24);
+      relativo = dias === 1 ? 'há 1 dia' : 'há ' + dias + ' dias';
+    }
+  }
+
+  const dia = String(d.getDate()).padStart(2,'0');
+  const mes = String(d.getMonth()+1).padStart(2,'0');
+  const hora = String(d.getHours()).padStart(2,'0');
+  const minuto = String(d.getMinutes()).padStart(2,'0');
+
+  return 'Último online: ' + relativo + ' (' + dia + '/' + mes + ' ' + hora + ':' + minuto + ')';
+}
+
+function atualizarUltimoOnlineAdminCard(code, online, dataUltimoOnline){
+  const el = document.getElementById('admin-last-lista-' + code);
+  if(!el) return;
+
+  if(online){
+    el.style.display = 'none';
+    el.textContent = '';
+    el.setAttribute('data-last-seen', new Date().toISOString());
+    return;
+  }
+
+  const ultima = dataUltimoOnline || el.getAttribute('data-last-seen') || el.getAttribute('data-updated-at');
+  el.textContent = formatarUltimoOnlineAdminSmartBms(ultima);
+  el.style.display = 'block';
+}
+
+function textoBadgeVinculoAdmin(b){
+  if(b && b.user_id){
+    const nome = b.dono_nome || b.nome_usuario || b.user_nome || b.dono_email || b.user_email || 'Cliente';
+    return '<span class="badge-vinculo-unico badge-orange">Vinculada • ' + escapeHtmlAdmin(nome) + '</span>';
+  }
+  return '<span class="badge-vinculo-unico badge-green">Disponível</span>';
+}
+
+function escapeHtmlAdmin(valor) {
+  return String(valor === undefined || valor === null ? '' : valor)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function escapeJsAdmin(valor) {
+  return String(valor === undefined || valor === null ? '' : valor)
+    .replace(/\\/g, '\\\\')
+    .replace(/'/g, "\\'")
+    .replace(/"/g, '\\"')
+    .replace(/\n/g, '\\n')
+    .replace(/\r/g, '\\r');
+}
+
+function normalizarCodigoBmsAdmin(code) {
+  let v = String(code || '').trim().toUpperCase().replace(/[^0-9A-Z]/g, '');
+  if (v.startsWith('5L')) v = 'SL' + v.slice(2); // proteção contra digitação errada comum
+  if (v.startsWith('SL')) v = v.slice(2);
+  return 'SL' + v.slice(0, 12);
+}
+
+function validarCodigoBmsAdmin(code) {
+  return /^[0-9A-Z]{3,32}$/.test(normalizarCodigoBmsAdmin(code));
+}
+
+function numeroSeguro(valor, fallback) {
+  const n = Number(valor);
+  return Number.isFinite(n) ? n : fallback;
+}
+
+
 document.getElementById('code').oninput = e => {
-  if(!e.target.value.startsWith('SL')) e.target.value = 'SL';
-  e.target.value = 'SL' + e.target.value.slice(2).replace(/[^0-9]/g,'').slice(0,12);
+  e.target.value = e.target.value.toUpperCase().replace(/[^0-9A-FSL]/g, '').slice(0, 14);
 };
 
 function gerarCodigoAleatorio(){
-  const numeros = Math.floor(Math.random() * 1000000000000).toString().padStart(12, '0');
-  return 'SL' + numeros;
+  let hex = '';
+  const chars = '0123456789ABCDEF';
+  for(let i=0;i<12;i++) hex += chars[Math.floor(Math.random()*chars.length)];
+  return 'SL' + hex;
 }
 
 async function generarECadastrar(){
@@ -701,28 +860,49 @@ async function generarECadastrar(){
 }
 
 async function cad(){
-  const code = document.getElementById('code').value;
+  const code = normalizarCodigoBmsAdminSeguro(document.getElementById('code').value);
   const msgEl = document.getElementById('msg');
   clearTimeout(TIMEOUT_ADMIN_MSG);
 
-  const r = await fetch(API+'?action=admin_add_master',{method:'POST',headers:authHeaders(),body:JSON.stringify({code})});
-  const d = await r.json();
-  msgEl.textContent = d.ok?'Cadastrada no sistema!':d.error;
-  msgEl.style.color = d.ok?'var(--green)':'var(--red)';
-  
-  if(d.ok){
-    document.getElementById('code').value='';
-    carregarTudo();
+  if (!validarCodigoBmsAdminSeguro(code)) {
+    msgEl.textContent = 'Código inválido. Digite os 12 caracteres HEX do eFuse ou SL + 12 caracteres.';
+    msgEl.style.color = 'var(--red)';
+    TIMEOUT_ADMIN_MSG = setTimeout(() => { msgEl.textContent = ''; }, 3000);
+    return;
   }
-  
+
+  try {
+    const r = await fetch(API+'?action=admin_add_master',{method:'POST',headers:authHeaders(),body:JSON.stringify({code})});
+    if(r.status===401){adminLogout();return;}
+    const d = await r.json();
+    msgEl.textContent = d.ok?'Cadastrada no sistema!':(d.error || 'Erro ao cadastrar BMS');
+    msgEl.style.color = d.ok?'var(--green)':'var(--red)';
+
+    if(d.ok){
+      document.getElementById('code').value='';
+      carregarTudo();
+    }
+  } catch(e) {
+    msgEl.textContent = 'Erro de comunicação com a API';
+    msgEl.style.color = 'var(--red)';
+  }
+
   TIMEOUT_ADMIN_MSG = setTimeout(() => { msgEl.textContent = ''; }, 3000);
 }
 
 async function del(code){
   event.stopPropagation();
-  if(!confirm(`Deletar ${code} do sistema?`))return;
-  await fetch(API+`?action=deletar&code=${code}`,{method:'DELETE',headers:authHeaders()});
-  carregarTudo();
+  code = String(code || '').trim().toUpperCase();
+  if(!validarCodigoBmsAdmin(code)) return alert('Código inválido.');
+  if(!confirm(`Deletar ${code} do sistema?`)) return;
+
+  try {
+    const r = await fetch(API+`?action=deletar&code=${encodeURIComponent(code)}`,{method:'DELETE',headers:authHeaders()});
+    if(r.status === 401){ adminLogout(); return; }
+    carregarTudo();
+  } catch(e) {
+    alert('Erro ao deletar dispositivo.');
+  }
 }
 
 function viewBmsDetails(code){ showDashAdmin(code); }
@@ -732,8 +912,8 @@ async function enviarFirmwareOta() {
   const statusMsg = document.getElementById('msgOtaStatus');
   const btn = document.getElementById('btnOtaUpload');
 
-  if (!activeBmsCode) {
-    alert('Erro: Nenhuma placa BMS activa selecionada.');
+  if (!activeBmsCode || !validarCodigoBmsAdmin(activeBmsCode)) {
+    alert('Erro: Nenhuma placa BMS ativa selecionada.');
     return;
   }
   if (!fileInput.files || fileInput.files.length === 0) {
@@ -743,8 +923,15 @@ async function enviarFirmwareOta() {
   }
 
   const arquivo = fileInput.files[0];
-  if (!arquivo.name.endsWith('.bin')) {
+  if (!arquivo.name.toLowerCase().endsWith('.bin')) {
     statusMsg.textContent = 'Erro: O arquivo precisa ser obrigatoriamente extensão .bin!';
+    statusMsg.style.color = 'var(--red)';
+    return;
+  }
+
+  const tamanhoMaximoBin = 8 * 1024 * 1024;
+  if (arquivo.size <= 0 || arquivo.size > tamanhoMaximoBin) {
+    statusMsg.textContent = 'Erro: arquivo .bin vazio ou maior que 8 MB.';
     statusMsg.style.color = 'var(--red)';
     return;
   }
@@ -791,7 +978,13 @@ async function enviarFirmwareOta() {
       otaClient.connect({
         userName: cred.user, password: cred.pass, useSSL: true, timeout: 5,
         onSuccess: function () {
-          const payloadOtaMqtt = JSON.stringify({ url: d.url });
+          const payloadOtaMqtt = JSON.stringify({
+            url: d.url,
+            code: activeBmsCode,
+            file: arquivo.name,
+            size: arquivo.size,
+            ts: Date.now()
+          });
           const mensagemMqtt = new Paho.MQTT.Message(payloadOtaMqtt);
           mensagemMqtt.destinationName = "sl_bms/" + activeBmsCode + "/ota";
           otaClient.send(mensagemMqtt);
@@ -843,7 +1036,7 @@ function abrirModalVincular(userId, nomeCliente) {
     select.innerHTML = '<option value="">Nenhuma BMS disponível no banco</option>';
   } else {
     select.innerHTML = '<option value="">-- Selecione uma BMS --</option>' + 
-      livres.map(b => `<option value="${b.code}">${b.code}</option>`).join('');
+      livres.map(b => `<option value="${escapeHtmlAdmin(b.code)}">${escapeHtmlAdmin(b.code)}</option>`).join('');
   }
   
   document.getElementById('modalVincularBms').classList.add('active');
@@ -887,7 +1080,7 @@ async function abrirModalDesvincular(userId, nomeCliente) {
     select.innerHTML = '<option value="">Este usuário não possui nenhuma BMS</option>';
   } else {
     select.innerHTML = '<option value="">-- Selecione la BMS para remover --</option>' + 
-      vinculadas.map(b => `<option value="${b.code}">${b.code}</option>`).join('');
+      vinculadas.map(b => `<option value="${escapeHtmlAdmin(b.code)}">${escapeHtmlAdmin(b.code)}</option>`).join('');
   }
   
   document.getElementById('modalDesvincularBms').classList.add('active');
@@ -926,6 +1119,38 @@ function gerenciarLayoutStatus(elementoCard, elementoTxt, ativo, textoAtivo, tex
   }
   if (elementoTxt.textContent !== novoTexto) {
     elementoTxt.textContent = novoTexto;
+  }
+}
+
+
+function aplicarSnapshotAdminD1(code){
+  const b = bmsList.find(x => x.code === code);
+  if(!b) return;
+
+  const payload = {
+    soc: numeroSeguro(b.soc, 0),
+    voltage: numeroSeguro(b.voltage, 0),
+    current: numeroSeguro(b.current, 0),
+    temp: numeroSeguro(b.temp, 0),
+    cells: Array.isArray(b.cells) ? b.cells : (typeof b.cells === 'string' ? (() => { try { return JSON.parse(b.cells); } catch(e){ return []; } })() : []),
+    inversor_conectado: b.inversor_conectado,
+    bateria_conectada: b.bateria_conectada,
+    inv_potencia: b.inv_potencia,
+    inv_tensao_ac: b.inv_tensao_ac,
+    inv_frequencia: b.inv_frequencia,
+    inv_geracao_dia: b.inv_geracao_dia,
+    rssi: b.rssi,
+    heap: b.heap,
+    uptime: b.uptime,
+    fw: b.fw,
+    esp_model: b.esp_model,
+    chip_revision: b.chip_revision,
+    flash_mb: b.flash_mb,
+    psram: b.psram
+  };
+
+  if(b.online){
+    processarERenderizarDadosAdminMqtt(payload);
   }
 }
 
@@ -996,6 +1221,14 @@ function configurarInterfaceDashboardOfflineAdmin() {
   adminSocGauge.style.background = 'var(--gauge-empty)';
   
   renderAdminCells([]);
+  if(document.getElementById('adminRssi')) document.getElementById('adminRssi').textContent = '-- dBm';
+  if(document.getElementById('adminHeap')) document.getElementById('adminHeap').textContent = '--';
+  if(document.getElementById('adminUptime')) document.getElementById('adminUptime').textContent = '--';
+  if(document.getElementById('adminFw')) document.getElementById('adminFw').textContent = '--';
+  if(document.getElementById('adminEspModel')) document.getElementById('adminEspModel').textContent = '--';
+  if(document.getElementById('adminChipRevision')) document.getElementById('adminChipRevision').textContent = '--';
+  if(document.getElementById('adminFlashMb')) document.getElementById('adminFlashMb').textContent = '-- MB';
+  if(document.getElementById('adminPsram')) document.getElementById('adminPsram').textContent = '--';
 }
 
 function processarERenderizarDadosAdminMqtt(d) {
@@ -1030,10 +1263,10 @@ function processarERenderizarDadosAdminMqtt(d) {
     document.getElementById('adminInvFrequencia').textContent = '0.0Hz';
     document.getElementById('adminInvGeracaoDia').textContent = '0.0kWh';
   } else {
-    document.getElementById('adminInvPotencia').textContent = (d.inv_potencia !== undefined ? d.inv_potencia.toFixed(0) : '0') + 'W';
-    document.getElementById('adminInvTensaoAC').textContent = (d.inv_tensao_ac !== undefined ? d.inv_tensao_ac.toFixed(1) : '0.0') + 'V';
-    document.getElementById('adminInvFrequencia').textContent = (d.inv_frequencia !== undefined ? d.inv_frequencia.toFixed(1) : '0.0') + 'Hz';
-    document.getElementById('adminInvGeracaoDia').textContent = (d.inv_geracao_dia !== undefined ? d.inv_geracao_dia.toFixed(1) : '0.0') + 'kWh';
+    document.getElementById('adminInvPotencia').textContent = numeroSeguro(d.inv_potencia, 0).toFixed(0) + 'W';
+    document.getElementById('adminInvTensaoAC').textContent = numeroSeguro(d.inv_tensao_ac, 0).toFixed(1) + 'V';
+    document.getElementById('adminInvFrequencia').textContent = numeroSeguro(d.inv_frequencia, 0).toFixed(1) + 'Hz';
+    document.getElementById('adminInvGeracaoDia').textContent = numeroSeguro(d.inv_geracao_dia, 0).toFixed(1) + 'kWh';
   }
 
   if(!batAtiva) {
@@ -1046,11 +1279,11 @@ function processarERenderizarDadosAdminMqtt(d) {
     adminSocBar.style.width = '0%';
     adminSocGauge.style.background = 'var(--gauge-empty)';
   } else {
-    const socVal = d.soc ? parseInt(d.soc) : 0;
+    const socVal = Math.max(0, Math.min(100, parseInt(numeroSeguro(d.soc, 0))));
     document.getElementById('adminSoc').textContent = socVal + '%';
-    document.getElementById('adminVolt').textContent = (d.voltage ? d.voltage.toFixed(2) : '0.00') + 'V';
-    document.getElementById('adminCorr').textContent = (d.current ? d.current.toFixed(1) : '0.0') + 'A';
-    document.getElementById('adminTemp').textContent = (d.temp ? d.temp.toFixed(1) : '0.0') + '°C';
+    document.getElementById('adminVolt').textContent = numeroSeguro(d.voltage, 0).toFixed(2) + 'V';
+    document.getElementById('adminCorr').textContent = numeroSeguro(d.current, 0).toFixed(1) + 'A';
+    document.getElementById('adminTemp').textContent = numeroSeguro(d.temp, 0).toFixed(1) + '°C';
     
     adminSocValor.textContent = socVal + '%';
     adminSocBarTxt.textContent = socVal + '%';
@@ -1059,6 +1292,18 @@ function processarERenderizarDadosAdminMqtt(d) {
     adminSocGauge.style.background = `conic-gradient(var(--green) 0deg, var(--cyan) ${deg}deg, var(--gauge-empty) ${deg}deg)`;
   }
   
+  if(document.getElementById('adminRssi')) document.getElementById('adminRssi').textContent = (d.rssi !== undefined ? numeroSeguro(d.rssi, 0).toFixed(0) + ' dBm' : '-- dBm');
+  if(document.getElementById('adminHeap')) document.getElementById('adminHeap').textContent = (d.heap !== undefined ? numeroSeguro(d.heap, 0).toFixed(0) : '--');
+  if(document.getElementById('adminUptime')) {
+    const up = numeroSeguro(d.uptime, 0);
+    document.getElementById('adminUptime').textContent = up > 0 ? Math.floor(up / 3600) + 'h ' + Math.floor((up % 3600) / 60) + 'm' : '--';
+  }
+  if(document.getElementById('adminFw')) document.getElementById('adminFw').textContent = escapeHtmlAdmin(d.fw || d.firmware || '--');
+  if(document.getElementById('adminEspModel')) document.getElementById('adminEspModel').textContent = escapeHtmlAdmin(d.esp_model || d.chip_model || '--');
+  if(document.getElementById('adminChipRevision')) document.getElementById('adminChipRevision').textContent = (d.chip_revision !== undefined ? numeroSeguro(d.chip_revision, 0).toFixed(0) : '--');
+  if(document.getElementById('adminFlashMb')) document.getElementById('adminFlashMb').textContent = (d.flash_mb !== undefined ? numeroSeguro(d.flash_mb, 0).toFixed(0) + ' MB' : '-- MB');
+  if(document.getElementById('adminPsram')) document.getElementById('adminPsram').textContent = (d.psram ? 'SIM' : 'NÃO');
+
   renderAdminCells(d.cells || []);
 }
 
@@ -1200,7 +1445,7 @@ function alterarFiltroBms(novoFiltro) {
 
 function atualizarHTMLListaBms() {
   let bmsFiltradas = bmsList;
-  
+
   if (filtroAtivo === 'disponiveis') {
     bmsFiltradas = bmsList.filter(b => !b.user_id);
   } else if (filtroAtivo === 'online') {
@@ -1208,26 +1453,44 @@ function atualizarHTMLListaBms() {
   }
 
   document.getElementById('lista').innerHTML = bmsFiltradas.map(b=>{
-    const dono = b.user_id? `<span class="badge badge-orange">Vinculada</span>` : `<span class="badge badge-green">Disponível</span>`;
+    const dono = textoBadgeVinculoAdmin(b);
     const statusClass = b.online ? 'on' : 'off';
     const statusText = b.online ? 'Online' : 'Offline';
+    const ultimoOnlineStyle = b.online ? 'display:none' : 'display:block';
 
     return `
-    <div class="card" id="admin-card-lista-${b.code}" onclick="viewBmsDetails('${b.code}')">
+    <div class="card" id="admin-card-lista-${escapeHtmlAdmin(b.code)}" onclick="viewBmsDetails('${escapeJsAdmin(b.code)}')">
       <div style="display:flex; flex-direction:column; align-items:center; width: 100%;">
-        <span class="status ${statusClass}" id="admin-dot-lista-${b.code}">${statusText}</span>
-        <div class="card-code">${b.code}</div>
-        <div style="margin-top: 2px;">${dono}</div>
+        <div class="card-code">${escapeHtmlAdmin(b.code)}</div>
+        <span class="status ${statusClass}" id="admin-dot-lista-${escapeHtmlAdmin(b.code)}">${statusText}</span>
+        <div class="ultimo-online-admin" id="admin-last-lista-${escapeHtmlAdmin(b.code)}" data-updated-at="${escapeHtmlAdmin(b.updated_at || '')}" style="${ultimoOnlineStyle}">
+          ${b.online ? '' : formatarUltimoOnlineAdminSmartBms(b.updated_at)}
+        </div>
+        <div style="margin-top: 2px; max-width:100%;">${dono}</div>
       </div>
-      <button class="del" onclick="del('${b.code}')">EXCLUIR</button>
+      <button class="del" onclick="del('${escapeJsAdmin(b.code)}')">EXCLUIR</button>
     </div>
   `}).join('') || `<div class="card card-empty"><div>Nenhuma BMS encontrada neste filtro</div></div>`;
 
   atualizarContadoresFiltro();
+
+  for(const item of bmsFiltradas){
+    atualizarUltimoOnlineAdminCard(item.code, !!item.online, item.updated_at || '');
+  }
+
   conectarMqttParaListaGeralAdmin();
 }
 
+
+function encerrarMqttAdminSilencioso(){
+  if(MQTT_CLIENT){
+    try { MQTT_CLIENT.disconnect(); } catch(e) {}
+    MQTT_CLIENT = null;
+  }
+}
+
 async function conectarMqttParaListaGeralAdmin() {
+  encerrarMqttAdminSilencioso();
   try {
     const rCred = await fetch(API + '?action=get_mqtt_credentials', { headers: { 'Authorization': 'Bearer ' + adminToken } });
     const cred = await rCred.json();
@@ -1248,6 +1511,7 @@ async function conectarMqttParaListaGeralAdmin() {
 
         if (dispositivoNoObjeto) {
           dispositivoNoObjeto.online = true;
+          dispositivoNoObjeto.updated_at = new Date().toISOString();
         }
 
         if (statusAnteriorEraOffline && activeScreen === 'painel') {
@@ -1265,6 +1529,7 @@ async function conectarMqttParaListaGeralAdmin() {
         if (cardElemento && dotElemento) {
           cardElemento.querySelector('.status').className = "status on";
           dotElemento.textContent = "Online";
+              atualizarUltimoOnlineAdminCard(idPlacaEmissora, true, new Date().toISOString());
 
           if (listaTimeoutsAdminCards[idPlacaEmissora]) clearTimeout(listaTimeoutsAdminCards[idPlacaEmissora]);
           listaTimeoutsAdminCards[idPlacaEmissora] = setTimeout(function() {
@@ -1303,8 +1568,8 @@ async function listarUsers(){
     <div class="card">
       <div class="card-top">
         <div style="text-align:center;margin-bottom:12px">
-          <b style="font-size:18px;color:var(--text-main)">${u.nome}</b>
-          <div style="opacity:.6;font-size:13px;margin-top:4px;word-break:break-all;font-family:monospace;color:var(--text-muted)">${u.email}</div>
+          <b style="font-size:18px;color:var(--text-main)">${escapeHtmlAdmin(u.nome)}</b>
+          <div style="opacity:.6;font-size:13px;margin-top:4px;word-break:break-all;font-family:monospace;color:var(--text-muted)">${escapeHtmlAdmin(u.email)}</div>
           <div style="opacity:.5;font-size:11px;margin-top:4px;color:var(--text-muted)">Cadastro: ${new Date(u.created_at).toLocaleDateString('pt-BR')}</div>
         </div>
         <div class="data-item" style="text-align:left;display:flex;justify-content:space-between;align-items:center;padding:8px 12px;width:100%">
@@ -1313,11 +1578,11 @@ async function listarUsers(){
         </div>
       </div>
       <div class="btn-group" style="width:100%">
-        <button class="edit" onclick="editarUser(${u.id},'${u.nome}','${u.email}')" style="width:100%">EDITAR DETALHES</button>
+        <button class="edit" onclick="editarUser(${u.id},'${escapeHtmlAdmin(u.nome)}','${escapeHtmlAdmin(u.email)}')" style="width:100%">EDITAR DETALHES</button>
       </div>
-      <button class="vincular" onclick="abrirModalVincular(${u.id}, '${u.nome}')" style="width:100%">+ VINCULAR BMS</button>
-      <button class="desvincular" onclick="abrirModalDesvincular(${u.id}, '${u.nome}')" style="width:100%">- DESVINCULAR BMS</button>
-      <button class="del" onclick="deletarUser(${u.id},'${u.nome}')" style="width:100%; margin-top:6px;">EXCLUIR CLIENTE</button>
+      <button class="vincular" onclick="abrirModalVincular(${u.id}, '${escapeHtmlAdmin(u.nome)}')" style="width:100%">+ VINCULAR BMS</button>
+      <button class="desvincular" onclick="abrirModalDesvincular(${u.id}, '${escapeHtmlAdmin(u.nome)}')" style="width:100%">- DESVINCULAR BMS</button>
+      <button class="del" onclick="deletarUser(${u.id},'${escapeHtmlAdmin(u.nome)}')" style="width:100%; margin-top:6px;">EXCLUIR CLIENTE</button>
     </div>
   `).join('') || '<div class="card card-empty"><div>Nenhum cliente cadastrado</div></div>';
 }
