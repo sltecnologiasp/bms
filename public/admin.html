@@ -997,12 +997,25 @@ async function carregarStatusOtaAdmin(){
 }
 
 function mostrarListaOtaStatus(status){
+  const wrap = document.getElementById('otaResultadoLista');
+  const map = {pending:'Pending', delivered:'Delivered', confirmed:'Confirmed', failed:'Failed'};
+
+  if(otaStatusAtual === status && wrap && wrap.style.display !== 'none'){
+    otaStatusAtual = null;
+    wrap.style.display = 'none';
+    ['Pending','Delivered','Confirmed','Failed'].forEach(suf => {
+      const el = document.getElementById('btnOtaStatus' + suf);
+      if(el) el.classList.remove('active');
+    });
+    return;
+  }
+
   otaStatusAtual = status;
   ['Pending','Delivered','Confirmed','Failed'].forEach(suf => {
     const el = document.getElementById('btnOtaStatus' + suf);
     if(el) el.classList.remove('active');
   });
-  const map = {pending:'Pending', delivered:'Delivered', confirmed:'Confirmed', failed:'Failed'};
+
   const btn = document.getElementById('btnOtaStatus' + map[status]);
   if(btn) btn.classList.add('active');
   renderListaOtaStatus(status);
