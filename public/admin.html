@@ -1435,9 +1435,14 @@ function aplicarSnapshotAdminD1(code){
 }
 
 async function conectarMqttParaDashboardAdmin() {
-  configurarInterfaceDashboardOfflineAdmin();
-
   const bmsInfo = bmsList.find(b => b.code === activeBmsCode) || {};
+
+  // Não força offline ao abrir a dashboard se a lista já sabe que o dispositivo está online.
+  // Isso evita esperar o próximo pacote MQTT para mostrar Online.
+  if(!bmsInfo.online){
+    configurarInterfaceDashboardOfflineAdmin();
+  }
+
   document.getElementById('modalBmsDono').innerHTML = bmsInfo.user_id ? 
     `<span class="badge badge-orange" style="font-size:12px; padding:6px 12px;">Vinculada: ${bmsInfo.dono_nome || bmsInfo.dono_email}</span>` : 
     `<span class="badge badge-green" style="font-size:12px; padding:6px 12px;">Disponível / Livre</span>`;
