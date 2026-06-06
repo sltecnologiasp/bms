@@ -631,7 +631,20 @@ export async function onRequest({ request, env }) {
       }
 
 
-      if (action === 'admin_ota_status' && request.method === 'GET') {
+      
+    // ROTA ADMIN: LIMPAR FILA/RESULTADOS OTA
+    if (action === 'admin_ota_clear' && request.method === 'DELETE') {
+      if (!isAdmin) return json({ ok: false, error: 'Apenas administrador' }, 403);
+
+      try {
+        await env.DB.prepare(`DELETE FROM ota_queue`).run();
+        return json({ ok: true });
+      } catch (err) {
+        return json({ ok: false, error: 'Falha ao limpar atualizações OTA: ' + err.message }, 500);
+      }
+    }
+
+if (action === 'admin_ota_status' && request.method === 'GET') {
         try {
           await env.DB.prepare(`
             CREATE TABLE IF NOT EXISTS ota_queue (
