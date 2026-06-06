@@ -619,7 +619,7 @@ button:active{transform:scale(0.98)}
     <div class="label">Adicionar dispositivo</div>
     
     <div class="qr-input-row">
-      <input id="bms-code" placeholder="Digite o código eFuse" maxlength="14">
+      <input id="bms-code" placeholder="Digite ou scaneie código" maxlength="14">
       <button class="btn-qr-scan" onclick="abrirScannerCamera()" title="Escanear QR Code">
         <svg viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" d="M3 7V5a2 2 0 012-2h2m10 0h2a2 2 0 012 2v2m0 10v2a2 2 0 01-2 2h-2M7 21H5a2 2 0 01-2-2v-2M12 7v10m-3-5h6" />
@@ -627,7 +627,7 @@ button:active{transform:scale(0.98)}
       </button>
     </div>
     
-    <input id="bms-nome" placeholder="Nome Ex: Bateria Casa" style="margin-top:12px">
+    <input id="bms-nome" placeholder="Nome Ex: Casa" style="margin-top:12px">
     <button onclick="addBms()">ADICIONAR DISPOSITIVO</button>
     <button id="btn-toggle-cortina" class="hidden" onclick="toggleCortinaDispositivos()">MOSTRAR DISPOSITIVOS</button>
   </div>
