@@ -667,6 +667,7 @@ let TIMEOUT_ADMIN_LOGIN = null;
 let TIMEOUT_ADMIN_MSG = null;
 
 let MQTT_CLIENT = null;
+let MQTT_LISTA_ADMIN_CONECTADO = false;
 let bmsTimeoutTimerAdmin = null;         
 let listaTimeoutsAdminCards = {};      
 
@@ -1669,6 +1670,7 @@ async function carregarTudo(){
 
   if(activeScreen === 'painel') {
     atualizarHTMLListaBms();
+    conectarMqttParaListaGeralAdmin();
     carregarStatusOtaAdmin();
   }
 }
@@ -1737,7 +1739,6 @@ function atualizarHTMLListaBms() {
     atualizarUltimoOnlineAdminCard(item.code, !!item.online, item.updated_at || '');
   }
 
-  conectarMqttParaListaGeralAdmin();
 }
 
 
@@ -1749,6 +1750,7 @@ function encerrarMqttAdminSilencioso(){
 }
 
 async function conectarMqttParaListaGeralAdmin() {
+  if (MQTT_LISTA_ADMIN_CONECTADO && MQTT_CLIENT) return;
   encerrarMqttAdminSilencioso();
   try {
     const rCred = await fetch(API + '?action=get_mqtt_credentials', { headers: { 'Authorization': 'Bearer ' + adminToken } });
@@ -1758,7 +1760,7 @@ async function conectarMqttParaListaGeralAdmin() {
     const clientRandomId = cred.clientPrefix + "list_admin_" + Math.floor(Math.random() * 10000);
     MQTT_CLIENT = new Paho.MQTT.Client(cred.host, Number(cred.port), clientRandomId);
 
-    MQTT_CLIENT.onConnectionLost = function () {};
+    MQTT_CLIENT.onConnectionLost = function () { MQTT_LISTA_ADMIN_CONECTADO = false; };
     MQTT_CLIENT.onMessageArrived = function (message) {
       try {
         const topicoLido = message.destinationName;
@@ -1773,7 +1775,21 @@ async function conectarMqttParaListaGeralAdmin() {
           dispositivoNoObjeto.updated_at = new Date().toISOString();
         }
 
-        if (statusAnteriorEraOffline && activeScreen === 'painel') {
+        if (listaTimeoutsAdminCards[idPlacaEmissora]) clearTimeout(listaTimeoutsAdminCards[idPlacaEmissora]);
+        listaTimeoutsAdminCards[idPlacaEmissora] = setTimeout(function() {
+          const itemTimeout = bmsList.find(b => b.code === idPlacaEmissora);
+          if (itemTimeout) itemTimeout.online = false;
+          if (activeScreen === 'painel') {
+            bmsList.sort((a, b) => {
+              if (a.online && !b.online) return -1;
+              if (!a.online && b.online) return 1;
+              return (b.updated_at ? new Date(b.updated_at).getTime() : 0) - (a.updated_at ? new Date(a.updated_at).getTime() : 0);
+            });
+            atualizarHTMLListaBms();
+          }
+        }, TEMPO_TIMEOUT_CONEXAO);
+
+        if (activeScreen === 'painel') {
           bmsList.sort((a, b) => {
             if (a.online && !b.online) return -1;
             if (!a.online && b.online) return 1;
@@ -1788,21 +1804,7 @@ async function conectarMqttParaListaGeralAdmin() {
         if (cardElemento && dotElemento) {
           cardElemento.querySelector('.status').className = "status on";
           dotElemento.textContent = "Online";
-              atualizarUltimoOnlineAdminCard(idPlacaEmissora, true, new Date().toISOString());
-
-          if (listaTimeoutsAdminCards[idPlacaEmissora]) clearTimeout(listaTimeoutsAdminCards[idPlacaEmissora]);
-          listaTimeoutsAdminCards[idPlacaEmissora] = setTimeout(function() {
-            if (dispositivoNoObjeto) dispositivoNoObjeto.online = false;
-            
-            if (activeScreen === 'painel') {
-              bmsList.sort((a, b) => {
-                if (a.online && !b.online) return -1;
-                if (!a.online && b.online) return 1;
-                return (b.updated_at ? new Date(b.updated_at).getTime() : 0) - (a.updated_at ? new Date(a.updated_at).getTime() : 0);
-              });
-              atualizarHTMLListaBms();
-            }
-          }, TEMPO_TIMEOUT_CONEXAO); 
+          atualizarUltimoOnlineAdminCard(idPlacaEmissora, true, new Date().toISOString());
         }
         atualizarContadoresFiltro();
       } catch (err) {}
@@ -1811,6 +1813,7 @@ async function conectarMqttParaListaGeralAdmin() {
     MQTT_CLIENT.connect({
       userName: cred.user, password: cred.pass, useSSL: true, timeout: 5,
       onSuccess: function () {
+        MQTT_LISTA_ADMIN_CONECTADO = true;
         MQTT_CLIENT.subscribe("sl_bms/+/telemetria");
       }
     });
