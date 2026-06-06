@@ -519,6 +519,60 @@ button:active{transform:scale(0.98)}
   letter-spacing:.2px;
 }
 
+
+/* AJUSTE RESPONSIVO - CONFIGURAÇÕES DA CONTA */
+#configuracoesPage:not(.hidden){
+  display:flex !important;
+  flex-direction:column !important;
+  align-items:center !important;
+  justify-content:flex-start !important;
+  width:100% !important;
+  max-width:720px !important;
+  min-height:100vh !important;
+  margin:0 auto !important;
+  padding:clamp(28px, 5vw, 56px) clamp(12px, 4vw, 24px) 28px !important;
+}
+
+#configuracoesPage .title,
+#configuracoesPage .user-info{
+  width:100% !important;
+  text-align:center !important;
+}
+
+#configuracoesPage .card,
+#configuracoesPage > button{
+  width:100% !important;
+  max-width:500px !important;
+  margin-left:auto !important;
+  margin-right:auto !important;
+}
+
+#configuracoesPage .footer-link{
+  width:100% !important;
+  max-width:500px !important;
+  margin:clamp(48px, 12vh, 120px) auto 0 auto !important;
+  text-align:center !important;
+}
+
+@media (min-width: 768px){
+  #configuracoesPage:not(.hidden){
+    padding-top:clamp(40px, 8vh, 80px) !important;
+  }
+}
+
+@media (max-width: 420px){
+  #configuracoesPage:not(.hidden){
+    max-width:100% !important;
+    padding-left:8px !important;
+    padding-right:8px !important;
+  }
+
+  #configuracoesPage .card,
+  #configuracoesPage > button{
+    max-width:100% !important;
+  }
+}
+
 </style>
 </head>
 <body>
