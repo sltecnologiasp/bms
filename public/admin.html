@@ -670,6 +670,8 @@ let MQTT_CLIENT = null;
 let MQTT_LISTA_ADMIN_CONECTADO = false;
 let bmsTimeoutTimerAdmin = null;         
 let listaTimeoutsAdminCards = {};      
+let ultimoPacoteMqttAdminMs = {};
+let ultimoPayloadMqttAdmin = {};
 
 const TEMPO_TIMEOUT_CONEXAO = 10000;
 
@@ -775,6 +777,10 @@ function showDashAdmin(code) {
   
   document.getElementById('modalBmsTitle').textContent = code;
   aplicarSnapshotAdminD1(code);
+  const codeCacheAdmin = normalizarCodigoBmsAdminSeguro(code);
+  if(ultimoPayloadMqttAdmin[codeCacheAdmin] && (Date.now() - (ultimoPacoteMqttAdminMs[codeCacheAdmin] || 0)) < TEMPO_TIMEOUT_CONEXAO){
+    processarERenderizarDadosAdminMqtt(ultimoPayloadMqttAdmin[codeCacheAdmin]);
+  }
   conectarMqttParaDashboardAdmin();
 }
 
@@ -1459,6 +1465,7 @@ async function conectarMqttParaDashboardAdmin() {
     MQTT_CLIENT.onMessageArrived = function (message) {
       try {
         const d = JSON.parse(message.payloadString);
+        marcarCacheMqttAdmin(activeBmsCode, d);
         processarERenderizarDadosAdminMqtt(d);
       } catch (err) {}
     };
@@ -1515,6 +1522,7 @@ function configurarInterfaceDashboardOfflineAdmin() {
 function processarERenderizarDadosAdminMqtt(d) {
   if (bmsTimeoutTimerAdmin) clearTimeout(bmsTimeoutTimerAdmin);
   bmsTimeoutTimerAdmin = setTimeout(function() {
+    marcarOfflineCacheMqttAdmin(activeBmsCode);
     configurarInterfaceDashboardOfflineAdmin();
   }, TEMPO_TIMEOUT_CONEXAO); 
 
@@ -1675,6 +1683,42 @@ async function deletarUser(id, nome){
   listarUsers();
 }
 
+
+function aplicarCacheMqttAdminNaLista(){
+  const agora = Date.now();
+  bmsList.forEach(function(b){
+    const code = normalizarCodigoBmsAdminSeguro(b.code);
+    const t = ultimoPacoteMqttAdminMs[code] || 0;
+    if(t && (agora - t) < TEMPO_TIMEOUT_CONEXAO){
+      b.online = true;
+      b.updated_at = new Date(t).toISOString();
+      if(ultimoPayloadMqttAdmin[code]){
+        Object.assign(b, ultimoPayloadMqttAdmin[code]);
+      }
+    } else if(t){
+      b.online = false;
+    }
+  });
+}
+
+function marcarCacheMqttAdmin(code, payload){
+  const c = normalizarCodigoBmsAdminSeguro(code);
+  ultimoPacoteMqttAdminMs[c] = Date.now();
+  if(payload) ultimoPayloadMqttAdmin[c] = payload;
+  const b = bmsList.find(x => normalizarCodigoBmsAdminSeguro(x.code) === c);
+  if(b){
+    b.online = true;
+    b.updated_at = new Date(ultimoPacoteMqttAdminMs[c]).toISOString();
+    if(payload) Object.assign(b, payload);
+  }
+}
+
+function marcarOfflineCacheMqttAdmin(code){
+  const c = normalizarCodigoBmsAdminSeguro(code);
+  const b = bmsList.find(x => normalizarCodigoBmsAdminSeguro(x.code) === c);
+  if(b) b.online = false;
+}
+
 async function carregarTudo(){
   if (!adminToken) return;
   const rBms = await fetch(API+'?action=admin_list_master',{headers:authHeaders()});
@@ -1685,6 +1729,8 @@ async function carregarTudo(){
     if (!a.online && b.online) return 1;
     return (b.updated_at ? new Date(b.updated_at).getTime() : 0) - (a.updated_at ? new Date(a.updated_at).getTime() : 0);
   });
+
+  aplicarCacheMqttAdminNaLista();
 
   if(activeScreen === 'painel') {
     atualizarHTMLListaBms();
@@ -1783,9 +1829,12 @@ async function conectarMqttParaListaGeralAdmin() {
       try {
         const topicoLido = message.destinationName;
         const partesTopico = topicoLido.split('/');
-        const idPlacaEmissora = partesTopico[1]; 
+        const idPlacaEmissora = normalizarCodigoBmsAdminSeguro(partesTopico[1]); 
+        let payloadAdminLista = null;
+        try { payloadAdminLista = JSON.parse(message.payloadString); } catch(ePayloadAdmin) {}
+        marcarCacheMqttAdmin(idPlacaEmissora, payloadAdminLista);
 
-        let dispositivoNoObjeto = bmsList.find(b => b.code === idPlacaEmissora);
+        let dispositivoNoObjeto = bmsList.find(b => normalizarCodigoBmsAdminSeguro(b.code) === idPlacaEmissora);
         let statusAnteriorEraOffline = dispositivoNoObjeto ? !dispositivoNoObjeto.online : true;
 
         if (dispositivoNoObjeto) {
@@ -1795,7 +1844,8 @@ async function conectarMqttParaListaGeralAdmin() {
 
         if (listaTimeoutsAdminCards[idPlacaEmissora]) clearTimeout(listaTimeoutsAdminCards[idPlacaEmissora]);
         listaTimeoutsAdminCards[idPlacaEmissora] = setTimeout(function() {
-          const itemTimeout = bmsList.find(b => b.code === idPlacaEmissora);
+          marcarOfflineCacheMqttAdmin(idPlacaEmissora);
+          const itemTimeout = bmsList.find(b => normalizarCodigoBmsAdminSeguro(b.code) === idPlacaEmissora);
           if (itemTimeout) itemTimeout.online = false;
           if (activeScreen === 'painel') {
             bmsList.sort((a, b) => {

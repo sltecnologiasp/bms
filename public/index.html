@@ -796,6 +796,9 @@ var MQTT_CLIENT = null;
 var bmsTimeoutTimer = null;         
 var listaPlacasRegistradas = [];   
 var listaTimeoutsDispositivos = {}; 
+var estadoOnlineDispositivos = {};
+var ultimoPayloadDispositivos = {};
+var ultimoPacoteDispositivosMs = {};
 
 // CONFIGURAÇÃO DO TIMEOUT EM MILISSEGUNDOS (15 SEGUNDOS DE TOLERÂNCIA CONTRA OSCILAÇÕES)
 var TEMPO_TIMEOUT_CONEXAO = 10000;
@@ -1441,7 +1444,20 @@ function carregarListaUmaVez() {
     el.innerHTML = html;
 
     for(var j=0;j<lista.length;j++){
-      atualizarUltimoOnlineCardSmartBms(lista[j].code, false, lista[j].updated_at || '');
+      var codeCacheLista = lista[j].code;
+      var onlineCacheLista = !!(ultimoPacoteDispositivosMs[codeCacheLista] && (Date.now() - ultimoPacoteDispositivosMs[codeCacheLista]) < TEMPO_TIMEOUT_CONEXAO);
+      var cardCacheLista = document.getElementById('card-lista-' + codeCacheLista);
+      var dotCacheLista = document.getElementById('dot-lista-' + codeCacheLista);
+      if(onlineCacheLista && cardCacheLista && dotCacheLista){
+        estadoOnlineDispositivos[codeCacheLista] = true;
+        cardCacheLista.className = "bms-item online-active";
+        dotCacheLista.className = "status-dot on";
+        dotCacheLista.textContent = "Online";
+        atualizarUltimoOnlineCardSmartBms(codeCacheLista, true, new Date(ultimoPacoteDispositivosMs[codeCacheLista]).toISOString());
+      } else {
+        estadoOnlineDispositivos[codeCacheLista] = false;
+        atualizarUltimoOnlineCardSmartBms(codeCacheLista, false, lista[j].updated_at || '');
+      }
     }
 
     conectarMqttParaListaDispositivos();
@@ -1464,6 +1480,11 @@ function conectarMqttParaListaDispositivos() {
         const topicoLido = message.destinationName; 
         const partesTopico = topicoLido.split('/');
         const idPlacaEmissora = partesTopico[1]; 
+        let payloadLista = null;
+        try { payloadLista = JSON.parse(message.payloadString); } catch(ePayload) {}
+        estadoOnlineDispositivos[idPlacaEmissora] = true;
+        ultimoPacoteDispositivosMs[idPlacaEmissora] = Date.now();
+        if(payloadLista) ultimoPayloadDispositivos[idPlacaEmissora] = payloadLista;
 
         if (listaPlacasRegistradas.indexOf(idPlacaEmissora) !== -1) {
           var cardElemento = document.getElementById('card-lista-' + idPlacaEmissora);
@@ -1481,6 +1502,7 @@ function conectarMqttParaListaDispositivos() {
               cardElemento.className = "bms-item";
               dotElemento.className = "status-dot off";
               dotElemento.textContent = "Offline";
+              estadoOnlineDispositivos[idPlacaEmissora] = false;
               atualizarUltimoOnlineCardSmartBms(idPlacaEmissora, false);
             }, TEMPO_TIMEOUT_CONEXAO); 
           }
@@ -1508,7 +1530,14 @@ function abrirDash(code){
   document.getElementById('dash').classList.remove('hidden');
   document.getElementById('bms-titulo').textContent = code;
   
-  configurarInterfaceEstadoOffline();
+  if(ultimoPayloadDispositivos[code] && ultimoPacoteDispositivosMs[code] && (Date.now() - ultimoPacoteDispositivosMs[code]) < TEMPO_TIMEOUT_CONEXAO){
+    processarERenderizarDadosMqtt(ultimoPayloadDispositivos[code]);
+  } else if(ultimoPacoteDispositivosMs[code] && (Date.now() - ultimoPacoteDispositivosMs[code]) < TEMPO_TIMEOUT_CONEXAO){
+    gerenciarLayoutStatus(document.getElementById('cardBms'), document.getElementById('txtBms'), true, "Online", "Offline");
+    bmsTimeoutTimer = setTimeout(function() { configurarInterfaceEstadoOffline(); }, TEMPO_TIMEOUT_CONEXAO);
+  } else {
+    configurarInterfaceEstadoOffline();
+  }
 
   fetch(API + '?action=get_mqtt_credentials', { headers: {'Authorization': 'Bearer ' + TOKEN} })
   .then(function(res) { return res.json(); })
@@ -1526,6 +1555,9 @@ function abrirDash(code){
     MQTT_CLIENT.onMessageArrived = function (message) {
       try {
         const d = JSON.parse(message.payloadString);
+        estadoOnlineDispositivos[CODIGO] = true;
+        ultimoPacoteDispositivosMs[CODIGO] = Date.now();
+        ultimoPayloadDispositivos[CODIGO] = d;
         processarERenderizarDadosMqtt(d);
       } catch (err) {
         console.error("[MQTT] Erro de processamento do payload:", err);
@@ -1577,7 +1609,8 @@ function configurarInterfaceEstadoOffline() {
 function processarERenderizarDadosMqtt(d) {
   if (bmsTimeoutTimer) clearTimeout(bmsTimeoutTimer);
   bmsTimeoutTimer = setTimeout(function() {
-    console.log("[SISTEMA] Fluxo interrompido. Forçando queda do painel após tolerância de 15s.");
+    console.log("[SISTEMA] Fluxo interrompido. Forçando queda do painel após tolerância de 10s.");
+    estadoOnlineDispositivos[CODIGO] = false;
     configurarInterfaceEstadoOffline(); 
   }, TEMPO_TIMEOUT_CONEXAO); 
 
