@@ -448,8 +448,7 @@ button.logout:hover{background:rgba(231,29,54,0.08);color:var(--red);border-colo
     <div class="label">Cadastrar BMS no Sistema</div>
     <input id="code" placeholder="Digite o código eFuse" maxlength="14" style="margin-top:8px">
     <button class="btn-clientes" onclick="cad()">CADASTRAR BMS MASTER</button>
-    <button class="btn-sec" onclick="generarECadastrar()">GERAR CÓDIGO ALEATÓRIO</button>
-    <button class="btn-clientes" style="margin-top:24px" onclick="mostrarClientes()">VER CLIENTES CADASTRADOS</button>
+<button class="btn-clientes" style="margin-top:24px" onclick="mostrarClientes()">VER CLIENTES CADASTRADOS</button>
     <p id="msg" style="text-align:center;margin-top:12px;font-size:14px;font-weight:600"></p>
   </div>
 
@@ -671,6 +670,7 @@ let activeScreen = sessionStorage.getItem('admin_active_screen') || 'painel';
 
 let filtroAtivo = 'todas';
 let otaStatusAtual = null;
+let otaBatchAtualAdmin = sessionStorage.getItem('admin_ota_batch_atual') || '';
 let INTERVALO_OTA_STATUS_ADMIN = null;
 let otaStatusData = { counts:{pending:0, delivered:0, confirmed:0, failed:0}, items:{pending:[], delivered:[], confirmed:[], failed:[]} };
 
@@ -752,6 +752,7 @@ function showPainelPage() {
   document.getElementById('painel').classList.add('active');
   document.getElementById('painel').style.display = 'flex';
   carregarTudo();
+  iniciarAtualizacaoAutomaticaOtaAdmin();
 }
 
 function showClientesPage(){
@@ -926,19 +927,6 @@ document.getElementById('code').oninput = e => {
   e.target.value = e.target.value.toUpperCase().replace(/[^0-9A-FSL]/g, '').slice(0, 14);
 };
 
-function gerarCodigoAleatorio(){
-  let hex = '';
-  const chars = '0123456789ABCDEF';
-  for(let i=0;i<12;i++) hex += chars[Math.floor(Math.random()*chars.length)];
-  return 'SL' + hex;
-}
-
-async function generarECadastrar(){
-  const code = gerarCodigoAleatorio();
-  document.getElementById('code').value = code;
-  await cad();
-}
-
 async function cad(){
   const code = normalizarCodigoBmsAdminSeguro(document.getElementById('code').value);
   const msgEl = document.getElementById('msg');
@@ -1051,6 +1039,8 @@ async function limparAtualizacoesOta(){
         items: { pending:[], delivered:[], confirmed:[], failed:[] }
       };
       otaStatusAtual = null;
+      otaBatchAtualAdmin = '';
+      sessionStorage.removeItem('admin_ota_batch_atual');
       atualizarBotoesOtaStatus();
 
       ['Pending','Delivered','Confirmed','Failed'].forEach(suf => {
@@ -1092,8 +1082,7 @@ function iniciarAtualizacaoAutomaticaOtaAdmin(){
 
   if(activeScreen !== 'painel') return;
 
-  // Atualiza imediatamente e depois mantém o card OTA vivo.
-  iniciarAtualizacaoAutomaticaOtaAdmin();
+  carregarStatusOtaAdmin();
 
   INTERVALO_OTA_STATUS_ADMIN = setInterval(function(){
     if(activeScreen === 'painel' && adminToken){
@@ -1115,7 +1104,8 @@ function pararAtualizacaoAutomaticaOtaAdmin(){
 async function carregarStatusOtaAdmin(){
   if(!adminToken) return;
   try{
-    const r = await fetch(API + '?action=admin_ota_status', { headers: authHeaders() });
+    const qs = otaBatchAtualAdmin ? ('&batch_id=' + encodeURIComponent(otaBatchAtualAdmin)) : '';
+    const r = await fetch(API + '?action=admin_ota_status' + qs, { headers: authHeaders() });
     if(r.status === 401){ adminLogout(); return; }
     const d = await r.json();
     if(d && d.ok){
@@ -1207,7 +1197,6 @@ async function conectarMqttOtaAdminSeguro(statusMsg) {
 }
 
 async function enviarFirmwareOtaMassa() {
-  iniciarAtualizacaoAutomaticaOtaAdmin();
   const fileInput = document.getElementById('arquivoOtaMassaBin');
   const statusMsg = document.getElementById('msgOtaMassaStatus');
   const btn = document.getElementById('btnOtaMassaUpload');
@@ -1215,52 +1204,56 @@ async function enviarFirmwareOtaMassa() {
   const dispositivos = (bmsList || []).map(b => normalizarCodigoBmsAdminSeguro(b.code)).filter(validarCodigoBmsAdminSeguro);
 
   if (!dispositivos.length) {
-    statusMsg.textContent = 'Nenhum dispositivo cadastrado para atualizar.';
-    statusMsg.style.color = 'var(--orange)';
+    mostrarMensagemTemporariaAdmin(statusMsg, 'Nenhum dispositivo cadastrado para atualizar.', 'var(--orange)');
     return;
   }
 
   if (!fileInput.files || fileInput.files.length === 0) {
-    statusMsg.textContent = 'Selecione um arquivo .bin primeiro.';
-    statusMsg.style.color = 'var(--red)';
+    mostrarMensagemTemporariaAdmin(statusMsg, 'Selecione um arquivo .bin primeiro.', 'var(--red)');
     return;
   }
 
   const arquivo = fileInput.files[0];
   if (!arquivo.name.toLowerCase().endsWith('.bin')) {
-    statusMsg.textContent = 'O arquivo precisa ser .bin.';
-    statusMsg.style.color = 'var(--red)';
+    mostrarMensagemTemporariaAdmin(statusMsg, 'O arquivo precisa ser .bin.', 'var(--red)');
     return;
   }
 
   const tamanhoMaximoBin = 8 * 1024 * 1024;
   if (arquivo.size <= 0 || arquivo.size > tamanhoMaximoBin) {
-    statusMsg.textContent = 'Arquivo vazio ou maior que 8 MB.';
-    statusMsg.style.color = 'var(--red)';
+    mostrarMensagemTemporariaAdmin(statusMsg, 'Arquivo vazio ou maior que 8 MB.', 'var(--red)');
     return;
   }
 
   if (!confirm(`Enviar o firmware "${arquivo.name}" para ${dispositivos.length} dispositivo(s)?`)) return;
 
+  const batchId = 'OTA_' + Date.now() + '_' + Math.floor(Math.random() * 100000);
+  otaBatchAtualAdmin = batchId;
+  sessionStorage.setItem('admin_ota_batch_atual', batchId);
+
   btn.disabled = true;
   btn.style.opacity = '0.6';
   btn.textContent = 'ATUALIZANDO EM MASSA...';
-  statusMsg.textContent = 'Preparando fila OTA em massa...';
+  statusMsg.style.display = 'block';
+  statusMsg.textContent = 'Criando lote OTA: ' + batchId;
   statusMsg.style.color = 'var(--cyan)';
 
   let mqttClient = await conectarMqttOtaAdminSeguro(statusMsg);
   let sucesso = 0;
   let falha = 0;
   let mqttEnviado = 0;
+  let detalhes = [];
 
   try {
     for (let i = 0; i < dispositivos.length; i++) {
       const code = dispositivos[i];
-      statusMsg.textContent = `Enviando ${i + 1}/${dispositivos.length}: ${code}`;
+      statusMsg.textContent = `Criando fila ${i + 1}/${dispositivos.length}: ${code}`;
 
       const formData = new FormData();
       formData.append('firmware', arquivo);
       formData.append('code', code);
+      formData.append('batch_id', batchId);
+      formData.append('mass', '1');
 
       try {
         const r = await fetch(API + '?action=admin_upload_ota', {
@@ -1268,20 +1261,26 @@ async function enviarFirmwareOtaMassa() {
           headers: { 'Authorization': 'Bearer ' + adminToken },
           body: formData
         });
+
         const d = await r.json();
 
-        if (d && d.ok && d.url) {
+        if (d && d.ok && d.url && d.ota_id) {
           sucesso++;
+          detalhes.push({ code, ok:true, ota_id:d.ota_id, status:d.ota_status || 'pending' });
+
           if (mqttClient) {
             try {
               const payloadOtaMqtt = JSON.stringify({
                 url: d.url,
                 code,
+                ota_id: d.ota_id,
+                batch_id: batchId,
                 file: arquivo.name,
                 size: arquivo.size,
                 mass: true,
                 ts: Date.now()
               });
+
               const mensagemMqtt = new Paho.MQTT.Message(payloadOtaMqtt);
               mensagemMqtt.destinationName = 'sl_bms/' + code + '/ota';
               mqttClient.send(mensagemMqtt);
@@ -1290,31 +1289,38 @@ async function enviarFirmwareOtaMassa() {
           }
         } else {
           falha++;
+          detalhes.push({ code, ok:false, error:(d && (d.error || d.message)) || 'Falha ao criar fila OTA' });
         }
       } catch (e) {
         falha++;
+        detalhes.push({ code, ok:false, error:'Erro de comunicação' });
       }
+
+      await carregarStatusOtaAdmin();
     }
 
     if (mqttClient) {
       setTimeout(() => { try { mqttClient.disconnect(); } catch(e){} }, 700);
     }
 
-    carregarStatusOtaAdmin();
+    await carregarStatusOtaAdmin();
+    iniciarAtualizacaoAutomaticaOtaAdmin();
 
     if (falha === 0) {
-      statusMsg.textContent = `Atualização em massa criada para ${sucesso} dispositivo(s). MQTT enviado: ${mqttEnviado}.`;
+      statusMsg.textContent = `Lote OTA criado: ${sucesso}/${dispositivos.length}. MQTT imediato: ${mqttEnviado}. Acompanhe Pendentes/Entregues/Atualizadas.`;
       statusMsg.style.color = 'var(--green)';
       fileInput.value = '';
     } else {
-      statusMsg.textContent = `Concluído com ${sucesso} sucesso(s) e ${falha} falha(s).`;
+      statusMsg.textContent = `Lote OTA criado com ${sucesso} sucesso(s) e ${falha} falha(s).`;
       statusMsg.style.color = 'var(--orange)';
     }
+
+    console.table(detalhes);
   } finally {
     btn.disabled = false;
     btn.style.opacity = '1';
     btn.textContent = 'ATUALIZAR TODOS OS DISPOSITIVOS';
-    setTimeout(() => { statusMsg.textContent = ''; }, 9000);
+    setTimeout(() => { statusMsg.textContent = ''; statusMsg.style.display = 'none'; }, 3000);
   }
 }
 
