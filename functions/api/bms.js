@@ -377,6 +377,12 @@ export async function onRequest({ request, env }) {
       if (!validarCodigoBmsHex(code)) {
         return json({ ok: false, error: 'Code inválido. Use SL + 12 HEX.' }, 400);
       }
+      try { await env.DB.prepare(`ALTER TABLE bms ADD COLUMN fw TEXT`).run(); } catch(e) {}
+      try { await env.DB.prepare(`ALTER TABLE bms ADD COLUMN esp_model TEXT`).run(); } catch(e) {}
+      try { await env.DB.prepare(`ALTER TABLE bms ADD COLUMN chip_revision INTEGER DEFAULT 0`).run(); } catch(e) {}
+      try { await env.DB.prepare(`ALTER TABLE bms ADD COLUMN flash_mb INTEGER DEFAULT 0`).run(); } catch(e) {}
+      try { await env.DB.prepare(`ALTER TABLE bms ADD COLUMN psram INTEGER DEFAULT 0`).run(); } catch(e) {}
+
 
       const soc = Math.max(0, Math.min(100, numeroSeguro(body.soc, 0)));
       const voltage = numeroSeguro(body.voltage, 0);
@@ -428,18 +434,21 @@ export async function onRequest({ request, env }) {
         await env.DB.prepare(`
           INSERT INTO bms (
             code, soc, voltage, current, temp, cells, online, updated_at,
-            inversor_conectado, bateria_conectada, inv_potencia, inv_tensao_ac, inv_frequencia, inv_geracao_dia
+            inversor_conectado, bateria_conectada, inv_potencia, inv_tensao_ac, inv_frequencia, inv_geracao_dia,
+            fw, esp_model
           )
-          VALUES (?, ?, ?, ?, ?, ?, 1, datetime('now'), ?, ?, ?, ?, ?, ?)
+          VALUES (?, ?, ?, ?, ?, ?, 1, datetime('now'), ?, ?, ?, ?, ?, ?, ?, ?)
           ON CONFLICT(code) DO UPDATE SET
             soc = excluded.soc, voltage = excluded.voltage, current = excluded.current,
             temp = excluded.temp, cells = excluded.cells, online = 1, updated_at = datetime('now'),
             inversor_conectado = excluded.inversor_conectado, bateria_conectada = excluded.bateria_conectada,
             inv_potencia = excluded.inv_potencia, inv_tensao_ac = excluded.inv_tensao_ac,
-            inv_frequencia = excluded.inv_frequencia, inv_geracao_dia = excluded.inv_geracao_dia
+            inv_frequencia = excluded.inv_frequencia, inv_geracao_dia = excluded.inv_geracao_dia,
+            fw = excluded.fw, esp_model = excluded.esp_model
         `).bind(
           code, soc, voltage, current, temp, JSON.stringify(cells),
-          inversor_conectado, bateria_conectada, inv_potencia, inv_tensao_ac, inv_frequencia, inv_geracao_dia
+          inversor_conectado, bateria_conectada, inv_potencia, inv_tensao_ac, inv_frequencia, inv_geracao_dia,
+          fw, esp_model
         ).run();
       }
 
@@ -533,6 +542,8 @@ export async function onRequest({ request, env }) {
           const formData = await request.formData();
           const file = formData.get('firmware');
           const code = normalizarCodigoBms(formData.get('code'));
+          const batchId = textoSeguro(formData.get('batch_id') || '', 80);
+          const isMass = batchId ? 1 : (String(formData.get('mass') || '') === '1' ? 1 : 0);
 
           if (!file || !validarCodigoBmsHex(code)) {
             return json({ ok: false, error: 'Arquivo ou código do dispositivo inválido.' }, 400);
@@ -573,22 +584,35 @@ export async function onRequest({ request, env }) {
                 size INTEGER,
                 created_at TEXT DEFAULT CURRENT_TIMESTAMP,
                 delivered_at TEXT,
-                confirmed_at TEXT
+                confirmed_at TEXT,
+                batch_id TEXT,
+                mass INTEGER DEFAULT 0
               )
             `).run();
+            try { await env.DB.prepare(`ALTER TABLE ota_queue ADD COLUMN batch_id TEXT`).run(); } catch(e) {}
+            try { await env.DB.prepare(`ALTER TABLE ota_queue ADD COLUMN mass INTEGER DEFAULT 0`).run(); } catch(e) {}
+
+            if (batchId) {
+              await env.DB.prepare(`
+                DELETE FROM ota_queue
+                WHERE code = ? AND batch_id = ? AND status IN ('pending','delivered')
+              `).bind(code, batchId).run();
+            }
 
             const insertResult = await env.DB.prepare(`
-              INSERT INTO ota_queue (code, url, status, file_name, size, created_at)
-              VALUES (?, ?, 'pending', ?, ?, datetime('now'))
+              INSERT INTO ota_queue (code, url, status, file_name, size, created_at, batch_id, mass)
+              VALUES (?, ?, 'pending', ?, ?, datetime('now'), ?, ?)
             `).bind(
               code,
               publicUrl,
               String(file.name || 'firmware.bin'),
-              Number(file.size || 0)
+              Number(file.size || 0),
+              batchId,
+              isMass
             ).run();
 
             const check = await env.DB.prepare(`
-              SELECT id, code, url, status, file_name, size, created_at
+              SELECT id, code, url, status, file_name, size, created_at, batch_id, mass
               FROM ota_queue
               WHERE code = ?
               ORDER BY id DESC
@@ -612,6 +636,8 @@ export async function onRequest({ request, env }) {
               ota_queued: true,
               ota_id: check.id,
               ota_status: check.status,
+              batch_id: batchId,
+              mass: !!isMass,
               code
             });
 
@@ -631,71 +657,6 @@ export async function onRequest({ request, env }) {
       }
 
 
-      
-    // ROTA ADMIN: LIMPAR FILA/RESULTADOS OTA
-    if (action === 'admin_ota_clear' && request.method === 'DELETE') {
-      if (!isAdmin) return json({ ok: false, error: 'Apenas administrador' }, 403);
-
-      try {
-        await env.DB.prepare(`DELETE FROM ota_queue`).run();
-        return json({ ok: true });
-      } catch (err) {
-        return json({ ok: false, error: 'Falha ao limpar atualizações OTA: ' + err.message }, 500);
-      }
-    }
-
-if (action === 'admin_ota_status' && request.method === 'GET') {
-        try {
-          await env.DB.prepare(`
-            CREATE TABLE IF NOT EXISTS ota_queue (
-              id INTEGER PRIMARY KEY AUTOINCREMENT,
-              code TEXT NOT NULL,
-              url TEXT NOT NULL,
-              status TEXT DEFAULT 'pending',
-              file_name TEXT,
-              size INTEGER,
-              created_at TEXT DEFAULT CURRENT_TIMESTAMP,
-              delivered_at TEXT,
-              confirmed_at TEXT
-            )
-          `).run();
-
-          const query = await env.DB.prepare(`
-            SELECT id, code, status, file_name, size, created_at, delivered_at, confirmed_at
-            FROM ota_queue
-            ORDER BY id DESC
-            LIMIT 500
-          `).all();
-
-          const vistos = new Set();
-          const counts = { pending: 0, delivered: 0, confirmed: 0, failed: 0 };
-          const items = { pending: [], delivered: [], confirmed: [], failed: [] };
-
-          for (const row of (query.results || [])) {
-            const code = normalizarCodigoBms(row.code);
-            if (!validarCodigoBmsHex(code) || vistos.has(code)) continue;
-            vistos.add(code);
-
-            const st = ['pending','delivered','confirmed','failed'].includes(row.status) ? row.status : 'pending';
-            counts[st]++;
-            items[st].push({
-              id: row.id,
-              code,
-              status: st,
-              file_name: row.file_name || '',
-              size: row.size || 0,
-              created_at: row.created_at || '',
-              delivered_at: row.delivered_at || '',
-              confirmed_at: row.confirmed_at || ''
-            });
-          }
-
-          return json({ ok: true, counts, items });
-        } catch (err) {
-          return json({ ok: false, error: 'Falha ao consultar status OTA: ' + (err?.message || String(err)) }, 500);
-        }
-      }
-
       if (action === 'admin_ota_queue' && request.method === 'GET') {
         try {
           await env.DB.prepare(`
@@ -708,9 +669,14 @@ if (action === 'admin_ota_status' && request.method === 'GET') {
               size INTEGER,
               created_at TEXT DEFAULT CURRENT_TIMESTAMP,
               delivered_at TEXT,
-              confirmed_at TEXT
+              confirmed_at TEXT,
+              batch_id TEXT,
+              mass INTEGER DEFAULT 0
             )
           `).run();
+
+          try { await env.DB.prepare(`ALTER TABLE ota_queue ADD COLUMN batch_id TEXT`).run(); } catch(e) {}
+          try { await env.DB.prepare(`ALTER TABLE ota_queue ADD COLUMN mass INTEGER DEFAULT 0`).run(); } catch(e) {}
 
           const codeParam = url.searchParams.get('code');
           let query;
@@ -751,7 +717,8 @@ if (action === 'admin_ota_status' && request.method === 'GET') {
           results = query.results || [];
         } catch (errHealthColumns) {
           const query = await env.DB.prepare(`
-            SELECT bm.code, bm.user_id, b.soc, b.voltage, b.current, b.temp, b.cells, 
+            SELECT bm.code, bm.user_id, b.soc, b.voltage, b.current, b.temp, b.cells,
+                   b.fw, b.esp_model,
                    datetime(b.updated_at) || 'Z' as updated_at,
                    u.nome as dono_nome, u.email as dono_email
             FROM bms_master bm
@@ -765,7 +732,7 @@ if (action === 'admin_ota_status' && request.method === 'GET') {
         const data = (results || []).map(item => ({
           ...item,
           cells: JSON.parse(item.cells || '[]'),
-          online: false
+          online: item.updated_at && (now - new Date(item.updated_at).getTime() < 5000)
         }));
         return json(data);
       }
@@ -891,7 +858,7 @@ if (action === 'admin_ota_status' && request.method === 'GET') {
       const now = Date.now();
       const withOnline = (results || []).map(r => ({
         ...r,
-        online: false
+        online: r.updated_at && (now - new Date(r.updated_at).getTime() < 5000)
       }));
       return json(withOnline);
     }
@@ -906,7 +873,7 @@ if (action === 'admin_ota_status' && request.method === 'GET') {
       const data = await env.DB.prepare('SELECT *, datetime(updated_at) || "Z" as updated_at FROM bms WHERE code = ?').bind(code).first();
       if (!data) return json({ ok: false, error: 'BMS não encontrada' }, 404);
       
-      const online = false;
+      const online = data.updated_at && (Date.now() - new Date(data.updated_at).getTime() < 5000);
       
       return json({
         ...data,
