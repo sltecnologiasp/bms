@@ -780,43 +780,45 @@ async function atualizarDispositivoFirmwareAdmin(code){
   const elDevice = document.getElementById('adminEspModel');
   const elFw = document.getElementById('adminFw');
 
+  function valorValido(v){
+    v = String(v === undefined || v === null ? '' : v).trim();
+    return v && v !== '--' && v !== '0' && v.toLowerCase() !== 'null' && v.toLowerCase() !== 'undefined';
+  }
+
   function aplicarDeviceFw(origem){
     if(!origem) return false;
 
-    const device = origem.esp_model || origem.chip_model || origem.device || origem.dispositivo || '';
-    const fw = origem.fw || origem.firmware || '';
+    const device = origem.esp_model || origem.chip_model || origem.device || origem.dispositivo || origem.hardware || '';
+    const fw = origem.fw || origem.firmware || origem.firmware_version || '';
 
     let mudou = false;
 
-    if(elDevice && device && device !== '--'){
-      elDevice.textContent = device;
+    if(elDevice && valorValido(device)){
+      elDevice.textContent = String(device).trim();
       mudou = true;
     }
 
-    if(elFw && fw && fw !== '--'){
-      elFw.textContent = fw;
+    if(elFw && valorValido(fw)){
+      elFw.textContent = String(fw).trim();
       mudou = true;
     }
 
     return mudou;
   }
 
-  // 1) Usa o que já estiver na lista carregada do admin.
+  // Primeiro usa cache da lista já carregada.
   const itemLista = (bmsList || []).find(b => normalizarCodigoBmsAdminSeguro(b.code) === codigo);
   aplicarDeviceFw(itemLista);
 
-  // 2) Busca o último snapshot salvo do dispositivo.
+  // Busca o último registro salvo no D1 pela rota data.
   try{
     const r = await fetch(API + '?action=data&code=' + encodeURIComponent(codigo), { headers: authHeaders() });
     if(r.status === 401){ adminLogout(); return; }
-
     const d = await r.json();
-    if(d && d.ok !== false){
-      aplicarDeviceFw(d);
-    }
+    if(d && d.ok !== false) aplicarDeviceFw(d);
   }catch(e){}
 
-  // 3) Fallback final: recarrega admin_list_master e usa o último dado salvo mesmo offline.
+  // Fallback final: lista master do admin, que deve trazer último fw/esp_model salvo no D1.
   try{
     const r2 = await fetch(API + '?action=admin_list_master', { headers: authHeaders() });
     if(r2.status === 401){ adminLogout(); return; }
@@ -824,12 +826,12 @@ async function atualizarDispositivoFirmwareAdmin(code){
     const lista = await r2.json();
     if(Array.isArray(lista)){
       const item = lista.find(b => normalizarCodigoBmsAdminSeguro(b.code) === codigo);
-      aplicarDeviceFw(item);
-
-      // Atualiza cache local sem alterar o layout.
       if(item){
+        aplicarDeviceFw(item);
+
         const idx = (bmsList || []).findIndex(b => normalizarCodigoBmsAdminSeguro(b.code) === codigo);
         if(idx >= 0) bmsList[idx] = { ...bmsList[idx], ...item };
+        else bmsList.push(item);
       }
     }
   }catch(e){}
@@ -1633,6 +1635,8 @@ function aplicarSnapshotAdminD1(code){
   if(b.online){
     processarERenderizarDadosAdminMqtt(payload);
   }
+
+  setTimeout(function(){ atualizarDispositivoFirmwareAdmin(code); }, 300);
 }
 
 async function conectarMqttParaDashboardAdmin() {
