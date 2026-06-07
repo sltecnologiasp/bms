@@ -1918,16 +1918,25 @@ function marcarOfflineCacheMqttAdmin(code){
   if(b) b.online = false;
 }
 
+function ordenarBmsListaAdmin(a, b) {
+  const onlineA = !!a.online;
+  const onlineB = !!b.online;
+
+  if (onlineA && !onlineB) return -1;
+  if (!onlineA && onlineB) return 1;
+
+  const ca = normalizarCodigoBmsAdminSeguro(a.code || '');
+  const cb = normalizarCodigoBmsAdminSeguro(b.code || '');
+
+  return ca.localeCompare(cb);
+}
+
 async function carregarTudo(){
   if (!adminToken) return;
   const rBms = await fetch(API+'?action=admin_list_master',{headers:authHeaders()});
   const dBms = await rBms.json();
   
-  bmsList = dBms.sort((a, b) => {
-    if (a.online && !b.online) return -1;
-    if (!a.online && b.online) return 1;
-    return (b.updated_at ? new Date(b.updated_at).getTime() : 0) - (a.updated_at ? new Date(a.updated_at).getTime() : 0);
-  });
+  bmsList = dBms.sort(ordenarBmsListaAdmin);
 
   aplicarCacheMqttAdminNaLista();
 
@@ -2047,21 +2056,13 @@ async function conectarMqttParaListaGeralAdmin() {
           const itemTimeout = bmsList.find(b => normalizarCodigoBmsAdminSeguro(b.code) === idPlacaEmissora);
           if (itemTimeout) itemTimeout.online = false;
           if (activeScreen === 'painel') {
-            bmsList.sort((a, b) => {
-              if (a.online && !b.online) return -1;
-              if (!a.online && b.online) return 1;
-              return (b.updated_at ? new Date(b.updated_at).getTime() : 0) - (a.updated_at ? new Date(a.updated_at).getTime() : 0);
-            });
+            bmsList.sort(ordenarBmsListaAdmin);
             atualizarHTMLListaBms();
           }
         }, TEMPO_TIMEOUT_CONEXAO);
 
         if (activeScreen === 'painel') {
-          bmsList.sort((a, b) => {
-            if (a.online && !b.online) return -1;
-            if (!a.online && b.online) return 1;
-            return (b.updated_at ? new Date(b.updated_at).getTime() : 0) - (a.updated_at ? new Date(a.updated_at).getTime() : 0);
-          });
+          bmsList.sort(ordenarBmsListaAdmin);
           atualizarHTMLListaBms();
         }
 
