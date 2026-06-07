@@ -772,6 +772,45 @@ function showClientesPage(){
   listarUsers();
 }
 
+
+async function atualizarDispositivoFirmwareAdmin(code){
+  const codigo = normalizarCodigoBmsAdminSeguro(code);
+  if(!validarCodigoBmsAdminSeguro(codigo)) return;
+
+  const elDevice = document.getElementById('adminEspModel');
+  const elFw = document.getElementById('adminFw');
+
+  // 1) Primeiro usa o último snapshot já carregado na lista admin.
+  const itemLista = (bmsList || []).find(b => normalizarCodigoBmsAdminSeguro(b.code) === codigo);
+  if(itemLista){
+    if(elDevice && (itemLista.esp_model || itemLista.chip_model)){
+      elDevice.textContent = itemLista.esp_model || itemLista.chip_model;
+    }
+    if(elFw && (itemLista.fw || itemLista.firmware)){
+      elFw.textContent = itemLista.fw || itemLista.firmware;
+    }
+  }
+
+  // 2) Depois tenta atualizar pelo D1. Se falhar/offline, mantém o último valor.
+  try{
+    const r = await fetch(API + '?action=data&code=' + encodeURIComponent(codigo), { headers: authHeaders() });
+    if(r.status === 401){ adminLogout(); return; }
+
+    const d = await r.json();
+    if(!d || d.ok === false) return;
+
+    if(elDevice && (d.esp_model || d.chip_model)){
+      elDevice.textContent = d.esp_model || d.chip_model;
+    }
+
+    if(elFw && (d.fw || d.firmware)){
+      elFw.textContent = d.fw || d.firmware;
+    }
+  }catch(e){
+    // Offline/erro de rede: mantém o último snapshot já exibido.
+  }
+}
+
 function showDashAdmin(code) {
   pararAtualizacaoAutomaticaOtaAdmin();
   fecharMqttAnterior();
@@ -790,6 +829,7 @@ function showDashAdmin(code) {
   document.getElementById('dashAdmin').style.display = 'flex';
   
   document.getElementById('modalBmsTitle').textContent = code;
+  atualizarDispositivoFirmwareAdmin(code);
   aplicarSnapshotAdminD1(code);
   const codeCacheAdmin = normalizarCodigoBmsAdminSeguro(code);
   if(ultimoPayloadMqttAdmin[codeCacheAdmin] && (Date.now() - (ultimoPacoteMqttAdminMs[codeCacheAdmin] || 0)) < TEMPO_TIMEOUT_CONEXAO){
