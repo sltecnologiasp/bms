@@ -756,7 +756,7 @@ button:active{transform:scale(0.98)}
 .inverter-info-card .metric-icon{
   position:absolute !important;
   right:12px !important;
-  top:57% !important;
+  top:64% !important;
   transform:translateY(-50%) !important;
   width:24px !important;
   height:24px !important;
@@ -776,7 +776,7 @@ button:active{transform:scale(0.98)}
   .battery-info-card .metric-icon,
   .inverter-info-card .metric-icon{
     right:10px !important;
-    top:57% !important;
+    top:64% !important;
     width:22px !important;
     height:22px !important;
   }
@@ -786,6 +786,24 @@ button:active{transform:scale(0.98)}
     width:22px !important;
     height:22px !important;
   }
+}
+
+
+/* SMART BMS - REMOVER BARRINHAS INTERNAS DAS CELULAS */
+.cell-fill-track,
+.cell-fill{
+  display:none !important;
+}
+
+
+/* SMART BMS - AJUSTE CELULAS SEM BARRA */
+.cell{
+  min-height:66px !important;
+  padding:9px 8px !important;
+}
+
+.cell-val{
+  margin-bottom:0 !important;
 }
 
 </style>
@@ -2029,15 +2047,9 @@ function renderCelulas(cels){
     var cls = 'ok';
     if(val < 3.2 || val > 4.2) cls = 'crit';
     else if(val < 3.4 || val > 4.15) cls = 'warn';
-
-    var pct = Math.round(((val - 2.8) / (4.2 - 2.8)) * 100);
-    if(!Number.isFinite(pct)) pct = 0;
-    pct = Math.max(0, Math.min(100, pct));
-
-    htmlCells += '<div class="cell '+cls+'" id="c-box-'+j+'">' +
+htmlCells += '<div class="cell '+cls+'" id="c-box-'+j+'">' +
       '<div class="cell-num">C'+(j+1)+'</div>' +
       '<div class="cell-val">'+val.toFixed(2)+'V</div>' +
-      '<div class="cell-fill-track"><div class="cell-fill" style="width:'+pct+'%"></div></div>' +
       '</div>';
   }
 
