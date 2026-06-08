@@ -1310,6 +1310,8 @@ var listaPlacasRegistradas = [];
 var listaTimeoutsDispositivos = {}; 
 var estadoOnlineDispositivos = {};
 var ultimoSnapshotDispositivos = {};
+var mqttAssumiuDashboard = false;
+var dashboardOpenMs = 0;
 
 
 // CONFIGURAÇÃO DO TIMEOUT EM MILISSEGUNDOS (15 SEGUNDOS DE TOLERÂNCIA CONTRA OSCILAÇÕES)
@@ -2088,7 +2090,9 @@ function aplicarSnapshotApiDispositivoReal(code){
     estadoOnlineDispositivos[code] = onlineApi;
 
     if(typeof processarERenderizarDadosMqtt === 'function'){
-      processarERenderizarDadosMqtt(d);
+      mqttAssumiuDashboard = true;
+        estadoOnlineDispositivos[CODIGO] = true;
+        processarERenderizarDadosMqtt(d);
     }
 
     gerenciarLayoutStatus(
@@ -2189,7 +2193,13 @@ clearInterval(INT);
   document.getElementById('dash').classList.remove('hidden');
   document.getElementById('bms-titulo').textContent = code;
   
-  configurarInterfaceEstadoOffline();
+  dashboardOpenMs = Date.now();
+  mqttAssumiuDashboard = false;
+
+  // Mantém o último estado do D1 por 10s enquanto aguarda MQTT.
+  if(estadoOnlineDispositivos[code]){
+    gerenciarLayoutStatus(document.getElementById('cardBms'), document.getElementById('txtBms'), true, "Online", "Offline");
+  }
 
   fetch(API + '?action=get_mqtt_credentials', { headers: {'Authorization': 'Bearer ' + TOKEN} })
   .then(function(res) { return res.json(); })
@@ -2231,6 +2241,11 @@ clearInterval(INT);
 }
 
 function configurarInterfaceEstadoOffline() {
+  if(!mqttAssumiuDashboard && (Date.now() - dashboardOpenMs) < 10000){
+    return;
+  }
+
+
   if(typeof CODIGO !== 'undefined' && CODIGO && estadoOnlineDispositivos[CODIGO]){
     gerenciarLayoutStatus(document.getElementById('cardBms'), document.getElementById('txtBms'), true, "Online", "Offline");
     return;
