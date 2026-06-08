@@ -35,6 +35,107 @@ export async function onRequest({ request, env }) {
     return String(valor || '').trim().slice(0, limite);
   }
 
+
+  function codigoDemoUsuario(userId) {
+    const idHex = Math.max(0, Number(userId) || 0).toString(16).toUpperCase().padStart(10, '0').slice(-10);
+    return 'SLDE' + idHex;
+  }
+
+  function isCodigoDemo(code) {
+    return /^SLDE[0-9A-F]{10}$/.test(String(code || '').trim().toUpperCase());
+  }
+
+  function gerarCelulasDemo() {
+    return [
+      3.20, 3.21, 3.20, 3.22,
+      3.21, 3.20, 3.22, 3.21,
+      3.20, 3.21, 3.22, 3.20,
+      3.21, 3.20, 3.21, 3.22
+    ];
+  }
+
+  async function garantirDispositivoDemoUsuario(userId) {
+    const uid = Number(userId || 0);
+    if (!uid) return null;
+
+    const code = codigoDemoUsuario(uid);
+    const nome = 'Dispositivo Demonstração';
+    const cellsJson = JSON.stringify(gerarCelulasDemo());
+
+    await env.DB.prepare('INSERT OR IGNORE INTO bms_master (code, user_id) VALUES (?, ?)')
+      .bind(code, uid).run();
+
+    await env.DB.prepare('UPDATE bms_master SET user_id = ? WHERE code = ? AND (user_id IS NULL OR user_id = ?)')
+      .bind(uid, code, uid).run();
+
+    await env.DB.prepare('INSERT OR IGNORE INTO user_bms (user_id, bms_code, bms_nome) VALUES (?, ?, ?)')
+      .bind(uid, code, nome).run();
+
+    try {
+      await env.DB.prepare(`
+        INSERT INTO bms (
+          code, soc, voltage, current, temp, cells, online, updated_at,
+          inversor_conectado, bateria_conectada, inv_potencia, inv_tensao_ac, inv_frequencia, inv_geracao_dia,
+          heap, rssi, uptime, fw, esp_model, chip_revision, flash_mb, psram
+        )
+        VALUES (?, 84, 52.4, 10.5, 28.0, ?, 1, datetime('now'),
+                1, 1, 1250, 220.0, 60.0, 8.6,
+                210000, -45, 3600, 'DEMO', 'SMART BMS DEMO', 0, 16, 1)
+        ON CONFLICT(code) DO UPDATE SET
+          soc = 84,
+          voltage = 52.4,
+          current = 10.5,
+          temp = 28.0,
+          cells = excluded.cells,
+          online = 1,
+          updated_at = datetime('now'),
+          inversor_conectado = 1,
+          bateria_conectada = 1,
+          inv_potencia = 1250,
+          inv_tensao_ac = 220.0,
+          inv_frequencia = 60.0,
+          inv_geracao_dia = 8.6,
+          heap = 210000,
+          rssi = -45,
+          uptime = 3600,
+          fw = 'DEMO',
+          esp_model = 'SMART BMS DEMO',
+          chip_revision = 0,
+          flash_mb = 16,
+          psram = 1
+      `).bind(code, cellsJson).run();
+    } catch (errDemoCols) {
+      await env.DB.prepare(`
+        INSERT INTO bms (
+          code, soc, voltage, current, temp, cells, online, updated_at,
+          inversor_conectado, bateria_conectada, inv_potencia, inv_tensao_ac, inv_frequencia, inv_geracao_dia,
+          fw, esp_model
+        )
+        VALUES (?, 84, 52.4, 10.5, 28.0, ?, 1, datetime('now'),
+                1, 1, 1250, 220.0, 60.0, 8.6, 'DEMO', 'SMART BMS DEMO')
+        ON CONFLICT(code) DO UPDATE SET
+          soc = 84,
+          voltage = 52.4,
+          current = 10.5,
+          temp = 28.0,
+          cells = excluded.cells,
+          online = 1,
+          updated_at = datetime('now'),
+          inversor_conectado = 1,
+          bateria_conectada = 1,
+          inv_potencia = 1250,
+          inv_tensao_ac = 220.0,
+          inv_frequencia = 60.0,
+          inv_geracao_dia = 8.6,
+          fw = 'DEMO',
+          esp_model = 'SMART BMS DEMO'
+      `).bind(code, cellsJson).run();
+    }
+
+    return code;
+  }
+
+
   // =========================================================================
   // FUNÇÃO AUXILIAR DE CRIPTOGRAFIA PARA O NOVO TOKEN SEGURO (HMAC-SHA256)
   // =========================================================================
@@ -198,6 +299,7 @@ export async function onRequest({ request, env }) {
         `, { headers: { 'Content-Type': 'text/html; charset=utf-8' } });
       }
       await env.DB.prepare('UPDATE users SET email_verificado = 1, token_verificacao = NULL WHERE id = ?').bind(user.id).run();
+      await garantirDispositivoDemoUsuario(user.id);
       return new Response(`
         <html lang="pt-BR">
         <body style="background:#05070d;color:#fff;font-family:sans-serif;display:flex;align-items:center;justify-content:center;height:100vh;text-align:center;margin:0;">
@@ -316,6 +418,7 @@ export async function onRequest({ request, env }) {
       const nova_senha_hash = Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2, '0')).join('');
 
       await env.DB.prepare('UPDATE users SET senha_hash = ?, token_verificacao = NULL, email_verificado = 1 WHERE id = ?').bind(nova_senha_hash, user.id).run();
+      await garantirDispositivoDemoUsuario(user.id);
       return json({ ok: true });
     }
 
@@ -340,6 +443,8 @@ export async function onRequest({ request, env }) {
       if (user.email_verificado === 0) {
         return json({ ok: false, error: 'Confirme seu e-mail na caixa de entrada antes de acessar.' }, 403);
       }
+
+      await garantirDispositivoDemoUsuario(user.id);
 
       const JWT_SECRET = env.JWT_SECRET || "MudeEsseTextoNoPainelCloudflare123!";
       const payloadTexto = `user:${user.id}:${Date.now()}`;
@@ -732,7 +837,7 @@ export async function onRequest({ request, env }) {
         const data = (results || []).map(item => ({
           ...item,
           cells: JSON.parse(item.cells || '[]'),
-          online: item.updated_at && (now - new Date(item.updated_at).getTime() < 5000)
+          online: isCodigoDemo(item.code) ? true : (item.updated_at && (now - new Date(item.updated_at).getTime() < 5000))
         }));
         return json(data);
       }
@@ -858,7 +963,8 @@ export async function onRequest({ request, env }) {
       const now = Date.now();
       const withOnline = (results || []).map(r => ({
         ...r,
-        online: r.updated_at && (now - new Date(r.updated_at).getTime() < 5000)
+        updated_at: isCodigoDemo(r.code) ? new Date().toISOString() : r.updated_at,
+        online: isCodigoDemo(r.code) ? true : (r.updated_at && (now - new Date(r.updated_at).getTime() < 5000))
       }));
       return json(withOnline);
     }
@@ -870,10 +976,14 @@ export async function onRequest({ request, env }) {
         const check = await env.DB.prepare('SELECT id FROM user_bms WHERE user_id = ? AND bms_code = ?').bind(userId, code).first();
         if (!check) return json({ ok: false, error: 'Acesso negado' }, 403);
       }
+      if (isCodigoDemo(code) && userId && !isAdmin) {
+        await garantirDispositivoDemoUsuario(userId);
+      }
+
       const data = await env.DB.prepare('SELECT *, datetime(updated_at) || "Z" as updated_at FROM bms WHERE code = ?').bind(code).first();
       if (!data) return json({ ok: false, error: 'BMS não encontrada' }, 404);
       
-      const online = data.updated_at && (Date.now() - new Date(data.updated_at).getTime() < 5000);
+      const online = isCodigoDemo(code) ? true : (data.updated_at && (Date.now() - new Date(data.updated_at).getTime() < 5000));
       
       return json({
         ...data,
