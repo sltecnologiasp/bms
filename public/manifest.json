@@ -10,16 +10,16 @@
   "background_color": "#f4f6f9",
   "theme_color": "#0077b6",
   "display": "standalone",
-  "orientation": "portrait",
+  "orientation": "portrait-primary",
   "icons": [
     {
-      "src": "/icon-192.png",
+      "src": "/1000229030.png",
       "type": "image/png",
       "sizes": "192x192",
       "purpose": "any maskable"
     },
     {
-      "src": "/icon-512.png",
+      "src": "/1000229030.png",
       "type": "image/png",
       "sizes": "512x512",
       "purpose": "any maskable"

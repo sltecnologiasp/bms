@@ -1,14 +1,12 @@
 // SMART BMS - Service Worker PWA seguro
-// Mantém o app instalável, evita cache fantasma e preserva fallback básico offline.
+// Mantém o app instalável, evita cache fantasma e usa apenas assets existentes.
 
-const CACHE_NAME = 'smart-bms-assets-v4';
+const CACHE_NAME = 'smart-bms-assets-v5';
 
 const STATIC_ASSETS = [
   '/',
   '/manifest.json',
-  '/1000229030.png',
-  '/icon-192.png',
-  '/icon-512.png'
+  '/1000229030.png'
 ];
 
 self.addEventListener('install', event => {
@@ -47,11 +45,13 @@ self.addEventListener('fetch', event => {
   const isJs = url.pathname.endsWith('.js');
   const isCss = url.pathname.endsWith('.css');
 
+  // API nunca usa cache.
   if (isApi) {
     event.respondWith(fetch(request, { cache: 'no-store' }));
     return;
   }
 
+  // HTML: rede primeiro para receber versão nova; fallback cacheado para abrir offline.
   if (isHtml) {
     event.respondWith(
       fetch(request, { cache: 'no-store' })
@@ -65,11 +65,13 @@ self.addEventListener('fetch', event => {
     return;
   }
 
+  // JS/CSS: sempre rede para evitar código antigo.
   if (isJs || isCss) {
     event.respondWith(fetch(request, { cache: 'no-store' }));
     return;
   }
 
+  // Assets do próprio domínio: cache first + atualização em segundo plano.
   event.respondWith(
     caches.match(request).then(cached => {
       const fetchPromise = fetch(request).then(response => {
