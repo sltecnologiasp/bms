@@ -45,60 +45,6 @@ export async function onRequest({ request, env }) {
     return /^SLDE[0-9A-F]{10}$/.test(String(code || '').trim().toUpperCase());
   }
 
-  function calcularDemoInteligente(userId) {
-    const uid = Number(userId || 0);
-    const t = Math.floor(Date.now() / 1000);
-    const fase = (t / 60) + (uid % 37);
-
-    function onda(amplitude, velocidade, deslocamento = 0) {
-      return Math.sin((fase / velocidade) + deslocamento) * amplitude;
-    }
-
-    function limitar(valor, min, max) {
-      return Math.max(min, Math.min(max, valor));
-    }
-
-    function arredondar(valor, casas = 1) {
-      const p = Math.pow(10, casas);
-      return Math.round(valor * p) / p;
-    }
-
-    const soc = arredondar(limitar(82 + onda(5, 3.5), 76, 88), 0);
-    const voltage = arredondar(51.6 + (soc / 100) * 2.1 + onda(0.18, 2.4, 1.2), 2);
-    const current = arredondar(onda(14, 1.8, 0.5), 1);
-    const temp = arredondar(27.5 + onda(2.2, 4.5, 2.1), 1);
-
-    const invPotenciaBase = Math.abs(onda(1600, 2.1, 0.8));
-    const inv_potencia = Math.round(limitar(invPotenciaBase + 450, 180, 3200));
-    const inv_tensao_ac = arredondar(220 + onda(2.5, 2.8, 0.4), 1);
-    const inv_frequencia = arredondar(60 + onda(0.08, 3.2, 1.8), 2);
-    const inv_geracao_dia = arredondar(limitar(4.5 + Math.abs(onda(5.2, 7.0, 0.2)), 0.8, 13.5), 1);
-
-    const cells = [];
-    const mediaCelula = voltage / 16;
-
-    for (let i = 0; i < 16; i++) {
-      const variacao = Math.sin((fase / 2.7) + i * 0.73) * 0.012;
-      cells.push(arredondar(limitar(mediaCelula + variacao, 3.18, 3.38), 2));
-    }
-
-    return {
-      soc,
-      voltage,
-      current,
-      temp,
-      cells,
-      inversor_conectado: 1,
-      bateria_conectada: 1,
-      inv_potencia,
-      inv_tensao_ac,
-      inv_frequencia,
-      inv_geracao_dia,
-      fw: 'DEMO',
-      esp_model: 'SMART BMS DEMO'
-    };
-  }
-
   async function garantirDispositivoDemoUsuario(userId) {
     const uid = Number(userId || 0);
     if (!uid) return null;
@@ -262,21 +208,6 @@ export async function onRequest({ request, env }) {
       return json({ ok: true });
     }
 
-
-
-    // ROTA PÚBLICA OPCIONAL: DEMO INTELIGENTE SEM ESP32
-    if (action === 'demo_data' && request.method === 'GET') {
-      const userParam = Number(url.searchParams.get('user') || 1);
-      const demo = calcularDemoInteligente(userParam);
-      return json({
-        ok: true,
-        code: codigoDemoUsuario(userParam),
-        nome: 'Dispositivo Demonstração',
-        updated_at: new Date().toISOString(),
-        online: true,
-        ...demo
-      });
-    }
 
     // ROTA 1: VERIFICAÇÃO DE E-MAIL
     if (action === 'verify_email' && request.method === 'GET') {
@@ -734,71 +665,6 @@ export async function onRequest({ request, env }) {
       }
 
 
-      
-    // ROTA ADMIN: LIMPAR FILA/RESULTADOS OTA
-    if (action === 'admin_ota_clear' && request.method === 'DELETE') {
-      if (!isAdmin) return json({ ok: false, error: 'Apenas administrador' }, 403);
-
-      try {
-        await env.DB.prepare(`DELETE FROM ota_queue`).run();
-        return json({ ok: true });
-      } catch (err) {
-        return json({ ok: false, error: 'Falha ao limpar atualizações OTA: ' + err.message }, 500);
-      }
-    }
-
-if (action === 'admin_ota_status' && request.method === 'GET') {
-        try {
-          await env.DB.prepare(`
-            CREATE TABLE IF NOT EXISTS ota_queue (
-              id INTEGER PRIMARY KEY AUTOINCREMENT,
-              code TEXT NOT NULL,
-              url TEXT NOT NULL,
-              status TEXT DEFAULT 'pending',
-              file_name TEXT,
-              size INTEGER,
-              created_at TEXT DEFAULT CURRENT_TIMESTAMP,
-              delivered_at TEXT,
-              confirmed_at TEXT
-            )
-          `).run();
-
-          const query = await env.DB.prepare(`
-            SELECT id, code, status, file_name, size, created_at, delivered_at, confirmed_at
-            FROM ota_queue
-            ORDER BY id DESC
-            LIMIT 500
-          `).all();
-
-          const vistos = new Set();
-          const counts = { pending: 0, delivered: 0, confirmed: 0, failed: 0 };
-          const items = { pending: [], delivered: [], confirmed: [], failed: [] };
-
-          for (const row of (query.results || [])) {
-            const code = normalizarCodigoBms(row.code);
-            if (!validarCodigoBmsHex(code) || vistos.has(code)) continue;
-            vistos.add(code);
-
-            const st = ['pending','delivered','confirmed','failed'].includes(row.status) ? row.status : 'pending';
-            counts[st]++;
-            items[st].push({
-              id: row.id,
-              code,
-              status: st,
-              file_name: row.file_name || '',
-              size: row.size || 0,
-              created_at: row.created_at || '',
-              delivered_at: row.delivered_at || '',
-              confirmed_at: row.confirmed_at || ''
-            });
-          }
-
-          return json({ ok: true, counts, items });
-        } catch (err) {
-          return json({ ok: false, error: 'Falha ao consultar status OTA: ' + (err?.message || String(err)) }, 500);
-        }
-      }
-
       if (action === 'admin_ota_queue' && request.method === 'GET') {
         try {
           await env.DB.prepare(`
@@ -868,7 +734,7 @@ if (action === 'admin_ota_status' && request.method === 'GET') {
         const data = (results || []).map(item => ({
           ...item,
           cells: JSON.parse(item.cells || '[]'),
-          online: false
+          online: item.updated_at && (now - new Date(item.updated_at).getTime() < 5000)
         }));
         return json((data || []).filter(item => !isCodigoDemo(item.code)));
       }
@@ -1013,21 +879,10 @@ if (action === 'admin_ota_status' && request.method === 'GET') {
         const check = await env.DB.prepare('SELECT id FROM user_bms WHERE user_id = ? AND bms_code = ?').bind(userId, code).first();
         if (!check) return json({ ok: false, error: 'Acesso negado' }, 403);
       }
-
-      if (isCodigoDemo(code) && userId && !isAdmin) {
-        const demo = calcularDemoInteligente(userId);
-        return json({
-          code,
-          nome: 'Dispositivo Demonstração',
-          updated_at: new Date().toISOString(),
-          online: true,
-          ...demo
-        });
-      }
       const data = await env.DB.prepare('SELECT *, datetime(updated_at) || "Z" as updated_at FROM bms WHERE code = ?').bind(code).first();
       if (!data) return json({ ok: false, error: 'BMS não encontrada' }, 404);
       
-      const online = false;
+      const online = data.updated_at && (Date.now() - new Date(data.updated_at).getTime() < 5000);
       
       return json({
         ...data,
