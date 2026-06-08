@@ -92,7 +92,7 @@ export async function onRequest({ request }) {
   return json({
     ok: true,
     code,
-    nome: 'Dispositivo Demonstração',
+    nome: 'Demonstração',
     updated_at: new Date().toISOString(),
     ...demo
   });
