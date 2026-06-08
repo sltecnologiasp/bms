@@ -45,7 +45,6 @@ export async function onRequest({ request, env }) {
     return /^SLDE[0-9A-F]{10}$/.test(String(code || '').trim().toUpperCase());
   }
 
-
   function calcularDemoInteligente(userId) {
     const uid = Number(userId || 0);
     const t = Math.floor(Date.now() / 1000);
@@ -77,6 +76,7 @@ export async function onRequest({ request, env }) {
 
     const cells = [];
     const mediaCelula = voltage / 16;
+
     for (let i = 0; i < 16; i++) {
       const variacao = Math.sin((fase / 2.7) + i * 0.73) * 0.012;
       cells.push(arredondar(limitar(mediaCelula + variacao, 3.18, 3.38), 2));
@@ -94,24 +94,9 @@ export async function onRequest({ request, env }) {
       inv_tensao_ac,
       inv_frequencia,
       inv_geracao_dia,
-      heap: 210000 + Math.round(onda(3000, 2.2)),
-      rssi: -45 + Math.round(onda(6, 2.5)),
-      uptime: 3600 + (t % 86400),
       fw: 'DEMO',
-      esp_model: 'SMART BMS DEMO',
-      chip_revision: 0,
-      flash_mb: 16,
-      psram: 1
+      esp_model: 'SMART BMS DEMO'
     };
-  }
-
-  function gerarCelulasDemo() {
-    return [
-      3.20, 3.21, 3.20, 3.22,
-      3.21, 3.20, 3.22, 3.21,
-      3.20, 3.21, 3.22, 3.20,
-      3.21, 3.20, 3.21, 3.22
-    ];
   }
 
   async function garantirDispositivoDemoUsuario(userId) {
@@ -120,8 +105,6 @@ export async function onRequest({ request, env }) {
 
     const code = codigoDemoUsuario(uid);
     const nome = 'Dispositivo Demonstração';
-    const demo = calcularDemoInteligente(uid);
-    const cellsJson = JSON.stringify(demo.cells);
 
     await env.DB.prepare('INSERT OR IGNORE INTO bms_master (code, user_id) VALUES (?, ?)')
       .bind(code, uid).run();
@@ -131,80 +114,6 @@ export async function onRequest({ request, env }) {
 
     await env.DB.prepare('INSERT OR IGNORE INTO user_bms (user_id, bms_code, bms_nome) VALUES (?, ?, ?)')
       .bind(uid, code, nome).run();
-
-    try {
-      await env.DB.prepare(`
-        INSERT INTO bms (
-          code, soc, voltage, current, temp, cells, online, updated_at,
-          inversor_conectado, bateria_conectada, inv_potencia, inv_tensao_ac, inv_frequencia, inv_geracao_dia,
-          heap, rssi, uptime, fw, esp_model, chip_revision, flash_mb, psram
-        )
-        VALUES (?, ?, ?, ?, ?, ?, 1, datetime('now'),
-                ?, ?, ?, ?, ?, ?,
-                ?, ?, ?, ?, ?, ?, ?, ?)
-        ON CONFLICT(code) DO UPDATE SET
-          soc = excluded.soc,
-          voltage = excluded.voltage,
-          current = excluded.current,
-          temp = excluded.temp,
-          cells = excluded.cells,
-          online = 1,
-          updated_at = datetime('now'),
-          inversor_conectado = excluded.inversor_conectado,
-          bateria_conectada = excluded.bateria_conectada,
-          inv_potencia = excluded.inv_potencia,
-          inv_tensao_ac = excluded.inv_tensao_ac,
-          inv_frequencia = excluded.inv_frequencia,
-          inv_geracao_dia = excluded.inv_geracao_dia,
-          heap = excluded.heap,
-          rssi = excluded.rssi,
-          uptime = excluded.uptime,
-          fw = excluded.fw,
-          esp_model = excluded.esp_model,
-          chip_revision = excluded.chip_revision,
-          flash_mb = excluded.flash_mb,
-          psram = excluded.psram
-      `).bind(
-        code,
-        demo.soc, demo.voltage, demo.current, demo.temp, cellsJson,
-        demo.inversor_conectado, demo.bateria_conectada,
-        demo.inv_potencia, demo.inv_tensao_ac, demo.inv_frequencia, demo.inv_geracao_dia,
-        demo.heap, demo.rssi, demo.uptime, demo.fw, demo.esp_model,
-        demo.chip_revision, demo.flash_mb, demo.psram
-      ).run();
-    } catch (errDemoCols) {
-      await env.DB.prepare(`
-        INSERT INTO bms (
-          code, soc, voltage, current, temp, cells, online, updated_at,
-          inversor_conectado, bateria_conectada, inv_potencia, inv_tensao_ac, inv_frequencia, inv_geracao_dia,
-          fw, esp_model
-        )
-        VALUES (?, ?, ?, ?, ?, ?, 1, datetime('now'),
-                ?, ?, ?, ?, ?, ?, ?, ?)
-        ON CONFLICT(code) DO UPDATE SET
-          soc = excluded.soc,
-          voltage = excluded.voltage,
-          current = excluded.current,
-          temp = excluded.temp,
-          cells = excluded.cells,
-          online = 1,
-          updated_at = datetime('now'),
-          inversor_conectado = excluded.inversor_conectado,
-          bateria_conectada = excluded.bateria_conectada,
-          inv_potencia = excluded.inv_potencia,
-          inv_tensao_ac = excluded.inv_tensao_ac,
-          inv_frequencia = excluded.inv_frequencia,
-          inv_geracao_dia = excluded.inv_geracao_dia,
-          fw = excluded.fw,
-          esp_model = excluded.esp_model
-      `).bind(
-        code,
-        demo.soc, demo.voltage, demo.current, demo.temp, cellsJson,
-        demo.inversor_conectado, demo.bateria_conectada,
-        demo.inv_potencia, demo.inv_tensao_ac, demo.inv_frequencia, demo.inv_geracao_dia,
-        demo.fw, demo.esp_model
-      ).run();
-    }
 
     return code;
   }
@@ -353,6 +262,21 @@ export async function onRequest({ request, env }) {
       return json({ ok: true });
     }
 
+
+
+    // ROTA PÚBLICA OPCIONAL: DEMO INTELIGENTE SEM ESP32
+    if (action === 'demo_data' && request.method === 'GET') {
+      const userParam = Number(url.searchParams.get('user') || 1);
+      const demo = calcularDemoInteligente(userParam);
+      return json({
+        ok: true,
+        code: codigoDemoUsuario(userParam),
+        nome: 'Dispositivo Demonstração',
+        updated_at: new Date().toISOString(),
+        online: true,
+        ...demo
+      });
+    }
 
     // ROTA 1: VERIFICAÇÃO DE E-MAIL
     if (action === 'verify_email' && request.method === 'GET') {
@@ -556,12 +480,6 @@ export async function onRequest({ request, env }) {
       if (!validarCodigoBmsHex(code)) {
         return json({ ok: false, error: 'Code inválido. Use SL + 12 HEX.' }, 400);
       }
-      try { await env.DB.prepare(`ALTER TABLE bms ADD COLUMN fw TEXT`).run(); } catch(e) {}
-      try { await env.DB.prepare(`ALTER TABLE bms ADD COLUMN esp_model TEXT`).run(); } catch(e) {}
-      try { await env.DB.prepare(`ALTER TABLE bms ADD COLUMN chip_revision INTEGER DEFAULT 0`).run(); } catch(e) {}
-      try { await env.DB.prepare(`ALTER TABLE bms ADD COLUMN flash_mb INTEGER DEFAULT 0`).run(); } catch(e) {}
-      try { await env.DB.prepare(`ALTER TABLE bms ADD COLUMN psram INTEGER DEFAULT 0`).run(); } catch(e) {}
-
 
       const soc = Math.max(0, Math.min(100, numeroSeguro(body.soc, 0)));
       const voltage = numeroSeguro(body.voltage, 0);
@@ -613,21 +531,18 @@ export async function onRequest({ request, env }) {
         await env.DB.prepare(`
           INSERT INTO bms (
             code, soc, voltage, current, temp, cells, online, updated_at,
-            inversor_conectado, bateria_conectada, inv_potencia, inv_tensao_ac, inv_frequencia, inv_geracao_dia,
-            fw, esp_model
+            inversor_conectado, bateria_conectada, inv_potencia, inv_tensao_ac, inv_frequencia, inv_geracao_dia
           )
-          VALUES (?, ?, ?, ?, ?, ?, 1, datetime('now'), ?, ?, ?, ?, ?, ?, ?, ?)
+          VALUES (?, ?, ?, ?, ?, ?, 1, datetime('now'), ?, ?, ?, ?, ?, ?)
           ON CONFLICT(code) DO UPDATE SET
             soc = excluded.soc, voltage = excluded.voltage, current = excluded.current,
             temp = excluded.temp, cells = excluded.cells, online = 1, updated_at = datetime('now'),
             inversor_conectado = excluded.inversor_conectado, bateria_conectada = excluded.bateria_conectada,
             inv_potencia = excluded.inv_potencia, inv_tensao_ac = excluded.inv_tensao_ac,
-            inv_frequencia = excluded.inv_frequencia, inv_geracao_dia = excluded.inv_geracao_dia,
-            fw = excluded.fw, esp_model = excluded.esp_model
+            inv_frequencia = excluded.inv_frequencia, inv_geracao_dia = excluded.inv_geracao_dia
         `).bind(
           code, soc, voltage, current, temp, JSON.stringify(cells),
-          inversor_conectado, bateria_conectada, inv_potencia, inv_tensao_ac, inv_frequencia, inv_geracao_dia,
-          fw, esp_model
+          inversor_conectado, bateria_conectada, inv_potencia, inv_tensao_ac, inv_frequencia, inv_geracao_dia
         ).run();
       }
 
@@ -721,8 +636,6 @@ export async function onRequest({ request, env }) {
           const formData = await request.formData();
           const file = formData.get('firmware');
           const code = normalizarCodigoBms(formData.get('code'));
-          const batchId = textoSeguro(formData.get('batch_id') || '', 80);
-          const isMass = batchId ? 1 : (String(formData.get('mass') || '') === '1' ? 1 : 0);
 
           if (!file || !validarCodigoBmsHex(code)) {
             return json({ ok: false, error: 'Arquivo ou código do dispositivo inválido.' }, 400);
@@ -763,35 +676,22 @@ export async function onRequest({ request, env }) {
                 size INTEGER,
                 created_at TEXT DEFAULT CURRENT_TIMESTAMP,
                 delivered_at TEXT,
-                confirmed_at TEXT,
-                batch_id TEXT,
-                mass INTEGER DEFAULT 0
+                confirmed_at TEXT
               )
             `).run();
-            try { await env.DB.prepare(`ALTER TABLE ota_queue ADD COLUMN batch_id TEXT`).run(); } catch(e) {}
-            try { await env.DB.prepare(`ALTER TABLE ota_queue ADD COLUMN mass INTEGER DEFAULT 0`).run(); } catch(e) {}
-
-            if (batchId) {
-              await env.DB.prepare(`
-                DELETE FROM ota_queue
-                WHERE code = ? AND batch_id = ? AND status IN ('pending','delivered')
-              `).bind(code, batchId).run();
-            }
 
             const insertResult = await env.DB.prepare(`
-              INSERT INTO ota_queue (code, url, status, file_name, size, created_at, batch_id, mass)
-              VALUES (?, ?, 'pending', ?, ?, datetime('now'), ?, ?)
+              INSERT INTO ota_queue (code, url, status, file_name, size, created_at)
+              VALUES (?, ?, 'pending', ?, ?, datetime('now'))
             `).bind(
               code,
               publicUrl,
               String(file.name || 'firmware.bin'),
-              Number(file.size || 0),
-              batchId,
-              isMass
+              Number(file.size || 0)
             ).run();
 
             const check = await env.DB.prepare(`
-              SELECT id, code, url, status, file_name, size, created_at, batch_id, mass
+              SELECT id, code, url, status, file_name, size, created_at
               FROM ota_queue
               WHERE code = ?
               ORDER BY id DESC
@@ -815,8 +715,6 @@ export async function onRequest({ request, env }) {
               ota_queued: true,
               ota_id: check.id,
               ota_status: check.status,
-              batch_id: batchId,
-              mass: !!isMass,
               code
             });
 
@@ -836,6 +734,71 @@ export async function onRequest({ request, env }) {
       }
 
 
+      
+    // ROTA ADMIN: LIMPAR FILA/RESULTADOS OTA
+    if (action === 'admin_ota_clear' && request.method === 'DELETE') {
+      if (!isAdmin) return json({ ok: false, error: 'Apenas administrador' }, 403);
+
+      try {
+        await env.DB.prepare(`DELETE FROM ota_queue`).run();
+        return json({ ok: true });
+      } catch (err) {
+        return json({ ok: false, error: 'Falha ao limpar atualizações OTA: ' + err.message }, 500);
+      }
+    }
+
+if (action === 'admin_ota_status' && request.method === 'GET') {
+        try {
+          await env.DB.prepare(`
+            CREATE TABLE IF NOT EXISTS ota_queue (
+              id INTEGER PRIMARY KEY AUTOINCREMENT,
+              code TEXT NOT NULL,
+              url TEXT NOT NULL,
+              status TEXT DEFAULT 'pending',
+              file_name TEXT,
+              size INTEGER,
+              created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+              delivered_at TEXT,
+              confirmed_at TEXT
+            )
+          `).run();
+
+          const query = await env.DB.prepare(`
+            SELECT id, code, status, file_name, size, created_at, delivered_at, confirmed_at
+            FROM ota_queue
+            ORDER BY id DESC
+            LIMIT 500
+          `).all();
+
+          const vistos = new Set();
+          const counts = { pending: 0, delivered: 0, confirmed: 0, failed: 0 };
+          const items = { pending: [], delivered: [], confirmed: [], failed: [] };
+
+          for (const row of (query.results || [])) {
+            const code = normalizarCodigoBms(row.code);
+            if (!validarCodigoBmsHex(code) || vistos.has(code)) continue;
+            vistos.add(code);
+
+            const st = ['pending','delivered','confirmed','failed'].includes(row.status) ? row.status : 'pending';
+            counts[st]++;
+            items[st].push({
+              id: row.id,
+              code,
+              status: st,
+              file_name: row.file_name || '',
+              size: row.size || 0,
+              created_at: row.created_at || '',
+              delivered_at: row.delivered_at || '',
+              confirmed_at: row.confirmed_at || ''
+            });
+          }
+
+          return json({ ok: true, counts, items });
+        } catch (err) {
+          return json({ ok: false, error: 'Falha ao consultar status OTA: ' + (err?.message || String(err)) }, 500);
+        }
+      }
+
       if (action === 'admin_ota_queue' && request.method === 'GET') {
         try {
           await env.DB.prepare(`
@@ -848,14 +811,9 @@ export async function onRequest({ request, env }) {
               size INTEGER,
               created_at TEXT DEFAULT CURRENT_TIMESTAMP,
               delivered_at TEXT,
-              confirmed_at TEXT,
-              batch_id TEXT,
-              mass INTEGER DEFAULT 0
+              confirmed_at TEXT
             )
           `).run();
-
-          try { await env.DB.prepare(`ALTER TABLE ota_queue ADD COLUMN batch_id TEXT`).run(); } catch(e) {}
-          try { await env.DB.prepare(`ALTER TABLE ota_queue ADD COLUMN mass INTEGER DEFAULT 0`).run(); } catch(e) {}
 
           const codeParam = url.searchParams.get('code');
           let query;
@@ -896,8 +854,7 @@ export async function onRequest({ request, env }) {
           results = query.results || [];
         } catch (errHealthColumns) {
           const query = await env.DB.prepare(`
-            SELECT bm.code, bm.user_id, b.soc, b.voltage, b.current, b.temp, b.cells,
-                   b.fw, b.esp_model,
+            SELECT bm.code, bm.user_id, b.soc, b.voltage, b.current, b.temp, b.cells, 
                    datetime(b.updated_at) || 'Z' as updated_at,
                    u.nome as dono_nome, u.email as dono_email
             FROM bms_master bm
@@ -911,9 +868,9 @@ export async function onRequest({ request, env }) {
         const data = (results || []).map(item => ({
           ...item,
           cells: JSON.parse(item.cells || '[]'),
-          online: isCodigoDemo(item.code) ? true : (item.updated_at && (now - new Date(item.updated_at).getTime() < 5000))
+          online: false
         }));
-        return json(data);
+        return json((data || []).filter(item => !isCodigoDemo(item.code)));
       }
 
       if (action === 'admin_force_bind' && request.method === 'POST') {
@@ -1020,6 +977,12 @@ export async function onRequest({ request, env }) {
       if (!validarCodigoBmsHex(code)) return json({ ok: false, error: 'Code inválido' }, 400);
       const check = await env.DB.prepare('SELECT id FROM bms_master WHERE code = ? AND user_id = ?').bind(code, userId).first();
       if (!check) return json({ ok: false, error: 'BMS não encontrada na sua conta' }, 403);
+      if (isCodigoDemo(code)) {
+        await env.DB.prepare('DELETE FROM user_bms WHERE user_id = ? AND bms_code = ?').bind(userId, code).run();
+        await env.DB.prepare('DELETE FROM bms_master WHERE code = ? AND user_id = ?').bind(code, userId).run();
+        await env.DB.prepare('DELETE FROM bms WHERE code = ?').bind(code).run();
+        return json({ ok: true });
+      }
       await env.DB.prepare('UPDATE bms_master SET user_id = NULL WHERE code = ?').bind(code).run();
       await env.DB.prepare('DELETE FROM user_bms WHERE user_id = ? AND bms_code = ?').bind(userId, code).run();
       return json({ ok: true });
@@ -1050,14 +1013,21 @@ export async function onRequest({ request, env }) {
         const check = await env.DB.prepare('SELECT id FROM user_bms WHERE user_id = ? AND bms_code = ?').bind(userId, code).first();
         if (!check) return json({ ok: false, error: 'Acesso negado' }, 403);
       }
-      if (isCodigoDemo(code) && userId && !isAdmin) {
-        await garantirDispositivoDemoUsuario(userId);
-      }
 
+      if (isCodigoDemo(code) && userId && !isAdmin) {
+        const demo = calcularDemoInteligente(userId);
+        return json({
+          code,
+          nome: 'Dispositivo Demonstração',
+          updated_at: new Date().toISOString(),
+          online: true,
+          ...demo
+        });
+      }
       const data = await env.DB.prepare('SELECT *, datetime(updated_at) || "Z" as updated_at FROM bms WHERE code = ?').bind(code).first();
       if (!data) return json({ ok: false, error: 'BMS não encontrada' }, 404);
       
-      const online = isCodigoDemo(code) ? true : (data.updated_at && (Date.now() - new Date(data.updated_at).getTime() < 5000));
+      const online = false;
       
       return json({
         ...data,
