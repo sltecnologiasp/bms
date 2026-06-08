@@ -45,7 +45,8 @@ export async function onRequest({ request, env }) {
     return /^SLDE[0-9A-F]{10}$/.test(String(code || '').trim().toUpperCase());
   }
 
-  async function garantirDispositivoDemoUsuario(userId) {
+  async // SMART BMS: demo não deve ser recriado no login. Criar apenas na ativação/cadastro da conta.
+  function garantirDispositivoDemoUsuario(userId) {
     const uid = Number(userId || 0);
     if (!uid) return null;
 
@@ -372,8 +373,6 @@ export async function onRequest({ request, env }) {
       if (user.email_verificado === 0) {
         return json({ ok: false, error: 'Confirme seu e-mail na caixa de entrada antes de acessar.' }, 403);
       }
-
-      await garantirDispositivoDemoUsuario(user.id);
 
       const JWT_SECRET = env.JWT_SECRET || "MudeEsseTextoNoPainelCloudflare123!";
       const payloadTexto = `user:${user.id}:${Date.now()}`;
