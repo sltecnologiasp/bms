@@ -1,15 +1,19 @@
-// SMART BMS - Service Worker PWA sem cache agressivo
-// Mantém PWA instalável, mas evita cache fantasma.
+// SMART BMS - Service Worker PWA seguro
+// Mantém o app instalável, evita cache fantasma e preserva fallback básico offline.
 
-const CACHE_NAME = 'smart-bms-assets-v3';
+const CACHE_NAME = 'smart-bms-assets-v4';
 
 const STATIC_ASSETS = [
+  '/',
   '/manifest.json',
-  '/1000229030.png'
+  '/1000229030.png',
+  '/icon-192.png',
+  '/icon-512.png'
 ];
 
 self.addEventListener('install', event => {
   self.skipWaiting();
+
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then(cache => cache.addAll(STATIC_ASSETS))
@@ -20,40 +24,63 @@ self.addEventListener('install', event => {
 self.addEventListener('activate', event => {
   event.waitUntil(
     caches.keys()
-      .then(keys => Promise.all(keys.map(key => {
-        if (key !== CACHE_NAME) return caches.delete(key);
-      })))
+      .then(keys => Promise.all(
+        keys.map(key => key !== CACHE_NAME ? caches.delete(key) : Promise.resolve())
+      ))
       .then(() => self.clients.claim())
   );
 });
 
 self.addEventListener('fetch', event => {
   const request = event.request;
+
+  if (request.method !== 'GET') {
+    return;
+  }
+
   const url = new URL(request.url);
   const accept = request.headers.get('accept') || '';
 
-  const isApi = url.pathname.startsWith('/api/');
+  const isSameOrigin = url.origin === self.location.origin;
+  const isApi = isSameOrigin && url.pathname.startsWith('/api/');
   const isHtml = request.mode === 'navigate' || accept.includes('text/html');
   const isJs = url.pathname.endsWith('.js');
   const isCss = url.pathname.endsWith('.css');
 
-  // Nunca cachear API, HTML, páginas ou JavaScript.
-  if (isApi || isHtml || isJs || isCss) {
+  if (isApi) {
     event.respondWith(fetch(request, { cache: 'no-store' }));
     return;
   }
 
-  // Imagens e manifest: cache first com fallback rede.
+  if (isHtml) {
+    event.respondWith(
+      fetch(request, { cache: 'no-store' })
+        .then(response => {
+          const clone = response.clone();
+          caches.open(CACHE_NAME).then(cache => cache.put('/', clone));
+          return response;
+        })
+        .catch(() => caches.match('/') || caches.match(request))
+    );
+    return;
+  }
+
+  if (isJs || isCss) {
+    event.respondWith(fetch(request, { cache: 'no-store' }));
+    return;
+  }
+
   event.respondWith(
     caches.match(request).then(cached => {
-      if (cached) return cached;
-      return fetch(request).then(response => {
-        const clone = response.clone();
-        if (response.ok && request.method === 'GET') {
+      const fetchPromise = fetch(request).then(response => {
+        if (response && response.ok && isSameOrigin) {
+          const clone = response.clone();
           caches.open(CACHE_NAME).then(cache => cache.put(request, clone));
         }
         return response;
-      });
+      }).catch(() => cached);
+
+      return cached || fetchPromise;
     })
   );
 });

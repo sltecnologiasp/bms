@@ -2,15 +2,40 @@
 <html lang="pt-BR">
 <head>
   <link rel="manifest" href="/manifest.json">
-<script>
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', function(){
-      navigator.serviceWorker.register('/sw.js')
-        .then(function(){ console.log('[PWA] Service Worker registrado.'); })
-        .catch(function(err){ console.warn('[PWA] Service Worker falhou:', err); });
-    });
-  }
-</script>
+  <meta name="theme-color" content="#0077b6">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <link rel="apple-touch-icon" href="/icon-192.png">
+
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', function(){
+        navigator.serviceWorker.register('/sw.js', { updateViaCache: 'none' })
+          .then(function(reg){
+            console.log('[PWA] Service Worker registrado.');
+
+            if (reg && typeof reg.update === 'function') {
+              reg.update().catch(function(){});
+            }
+
+            reg.addEventListener('updatefound', function(){
+              var novoWorker = reg.installing;
+              if (!novoWorker) return;
+
+              novoWorker.addEventListener('statechange', function(){
+                if (novoWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                  console.log('[PWA] Nova versão disponível.');
+                }
+              });
+            });
+          })
+          .catch(function(err){
+            console.warn('[PWA] Service Worker falhou:', err);
+          });
+      });
+    }
+  </script>
   
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
