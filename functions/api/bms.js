@@ -45,6 +45,66 @@ export async function onRequest({ request, env }) {
     return /^SLDE[0-9A-F]{10}$/.test(String(code || '').trim().toUpperCase());
   }
 
+
+  function calcularDemoInteligente(userId) {
+    const uid = Number(userId || 0);
+    const t = Math.floor(Date.now() / 1000);
+    const fase = (t / 60) + (uid % 37);
+
+    function onda(amplitude, velocidade, deslocamento = 0) {
+      return Math.sin((fase / velocidade) + deslocamento) * amplitude;
+    }
+
+    function limitar(valor, min, max) {
+      return Math.max(min, Math.min(max, valor));
+    }
+
+    function arredondar(valor, casas = 1) {
+      const p = Math.pow(10, casas);
+      return Math.round(valor * p) / p;
+    }
+
+    const soc = arredondar(limitar(82 + onda(5, 3.5), 76, 88), 0);
+    const voltage = arredondar(51.6 + (soc / 100) * 2.1 + onda(0.18, 2.4, 1.2), 2);
+    const current = arredondar(onda(14, 1.8, 0.5), 1);
+    const temp = arredondar(27.5 + onda(2.2, 4.5, 2.1), 1);
+
+    const invPotenciaBase = Math.abs(onda(1600, 2.1, 0.8));
+    const inv_potencia = Math.round(limitar(invPotenciaBase + 450, 180, 3200));
+    const inv_tensao_ac = arredondar(220 + onda(2.5, 2.8, 0.4), 1);
+    const inv_frequencia = arredondar(60 + onda(0.08, 3.2, 1.8), 2);
+    const inv_geracao_dia = arredondar(limitar(4.5 + Math.abs(onda(5.2, 7.0, 0.2)), 0.8, 13.5), 1);
+
+    const cells = [];
+    const mediaCelula = voltage / 16;
+    for (let i = 0; i < 16; i++) {
+      const variacao = Math.sin((fase / 2.7) + i * 0.73) * 0.012;
+      cells.push(arredondar(limitar(mediaCelula + variacao, 3.18, 3.38), 2));
+    }
+
+    return {
+      soc,
+      voltage,
+      current,
+      temp,
+      cells,
+      inversor_conectado: 1,
+      bateria_conectada: 1,
+      inv_potencia,
+      inv_tensao_ac,
+      inv_frequencia,
+      inv_geracao_dia,
+      heap: 210000 + Math.round(onda(3000, 2.2)),
+      rssi: -45 + Math.round(onda(6, 2.5)),
+      uptime: 3600 + (t % 86400),
+      fw: 'DEMO',
+      esp_model: 'SMART BMS DEMO',
+      chip_revision: 0,
+      flash_mb: 16,
+      psram: 1
+    };
+  }
+
   function gerarCelulasDemo() {
     return [
       3.20, 3.21, 3.20, 3.22,
@@ -60,7 +120,8 @@ export async function onRequest({ request, env }) {
 
     const code = codigoDemoUsuario(uid);
     const nome = 'Dispositivo Demonstração';
-    const cellsJson = JSON.stringify(gerarCelulasDemo());
+    const demo = calcularDemoInteligente(uid);
+    const cellsJson = JSON.stringify(demo.cells);
 
     await env.DB.prepare('INSERT OR IGNORE INTO bms_master (code, user_id) VALUES (?, ?)')
       .bind(code, uid).run();
@@ -78,32 +139,39 @@ export async function onRequest({ request, env }) {
           inversor_conectado, bateria_conectada, inv_potencia, inv_tensao_ac, inv_frequencia, inv_geracao_dia,
           heap, rssi, uptime, fw, esp_model, chip_revision, flash_mb, psram
         )
-        VALUES (?, 84, 52.4, 10.5, 28.0, ?, 1, datetime('now'),
-                1, 1, 1250, 220.0, 60.0, 8.6,
-                210000, -45, 3600, 'DEMO', 'SMART BMS DEMO', 0, 16, 1)
+        VALUES (?, ?, ?, ?, ?, ?, 1, datetime('now'),
+                ?, ?, ?, ?, ?, ?,
+                ?, ?, ?, ?, ?, ?, ?, ?)
         ON CONFLICT(code) DO UPDATE SET
-          soc = 84,
-          voltage = 52.4,
-          current = 10.5,
-          temp = 28.0,
+          soc = excluded.soc,
+          voltage = excluded.voltage,
+          current = excluded.current,
+          temp = excluded.temp,
           cells = excluded.cells,
           online = 1,
           updated_at = datetime('now'),
-          inversor_conectado = 1,
-          bateria_conectada = 1,
-          inv_potencia = 1250,
-          inv_tensao_ac = 220.0,
-          inv_frequencia = 60.0,
-          inv_geracao_dia = 8.6,
-          heap = 210000,
-          rssi = -45,
-          uptime = 3600,
-          fw = 'DEMO',
-          esp_model = 'SMART BMS DEMO',
-          chip_revision = 0,
-          flash_mb = 16,
-          psram = 1
-      `).bind(code, cellsJson).run();
+          inversor_conectado = excluded.inversor_conectado,
+          bateria_conectada = excluded.bateria_conectada,
+          inv_potencia = excluded.inv_potencia,
+          inv_tensao_ac = excluded.inv_tensao_ac,
+          inv_frequencia = excluded.inv_frequencia,
+          inv_geracao_dia = excluded.inv_geracao_dia,
+          heap = excluded.heap,
+          rssi = excluded.rssi,
+          uptime = excluded.uptime,
+          fw = excluded.fw,
+          esp_model = excluded.esp_model,
+          chip_revision = excluded.chip_revision,
+          flash_mb = excluded.flash_mb,
+          psram = excluded.psram
+      `).bind(
+        code,
+        demo.soc, demo.voltage, demo.current, demo.temp, cellsJson,
+        demo.inversor_conectado, demo.bateria_conectada,
+        demo.inv_potencia, demo.inv_tensao_ac, demo.inv_frequencia, demo.inv_geracao_dia,
+        demo.heap, demo.rssi, demo.uptime, demo.fw, demo.esp_model,
+        demo.chip_revision, demo.flash_mb, demo.psram
+      ).run();
     } catch (errDemoCols) {
       await env.DB.prepare(`
         INSERT INTO bms (
@@ -111,25 +179,31 @@ export async function onRequest({ request, env }) {
           inversor_conectado, bateria_conectada, inv_potencia, inv_tensao_ac, inv_frequencia, inv_geracao_dia,
           fw, esp_model
         )
-        VALUES (?, 84, 52.4, 10.5, 28.0, ?, 1, datetime('now'),
-                1, 1, 1250, 220.0, 60.0, 8.6, 'DEMO', 'SMART BMS DEMO')
+        VALUES (?, ?, ?, ?, ?, ?, 1, datetime('now'),
+                ?, ?, ?, ?, ?, ?, ?, ?)
         ON CONFLICT(code) DO UPDATE SET
-          soc = 84,
-          voltage = 52.4,
-          current = 10.5,
-          temp = 28.0,
+          soc = excluded.soc,
+          voltage = excluded.voltage,
+          current = excluded.current,
+          temp = excluded.temp,
           cells = excluded.cells,
           online = 1,
           updated_at = datetime('now'),
-          inversor_conectado = 1,
-          bateria_conectada = 1,
-          inv_potencia = 1250,
-          inv_tensao_ac = 220.0,
-          inv_frequencia = 60.0,
-          inv_geracao_dia = 8.6,
-          fw = 'DEMO',
-          esp_model = 'SMART BMS DEMO'
-      `).bind(code, cellsJson).run();
+          inversor_conectado = excluded.inversor_conectado,
+          bateria_conectada = excluded.bateria_conectada,
+          inv_potencia = excluded.inv_potencia,
+          inv_tensao_ac = excluded.inv_tensao_ac,
+          inv_frequencia = excluded.inv_frequencia,
+          inv_geracao_dia = excluded.inv_geracao_dia,
+          fw = excluded.fw,
+          esp_model = excluded.esp_model
+      `).bind(
+        code,
+        demo.soc, demo.voltage, demo.current, demo.temp, cellsJson,
+        demo.inversor_conectado, demo.bateria_conectada,
+        demo.inv_potencia, demo.inv_tensao_ac, demo.inv_frequencia, demo.inv_geracao_dia,
+        demo.fw, demo.esp_model
+      ).run();
     }
 
     return code;
