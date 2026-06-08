@@ -2254,7 +2254,11 @@ function carregarListaUmaVez() {
       if(isDispositivoDemoCliente(lista[j].code)){
         marcarDemoOnlineNaLista(lista[j].code);
       } else {
-        atualizarUltimoOnlineCardSmartBms(lista[j].code, false, lista[j].updated_at || '');
+        atualizarUltimoOnlineCardSmartBms(
+          lista[j].code,
+          !!estadoOnlineDispositivos[lista[j].code],
+          lista[j].updated_at || ''
+        );
       }
     }
 
