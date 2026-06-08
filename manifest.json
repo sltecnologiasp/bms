@@ -1,0 +1,30 @@
+{
+  "id": "/",
+  "scope": "/",
+  "start_url": "/",
+  "short_name": "Smart BMS",
+  "name": "Smart BMS - SL Tecnologia",
+  "description": "Gerenciamento e Monitoramento Avançado de Baterias em Tempo Real",
+  "lang": "pt-BR",
+  "categories": [
+    "utilities"
+  ],
+  "background_color": "#f4f6f9",
+  "theme_color": "#0077b6",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "type": "image/png",
+      "sizes": "192x192",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-512.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "any maskable"
+    }
+  ]
+}
