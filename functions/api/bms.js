@@ -45,8 +45,8 @@ export async function onRequest({ request, env }) {
     return /^SLDE[0-9A-F]{10}$/.test(String(code || '').trim().toUpperCase());
   }
 
-  async // SMART BMS: demo não deve ser recriado no login. Criar apenas na ativação/cadastro da conta.
-  function garantirDispositivoDemoUsuario(userId) {
+  // SMART BMS: demo não deve ser recriado no login. Criar apenas na ativação/cadastro da conta.
+  async function garantirDispositivoDemoUsuario(userId) {
     const uid = Number(userId || 0);
     if (!uid) return null;
 
@@ -348,7 +348,6 @@ export async function onRequest({ request, env }) {
       const nova_senha_hash = Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2, '0')).join('');
 
       await env.DB.prepare('UPDATE users SET senha_hash = ?, token_verificacao = NULL, email_verificado = 1 WHERE id = ?').bind(nova_senha_hash, user.id).run();
-      await garantirDispositivoDemoUsuario(user.id);
       return json({ ok: true });
     }
 
