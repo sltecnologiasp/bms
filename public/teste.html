@@ -868,6 +868,104 @@ button:active{transform:scale(0.98)}
   }
 }
 
+
+/* ======================================================
+   SMART BMS - VALOR + ICONE CENTRALIZADOS V7
+   Mantem o grid original. Centraliza somente a linha valor+icone.
+   ====================================================== */
+
+.battery-info-card,
+.inverter-info-card{
+  position:relative !important;
+  overflow:hidden !important;
+  min-height:92px !important;
+}
+
+.battery-info-card .label,
+.inverter-info-card .label{
+  width:100% !important;
+  text-align:center !important;
+  margin-bottom:4px !important;
+}
+
+.metric-value-row{
+  width:100% !important;
+  display:flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  gap:8px !important;
+  margin-top:4px !important;
+}
+
+.metric-value-row .value{
+  width:auto !important;
+  margin-top:0 !important;
+  text-align:center !important;
+  display:inline-block !important;
+  flex:0 0 auto !important;
+}
+
+.metric-value-row .metric-icon{
+  position:static !important;
+  right:auto !important;
+  top:auto !important;
+  transform:none !important;
+  width:24px !important;
+  height:24px !important;
+  opacity:.78 !important;
+  pointer-events:none !important;
+  display:flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  flex:0 0 24px !important;
+  margin:0 !important;
+}
+
+.metric-value-row .metric-icon svg{
+  width:24px !important;
+  height:24px !important;
+  display:block !important;
+}
+
+.metric-value-row .metric-icon.icon-lift-tensao{
+  transform:translateY(-2px) !important;
+}
+
+.metric-value-row .metric-icon.icon-lift-temp{
+  transform:translateY(-3px) !important;
+}
+
+.cell-fill-track,
+.cell-fill{
+  display:none !important;
+}
+
+.cell{
+  min-height:66px !important;
+  padding:9px 8px !important;
+}
+
+.cell-val{
+  margin-bottom:0 !important;
+}
+
+@media(max-width:420px){
+  .metric-value-row{
+    gap:6px !important;
+  }
+
+  .metric-value-row .metric-icon{
+    width:22px !important;
+    height:22px !important;
+    flex-basis:22px !important;
+  }
+
+  .metric-value-row .metric-icon svg{
+    width:22px !important;
+    height:22px !important;
+  }
+}
+
 </style>
 </head>
 <body>
@@ -1057,30 +1155,38 @@ button:active{transform:scale(0.98)}
     <div class="grid">
       <div class="card-inner-item inverter-info-card">
         <div class="label">Potência Ativa</div>
-        <div class="value" id="invPotencia" style="color:var(--green)">0W</div>
-        <div class="metric-icon" style="color:var(--green)">
-          <svg viewBox="0 0 64 64" fill="none"><path d="M34 4L14 36h14l-5 24 27-38H35l-1-18z" fill="currentColor"/></svg>
+        <div class="metric-value-row">
+          <div class="value" id="invPotencia" style="color:var(--green)">0W</div>
+          <div class="metric-icon" style="color:var(--green)">
+            <svg viewBox="0 0 64 64" fill="none"><path d="M34 4L14 36h14l-5 24 27-38H35l-1-18z" fill="currentColor"/></svg>
+          </div>
         </div>
       </div>
       <div class="card-inner-item inverter-info-card">
         <div class="label">Tensão AC</div>
-        <div class="value" id="invTensaoAC" style="color:var(--cyan)">0.0V</div>
-        <div class="metric-icon icon-lift-tensao" style="color:var(--cyan)">
-          <svg viewBox="0 0 64 64" fill="none"><path d="M8 34c8-18 16-18 24 0s16 18 24 0" stroke="currentColor" stroke-width="5" stroke-linecap="round"/></svg>
+        <div class="metric-value-row">
+          <div class="value" id="invTensaoAC" style="color:var(--cyan)">0.0V</div>
+          <div class="metric-icon icon-lift-tensao" style="color:var(--cyan)">
+            <svg viewBox="0 0 64 64" fill="none"><path d="M8 34c8-18 16-18 24 0s16 18 24 0" stroke="currentColor" stroke-width="5" stroke-linecap="round"/></svg>
+          </div>
         </div>
       </div>
       <div class="card-inner-item inverter-info-card">
         <div class="label">Frequência</div>
-        <div class="value" id="invFrequencia" style="color:var(--orange)">0.0Hz</div>
-        <div class="metric-icon" style="color:var(--orange)">
-          <svg viewBox="0 0 64 64" fill="none"><path d="M6 34c6-18 13-18 20 0s14 18 20 0 8-18 12-9" stroke="currentColor" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <div class="metric-value-row">
+          <div class="value" id="invFrequencia" style="color:var(--orange)">0.0Hz</div>
+          <div class="metric-icon" style="color:var(--orange)">
+            <svg viewBox="0 0 64 64" fill="none"><path d="M6 34c6-18 13-18 20 0s14 18 20 0 8-18 12-9" stroke="currentColor" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
         </div>
       </div>
       <div class="card-inner-item inverter-info-card">
         <div class="label">Geração do Dia</div>
-        <div class="value" id="invGeracaoDia" style="color:var(--blue)">0.0kWh</div>
-        <div class="metric-icon" style="color:var(--blue)">
-          <svg viewBox="0 0 64 64" fill="none"><circle cx="32" cy="24" r="10" fill="currentColor"/><path d="M32 4v8M32 36v8M12 24H4M60 24h-8M18 10l-6-6M46 10l6-6M18 38l-6 6M46 38l6 6M14 54h36" stroke="currentColor" stroke-width="4" stroke-linecap="round"/></svg>
+        <div class="metric-value-row">
+          <div class="value" id="invGeracaoDia" style="color:var(--blue)">0.0kWh</div>
+          <div class="metric-icon" style="color:var(--blue)">
+            <svg viewBox="0 0 64 64" fill="none"><circle cx="32" cy="24" r="10" fill="currentColor"/><path d="M32 4v8M32 36v8M12 24H4M60 24h-8M18 10l-6-6M46 10l6-6M18 38l-6 6M46 38l6 6M14 54h36" stroke="currentColor" stroke-width="4" stroke-linecap="round"/></svg>
+          </div>
         </div>
       </div>
     </div>
@@ -1091,30 +1197,38 @@ button:active{transform:scale(0.98)}
     <div class="grid">
       <div class="card-inner-item battery-info-card">
         <div class="label">SOC</div>
-        <div class="value" id="soc" style="color:var(--green)">0%</div>
-        <div class="metric-icon" style="color:var(--green)">
-          <svg viewBox="0 0 64 64" fill="none"><rect x="8" y="18" width="43" height="28" rx="5" stroke="currentColor" stroke-width="4"/><rect x="52" y="26" width="5" height="12" rx="2" stroke="currentColor" stroke-width="4"/><rect x="15" y="24" width="10" height="16" rx="2" fill="currentColor"/><rect x="29" y="24" width="10" height="16" rx="2" fill="currentColor"/></svg>
+        <div class="metric-value-row">
+          <div class="value" id="soc" style="color:var(--green)">0%</div>
+          <div class="metric-icon" style="color:var(--green)">
+            <svg viewBox="0 0 64 64" fill="none"><rect x="8" y="18" width="43" height="28" rx="5" stroke="currentColor" stroke-width="4"/><rect x="52" y="26" width="5" height="12" rx="2" stroke="currentColor" stroke-width="4"/><rect x="15" y="24" width="10" height="16" rx="2" fill="currentColor"/><rect x="29" y="24" width="10" height="16" rx="2" fill="currentColor"/></svg>
+          </div>
         </div>
       </div>
       <div class="card-inner-item battery-info-card">
         <div class="label">Tensão</div>
-        <div class="value" id="volt" style="color:var(--cyan)">0V</div>
-        <div class="metric-icon icon-lift-tensao" style="color:var(--blue)">
-          <svg viewBox="0 0 64 64" fill="none"><path d="M36 5L16 35h15l-4 24 21-33H33l3-21z" fill="currentColor"/></svg>
+        <div class="metric-value-row">
+          <div class="value" id="volt" style="color:var(--cyan)">0V</div>
+          <div class="metric-icon icon-lift-tensao" style="color:var(--blue)">
+            <svg viewBox="0 0 64 64" fill="none"><path d="M36 5L16 35h15l-4 24 21-33H33l3-21z" fill="currentColor"/></svg>
+          </div>
         </div>
       </div>
       <div class="card-inner-item battery-info-card">
         <div class="label">Corrente</div>
-        <div class="value" id="corr" style="color:var(--orange)">0A</div>
-        <div class="metric-icon" style="color:var(--orange)">
-          <svg viewBox="0 0 64 64" fill="none"><path d="M6 34h13l7-20 13 38 7-18h12" stroke="currentColor" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <div class="metric-value-row">
+          <div class="value" id="corr" style="color:var(--orange)">0A</div>
+          <div class="metric-icon" style="color:var(--orange)">
+            <svg viewBox="0 0 64 64" fill="none"><path d="M6 34h13l7-20 13 38 7-18h12" stroke="currentColor" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
         </div>
       </div>
       <div class="card-inner-item battery-info-card">
         <div class="label">Temperatura</div>
-        <div class="value" id="temp" style="color:var(--red)">0°C</div>
-        <div class="metric-icon icon-lift-temp" style="color:var(--red)">
-          <svg viewBox="0 0 64 64" fill="none"><path d="M32 8a8 8 0 00-8 8v22a14 14 0 1016 0V16a8 8 0 00-8-8z" stroke="currentColor" stroke-width="4"/><path d="M32 22v24" stroke="currentColor" stroke-width="5" stroke-linecap="round"/><circle cx="32" cy="48" r="6" fill="currentColor"/></svg>
+        <div class="metric-value-row">
+          <div class="value" id="temp" style="color:var(--red)">0°C</div>
+          <div class="metric-icon icon-lift-temp" style="color:var(--red)">
+            <svg viewBox="0 0 64 64" fill="none"><path d="M32 8a8 8 0 00-8 8v22a14 14 0 1016 0V16a8 8 0 00-8-8z" stroke="currentColor" stroke-width="4"/><path d="M32 22v24" stroke="currentColor" stroke-width="5" stroke-linecap="round"/><circle cx="32" cy="48" r="6" fill="currentColor"/></svg>
+          </div>
         </div>
       </div>
     </div>
