@@ -1328,16 +1328,44 @@ window.addEventListener('beforeunload', function(e) {
 
 
 function isDispositivoDemoCliente(code){
-  return /^SLDE[0-9A-F]{10}$/.test(String(code||'').trim().toUpperCase());
+  return /^SLDE[0-9A-F]{10}$/.test(String(code || '').trim().toUpperCase());
 }
 
 function forcarStatusDemoOnline(){
-  try{
-    document.getElementById('txtInversor').textContent='Conectado';
-    document.getElementById('txtBms').textContent='Online';
-    document.getElementById('txtBateria').textContent='Conectada';
-  }catch(e){}
+  var cardInv = document.getElementById('cardInversor');
+  var txtInv = document.getElementById('txtInversor');
+  var cardBms = document.getElementById('cardBms');
+  var txtBms = document.getElementById('txtBms');
+  var cardBat = document.getElementById('cardBateria');
+  var txtBat = document.getElementById('txtBateria');
+
+  if(typeof gerenciarLayoutStatus === 'function'){
+    gerenciarLayoutStatus(cardBms, txtBms, true, "Online", "Offline");
+    gerenciarLayoutStatus(cardInv, txtInv, true, "Conectado", "Desconectado");
+    gerenciarLayoutStatus(cardBat, txtBat, true, "Conectada", "Desconectada");
+  } else {
+    if(txtBms) txtBms.textContent = 'Online';
+    if(txtInv) txtInv.textContent = 'Conectado';
+    if(txtBat) txtBat.textContent = 'Conectada';
+  }
 }
+
+function marcarDemoOnlineNaLista(code){
+  var card = document.getElementById('card-lista-' + code);
+  var dot = document.getElementById('dot-lista-' + code);
+
+  if(card){
+    card.className = 'bms-item online-active';
+  }
+
+  if(dot){
+    dot.className = 'status-dot on';
+    dot.textContent = 'Online';
+  }
+
+  atualizarUltimoOnlineCardSmartBms(code, true, new Date().toISOString());
+}
+
 
 function normalizarCodigoBmsCliente(code) {
   var raw = String(code || '').trim().toUpperCase();
@@ -1966,7 +1994,11 @@ function carregarListaUmaVez() {
     el.innerHTML = html;
 
     for(var j=0;j<lista.length;j++){
-      atualizarUltimoOnlineCardSmartBms(lista[j].code, false, lista[j].updated_at || '');
+      if(isDispositivoDemoCliente(lista[j].code)){
+        marcarDemoOnlineNaLista(lista[j].code);
+      } else {
+        atualizarUltimoOnlineCardSmartBms(lista[j].code, false, lista[j].updated_at || '');
+      }
     }
 
     conectarMqttParaListaDispositivos();
@@ -2003,6 +2035,10 @@ function conectarMqttParaListaDispositivos() {
 
             if (listaTimeoutsDispositivos[idPlacaEmissora]) clearTimeout(listaTimeoutsDispositivos[idPlacaEmissora]);
             listaTimeoutsDispositivos[idPlacaEmissora] = setTimeout(function() {
+              if(isDispositivoDemoCliente(idPlacaEmissora)){
+                marcarDemoOnlineNaLista(idPlacaEmissora);
+                return;
+              }
               cardElemento.className = "bms-item";
               dotElemento.className = "status-dot off";
               dotElemento.textContent = "Offline";
@@ -2027,33 +2063,61 @@ function conectarMqttParaListaDispositivos() {
 function iniciarDemoClienteSeparado(code){
   fecharMqttAnterior();
   clearInterval(INT);
+  if(bmsTimeoutTimer) clearTimeout(bmsTimeoutTimer);
+
+  CODIGO = code;
+  localStorage.setItem('bms_codigo_ativo', code);
+
+  esconderTudo();
+  document.getElementById('dash').classList.remove('hidden');
+  document.getElementById('bms-titulo').textContent = code;
+
+  forcarStatusDemoOnline();
 
   function atualizarDemo(){
     fetch(DEMO_API + '?code=' + encodeURIComponent(code))
-      .then(r=>r.json())
-      .then(d=>{
+      .then(function(r){ return r ? r.json() : null; })
+      .then(function(d){
+        if(!d || d.ok === false){
+          forcarStatusDemoOnline();
+          return;
+        }
+
+        d.code = code;
         d.online = true;
         d.inversor_conectado = true;
         d.bateria_conectada = true;
+
+        if(bmsTimeoutTimer) clearTimeout(bmsTimeoutTimer);
+
+        processarERenderizarDadosMqtt(d);
         forcarStatusDemoOnline();
 
-        if(typeof processarERenderizarDadosMqtt === 'function'){
-          processarERenderizarDadosMqtt(d);
-        }
+        if(bmsTimeoutTimer) clearTimeout(bmsTimeoutTimer);
+        bmsTimeoutTimer = setTimeout(function(){
+          if(isDispositivoDemoCliente(CODIGO)){
+            forcarStatusDemoOnline();
+            return;
+          }
+          configurarInterfaceEstadoOffline();
+        }, TEMPO_TIMEOUT_CONEXAO);
       })
-      .catch(()=>forcarStatusDemoOnline());
+      .catch(function(){
+        forcarStatusDemoOnline();
+      });
   }
 
   atualizarDemo();
-  INT = setInterval(atualizarDemo,3000);
+  INT = setInterval(atualizarDemo, 3000);
 }
+
 
 function abrirDash(code){
   if(isDispositivoDemoCliente(code)){
-    document.getElementById('bms-titulo').textContent = code;
     iniciarDemoClienteSeparado(code);
     return;
   }
+
 
   clearInterval(INT);
   fecharMqttAnterior();
@@ -2106,6 +2170,12 @@ function abrirDash(code){
 }
 
 function configurarInterfaceEstadoOffline() {
+  if(isDispositivoDemoCliente(CODIGO)){
+    forcarStatusDemoOnline();
+    return;
+  }
+
+
   var cardInv = document.getElementById('cardInversor');
   var txtInv = document.getElementById('txtInversor');
   var cardBms = document.getElementById('cardBms');
