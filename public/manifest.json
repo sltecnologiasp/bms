@@ -6,20 +6,22 @@
   "name": "Smart BMS - SL Tecnologia",
   "description": "Gerenciamento e Monitoramento Avançado de Baterias em Tempo Real",
   "lang": "pt-BR",
-  "categories": ["utilities"],
+  "categories": [
+    "utilities"
+  ],
   "background_color": "#f4f6f9",
   "theme_color": "#0077b6",
   "display": "standalone",
   "orientation": "portrait-primary",
   "icons": [
     {
-      "src": "/1000229030.png",
+      "src": "/icon-192.png",
       "type": "image/png",
       "sizes": "192x192",
       "purpose": "any maskable"
     },
     {
-      "src": "/1000229030.png",
+      "src": "/icon-512.png",
       "type": "image/png",
       "sizes": "512x512",
       "purpose": "any maskable"
