@@ -520,73 +520,388 @@ button:active{transform:scale(0.98)}
 }
 
 
-/* AJUSTE RESPONSIVO - CONFIGURAÇÕES DA CONTA */
-#configuracoesPage:not(.hidden){
+/* ======================================================
+   SMART BMS - VISUAL BATERIA / CELULAS 4x4
+   ====================================================== */
+
+.battery-info-card{
+  position:relative !important;
+  overflow:hidden !important;
+  min-height:92px !important;
+}
+
+.battery-info-card .metric-icon{
+  position:absolute;
+  right:14px;
+  top:50%;
+  transform:translateY(-50%);
+  width:34px;
+  height:34px;
+  opacity:.72;
+  pointer-events:none;
+}
+
+.battery-info-card .metric-icon svg{
+  width:100%;
+  height:100%;
+  display:block;
+}
+
+.battery-info-card .label,
+.battery-info-card .value{
+  position:relative;
+  z-index:2;
+}
+
+.cells{
+  display:grid !important;
+  grid-template-columns:repeat(4, 1fr) !important;
+  gap:14px 12px !important;
+  margin-top:18px !important;
+  width:100% !important;
+  overflow:visible !important;
+}
+
+.cell{
+  position:relative !important;
+  min-height:74px !important;
+  padding:9px 9px 10px 13px !important;
+  border-radius:9px !important;
+  background:var(--card-bg) !important;
+  border:1.8px solid var(--cell-border) !important;
   display:flex !important;
   flex-direction:column !important;
   align-items:center !important;
   justify-content:center !important;
-  width:100% !important;
-  max-width:760px !important;
-  min-height:100vh !important;
-  margin:0 auto !important;
-  padding:clamp(72px, 10vh, 120px) clamp(12px, 4vw, 28px) clamp(48px, 8vh, 90px) !important;
+  box-shadow:0 2px 8px rgba(15,23,42,.04) !important;
+  overflow:visible !important;
 }
 
-#configuracoesPage .title,
-#configuracoesPage .user-info{
+.cell::before{
+  content:'' !important;
+  position:absolute !important;
+  left:-9px !important;
+  top:50% !important;
+  transform:translateY(-50%) !important;
+  width:8px !important;
+  height:28px !important;
+  border:1.8px solid currentColor !important;
+  border-right:none !important;
+  border-radius:5px 0 0 5px !important;
+  background:var(--card-bg) !important;
+}
+
+.cell-num{
+  font-size:11px !important;
+  opacity:.8 !important;
+  margin-bottom:2px !important;
+  color:var(--text-main) !important;
+  font-weight:700 !important;
+}
+
+.cell-val{
+  font-size:17px !important;
+  font-weight:900 !important;
+  font-variant-numeric:tabular-nums !important;
+  color:var(--text-main) !important;
+  line-height:1.1 !important;
+  margin-bottom:7px !important;
+}
+
+.cell-fill-track{
+  width:100%;
+  height:9px;
+  border-radius:999px;
+  background:rgba(226,232,240,.65);
+  overflow:hidden;
+}
+
+.cell-fill{
+  height:100%;
+  width:0%;
+  border-radius:999px;
+  background:currentColor;
+  transition:width .35s ease;
+}
+
+.cell.ok{
+  border-color:var(--green) !important;
+  color:var(--green) !important;
+}
+
+.cell.warn{
+  border-color:var(--orange) !important;
+  color:var(--orange) !important;
+}
+
+.cell.crit{
+  border-color:var(--red) !important;
+  color:var(--red) !important;
+}
+
+[data-theme="dark"] .cell{
+  background:rgba(13,20,35,.9) !important;
+  box-shadow:0 0 10px rgba(0,255,255,.08) !important;
+}
+
+[data-theme="dark"] .cell::before{
+  background:rgba(13,20,35,.9) !important;
+}
+
+[data-theme="dark"] .cell-fill-track{
+  background:rgba(255,255,255,.10);
+}
+
+@media(max-width:420px){
+  .battery-info-card .metric-icon{
+    width:28px !important;
+    height:28px !important;
+    right:10px !important;
+    opacity:.65 !important;
+  }
+
+  .cells{
+    grid-template-columns:repeat(4, minmax(0, 1fr)) !important;
+    gap:12px 10px !important;
+  }
+
+  .cell{
+    min-height:68px !important;
+    padding:8px 7px 9px 11px !important;
+  }
+
+  .cell-val{
+    font-size:15px !important;
+  }
+
+  .cell-num{
+    font-size:10px !important;
+  }
+
+  .cell::before{
+    left:-8px !important;
+    width:7px !important;
+    height:25px !important;
+  }
+}
+
+
+.inverter-info-card{
+  position:relative !important;
+  overflow:hidden !important;
+  min-height:92px !important;
+}
+
+.inverter-info-card .metric-icon{
+  position:absolute;
+  right:14px;
+  top:50%;
+  transform:translateY(-50%);
+  width:34px;
+  height:34px;
+  opacity:.62;
+  pointer-events:none;
+}
+
+.inverter-info-card .metric-icon svg{
+  width:100%;
+  height:100%;
+  display:block;
+}
+
+.inverter-info-card .label,
+.inverter-info-card .value{
+  position:relative;
+  z-index:2;
+}
+
+@media(max-width:420px){
+  .inverter-info-card .metric-icon{
+    width:28px !important;
+    height:28px !important;
+    right:10px !important;
+    opacity:.58 !important;
+  }
+}
+
+
+/* ======================================================
+   SMART BMS - AJUSTE FINAL DOS ICONES DOS CARDS
+   Titulo centralizado no topo, valor centralizado,
+   icone à direita alinhado com o valor.
+   ====================================================== */
+
+.battery-info-card,
+.inverter-info-card{
+  position:relative !important;
+  overflow:hidden !important;
+  min-height:92px !important;
+}
+
+.battery-info-card .label,
+.inverter-info-card .label{
   width:100% !important;
   text-align:center !important;
+  margin-bottom:4px !important;
 }
 
-#configuracoesPage .title{
-  margin-top:0 !important;
-}
-
-#configuracoesPage .user-info{
-  margin-bottom:28px !important;
-}
-
-#configuracoesPage .card,
-#configuracoesPage > button{
+.battery-info-card .value,
+.inverter-info-card .value{
   width:100% !important;
-  max-width:560px !important;
-  margin-left:auto !important;
-  margin-right:auto !important;
+  text-align:center !important;
+  padding-right:0 !important;
 }
 
-#configuracoesPage .card{
-  margin-bottom:14px !important;
+.battery-info-card .metric-icon,
+.inverter-info-card .metric-icon{
+  position:absolute !important;
+  right:12px !important;
+  top:64% !important;
+  transform:translateY(-50%) !important;
+  width:24px !important;
+  height:24px !important;
+  opacity:.78 !important;
+  pointer-events:none !important;
+  display:block !important;
 }
 
-#configuracoesPage > button{
-  margin-top:8px !important;
+.battery-info-card .metric-icon svg,
+.inverter-info-card .metric-icon svg{
+  width:24px !important;
+  height:24px !important;
+  display:block !important;
 }
 
-#configuracoesPage .footer-link{
+@media(max-width:420px){
+  .battery-info-card .metric-icon,
+  .inverter-info-card .metric-icon{
+    right:10px !important;
+    top:64% !important;
+    width:22px !important;
+    height:22px !important;
+  }
+
+  .battery-info-card .metric-icon svg,
+  .inverter-info-card .metric-icon svg{
+    width:22px !important;
+    height:22px !important;
+  }
+}
+
+
+/* SMART BMS - REMOVER BARRINHAS INTERNAS DAS CELULAS */
+.cell-fill-track,
+.cell-fill{
   display:none !important;
 }
 
-@media (min-width: 768px){
-  #configuracoesPage:not(.hidden){
-    max-width:820px !important;
-    padding-top:clamp(90px, 12vh, 140px) !important;
-    padding-bottom:clamp(70px, 10vh, 120px) !important;
-  }
+
+/* SMART BMS - AJUSTE CELULAS SEM BARRA */
+.cell{
+  min-height:66px !important;
+  padding:9px 8px !important;
 }
 
-@media (max-width: 420px){
-  #configuracoesPage:not(.hidden){
-    max-width:100% !important;
-    justify-content:flex-start !important;
-    padding-top:76px !important;
-    padding-left:8px !important;
-    padding-right:8px !important;
+.cell-val{
+  margin-bottom:0 !important;
+}
+
+
+
+/* ======================================================
+   SMART BMS - VALOR + ICONE CENTRALIZADOS V7
+   Mantem o grid original. Centraliza somente a linha valor+icone.
+   ====================================================== */
+
+.battery-info-card,
+.inverter-info-card{
+  position:relative !important;
+  overflow:hidden !important;
+  min-height:92px !important;
+}
+
+.battery-info-card .label,
+.inverter-info-card .label{
+  width:100% !important;
+  text-align:center !important;
+  margin-bottom:4px !important;
+}
+
+.metric-value-row{
+  width:100% !important;
+  display:flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  gap:8px !important;
+  margin-top:4px !important;
+}
+
+.metric-value-row .value{
+  width:auto !important;
+  margin-top:0 !important;
+  text-align:center !important;
+  display:inline-block !important;
+  flex:0 0 auto !important;
+}
+
+.metric-value-row .metric-icon{
+  position:static !important;
+  right:auto !important;
+  top:auto !important;
+  transform:none !important;
+  width:24px !important;
+  height:24px !important;
+  opacity:.78 !important;
+  pointer-events:none !important;
+  display:flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  flex:0 0 24px !important;
+  margin:0 !important;
+}
+
+.metric-value-row .metric-icon svg{
+  width:24px !important;
+  height:24px !important;
+  display:block !important;
+}
+
+.metric-value-row .metric-icon.icon-lift-tensao{
+  transform:translateY(-2px) !important;
+}
+
+.metric-value-row .metric-icon.icon-lift-temp{
+  transform:translateY(-3px) !important;
+}
+
+.cell-fill-track,
+.cell-fill{
+  display:none !important;
+}
+
+.cell{
+  min-height:66px !important;
+  padding:9px 8px !important;
+}
+
+.cell-val{
+  margin-bottom:0 !important;
+}
+
+@media(max-width:420px){
+  .metric-value-row{
+    gap:6px !important;
   }
 
-  #configuracoesPage .card,
-  #configuracoesPage > button{
-    max-width:100% !important;
+  .metric-value-row .metric-icon{
+    width:22px !important;
+    height:22px !important;
+    flex-basis:22px !important;
+  }
+
+  .metric-value-row .metric-icon svg{
+    width:22px !important;
+    height:22px !important;
   }
 }
 
@@ -690,7 +1005,7 @@ button:active{transform:scale(0.98)}
     <div class="label">Adicionar dispositivo</div>
     
     <div class="qr-input-row">
-      <input id="bms-code" placeholder="Digite ou scaneie código" maxlength="14">
+      <input id="bms-code" placeholder="Digite o código eFuse" maxlength="14">
       <button class="btn-qr-scan" onclick="abrirScannerCamera()" title="Escanear QR Code">
         <svg viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" d="M3 7V5a2 2 0 012-2h2m10 0h2a2 2 0 012 2v2m0 10v2a2 2 0 01-2 2h-2M7 21H5a2 2 0 01-2-2v-2M12 7v10m-3-5h6" />
@@ -698,7 +1013,7 @@ button:active{transform:scale(0.98)}
       </button>
     </div>
     
-    <input id="bms-nome" placeholder="Nome Ex: Casa" style="margin-top:12px">
+    <input id="bms-nome" placeholder="Nome Ex: Bateria Casa" style="margin-top:12px">
     <button onclick="addBms()">ADICIONAR DISPOSITIVO</button>
     <button id="btn-toggle-cortina" class="hidden" onclick="toggleCortinaDispositivos()">MOSTRAR DISPOSITIVOS</button>
   </div>
@@ -711,8 +1026,8 @@ button:active{transform:scale(0.98)}
   </div>
   
   <div class="card" style="width:100%; display:flex; flex-direction:column; gap:12px; padding:16px; box-sizing:border-box;">
-    <button class="btn-card-action" onclick="mostrarPaginaConta()">CONFIGURAÇÕES DA CONTA</button>
-    <button class="btn-card-action" onclick="sair()">SAIR</button>
+    <button class="btn-card-action" onclick="mostrarPaginaConta()">Configurações da Conta</button>
+    <button class="btn-card-action" onclick="sair()">Sair</button>
   </div>
 
   
@@ -735,6 +1050,10 @@ button:active{transform:scale(0.98)}
   </div>
 
   <button class="btn-sec" style="max-width:440px; width:100%" onclick="voltarParaLista()">Voltar</button>
+  <div class="footer-link">
+    <a href="https://wa.me/5515991355393" target="_blank">SL TECNOLOGIA</a>
+    <span>© Todos os direitos reservados</span>
+  </div>
 </div>
 
 <div id="dash" class="hidden">
@@ -773,20 +1092,68 @@ button:active{transform:scale(0.98)}
   <div class="card-wrapper-block">
     <div class="section-block-title">Informações do Inversor</div>
     <div class="grid">
-      <div class="card-inner-item"><div class="label">Potência Ativa</div><div class="value" id="invPotencia" style="color:var(--green)">0W</div></div>
-      <div class="card-inner-item"><div class="label">Tensão AC</div><div class="value" id="invTensaoAC" style="color:var(--cyan)">0.0V</div></div>
-      <div class="card-inner-item"><div class="label">Frequência</div><div class="value" id="invFrequencia" style="color:var(--orange)">0.0Hz</div></div>
-      <div class="card-inner-item"><div class="label">Geração do Dia</div><div class="value" id="invGeracaoDia" style="color:var(--blue)">0.0kWh</div></div>
+      <div class="card-inner-item inverter-info-card">
+        <div class="label">Potência Ativa</div>
+        <div class="value" id="invPotencia" style="color:var(--green)">0W</div>
+        <div class="metric-icon" style="color:var(--green)">
+          <svg viewBox="0 0 64 64" fill="none"><path d="M34 4L14 36h14l-5 24 27-38H35l-1-18z" fill="currentColor"/></svg>
+        </div>
+      </div>
+      <div class="card-inner-item inverter-info-card">
+        <div class="label">Tensão AC</div>
+        <div class="value" id="invTensaoAC" style="color:var(--cyan)">0.0V</div>
+        <div class="metric-icon icon-lift-tensao" style="color:var(--cyan)">
+          <svg viewBox="0 0 64 64" fill="none"><path d="M8 34c8-18 16-18 24 0s16 18 24 0" stroke="currentColor" stroke-width="5" stroke-linecap="round"/></svg>
+        </div>
+      </div>
+      <div class="card-inner-item inverter-info-card">
+        <div class="label">Frequência</div>
+        <div class="value" id="invFrequencia" style="color:var(--orange)">0.0Hz</div>
+        <div class="metric-icon" style="color:var(--orange)">
+          <svg viewBox="0 0 64 64" fill="none"><path d="M6 34c6-18 13-18 20 0s14 18 20 0 8-18 12-9" stroke="currentColor" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+      </div>
+      <div class="card-inner-item inverter-info-card">
+        <div class="label">Geração do Dia</div>
+        <div class="value" id="invGeracaoDia" style="color:var(--blue)">0.0kWh</div>
+        <div class="metric-icon" style="color:var(--blue)">
+          <svg viewBox="0 0 64 64" fill="none"><circle cx="32" cy="24" r="10" fill="currentColor"/><path d="M32 4v8M32 36v8M12 24H4M60 24h-8M18 10l-6-6M46 10l6-6M18 38l-6 6M46 38l6 6M14 54h36" stroke="currentColor" stroke-width="4" stroke-linecap="round"/></svg>
+        </div>
+      </div>
     </div>
   </div>
 
   <div class="card-wrapper-block">
     <div class="section-block-title">Informações da Bateria</div>
     <div class="grid">
-      <div class="card-inner-item"><div class="label">SOC</div><div class="value" id="soc" style="color:var(--green)">0%</div></div>
-      <div class="card-inner-item"><div class="label">Tensão</div><div class="value" id="volt" style="color:var(--cyan)">0V</div></div>
-      <div class="card-inner-item"><div class="label">Corrente</div><div class="value" id="corr" style="color:var(--orange)">0A</div></div>
-      <div class="card-inner-item"><div class="label">Temperatura</div><div class="value" id="temp" style="color:var(--red)">0°C</div></div>
+      <div class="card-inner-item battery-info-card">
+        <div class="label">SOC</div>
+        <div class="value" id="soc" style="color:var(--green)">0%</div>
+        <div class="metric-icon" style="color:var(--green)">
+          <svg viewBox="0 0 64 64" fill="none"><rect x="8" y="18" width="43" height="28" rx="5" stroke="currentColor" stroke-width="4"/><rect x="52" y="26" width="5" height="12" rx="2" stroke="currentColor" stroke-width="4"/><rect x="15" y="24" width="10" height="16" rx="2" fill="currentColor"/><rect x="29" y="24" width="10" height="16" rx="2" fill="currentColor"/></svg>
+        </div>
+      </div>
+      <div class="card-inner-item battery-info-card">
+        <div class="label">Tensão</div>
+        <div class="value" id="volt" style="color:var(--cyan)">0V</div>
+        <div class="metric-icon icon-lift-tensao" style="color:var(--blue)">
+          <svg viewBox="0 0 64 64" fill="none"><path d="M36 5L16 35h15l-4 24 21-33H33l3-21z" fill="currentColor"/></svg>
+        </div>
+      </div>
+      <div class="card-inner-item battery-info-card">
+        <div class="label">Corrente</div>
+        <div class="value" id="corr" style="color:var(--orange)">0A</div>
+        <div class="metric-icon" style="color:var(--orange)">
+          <svg viewBox="0 0 64 64" fill="none"><path d="M6 34h13l7-20 13 38 7-18h12" stroke="currentColor" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+      </div>
+      <div class="card-inner-item battery-info-card">
+        <div class="label">Temperatura</div>
+        <div class="value" id="temp" style="color:var(--red)">0°C</div>
+        <div class="metric-icon icon-lift-temp" style="color:var(--red)">
+          <svg viewBox="0 0 64 64" fill="none"><path d="M32 8a8 8 0 00-8 8v22a14 14 0 1016 0V16a8 8 0 00-8-8z" stroke="currentColor" stroke-width="4"/><path d="M32 22v24" stroke="currentColor" stroke-width="5" stroke-linecap="round"/><circle cx="32" cy="48" r="6" fill="currentColor"/></svg>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -844,6 +1211,7 @@ button:active{transform:scale(0.98)}
 
 <script>
 var API = '/api/bms';
+var DEMO_API = '/api/demo';
 var TOKEN = localStorage.getItem('bms_token');
 var USER = null;
 var CODIGO = localStorage.getItem('bms_codigo_ativo');
@@ -863,12 +1231,9 @@ var MQTT_CLIENT = null;
 var bmsTimeoutTimer = null;         
 var listaPlacasRegistradas = [];   
 var listaTimeoutsDispositivos = {}; 
-var estadoOnlineDispositivos = {};
-var ultimoPayloadDispositivos = {};
-var ultimoPacoteDispositivosMs = {};
 
 // CONFIGURAÇÃO DO TIMEOUT EM MILISSEGUNDOS (15 SEGUNDOS DE TOLERÂNCIA CONTRA OSCILAÇÕES)
-var TEMPO_TIMEOUT_CONEXAO = 10000;
+var TEMPO_TIMEOUT_CONEXAO = 15000;
 
 try{USER = JSON.parse(localStorage.getItem('bms_user')||'null');}catch(e){}
 
@@ -883,6 +1248,11 @@ window.addEventListener('beforeunload', function(e) {
   }
 });
 
+
+
+function isDispositivoDemoCliente(code){
+  return /^SLDE[0-9A-F]{10}$/.test(String(code || '').trim().toUpperCase());
+}
 
 function normalizarCodigoBmsCliente(code) {
   var raw = String(code || '').trim().toUpperCase();
@@ -1511,20 +1881,7 @@ function carregarListaUmaVez() {
     el.innerHTML = html;
 
     for(var j=0;j<lista.length;j++){
-      var codeCacheLista = lista[j].code;
-      var onlineCacheLista = !!(ultimoPacoteDispositivosMs[codeCacheLista] && (Date.now() - ultimoPacoteDispositivosMs[codeCacheLista]) < TEMPO_TIMEOUT_CONEXAO);
-      var cardCacheLista = document.getElementById('card-lista-' + codeCacheLista);
-      var dotCacheLista = document.getElementById('dot-lista-' + codeCacheLista);
-      if(onlineCacheLista && cardCacheLista && dotCacheLista){
-        estadoOnlineDispositivos[codeCacheLista] = true;
-        cardCacheLista.className = "bms-item online-active";
-        dotCacheLista.className = "status-dot on";
-        dotCacheLista.textContent = "Online";
-        atualizarUltimoOnlineCardSmartBms(codeCacheLista, true, new Date(ultimoPacoteDispositivosMs[codeCacheLista]).toISOString());
-      } else {
-        estadoOnlineDispositivos[codeCacheLista] = false;
-        atualizarUltimoOnlineCardSmartBms(codeCacheLista, false, lista[j].updated_at || '');
-      }
+      atualizarUltimoOnlineCardSmartBms(lista[j].code, false, lista[j].updated_at || '');
     }
 
     conectarMqttParaListaDispositivos();
@@ -1547,11 +1904,6 @@ function conectarMqttParaListaDispositivos() {
         const topicoLido = message.destinationName; 
         const partesTopico = topicoLido.split('/');
         const idPlacaEmissora = partesTopico[1]; 
-        let payloadLista = null;
-        try { payloadLista = JSON.parse(message.payloadString); } catch(ePayload) {}
-        estadoOnlineDispositivos[idPlacaEmissora] = true;
-        ultimoPacoteDispositivosMs[idPlacaEmissora] = Date.now();
-        if(payloadLista) ultimoPayloadDispositivos[idPlacaEmissora] = payloadLista;
 
         if (listaPlacasRegistradas.indexOf(idPlacaEmissora) !== -1) {
           var cardElemento = document.getElementById('card-lista-' + idPlacaEmissora);
@@ -1569,7 +1921,6 @@ function conectarMqttParaListaDispositivos() {
               cardElemento.className = "bms-item";
               dotElemento.className = "status-dot off";
               dotElemento.textContent = "Offline";
-              estadoOnlineDispositivos[idPlacaEmissora] = false;
               atualizarUltimoOnlineCardSmartBms(idPlacaEmissora, false);
             }, TEMPO_TIMEOUT_CONEXAO); 
           }
@@ -1587,6 +1938,39 @@ function conectarMqttParaListaDispositivos() {
   }).catch(function(err){});
 }
 
+
+function iniciarDemoClienteSeparado(code){
+  fecharMqttAnterior();
+  clearInterval(INT);
+
+  gerenciarLayoutStatus(document.getElementById('cardInversor'), document.getElementById('txtInversor'), true, "Conectado", "Desconectado");
+  gerenciarLayoutStatus(document.getElementById('cardBms'), document.getElementById('txtBms'), true, "Online", "Offline");
+  gerenciarLayoutStatus(document.getElementById('cardBateria'), document.getElementById('txtBateria'), true, "Conectada", "Desconectada");
+
+  function carregarDemoSeparado(){
+    fetch(DEMO_API + '?code=' + encodeURIComponent(code))
+      .then(function(r){ return r ? r.json() : null; })
+      .then(function(d){
+        if(!d || d.ok === false){
+          configurarInterfaceEstadoOffline();
+          return;
+        }
+
+        d.online = true;
+        d.inversor_conectado = true;
+        d.bateria_conectada = true;
+        processarERenderizarDadosMqtt(d);
+      })
+      .catch(function(){
+        configurarInterfaceEstadoOffline();
+      });
+  }
+
+  carregarDemoSeparado();
+  INT = setInterval(carregarDemoSeparado, 3000);
+}
+
+
 function abrirDash(code){
   clearInterval(INT);
   fecharMqttAnterior();
@@ -1596,15 +1980,13 @@ function abrirDash(code){
   esconderTudo();
   document.getElementById('dash').classList.remove('hidden');
   document.getElementById('bms-titulo').textContent = code;
-  
-  if(ultimoPayloadDispositivos[code] && ultimoPacoteDispositivosMs[code] && (Date.now() - ultimoPacoteDispositivosMs[code]) < TEMPO_TIMEOUT_CONEXAO){
-    processarERenderizarDadosMqtt(ultimoPayloadDispositivos[code]);
-  } else if(ultimoPacoteDispositivosMs[code] && (Date.now() - ultimoPacoteDispositivosMs[code]) < TEMPO_TIMEOUT_CONEXAO){
-    gerenciarLayoutStatus(document.getElementById('cardBms'), document.getElementById('txtBms'), true, "Online", "Offline");
-    bmsTimeoutTimer = setTimeout(function() { configurarInterfaceEstadoOffline(); }, TEMPO_TIMEOUT_CONEXAO);
-  } else {
-    configurarInterfaceEstadoOffline();
+
+  if(isDispositivoDemoCliente(code)){
+    iniciarDemoClienteSeparado(code);
+    return;
   }
+  
+  configurarInterfaceEstadoOffline();
 
   fetch(API + '?action=get_mqtt_credentials', { headers: {'Authorization': 'Bearer ' + TOKEN} })
   .then(function(res) { return res.json(); })
@@ -1622,9 +2004,6 @@ function abrirDash(code){
     MQTT_CLIENT.onMessageArrived = function (message) {
       try {
         const d = JSON.parse(message.payloadString);
-        estadoOnlineDispositivos[CODIGO] = true;
-        ultimoPacoteDispositivosMs[CODIGO] = Date.now();
-        ultimoPayloadDispositivos[CODIGO] = d;
         processarERenderizarDadosMqtt(d);
       } catch (err) {
         console.error("[MQTT] Erro de processamento do payload:", err);
@@ -1676,8 +2055,7 @@ function configurarInterfaceEstadoOffline() {
 function processarERenderizarDadosMqtt(d) {
   if (bmsTimeoutTimer) clearTimeout(bmsTimeoutTimer);
   bmsTimeoutTimer = setTimeout(function() {
-    console.log("[SISTEMA] Fluxo interrompido. Forçando queda do painel após tolerância de 10s.");
-    estadoOnlineDispositivos[CODIGO] = false;
+    console.log("[SISTEMA] Fluxo interrompido. Forçando queda do painel após tolerância de 15s.");
     configurarInterfaceEstadoOffline(); 
   }, TEMPO_TIMEOUT_CONEXAO); 
 
@@ -1773,59 +2151,52 @@ function addBms(){
 function renderCelulas(cels){
   var container = document.getElementById('celulas');
   if(!container) return;
+
   if(!cels || cels.length === 0){
-    container.innerHTML = '<div style="grid-column:1/-1;text-align:center;opacity:.3;padding:10px;font-size:13px">Sem dados</div>';
+    container.innerHTML = '<div style="grid-column:1/-1;text-align:center;opacity:.5;padding:10px;font-size:13px;color:var(--text-muted)">Sem dados</div>';
     document.getElementById('celMin').textContent = '0.00V';
     document.getElementById('celMax').textContent = '0.00V';
     document.getElementById('celDif').textContent = '0.00V';
     document.getElementById('celTot').textContent = '0';
     return;
   }
+
   var vals = [];
   for(var i=0;i<cels.length;i++){
     var v = parseFloat(cels[i]);
     if(v > 0) vals.push(v);
   }
-  
+
   var min = 0;
   var max = 0;
   var dif = 0;
-  
-  if (vals.length > 0) {
+
+  if(vals.length > 0){
     min = Math.min.apply(null, vals);
     max = Math.max.apply(null, vals);
     dif = max - min;
   }
-  
-  document.getElementById('celMin').textContent = min.toFixed(2)+'V';
-  document.getElementById('celMax').textContent = max.toFixed(2)+'V';
-  document.getElementById('celDif').textContent = dif.toFixed(2)+'V';
+
+  document.getElementById('celMin').textContent = min.toFixed(2) + 'V';
+  document.getElementById('celMax').textContent = max.toFixed(2) + 'V';
+  document.getElementById('celDif').textContent = dif.toFixed(2) + 'V';
   document.getElementById('celTot').textContent = cels.length;
-  
-  if (container.children.length !== cels.length || container.querySelector('div[style*="grid-column"]')) {
-    var html = '';
-    for(var i=0; i<cels.length; i++){
-      html += '<div class="cell" id="c-box-'+i+'"><div class="cell-num">C'+(i+1)+'</div><div class="cell-val" id="c-val-'+i+'">0.00V</div></div>';
-    }
-    container.innerHTML = html;
+
+  var htmlCells = '';
+  for(var j=0;j<cels.length;j++){
+    var val = parseFloat(cels[j]);
+    if(!Number.isFinite(val)) val = 0;
+
+    var cls = 'ok';
+    if(val < 3.2 || val > 4.2) cls = 'crit';
+    else if(val < 3.4 || val > 4.15) cls = 'warn';
+htmlCells += '<div class="cell '+cls+'" id="c-box-'+j+'">' +
+      '<div class="cell-num">C'+(j+1)+'</div>' +
+      '<div class="cell-val">'+val.toFixed(2)+'V</div>' +
+      '</div>';
   }
-  
-  for(var i=0; i<cels.length; i++){
-    var val = parseFloat(cels[i]);
-    var valStr = val.toFixed(2)+'V';
-    var cls = (val < 3.2 || val > 4.2) ? 'crit' : (val < 3.4 || val > 4.15) ? 'warn' : 'ok';
-    var novaClasse = 'cell ' + cls;
-    
-    var cellBox = document.getElementById('c-box-'+i);
-    var cellVal = document.getElementById('c-val-'+i);
-    
-    if (cellVal && cellVal.textContent !== valStr) {
-      cellVal.textContent = valStr;
-    }
-    if (cellBox && cellBox.className !== novaClasse) {
-      cellBox.className = novaClasse;
-    }
-  }
+
+  container.innerHTML = htmlCells;
 }
 
 function atualizarGauge(soc){
