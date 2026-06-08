@@ -1,12 +1,14 @@
 // SMART BMS - Service Worker PWA seguro
 // Mantém o app instalável, evita cache fantasma e usa apenas assets existentes.
 
-const CACHE_NAME = 'smart-bms-assets-v5';
+const CACHE_NAME = 'smart-bms-assets-v6';
 
 const STATIC_ASSETS = [
   '/',
   '/manifest.json',
-  '/1000229030.png'
+  '/1000229030.png',
+  '/icon-192.png',
+  '/icon-512.png'
 ];
 
 self.addEventListener('install', event => {
