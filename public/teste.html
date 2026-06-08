@@ -724,6 +724,70 @@ button:active{transform:scale(0.98)}
   }
 }
 
+
+/* ======================================================
+   SMART BMS - AJUSTE FINAL DOS ICONES DOS CARDS
+   Titulo centralizado no topo, valor centralizado,
+   icone à direita alinhado com o valor.
+   ====================================================== */
+
+.battery-info-card,
+.inverter-info-card{
+  position:relative !important;
+  overflow:hidden !important;
+  min-height:92px !important;
+}
+
+.battery-info-card .label,
+.inverter-info-card .label{
+  width:100% !important;
+  text-align:center !important;
+  margin-bottom:4px !important;
+}
+
+.battery-info-card .value,
+.inverter-info-card .value{
+  width:100% !important;
+  text-align:center !important;
+  padding-right:0 !important;
+}
+
+.battery-info-card .metric-icon,
+.inverter-info-card .metric-icon{
+  position:absolute !important;
+  right:12px !important;
+  top:57% !important;
+  transform:translateY(-50%) !important;
+  width:24px !important;
+  height:24px !important;
+  opacity:.78 !important;
+  pointer-events:none !important;
+  display:block !important;
+}
+
+.battery-info-card .metric-icon svg,
+.inverter-info-card .metric-icon svg{
+  width:24px !important;
+  height:24px !important;
+  display:block !important;
+}
+
+@media(max-width:420px){
+  .battery-info-card .metric-icon,
+  .inverter-info-card .metric-icon{
+    right:10px !important;
+    top:57% !important;
+    width:22px !important;
+    height:22px !important;
+  }
+
+  .battery-info-card .metric-icon svg,
+  .inverter-info-card .metric-icon svg{
+    width:22px !important;
+    height:22px !important;
+  }
+}
+
 </style>
 </head>
 <body>
@@ -929,7 +993,7 @@ button:active{transform:scale(0.98)}
         <div class="label">Frequência</div>
         <div class="value" id="invFrequencia" style="color:var(--orange)">0.0Hz</div>
         <div class="metric-icon" style="color:var(--orange)">
-          <svg viewBox="0 0 64 64" fill="none"><circle cx="32" cy="32" r="22" stroke="currentColor" stroke-width="4"/><path d="M32 14v18l12 8" stroke="currentColor" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <svg viewBox="0 0 64 64" fill="none"><path d="M6 34c6-18 13-18 20 0s14 18 20 0 8-18 12-9" stroke="currentColor" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </div>
       </div>
       <div class="card-inner-item inverter-info-card">
