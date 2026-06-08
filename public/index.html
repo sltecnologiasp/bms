@@ -1308,10 +1308,16 @@ var MQTT_CLIENT = null;
 var bmsTimeoutTimer = null;         
 var listaPlacasRegistradas = [];   
 var listaTimeoutsDispositivos = {}; 
+var ultimoPacoteDispositivosMs = {};
+
+var dashboardAberturaMs = 0;
+var mqttAssumiuDashboard = false;
+var aguardandoMqttInicial = false;
+var ultimoMqttDashboardMs = 0;
+var GRACE_MQTT_INICIAL_MS = 10000;
+
 var estadoOnlineDispositivos = {};
 var ultimoSnapshotDispositivos = {};
-var mqttAssumiuDashboard = false;
-var dashboardOpenMs = 0;
 
 
 // CONFIGURAÇÃO DO TIMEOUT EM MILISSEGUNDOS (15 SEGUNDOS DE TOLERÂNCIA CONTRA OSCILAÇÕES)
@@ -1369,6 +1375,87 @@ function marcarDemoOnlineNaLista(code){
   }
 
   atualizarUltimoOnlineCardSmartBms(code, true, new Date().toISOString());
+}
+
+
+
+function mqttRecenteDispositivo(code){
+  if(!code) return false;
+  var t = ultimoPacoteDispositivosMs[code] || 0;
+  return !!(t && (Date.now() - t) < TEMPO_TIMEOUT_CONEXAO);
+}
+
+function marcarDashboardBmsOnline(code){
+  if(code){
+    estadoOnlineDispositivos[code] = true;
+  }
+  gerenciarLayoutStatus(document.getElementById('cardBms'), document.getElementById('txtBms'), true, "Online", "Offline");
+}
+
+function podeDerrubarDashboardOffline(){
+  if(isDispositivoDemoCliente(CODIGO)) return false;
+
+  if(aguardandoMqttInicial && !mqttAssumiuDashboard && (Date.now() - dashboardAberturaMs) < GRACE_MQTT_INICIAL_MS){
+    return false;
+  }
+
+  if(mqttRecenteDispositivo(CODIGO)){
+    return false;
+  }
+
+  return true;
+}
+
+function renderizarDadosSnapshotD1(d){
+  if(!d) return;
+
+  var cardInv = document.getElementById('cardInversor');
+  var txtInv = document.getElementById('txtInversor');
+  var cardBat = document.getElementById('cardBateria');
+  var txtBat = document.getElementById('txtBateria');
+
+  var invAtivo = (d.inversor_conectado !== undefined) ? d.inversor_conectado : true;
+  gerenciarLayoutStatus(cardInv, txtInv, invAtivo, "Conectado", "Desconectado");
+
+  var batAtiva = (d.bateria_conectada !== undefined) ? d.bateria_conectada : true;
+  gerenciarLayoutStatus(cardBat, txtBat, batAtiva, "Conectada", "Desconectada");
+
+  if(!invAtivo) {
+    document.getElementById('invPotencia').textContent = '0W';
+    document.getElementById('invTensaoAC').textContent = '0.0V';
+    document.getElementById('invFrequencia').textContent = '0.0Hz';
+    document.getElementById('invGeracaoDia').textContent = '0.0kWh';
+  } else {
+    document.getElementById('invPotencia').textContent = (d.inv_potencia !== undefined ? Number(d.inv_potencia).toFixed(0) : '0') + 'W';
+    document.getElementById('invTensaoAC').textContent = (d.inv_tensao_ac !== undefined ? Number(d.inv_tensao_ac).toFixed(1) : '0.0') + 'V';
+    document.getElementById('invFrequencia').textContent = (d.inv_frequencia !== undefined ? Number(d.inv_frequencia).toFixed(1) : '0.0') + 'Hz';
+    document.getElementById('invGeracaoDia').textContent = (d.inv_geracao_dia !== undefined ? Number(d.inv_geracao_dia).toFixed(1) : '0.0') + 'kWh';
+  }
+
+  if(!batAtiva) {
+    document.getElementById('soc').textContent = '0%';
+    document.getElementById('volt').textContent = '0.00V';
+    document.getElementById('corr').textContent = '0.0A';
+    document.getElementById('temp').textContent = '0.0°C';
+    atualizarGauge(0);
+    renderCelulas([]);
+  } else {
+    document.getElementById('soc').textContent = Number(d.soc || 0).toFixed(0)+'%';
+    document.getElementById('volt').textContent = Number(d.voltage || 0).toFixed(2)+'V';
+    document.getElementById('corr').textContent = Number(d.current || 0).toFixed(1)+'A';
+    document.getElementById('temp').textContent = Number(d.temp || 0).toFixed(1)+'°C';
+    renderCelulas(d.cells || []);
+    atualizarGauge(parseInt(d.soc || 0));
+  }
+}
+
+function iniciarJanelaMqttInicial(){
+  if(bmsTimeoutTimer) clearTimeout(bmsTimeoutTimer);
+  bmsTimeoutTimer = setTimeout(function(){
+    if(!mqttAssumiuDashboard && !mqttRecenteDispositivo(CODIGO)){
+      configurarInterfaceEstadoOffline();
+    }
+  }, GRACE_MQTT_INICIAL_MS);
 }
 
 
@@ -2030,7 +2117,10 @@ function conectarMqttParaListaDispositivos() {
       try {
         const topicoLido = message.destinationName; 
         const partesTopico = topicoLido.split('/');
-        const idPlacaEmissora = partesTopico[1]; 
+        const idPlacaEmissora = partesTopico[1];
+
+        ultimoPacoteDispositivosMs[idPlacaEmissora] = Date.now();
+        estadoOnlineDispositivos[idPlacaEmissora] = true; 
 
         if (listaPlacasRegistradas.indexOf(idPlacaEmissora) !== -1) {
           var cardElemento = document.getElementById('card-lista-' + idPlacaEmissora);
@@ -2049,6 +2139,13 @@ function conectarMqttParaListaDispositivos() {
                 marcarDemoOnlineNaLista(idPlacaEmissora);
                 return;
               }
+              if(mqttRecenteDispositivo(idPlacaEmissora)){
+                cardElemento.className = "bms-item online-active";
+                dotElemento.className = "status-dot on";
+                dotElemento.textContent = "Online";
+                return;
+              }
+              estadoOnlineDispositivos[idPlacaEmissora] = false;
               cardElemento.className = "bms-item";
               dotElemento.className = "status-dot off";
               dotElemento.textContent = "Offline";
@@ -2085,39 +2182,13 @@ function aplicarSnapshotApiDispositivoReal(code){
     if(!d || d.ok === false) return;
 
     ultimoSnapshotDispositivos[code] = d;
+    renderizarDadosSnapshotD1(d);
 
-    var onlineApi = !!d.online;
-    estadoOnlineDispositivos[code] = onlineApi;
-
-    if(typeof processarERenderizarDadosMqtt === 'function'){
-      mqttAssumiuDashboard = true;
-        estadoOnlineDispositivos[CODIGO] = true;
-        processarERenderizarDadosMqtt(d);
+    // O D1 é somente snapshot. O status online real continua sendo do MQTT.
+    // Durante os primeiros 10 segundos, mantém o estado herdado da lista enquanto o MQTT assume.
+    if(mqttRecenteDispositivo(code) || (aguardandoMqttInicial && !mqttAssumiuDashboard)){
+      marcarDashboardBmsOnline(code);
     }
-
-    gerenciarLayoutStatus(
-      document.getElementById('cardBms'),
-      document.getElementById('txtBms'),
-      onlineApi,
-      "Online",
-      "Offline"
-    );
-
-    gerenciarLayoutStatus(
-      document.getElementById('cardInversor'),
-      document.getElementById('txtInversor'),
-      !!d.inversor_conectado,
-      "Conectado",
-      "Desconectado"
-    );
-
-    gerenciarLayoutStatus(
-      document.getElementById('cardBateria'),
-      document.getElementById('txtBateria'),
-      !!d.bateria_conectada,
-      "Conectada",
-      "Desconectada"
-    );
   })
   .catch(function(){});
 }
@@ -2181,25 +2252,26 @@ function abrirDash(code){
     return;
   }
 
-
-  
-  aplicarSnapshotApiDispositivoReal(code);
-clearInterval(INT);
   fecharMqttAnterior();
-  
+  clearInterval(INT);
+
   CODIGO = code;
   localStorage.setItem('bms_codigo_ativo', code);
+
+  dashboardAberturaMs = Date.now();
+  mqttAssumiuDashboard = false;
+  aguardandoMqttInicial = true;
+
   esconderTudo();
   document.getElementById('dash').classList.remove('hidden');
   document.getElementById('bms-titulo').textContent = code;
-  
-  dashboardOpenMs = Date.now();
-  mqttAssumiuDashboard = false;
 
-  // Mantém o último estado do D1 por 10s enquanto aguarda MQTT.
-  if(estadoOnlineDispositivos[code]){
-    gerenciarLayoutStatus(document.getElementById('cardBms'), document.getElementById('txtBms'), true, "Online", "Offline");
-  }
+  // Carrega imediatamente os últimos dados salvos no D1, sem usar D1 como status online real.
+  aplicarSnapshotApiDispositivoReal(code);
+
+  // Mantém o status herdado da lista por 10s enquanto aguarda o MQTT assumir.
+  marcarDashboardBmsOnline(code);
+  iniciarJanelaMqttInicial();
 
   fetch(API + '?action=get_mqtt_credentials', { headers: {'Authorization': 'Bearer ' + TOKEN} })
   .then(function(res) { return res.json(); })
@@ -2211,7 +2283,9 @@ clearInterval(INT);
 
     MQTT_CLIENT.onConnectionLost = function (responseObject) {
       console.log("[MQTT] Conexão finalizada ou perdida.");
-      configurarInterfaceEstadoOffline();
+      if(!mqttRecenteDispositivo(CODIGO) && !aguardandoMqttInicial){
+        configurarInterfaceEstadoOffline();
+      }
     };
 
     MQTT_CLIENT.onMessageArrived = function (message) {
@@ -2234,29 +2308,26 @@ clearInterval(INT);
       },
       onFailure: function (err) {
         console.error("[MQTT] Falha na autenticação:", err);
-        configurarInterfaceEstadoOffline();
+        // Não derruba imediatamente. Respeita a janela de 10s.
+        if((Date.now() - dashboardAberturaMs) >= GRACE_MQTT_INICIAL_MS && !mqttAssumiuDashboard){
+          configurarInterfaceEstadoOffline();
+        }
       }
     });
-  }).catch(function(e) { configurarInterfaceEstadoOffline(); });
+  }).catch(function(e) {
+    if((Date.now() - dashboardAberturaMs) >= GRACE_MQTT_INICIAL_MS && !mqttAssumiuDashboard){
+      configurarInterfaceEstadoOffline();
+    }
+  });
 }
 
 function configurarInterfaceEstadoOffline() {
-  if(!mqttAssumiuDashboard && (Date.now() - dashboardOpenMs) < 10000){
+  if(!podeDerrubarDashboardOffline()){
+    if(mqttRecenteDispositivo(CODIGO) || (aguardandoMqttInicial && !mqttAssumiuDashboard)){
+      marcarDashboardBmsOnline(CODIGO);
+    }
     return;
   }
-
-
-  if(typeof CODIGO !== 'undefined' && CODIGO && estadoOnlineDispositivos[CODIGO]){
-    gerenciarLayoutStatus(document.getElementById('cardBms'), document.getElementById('txtBms'), true, "Online", "Offline");
-    return;
-  }
-
-
-  if(isDispositivoDemoCliente(CODIGO)){
-    forcarStatusDemoOnline();
-    return;
-  }
-
 
   var cardInv = document.getElementById('cardInversor');
   var txtInv = document.getElementById('txtInversor');
@@ -2264,6 +2335,9 @@ function configurarInterfaceEstadoOffline() {
   var txtBms = document.getElementById('txtBms');
   var cardBat = document.getElementById('cardBateria');
   var txtBat = document.getElementById('txtBateria');
+
+  estadoOnlineDispositivos[CODIGO] = false;
+  aguardandoMqttInicial = false;
 
   gerenciarLayoutStatus(cardBms, txtBms, false, "Online", "Offline");
   gerenciarLayoutStatus(cardInv, txtInv, false, "Conectado", "Desconectado");
@@ -2283,54 +2357,28 @@ function configurarInterfaceEstadoOffline() {
 }
 
 function processarERenderizarDadosMqtt(d) {
+  var codeAtual = (d && d.code) ? d.code : CODIGO;
+
+  mqttAssumiuDashboard = true;
+  aguardandoMqttInicial = false;
+  ultimoMqttDashboardMs = Date.now();
+
+  if(codeAtual){
+    ultimoPacoteDispositivosMs[codeAtual] = Date.now();
+    estadoOnlineDispositivos[codeAtual] = true;
+    ultimoSnapshotDispositivos[codeAtual] = d;
+  }
+
   if (bmsTimeoutTimer) clearTimeout(bmsTimeoutTimer);
   bmsTimeoutTimer = setTimeout(function() {
-    console.log("[SISTEMA] Fluxo interrompido. Forçando queda do painel após tolerância de 15s.");
-    configurarInterfaceEstadoOffline(); 
+    if(!mqttRecenteDispositivo(CODIGO)){
+      console.log("[SISTEMA] Sem MQTT recente. Forçando offline após tolerância.");
+      configurarInterfaceEstadoOffline();
+    }
   }, TEMPO_TIMEOUT_CONEXAO); 
 
-  var cardInv = document.getElementById('cardInversor');
-  var txtInv = document.getElementById('txtInversor');
-  var cardBms = document.getElementById('cardBms');
-  var txtBms = document.getElementById('txtBms');
-  var cardBat = document.getElementById('cardBateria');
-  var txtBat = document.getElementById('txtBateria');
-
-  gerenciarLayoutStatus(cardBms, txtBms, true, "Online", "Offline");
-  
-  var invAtivo = (d.inversor_conectado !== undefined) ? d.inversor_conectado : true;
-  gerenciarLayoutStatus(cardInv, txtInv, invAtivo, "Conectado", "Desconectado");
-
-  var batAtiva = (d.bateria_conectada !== undefined) ? d.bateria_conectada : true;
-  gerenciarLayoutStatus(cardBat, txtBat, batAtiva, "Conectada", "Desconectada");
-
-  if(!invAtivo) {
-    document.getElementById('invPotencia').textContent = '0W';
-    document.getElementById('invTensaoAC').textContent = '0.0V';
-    document.getElementById('invFrequencia').textContent = '0.0Hz';
-    document.getElementById('invGeracaoDia').textContent = '0.0kWh';
-  } else {
-    document.getElementById('invPotencia').textContent = (d.inv_potencia !== undefined ? d.inv_potencia.toFixed(0) : '0') + 'W';
-    document.getElementById('invTensaoAC').textContent = (d.inv_tensao_ac !== undefined ? d.inv_tensao_ac.toFixed(1) : '0.0') + 'V';
-    document.getElementById('invFrequencia').textContent = (d.inv_frequencia !== undefined ? d.inv_frequencia.toFixed(1) : '0.0') + 'Hz';
-    document.getElementById('invGeracaoDia').textContent = (d.inv_geracao_dia !== undefined ? d.inv_geracao_dia.toFixed(1) : '0.0') + 'kWh';
-  }
-
-  if(!batAtiva) {
-    document.getElementById('soc').textContent = '0%';
-    document.getElementById('volt').textContent = '0.00V';
-    document.getElementById('corr').textContent = '0.0A';
-    document.getElementById('temp').textContent = '0.0°C';
-    atualizarGauge(0);
-    renderCelulas([]);
-  } else {
-    document.getElementById('soc').textContent = d.soc.toFixed(0)+'%';
-    document.getElementById('volt').textContent = d.voltage.toFixed(2)+'V';
-    document.getElementById('corr').textContent = d.current.toFixed(1)+'A';
-    document.getElementById('temp').textContent = d.temp.toFixed(1)+'°C';
-    renderCelulas(d.cells); 
-    atualizarGauge(parseInt(d.soc || 0));
-  }
+  marcarDashboardBmsOnline(codeAtual);
+  renderizarDadosSnapshotD1(d);
 }
 
 function voltar(){ 
