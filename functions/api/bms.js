@@ -51,7 +51,7 @@ export async function onRequest({ request, env }) {
     if (!uid) return null;
 
     const code = codigoDemoUsuario(uid);
-    const nome = 'Dispositivo Demonstração';
+    const nome = 'Demonstração';
 
     await env.DB.prepare('INSERT OR IGNORE INTO bms_master (code, user_id) VALUES (?, ?)')
       .bind(code, uid).run();
