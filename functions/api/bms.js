@@ -838,16 +838,25 @@ export async function onRequest({ request, env }) {
 
     if (action === 'remove_bms' && request.method === 'DELETE') {
       if (!userId) return json({ ok: false, error: 'Login necessário' }, 401);
-      const code = normalizarCodigoBms(url.searchParams.get('code'));
-      if (!validarCodigoBmsHex(code)) return json({ ok: false, error: 'Code inválido' }, 400);
+
+      const rawCode = String(url.searchParams.get('code') || '').trim().toUpperCase();
+      const demo = isCodigoDemo(rawCode);
+      const code = demo ? rawCode : normalizarCodigoBms(rawCode);
+
+      if (!demo && !validarCodigoBmsHex(code)) {
+        return json({ ok: false, error: 'Code inválido' }, 400);
+      }
+
       const check = await env.DB.prepare('SELECT id FROM bms_master WHERE code = ? AND user_id = ?').bind(code, userId).first();
       if (!check) return json({ ok: false, error: 'BMS não encontrada na sua conta' }, 403);
-      if (isCodigoDemo(code)) {
+
+      if (demo) {
         await env.DB.prepare('DELETE FROM user_bms WHERE user_id = ? AND bms_code = ?').bind(userId, code).run();
         await env.DB.prepare('DELETE FROM bms_master WHERE code = ? AND user_id = ?').bind(code, userId).run();
         await env.DB.prepare('DELETE FROM bms WHERE code = ?').bind(code).run();
         return json({ ok: true });
       }
+
       await env.DB.prepare('UPDATE bms_master SET user_id = NULL WHERE code = ?').bind(code).run();
       await env.DB.prepare('DELETE FROM user_bms WHERE user_id = ? AND bms_code = ?').bind(userId, code).run();
       return json({ ok: true });
