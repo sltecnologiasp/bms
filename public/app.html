@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="theme-color" content="#0077b6">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<link rel="manifest" href="/manifest.json">
+<link rel="apple-touch-icon" href="/icon-192.png">
+<title>Instalar SMART BMS</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#f4f7fb;--card:#ffffff;--border:#dbe5f0;--text:#1f2937;--muted:#64748b;--blue:#0077b6;--blue-dark:#005f92;--green:#16a34a;--warn:#d97706}
+body{min-height:100vh;font-family:Arial,Helvetica,sans-serif;background:linear-gradient(180deg,#eef6ff 0%,var(--bg) 42%,#ffffff 100%);color:var(--text);display:flex;align-items:center;justify-content:center;padding:18px}
+.wrap{width:100%;max-width:460px;text-align:center}
+.card{background:var(--card);border:1px solid var(--border);border-radius:24px;padding:28px 22px;box-shadow:0 18px 45px rgba(15,23,42,.10)}
+.logo{width:112px;height:112px;object-fit:contain;border-radius:26px;background:#f8fafc;border:1px solid var(--border);padding:10px;margin-bottom:18px;box-shadow:0 8px 22px rgba(15,23,42,.08)}
+h1{font-size:34px;font-weight:900;letter-spacing:.6px;color:var(--blue);margin-bottom:8px}
+.sub{color:var(--muted);font-size:15px;line-height:1.45;margin-bottom:22px}
+.features{display:grid;gap:10px;margin:18px 0 22px;text-align:left}
+.feature{display:flex;gap:10px;align-items:flex-start;background:#f8fafc;border:1px solid var(--border);border-radius:14px;padding:12px;color:#334155;font-size:14px;line-height:1.35}
+.dot{width:10px;height:10px;min-width:10px;border-radius:50%;background:var(--green);margin-top:4px}
+button,.btn{width:100%;display:block;text-decoration:none;border:none;border-radius:16px;padding:16px 18px;font-size:16px;font-weight:800;color:#fff;background:var(--blue);cursor:pointer;margin-top:12px;box-shadow:0 10px 20px rgba(0,119,182,.20)}
+button:active,.btn:active{transform:translateY(1px)}
+button:hover,.btn:hover{background:var(--blue-dark)}
+.btn-sec{background:#ffffff;border:1px solid var(--blue);color:var(--blue);box-shadow:none}
+.btn-sec:hover{background:#eef6ff;color:var(--blue-dark);border-color:var(--blue-dark)}
+button:disabled{opacity:.65;cursor:default;transform:none}
+.hint{display:none;margin-top:18px;padding:14px;border-radius:16px;background:#f8fafc;border:1px solid var(--border);color:var(--muted);font-size:14px;line-height:1.45;text-align:left}
+.hint.show{display:block}.hint strong{color:#1f2937}
+.status{margin-top:14px;font-size:13px;color:var(--muted)}.ok{color:var(--green)}.warn{color:var(--warn)}
+.footer{margin-top:18px;font-size:12px;color:#94a3b8}
+</style>
+</head>
+<body>
+<main class="wrap">
+<section class="card">
+<img class="logo" src="/1000229030.png" alt="SMART BMS">
+<h1>SMART BMS</h1>
+<p class="sub">Instale o painel como aplicativo para acesso rápido, tela cheia e experiência mais estável no celular.</p>
+<div class="features">
+<div class="feature"><span class="dot"></span><span>Acesso direto pela tela inicial.</span></div>
+<div class="feature"><span class="dot"></span><span>Visual de aplicativo, sem barra do navegador.</span></div>
+<div class="feature"><span class="dot"></span><span>Atualizações automáticas quando uma nova versão for publicada.</span></div>
+</div>
+<button id="btnInstall" onclick="installApp()">INSTALAR APLICATIVO</button>
+<a class="btn btn-sec" href="/">ABRIR PAINEL</a>
+<div id="androidHint" class="hint"><strong>Android / Chrome:</strong><br>Se o botão não abrir a instalação, toque no menu <strong>⋮</strong> e escolha <strong>Instalar app</strong> ou <strong>Adicionar à tela inicial</strong>.</div>
+<div id="iosHint" class="hint"><strong>iPhone / Safari:</strong><br>Toque em <strong>Compartilhar</strong> e depois em <strong>Adicionar à Tela de Início</strong>.</div>
+<div id="status" class="status">Verificando disponibilidade de instalação...</div>
+</section>
+<div class="footer">SL Tecnologia • SMART BMS</div>
+</main>
+<script>
+let deferredPrompt=null;
+function isStandalone(){return window.matchMedia('(display-mode: standalone)').matches||window.navigator.standalone===true||document.referrer.indexOf('android-app://')===0}
+function isIOS(){return /iphone|ipad|ipod/i.test(window.navigator.userAgent)}
+function setStatus(text,cls){const el=document.getElementById('status');el.className='status '+(cls||'');el.textContent=text}
+window.addEventListener('beforeinstallprompt',function(e){e.preventDefault();deferredPrompt=e;document.getElementById('androidHint').classList.remove('show');setStatus('Aplicativo pronto para instalação.','ok')});
+window.addEventListener('appinstalled',function(){deferredPrompt=null;const btn=document.getElementById('btnInstall');btn.textContent='APLICATIVO INSTALADO';btn.disabled=true;setStatus('Aplicativo instalado com sucesso.','ok')});
+async function installApp(){
+if(isStandalone()){setStatus('Você já está usando o SMART BMS instalado.','ok');return}
+if(deferredPrompt){deferredPrompt.prompt();await deferredPrompt.userChoice;deferredPrompt=null;return}
+if(isIOS()){document.getElementById('iosHint').classList.add('show');setStatus('No iPhone, a instalação é feita pelo menu Compartilhar do Safari.','warn')}
+else{document.getElementById('androidHint').classList.add('show');setStatus('Se o Chrome ainda não liberou o botão, use o menu ⋮ do navegador.','warn')}
+}
+if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('/sw.js',{updateViaCache:'none'}).then(function(reg){if(reg&&typeof reg.update==='function')reg.update().catch(function(){})}).catch(function(){})})}
+window.addEventListener('load',function(){
+if(isStandalone()){const btn=document.getElementById('btnInstall');btn.textContent='APLICATIVO JÁ INSTALADO';btn.disabled=true;setStatus('Você já está usando o SMART BMS como aplicativo.','ok');return}
+if(isIOS()){document.getElementById('iosHint').classList.add('show');setStatus('No iPhone, use Compartilhar > Adicionar à Tela de Início.','warn');return}
+setTimeout(function(){if(!deferredPrompt){document.getElementById('androidHint').classList.add('show');setStatus('Instalação automática ainda não liberada pelo Chrome.','warn')}},1800)
+});
+</script>
+</body>
+</html>
