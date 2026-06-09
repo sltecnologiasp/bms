@@ -991,9 +991,104 @@ button:active{transform:scale(0.98)}
   }
 }
 
+
+/* SMART BMS - Banner de instalação PWA */
+.pwa-install-banner{
+  position:fixed;
+  left:12px;
+  right:12px;
+  bottom:14px;
+  z-index:10000;
+  display:none;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  padding:12px 14px;
+  border-radius:18px;
+  background:var(--card-bg);
+  border:1px solid var(--card-border);
+  box-shadow:0 10px 35px rgba(0,0,0,.22), var(--neon-glow);
+  backdrop-filter:blur(10px);
+  -webkit-backdrop-filter:blur(10px);
+}
+
+.pwa-install-banner.show{
+  display:flex;
+}
+
+.pwa-install-text{
+  flex:1;
+  font-size:13px;
+  font-weight:800;
+  color:var(--text-main);
+  line-height:1.25;
+}
+
+.pwa-install-text span{
+  display:block;
+  font-size:11px;
+  font-weight:600;
+  color:var(--text-muted);
+  margin-top:2px;
+}
+
+.pwa-install-actions{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  flex:0 0 auto;
+}
+
+.pwa-install-actions button{
+  width:auto;
+  margin-top:0;
+  padding:10px 12px;
+  border-radius:12px;
+  font-size:12px;
+  white-space:nowrap;
+}
+
+.pwa-install-close{
+  background:transparent!important;
+  border:1px solid var(--input-border)!important;
+  color:var(--text-muted)!important;
+  box-shadow:none!important;
+  padding:10px 11px!important;
+}
+
+@media(max-width:420px){
+  .pwa-install-banner{
+    left:10px;
+    right:10px;
+    bottom:10px;
+    padding:11px 12px;
+  }
+
+  .pwa-install-text{
+    font-size:12px;
+  }
+
+  .pwa-install-actions button{
+    padding:9px 10px;
+    font-size:11px;
+  }
+}
+
 </style>
 </head>
 <body>
+
+<div id="pwaInstallBanner" class="pwa-install-banner" aria-live="polite">
+  <div class="pwa-install-text">
+    Instalar SMART BMS
+    <span>Acesse como aplicativo na tela inicial.</span>
+  </div>
+  <div class="pwa-install-actions">
+    <button type="button" onclick="instalarSmartBmsPwa()">INSTALAR</button>
+    <button type="button" class="pwa-install-close" onclick="dispensarSmartBmsPwa()">×</button>
+  </div>
+</div>
+
 
 <div id="login">
   <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; margin-bottom: 24px; width: 100%;">
@@ -2570,5 +2665,69 @@ function sairSemConfirmacao(){
   location.reload(); 
 }
 </script>
+
+<script>
+(function(){
+  var smartBmsDeferredPrompt = null;
+  var banner = null;
+  var DISPENSADO_KEY = 'smart_bms_pwa_install_dispensado';
+
+  function isStandalone(){
+    return window.matchMedia('(display-mode: standalone)').matches ||
+           window.navigator.standalone === true ||
+           document.referrer.indexOf('android-app://') === 0;
+  }
+
+  function mostrarBannerInstalacao(){
+    if (isStandalone()) return;
+    if (localStorage.getItem(DISPENSADO_KEY) === '1') return;
+
+    banner = document.getElementById('pwaInstallBanner');
+    if (banner && smartBmsDeferredPrompt) {
+      banner.classList.add('show');
+    }
+  }
+
+  window.addEventListener('beforeinstallprompt', function(e){
+    e.preventDefault();
+    smartBmsDeferredPrompt = e;
+    mostrarBannerInstalacao();
+  });
+
+  window.addEventListener('appinstalled', function(){
+    smartBmsDeferredPrompt = null;
+    banner = document.getElementById('pwaInstallBanner');
+    if (banner) banner.classList.remove('show');
+    localStorage.setItem(DISPENSADO_KEY, '1');
+  });
+
+  window.instalarSmartBmsPwa = function(){
+    if (!smartBmsDeferredPrompt) return;
+
+    smartBmsDeferredPrompt.prompt();
+
+    smartBmsDeferredPrompt.userChoice.then(function(){
+      smartBmsDeferredPrompt = null;
+      banner = document.getElementById('pwaInstallBanner');
+      if (banner) banner.classList.remove('show');
+    }).catch(function(){
+      smartBmsDeferredPrompt = null;
+    });
+  };
+
+  window.dispensarSmartBmsPwa = function(){
+    localStorage.setItem(DISPENSADO_KEY, '1');
+    banner = document.getElementById('pwaInstallBanner');
+    if (banner) banner.classList.remove('show');
+  };
+
+  window.addEventListener('load', function(){
+    if (isStandalone()) {
+      localStorage.setItem(DISPENSADO_KEY, '1');
+    }
+  });
+})();
+</script>
+
 </body>
 </html>

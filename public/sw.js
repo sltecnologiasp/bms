@@ -1,7 +1,7 @@
 // SMART BMS - Service Worker PWA seguro
 // Mantém o app instalável, evita cache fantasma e usa apenas assets existentes.
 
-const CACHE_NAME = 'smart-bms-assets-v6';
+const CACHE_NAME = 'smart-bms-assets-v7';
 
 const STATIC_ASSETS = [
   '/',
