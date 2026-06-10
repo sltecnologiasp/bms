@@ -1354,6 +1354,25 @@ body.app-logado .bottom-nav-smart{display:grid;}
   stroke:var(--text-main) !important;
 }
 
+
+/* CORRECAO SOLICITADA - somente o texto dos blocos superiores */
+.home-dashboard-card .home-action-btn span{
+  color:#666666 !important;
+  font-size:clamp(10.5px,3vw,13px) !important;
+  font-weight:500 !important;
+  line-height:1.15 !important;
+  max-width:96px !important;
+}
+@media(max-width:420px){
+  .home-dashboard-card .home-action-btn span{
+    font-size:11px !important;
+    max-width:86px !important;
+  }
+}
+[data-theme="dark"] .home-dashboard-card .home-action-btn span{
+  color:#9ca3af !important;
+}
+
 </style>
 </head>
 <body>
