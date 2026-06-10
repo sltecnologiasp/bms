@@ -1465,6 +1465,92 @@ body.modo-dispositivos .home-dashboard-card{display:none !important;}
   .home-dashboard-card .status-filter-num{font-size:19px !important;}
 }
 
+
+
+/* SMART BMS - TOPO FIXO DA TELA INICIAL */
+#lista .lista-fixed-top{
+  position:sticky !important;
+  top:0 !important;
+  z-index:850 !important;
+  background:var(--bg) !important;
+  padding:8px 0 10px 0 !important;
+  width:100% !important;
+}
+#lista .lista-fixed-top .user-info{
+  margin-bottom:10px !important;
+}
+body.modo-dispositivos #lista .lista-fixed-top{
+  display:none !important;
+}
+.home-dashboard-card .home-action-btn svg{
+  fill:currentColor !important;
+  stroke:currentColor !important;
+}
+.home-dashboard-card .home-action-btn svg circle[stroke="none"]{
+  stroke:none !important;
+}
+@media(max-width:420px){
+  #lista .lista-fixed-top{
+    padding-top:4px !important;
+    padding-bottom:8px !important;
+  }
+}
+
+
+
+/* SMART BMS - CORREÇÃO REAL: TOPO FIXO E ÍCONES DO RODAPÉ NOS BLOCOS */
+#lista{
+  padding-top:300px !important;
+  padding-bottom:118px !important;
+}
+#lista .lista-fixed-top{
+  position:fixed !important;
+  top:0 !important;
+  left:50% !important;
+  transform:translateX(-50%) !important;
+  z-index:950 !important;
+  width:100% !important;
+  max-width:1100px !important;
+  background:var(--bg) !important;
+  padding:44px 12px 10px 12px !important;
+  box-shadow:0 10px 24px rgba(15,23,42,.06) !important;
+}
+#lista .lista-fixed-top .title{
+  margin-bottom:4px !important;
+}
+#lista .lista-fixed-top .user-info{
+  margin-bottom:12px !important;
+}
+.home-dashboard-card .home-action-btn svg{
+  width:26px !important;
+  height:26px !important;
+  color:var(--text-muted) !important;
+  fill:currentColor !important;
+  stroke:currentColor !important;
+}
+.home-dashboard-card .home-action-btn svg circle[stroke="none"]{
+  fill:var(--card-bg) !important;
+  stroke:none !important;
+}
+body.modo-dispositivos #lista{
+  padding-top:44px !important;
+}
+body.modo-dispositivos #lista .lista-fixed-top{
+  display:none !important;
+}
+@media(max-width:420px){
+  #lista{
+    padding-top:292px !important;
+  }
+  #lista .lista-fixed-top{
+    padding:38px 10px 8px 10px !important;
+  }
+  .home-dashboard-card .home-action-btn svg{
+    width:24px !important;
+    height:24px !important;
+  }
+}
+
 </style>
 </head>
 <body>
@@ -1589,28 +1675,20 @@ body.modo-dispositivos .home-dashboard-card{display:none !important;}
 </div>
 
 <div id="lista" class="hidden">
-  <div class="title" style="font-size:clamp(28px,6vw,34px);margin-bottom:4px">SMART BMS</div>
-  <div class="user-info">Olá, <span id="user-nome">--</span></div>
+  <div class="lista-fixed-top">
+    <div class="title" style="font-size:clamp(28px,6vw,34px);margin-bottom:4px">SMART BMS</div>
+    <div class="user-info">Olá, <span id="user-nome">--</span></div>
 
-  <div class="home-dashboard-card">
+    <div class="home-dashboard-card">
     <div class="home-action-card">
       <div class="home-action-row">
       <div class="home-action-btn" onclick="togglePainelLista('add')">
-        <svg viewBox="0 0 64 64" aria-hidden="true">
-          <rect x="14" y="18" width="30" height="28" rx="5"></rect>
-          <path d="M22 10v8M32 10v8M14 26H6M14 38H6M22 46v8M34 46v8M44 26h8"></path>
-          <path d="M24 28h10M24 36h7"></path>
-          <path d="M49 38v16M41 46h16"></path>
-        </svg>
+        <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="16" height="6" rx="2"></rect><rect x="4" y="14" width="16" height="6" rx="2"></rect><circle cx="17" cy="7" r="1" fill="currentColor" stroke="none"></circle><circle cx="17" cy="17" r="1" fill="currentColor" stroke="none"></circle></svg>
         <span>Adicionar dispositivo</span>
       </div>
       <div class="home-action-divider"></div>
       <div class="home-action-btn" onclick="togglePainelLista('convite')">
-        <svg viewBox="0 0 64 64" aria-hidden="true">
-          <circle cx="27" cy="21" r="9"></circle>
-          <path d="M11 52c3.2-11.5 11.8-17 16-17s12.8 5.5 16 17"></path>
-          <path d="M50 36v16M42 44h16"></path>
-        </svg>
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"></circle><path d="M4 21c1.6-5 5-7 8-7s6.4 2 8 7"></path></svg>
         <span>Convidar usuário</span>
       </div>
     </div>
@@ -1667,7 +1745,8 @@ body.modo-dispositivos .home-dashboard-card{display:none !important;}
     </div>
     </div>
   </div>
-  
+  </div>
+
   <div id="cortina-dispositivos" class="cortina-wrapper aberta">
     <div class="card">
       <div class="label" style="margin-bottom:12px">Meus Dispositivos</div>
