@@ -1077,365 +1077,398 @@ button:active{transform:scale(0.98)}
 
 /* ======================================================
    SMART BMS - TELA PRINCIPAL ESTILO INSTALAÇÕES
+   Alteração visual somente para #lista / cards de dispositivos
    ====================================================== */
+
 #lista{
-  max-width:760px !important;
+  max-width:430px !important;
   min-height:100vh !important;
-  padding:38px 28px 112px !important;
-  background:#f3f4f6 !important;
-  color:#202124 !important;
+  padding:18px 14px 86px !important;
+  background:#f3f5f8 !important;
+  color:#1f2937 !important;
 }
-#lista .install-home{width:100%}
-.install-top-actions{
+
+#lista .title,
+#lista > .user-info{
+  display:none !important;
+}
+
+.smart-home-shell{
+  width:100%;
   display:flex;
-  align-items:center;
-  justify-content:center;
-  gap:26px;
-  margin:16px 0 24px;
+  flex-direction:column;
+  gap:14px;
 }
-.install-action{
-  width:auto !important;
-  margin:0 !important;
-  padding:0 !important;
-  border:0 !important;
-  background:transparent !important;
-  box-shadow:none !important;
-  color:#222 !important;
-  border-radius:0 !important;
-  display:flex;
-  align-items:center;
-  gap:12px;
-  font-size:26px;
-  font-weight:500;
-  line-height:1.08;
-  text-align:left;
-}
-.install-action-icon{
-  font-size:34px;
-  line-height:1;
-  width:38px;
-  text-align:center;
-  color:#202124;
-}
-.install-separator{
-  width:1px;
-  height:38px;
-  background:#cfcfcf;
-}
-.install-summary-row{
+
+.smart-top-actions{
   display:grid;
-  grid-template-columns:repeat(4,1fr);
-  gap:18px;
-  margin-bottom:32px;
+  grid-template-columns:1fr 1fr;
+  gap:12px;
+  width:100%;
 }
-.install-summary-card{
-  min-height:104px;
-  margin:0 !important;
-  padding:18px 8px 14px !important;
-  border-radius:20px !important;
-  background:#f8f8f8 !important;
-  border:1px solid transparent !important;
-  box-shadow:none !important;
-  color:#666 !important;
-  display:flex !important;
+
+.smart-top-action{
+  height:86px;
+  background:#ffffff;
+  border:1px solid #eef1f5;
+  border-radius:18px;
+  display:flex;
   flex-direction:column;
   align-items:center;
   justify-content:center;
   gap:8px;
+  color:#404b5a;
+  font-size:13px;
+  font-weight:700;
+  box-shadow:0 4px 12px rgba(15,23,42,.035);
 }
-.install-summary-card.active{
-  background:#eef3ff !important;
-  border:2px solid #5f9cff !important;
+
+.smart-top-icon{
+  width:32px;
+  height:32px;
+  color:#252f3d;
 }
-.install-summary-card strong{
-  font-size:28px;
-  font-weight:900;
-  color:#171923;
+
+.smart-stats-row{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:8px;
+  width:100%;
+}
+
+.smart-stat-card{
+  height:68px;
+  border-radius:16px;
+  background:#ffffff;
+  border:1px solid #edf0f5;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:5px;
+  box-shadow:0 4px 12px rgba(15,23,42,.035);
+}
+
+.smart-stat-card.active{
+  border:2px solid #119bd8;
+}
+
+.smart-stat-number{
+  font-size:18px;
   line-height:1;
+  font-weight:800;
+  color:#222b38;
 }
-.install-summary-card:nth-child(2) strong{color:#35b37e}
-.install-summary-card:nth-child(3) strong{color:#e91e63}
-.install-summary-card:nth-child(4) strong{color:#888}
-.install-summary-card span{
-  font-size:22px;
-  font-weight:500;
+
+.smart-stat-label{
+  font-size:11px;
+  line-height:1;
+  font-weight:700;
+  color:#8a94a3;
 }
-.install-search-row{
+
+.smart-search-row{
+  display:grid;
+  grid-template-columns:1fr 44px;
+  gap:10px;
+  width:100%;
+}
+
+.smart-search-box{
+  height:44px;
+  background:#ffffff;
+  border:1px solid #edf0f5;
+  border-radius:22px;
   display:flex;
   align-items:center;
-  gap:24px;
-  margin-bottom:24px;
+  gap:9px;
+  padding:0 14px;
+  color:#9aa4b2;
+  box-shadow:0 4px 12px rgba(15,23,42,.035);
 }
-.install-search-box{
-  flex:1;
-  min-width:0;
-  height:72px;
-  border-radius:36px;
-  background:#e9e9e9;
-  display:flex;
-  align-items:center;
-  padding:0 24px;
-  gap:14px;
+
+.smart-search-box svg{
+  width:18px;
+  height:18px;
+  color:#9aa4b2;
+  flex:0 0 auto;
 }
-.install-search-box input{
-  flex:1;
-  min-width:0;
-  height:100%;
+
+.smart-search-box input{
+  height:auto !important;
   padding:0 !important;
-  border:0 !important;
-  background:transparent !important;
-  box-shadow:none !important;
-  text-align:left !important;
-  color:#666 !important;
-  font-size:28px !important;
-  font-weight:400 !important;
-}
-.install-search-box input::placeholder{color:#9b9b9b !important}
-.install-search-icon{
-  font-size:42px;
-  color:#666;
-  transform:rotate(-12deg);
-}
-.install-list-icon{
-  font-size:34px;
-  color:#222;
-  font-weight:900;
-}
-.install-filter-btn{
-  width:52px !important;
-  height:52px !important;
   margin:0 !important;
-  padding:0 !important;
-  background:transparent !important;
   border:0 !important;
+  background:transparent !important;
+  text-align:left !important;
   box-shadow:none !important;
-  color:#222 !important;
-  font-size:46px !important;
-  transform:rotate(180deg);
+  color:#111827 !important;
+  font-size:13px !important;
+  font-weight:600 !important;
 }
-.install-add-panel{
-  display:none;
-  background:#fff;
-  border-radius:24px;
-  padding:18px;
-  margin-bottom:22px;
-  box-shadow:none;
-  border:1px solid #eee;
+
+.smart-search-box input::placeholder{
+  color:#a0a9b6 !important;
 }
-.install-add-panel.show{display:block}
-#lista .cortina-wrapper{
+
+.smart-filter-btn{
+  width:44px !important;
+  height:44px !important;
+  min-width:44px !important;
+  padding:0 !important;
+  margin:0 !important;
+  border-radius:15px !important;
+  background:#ffffff !important;
+  border:1px solid #edf0f5 !important;
+  box-shadow:0 4px 12px rgba(15,23,42,.035) !important;
+  color:#111827 !important;
+  display:flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+}
+
+.smart-filter-btn svg{
+  width:21px;
+  height:21px;
+}
+
+.smart-device-section{
+  width:100%;
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+
+#lista .card.legacy-add-card,
+#lista .card.legacy-config-card{
+  display:none !important;
+}
+
+#cortina-dispositivos{
   max-height:none !important;
   opacity:1 !important;
   overflow:visible !important;
+  width:100% !important;
 }
-.install-device-list{
-  gap:22px !important;
-  margin-top:10px !important;
-}
-#lista .bms-item{
-  position:relative;
-  min-height:128px !important;
-  background:#fff !important;
+
+#cortina-dispositivos > .card{
+  background:transparent !important;
   border:0 !important;
-  border-radius:24px !important;
+  padding:0 !important;
   box-shadow:none !important;
-  padding:26px 74px 22px 158px !important;
-  align-items:flex-start !important;
-  justify-content:center !important;
-  text-align:left !important;
-  overflow:hidden;
+  border-radius:0 !important;
 }
-#lista .bms-item:hover{border:0 !important}
-#lista .bms-item.online-active{animation:none !important;border:0 !important;box-shadow:none !important}
-.install-thumb{
-  position:absolute;
-  left:28px;
-  top:50%;
-  transform:translateY(-50%);
+
+#cortina-dispositivos > .card > .label{
+  display:none !important;
+}
+
+#bms-list{
+  display:flex !important;
+  flex-direction:column !important;
+  gap:12px !important;
+  width:100% !important;
+  margin:0 !important;
+}
+
+#bms-list .bms-item{
+  position:relative !important;
+  min-height:116px !important;
+  height:116px !important;
+  width:100% !important;
+  padding:12px 12px !important;
+  border-radius:18px !important;
+  background:#ffffff !important;
+  border:1px solid #edf0f5 !important;
+  box-shadow:0 5px 15px rgba(15,23,42,.045) !important;
+  display:grid !important;
+  grid-template-columns:92px 1fr 60px !important;
+  grid-template-rows:1fr !important;
+  column-gap:12px !important;
+  align-items:center !important;
+  text-align:left !important;
+  cursor:pointer !important;
+  animation:none !important;
+}
+
+#bms-list .bms-item::before{
+  content:"";
   width:92px;
   height:92px;
-  border-radius:10px;
-  overflow:hidden;
+  border-radius:15px;
   background:
-    linear-gradient(135deg,rgba(0,0,0,.20),rgba(0,0,0,.05)),
-    linear-gradient(145deg,#486070 0%,#8ea1aa 48%,#f8fafc 49%,#f8fafc 100%);
+    var(--install-img, url('/1000229030.png')) center/cover no-repeat,
+    linear-gradient(135deg,#e9eef5,#ffffff);
+  grid-column:1;
+  grid-row:1;
+  display:block;
 }
-.install-thumb::before{
-  content:'';
-  position:absolute;
-  left:10px;
-  top:18px;
-  width:58px;
-  height:42px;
-  background:linear-gradient(135deg,#263542,#111827);
-  transform:skewY(-16deg);
-  box-shadow:12px 6px 0 rgba(17,24,39,.9);
+
+#bms-list .bms-item h3{
+  grid-column:2 !important;
+  grid-row:1 !important;
+  align-self:start !important;
+  margin:2px 0 0 0 !important;
+  padding-right:0 !important;
+  color:#1f2937 !important;
+  font-size:15px !important;
+  line-height:1.15 !important;
+  font-weight:800 !important;
+  text-align:left !important;
+  width:100% !important;
+  max-width:100% !important;
+  white-space:nowrap !important;
+  overflow:hidden !important;
+  text-overflow:ellipsis !important;
 }
-.install-thumb::after{
-  content:'';
-  position:absolute;
-  left:28px;
-  bottom:22px;
-  width:18px;
-  height:14px;
-  background:#ffad20;
-  transform:skewY(-16deg);
-}
-#lista .bms-item h3{
-  width:100%;
-  margin:0 0 8px !important;
-  color:#202124 !important;
-  font-size:27px !important;
-  font-weight:500 !important;
-  letter-spacing:-.4px;
-  line-height:1.08;
-  white-space:nowrap;
-  overflow:hidden;
-  text-overflow:ellipsis;
-}
-.install-address{
-  width:100%;
-  color:#6b6f76;
-  font-size:19px;
-  line-height:1.18;
-  margin-bottom:14px;
-  display:-webkit-box;
-  -webkit-line-clamp:2;
-  -webkit-box-orient:vertical;
-  overflow:hidden;
-}
-.install-metrics{
-  display:flex;
-  align-items:center;
-  gap:28px;
-  color:#9a9a9a;
-  font-size:18px;
-  line-height:1;
-}
-.install-metrics span{
-  display:inline-flex;
-  align-items:center;
-  gap:8px;
-}
-.install-metrics .metric-solar::before{content:'☼';font-size:22px;color:#777}
-.install-metrics .metric-energy::before{content:'☀';font-size:22px;color:#777}
-#lista .status-dot{
-  position:absolute;
-  top:24px;
-  right:28px;
-  width:auto !important;
+
+#bms-list .bms-item p{
+  grid-column:2 !important;
+  grid-row:1 !important;
+  align-self:center !important;
   margin:0 !important;
-  padding:6px 10px;
-  border-radius:6px;
-  font-size:16px;
-  font-weight:500;
-  gap:0;
+  color:#8a94a3 !important;
+  font-size:11px !important;
+  line-height:1.2 !important;
+  font-family:Inter,Arial,sans-serif !important;
+  font-weight:600 !important;
+  text-align:left !important;
+  width:100% !important;
+  white-space:nowrap !important;
+  overflow:hidden !important;
+  text-overflow:ellipsis !important;
 }
-#lista .status-dot::before{display:none !important}
-#lista .status-dot.on{
-  color:#35b37e !important;
-  background:#eefaf3;
+
+#bms-list .bms-item p::before{
+  content:"Brasil";
 }
-#lista .status-dot.off{
-  color:#8f8f8f !important;
-  background:#f2f2f2;
+
+#bms-list .bms-item .status-dot{
+  grid-column:3 !important;
+  grid-row:1 !important;
+  align-self:end !important;
+  justify-self:end !important;
+  margin:0 0 4px 0 !important;
+  width:auto !important;
+  height:22px !important;
+  padding:0 9px !important;
+  border-radius:999px !important;
+  background:#edfdf5 !important;
+  color:#20a464 !important;
+  border:0 !important;
+  font-size:11px !important;
+  line-height:22px !important;
+  font-weight:800 !important;
+  display:inline-flex !important;
+  gap:0 !important;
 }
-#lista .ultimo-online-dispositivo{display:none !important}
-#lista .btn-item-del{
+
+#bms-list .bms-item .status-dot::before{
+  display:none !important;
+}
+
+#bms-list .bms-item .status-dot.off{
+  background:#fff1f1 !important;
+  color:#e24a4a !important;
+}
+
+#bms-list .bms-item .status-dot.on{
+  background:#edfdf5 !important;
+  color:#20a464 !important;
+}
+
+#bms-list .bms-item .status-dot.on,
+#bms-list .bms-item .status-dot.off{
+  font-size:0 !important;
+}
+
+#bms-list .bms-item .status-dot.on::after{
+  content:"Normal";
+  font-size:11px;
+}
+
+#bms-list .bms-item .status-dot.off::after{
+  content:"Off-line";
+  font-size:11px;
+}
+
+#bms-list .bms-item::after{
+  content:"13,68 kWp        0,00 kWh";
   position:absolute;
-  right:20px;
-  bottom:18px;
-  display:none;
+  left:116px;
+  bottom:16px;
+  color:#1f2937;
+  font-size:12px;
+  font-weight:800;
+  letter-spacing:.1px;
+  white-space:pre;
 }
-#lista .bms-item:active .btn-item-del,
-#lista .bms-item:hover .btn-item-del{display:block}
-.install-empty-text{
-  color:#686b72;
-  text-align:center;
-  font-size:22px;
-  padding:48px 0 0;
+
+#bms-list .bms-item .btn-item-del,
+#bms-list .bms-item .ultimo-online-dispositivo{
+  display:none !important;
 }
-.install-bottom-nav{
+
+.smart-bottom-nav{
   position:fixed;
   left:50%;
   bottom:0;
   transform:translateX(-50%);
   width:100%;
-  max-width:760px;
-  height:92px;
-  background:#f3f4f6;
+  max-width:430px;
+  height:68px;
+  background:#ffffff;
+  border-top:1px solid #edf0f5;
   display:grid;
-  grid-template-columns:repeat(5,1fr);
-  align-items:center;
-  padding:8px 24px 10px;
+  grid-template-columns:repeat(4,1fr);
   z-index:50;
+  box-shadow:0 -6px 18px rgba(15,23,42,.055);
 }
-.install-bottom-nav button{
-  margin:0 !important;
-  padding:0 !important;
-  background:transparent !important;
-  border:0 !important;
-  box-shadow:none !important;
-  color:#9c9fa5 !important;
-  display:flex !important;
+
+.smart-nav-item{
+  display:flex;
   flex-direction:column;
   align-items:center;
   justify-content:center;
   gap:4px;
-  font-weight:500 !important;
+  color:#9aa4b2;
+  font-size:10px;
+  font-weight:700;
 }
-.install-bottom-nav span{
-  font-size:31px;
-  line-height:1;
-}
-.install-bottom-nav small{
-  font-size:17px;
-  line-height:1.05;
-  white-space:nowrap;
-}
-.install-bottom-nav button.active{color:#0b78ff !important}
 
-@media(max-width:520px){
-  #lista{padding:34px 20px 108px !important}
-  .install-top-actions{gap:18px;margin-top:12px}
-  .install-action{font-size:24px}
-  .install-action-icon{font-size:31px;width:34px}
-  .install-summary-row{gap:14px}
-  .install-summary-card{min-height:96px;border-radius:18px !important}
-  .install-summary-card strong{font-size:26px}
-  .install-summary-card span{font-size:20px}
-  .install-search-row{gap:18px}
-  .install-search-box{height:68px;padding:0 20px}
-  .install-search-box input{font-size:25px !important}
-  #lista .bms-item{
-    min-height:118px !important;
-    padding:24px 60px 20px 136px !important;
-  }
-  .install-thumb{left:24px;width:84px;height:84px}
-  #lista .bms-item h3{font-size:24px !important}
-  .install-address{font-size:17px}
-  .install-metrics{font-size:16px;gap:18px}
-  #lista .status-dot{right:24px;font-size:15px}
-  .install-bottom-nav{height:90px;padding-left:18px;padding-right:18px}
-  .install-bottom-nav small{font-size:15px}
+.smart-nav-item.active{
+  color:#119bd8;
 }
-@media(max-width:390px){
-  #lista{padding-left:16px !important;padding-right:16px !important}
-  .install-action{font-size:21px;gap:8px}
-  .install-action-icon{font-size:28px;width:30px}
-  .install-summary-row{gap:10px}
-  .install-summary-card{min-height:86px;padding:14px 4px 12px !important}
-  .install-summary-card strong{font-size:24px}
-  .install-summary-card span{font-size:18px}
-  .install-search-box input{font-size:22px !important}
-  #lista .bms-item{
-    padding-left:118px !important;
-    padding-right:54px !important;
+
+.smart-nav-item svg{
+  width:22px;
+  height:22px;
+  stroke-width:2;
+}
+
+.smart-add-hidden-panel{
+  display:none !important;
+}
+
+@media(max-width:360px){
+  #lista{
+    padding-left:10px !important;
+    padding-right:10px !important;
   }
-  .install-thumb{left:20px;width:78px;height:78px}
-  #lista .bms-item h3{font-size:21px !important}
-  .install-address{font-size:15px}
-  .install-metrics{font-size:14px;gap:12px}
+  #bms-list .bms-item{
+    grid-template-columns:82px 1fr 56px !important;
+    height:106px !important;
+    min-height:106px !important;
+    column-gap:10px !important;
+  }
+  #bms-list .bms-item::before{
+    width:82px;
+    height:82px;
+  }
+  #bms-list .bms-item::after{
+    left:104px;
+    font-size:11px;
+  }
 }
 
 </style>
@@ -1543,80 +1576,107 @@ button:active{transform:scale(0.98)}
 </div>
 
 <div id="lista" class="hidden">
-  <span id="user-nome" style="display:none">--</span>
+  <div class="title" style="font-size:clamp(28px,6vw,34px);margin-bottom:4px">SMART BMS</div>
+  <div class="user-info">Olá, <span id="user-nome">--</span></div>
 
-  <div class="install-home">
-    <div class="install-top-actions">
-      <button type="button" class="install-action" onclick="document.getElementById('addDevicePanel').classList.toggle('show')">
-        <span class="install-action-icon">⌂+</span>
+  <div class="smart-home-shell">
+    <div class="smart-top-actions">
+      <div class="smart-top-action" onclick="document.getElementById('bms-code')?.focus()">
+        <svg class="smart-top-icon" viewBox="0 0 24 24" fill="none">
+          <path d="M3.5 11.3L12 4l8.5 7.3" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M5.5 10.5V20h13v-9.5" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M12 13v5" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/>
+          <path d="M9.5 15.5h5" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/>
+        </svg>
         <span>Assistente de<br>configuração</span>
-      </button>
-
-      <div class="install-separator"></div>
-
-      <button type="button" class="install-action" onclick="document.getElementById('addDevicePanel').classList.toggle('show')">
-        <span class="install-action-icon">👤+</span>
-        <span>Convidar<br>usuário</span>
-      </button>
-    </div>
-
-    <div class="install-summary-row">
-      <button type="button" class="install-summary-card active">
-        <strong id="countTudo">0</strong>
-        <span>Tudo</span>
-      </button>
-      <button type="button" class="install-summary-card">
-        <strong id="countNormal">0</strong>
-        <span>Normal</span>
-      </button>
-      <button type="button" class="install-summary-card">
-        <strong id="countFalha">0</strong>
-        <span>Falha</span>
-      </button>
-      <button type="button" class="install-summary-card">
-        <strong id="countOffline">0</strong>
-        <span>Off-line</span>
-      </button>
-    </div>
-
-    <div class="install-search-row">
-      <div class="install-search-box">
-        <span class="install-search-icon">⌕</span>
-        <input id="installSearch" type="text" placeholder="Insira um nome de instalação" oninput="filtrarInstalacoesSmartBms()">
-        <span class="install-list-icon">▦</span>
       </div>
-      <button type="button" class="install-filter-btn">▽</button>
+
+      <div class="smart-top-action" onclick="mostrarPaginaConta()">
+        <svg class="smart-top-icon" viewBox="0 0 24 24" fill="none">
+          <path d="M9.5 11a3.5 3.5 0 100-7 3.5 3.5 0 000 7z" stroke="currentColor" stroke-width="1.9"/>
+          <path d="M3.7 20c.7-3.5 2.8-5.4 5.8-5.4 2.3 0 4.1 1.1 5 3.1" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/>
+          <path d="M18.2 9.2v5.6M15.4 12h5.6" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/>
+        </svg>
+        <span>Convidar usuário</span>
+      </div>
     </div>
 
-    <div id="addDevicePanel" class="install-add-panel">
-      <div class="label">Adicionar dispositivo</div>
-      <div class="qr-input-row">
-        <input id="bms-code" placeholder="Digite ou escaneie código" maxlength="14">
-        <button class="btn-qr-scan" onclick="abrirScannerCamera()" title="Escanear QR Code">
-          <svg viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M3 7V5a2 2 0 012-2h2m10 0h2a2 2 0 012 2v2m0 10v2a2 2 0 01-2 2h-2M7 21H5a2 2 0 01-2-2v-2M12 7v10m-3-5h6" />
-          </svg>
-        </button>
+    <div class="smart-stats-row">
+      <div class="smart-stat-card active"><div class="smart-stat-number" id="statTudo">0</div><div class="smart-stat-label">Tudo</div></div>
+      <div class="smart-stat-card"><div class="smart-stat-number" id="statNormal">0</div><div class="smart-stat-label">Normal</div></div>
+      <div class="smart-stat-card"><div class="smart-stat-number" id="statFalha">0</div><div class="smart-stat-label">Falha</div></div>
+      <div class="smart-stat-card"><div class="smart-stat-number" id="statOffline">0</div><div class="smart-stat-label">Off-line</div></div>
+    </div>
+
+    <div class="smart-search-row">
+      <div class="smart-search-box">
+        <svg viewBox="0 0 24 24" fill="none">
+          <circle cx="11" cy="11" r="6.5" stroke="currentColor" stroke-width="2"/>
+          <path d="M16 16l4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+        <input id="smartBuscaInstalacao" placeholder="Insira um nome da instalação" oninput="filtrarSmartInstalacoes()">
+        <svg viewBox="0 0 24 24" fill="none">
+          <path d="M6 7h12M6 12h12M6 17h12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          <circle cx="8" cy="7" r="1.8" fill="currentColor"/>
+          <circle cx="16" cy="12" r="1.8" fill="currentColor"/>
+          <circle cx="11" cy="17" r="1.8" fill="currentColor"/>
+        </svg>
       </div>
-      <input id="bms-nome" placeholder="Nome Ex: Casa" style="margin-top:12px">
-      <button onclick="addBms()">ADICIONAR DISPOSITIVO</button>
-      <button id="btn-toggle-cortina" class="hidden" onclick="toggleCortinaDispositivos()">MOSTRAR DISPOSITIVOS</button>
+      <button class="smart-filter-btn" type="button" onclick="toggleCortinaDispositivos()" title="Filtrar">
+        <svg viewBox="0 0 24 24" fill="none">
+          <path d="M4 6h16M7 12h10M10 18h4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+      </button>
+    </div>
+
+    <div class="smart-device-section">
+      <div id="cortina-dispositivos" class="cortina-wrapper aberta">
+        <div class="card">
+          <div class="label" style="margin-bottom:12px">Meus Dispositivos</div>
+          <div id="bms-list" class="bms-list"></div>
+        </div>
+      </div>
     </div>
   </div>
 
-  <div id="cortina-dispositivos" class="cortina-wrapper aberta">
-    <div id="bms-list" class="bms-list install-device-list"></div>
+  <div class="card legacy-add-card">
+    <div class="label">Adicionar dispositivo</div>
+    <div class="qr-input-row">
+      <input id="bms-code" placeholder="Digite ou escaneie código" maxlength="14">
+      <button class="btn-qr-scan" onclick="abrirScannerCamera()" title="Escanear QR Code">
+        <svg viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M3 7V5a2 2 0 012-2h2m10 0h2a2 2 0 012 2v2m0 10v2a2 2 0 01-2 2h-2M7 21H5a2 2 0 01-2-2v-2M12 7v10m-3-5h6" />
+        </svg>
+      </button>
+    </div>
+    <input id="bms-nome" placeholder="Nome Ex: Casa" style="margin-top:12px">
+    <button onclick="addBms()">ADICIONAR DISPOSITIVO</button>
+    <button id="btn-toggle-cortina" class="hidden" onclick="toggleCortinaDispositivos()">MOSTRAR DISPOSITIVOS</button>
   </div>
 
-  <div class="install-empty-text" id="install-empty-text">Nenhum outro dado.</div>
+  <div class="card legacy-config-card" style="width:100%; display:flex; flex-direction:column; gap:12px; padding:16px; box-sizing:border-box;">
+    <button class="btn-card-action" onclick="mostrarPaginaConta()">CONFIGURAÇÕES DA CONTA</button>
+    <button class="btn-card-action" onclick="sair()">SAIR</button>
+  </div>
 
-  <nav class="install-bottom-nav">
-    <button type="button" class="active"><span>⌂</span><small>Página inicial</small></button>
-    <button type="button"><span>🔧</span><small>Manutenção</small></button>
-    <button type="button"><span>▰</span><small>Dispositivo</small></button>
-    <button type="button"><span>▦</span><small>Serviços</small></button>
-    <button type="button" onclick="mostrarPaginaConta()"><span>●</span><small>Perfil</small></button>
-  </nav>
+  <div class="smart-bottom-nav">
+    <div class="smart-nav-item active">
+      <svg viewBox="0 0 24 24" fill="none"><path d="M3.5 11.5L12 4l8.5 7.5" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"/><path d="M5.5 10.5V20h13v-9.5" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <span>Página inicial</span>
+    </div>
+    <div class="smart-nav-item">
+      <svg viewBox="0 0 24 24" fill="none"><path d="M6 6h12v12H6z" stroke="currentColor" stroke-linejoin="round"/><path d="M9 3v3M15 3v3M9 18v3M15 18v3M3 9h3M3 15h3M18 9h3M18 15h3" stroke="currentColor" stroke-linecap="round"/></svg>
+      <span>Dispositivos</span>
+    </div>
+    <div class="smart-nav-item">
+      <svg viewBox="0 0 24 24" fill="none"><path d="M5 7h14M5 12h14M5 17h14" stroke="currentColor" stroke-linecap="round"/><path d="M8 7v10M16 7v10" stroke="currentColor" stroke-linecap="round"/></svg>
+      <span>Serviços</span>
+    </div>
+    <div class="smart-nav-item" onclick="mostrarPaginaConta()">
+      <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="4" stroke="currentColor"/><path d="M4.5 20c1.2-4.2 3.8-6.2 7.5-6.2s6.3 2 7.5 6.2" stroke="currentColor" stroke-linecap="round"/></svg>
+      <span>Perfil</span>
+    </div>
+  </div>
 </div>
 
 <div id="configuracoesPage" class="hidden">
@@ -1898,7 +1958,7 @@ function marcarDemoOnlineNaLista(code){
 
   if(dot){
     dot.className = 'status-dot on';
-    dot.textContent = 'Normal';
+    dot.textContent = 'Online';
   }
 
   atualizarUltimoOnlineCardSmartBms(code, true, new Date().toISOString());
@@ -1956,7 +2016,7 @@ function agendarOfflineDispositivo(code){
     if(card && dot){
       card.className = "bms-item";
       dot.className = "status-dot off";
-      dot.textContent = "Off-line";
+      dot.textContent = "Offline";
       atualizarUltimoOnlineCardSmartBms(code, false);
     }
 
@@ -1975,7 +2035,7 @@ function marcarCardListaOnline(code){
   if(card && dot){
     card.className = "bms-item online-active";
     dot.className = "status-dot on";
-    dot.textContent = "Normal";
+    dot.textContent = "Online";
     atualizarUltimoOnlineCardSmartBms(code, true, new Date().toISOString());
   }
 }
@@ -2721,51 +2781,6 @@ function mostrarLista(){
   garantirMqttGlobal();
 }
 
-
-function atualizarResumoInstalacoesSmartBms(lista){
-  lista = lista || [];
-  var total = lista.length;
-  var normal = 0;
-  var offline = 0;
-
-  for(var i=0;i<lista.length;i++){
-    var code = lista[i] && lista[i].code;
-    if(code && estadoOnlineDispositivos[code]) normal++;
-    else offline++;
-  }
-
-  var tudoEl = document.getElementById('countTudo');
-  var normalEl = document.getElementById('countNormal');
-  var falhaEl = document.getElementById('countFalha');
-  var offlineEl = document.getElementById('countOffline');
-
-  if(tudoEl) tudoEl.textContent = total;
-  if(normalEl) normalEl.textContent = normal;
-  if(falhaEl) falhaEl.textContent = 0;
-  if(offlineEl) offlineEl.textContent = offline;
-
-  var empty = document.getElementById('install-empty-text');
-  if(empty) empty.style.display = total ? 'block' : 'none';
-}
-
-function filtrarInstalacoesSmartBms(){
-  var input = document.getElementById('installSearch');
-  var termo = input ? String(input.value || '').toLowerCase().trim() : '';
-  var cards = document.querySelectorAll('#bms-list .bms-item');
-  var visiveis = 0;
-
-  for(var i=0;i<cards.length;i++){
-    var alvo = String(cards[i].getAttribute('data-search') || cards[i].textContent || '').toLowerCase();
-    var show = !termo || alvo.indexOf(termo) >= 0;
-    cards[i].style.display = show ? 'flex' : 'none';
-    if(show) visiveis++;
-  }
-
-  var empty = document.getElementById('install-empty-text');
-  if(empty) empty.textContent = termo && !visiveis ? 'Nenhuma instalação encontrada.' : 'Nenhum outro dado.';
-}
-
-
 function carregarListaUmaVez() {
   fetch(API + '?action=user_bms', { headers: {'Authorization':'Bearer '+TOKEN} })
   .then(function(r){
@@ -2810,26 +2825,15 @@ function carregarListaUmaVez() {
       }
 
       var b = lista[i];
-      var nomeInstalacao = (b.nome || 'SEM NOME');
-      var enderecoInstalacao = (b.endereco || b.localizacao || b.cidade || b.code || 'Brasil');
-      var potenciaInstalacao = (b.potencia_kwp || b.kwp || b.potencia || '--');
-      var geracaoInstalacao = (b.geracao_dia || b.kwh_dia || '--');
-      if(potenciaInstalacao !== '--' && !String(potenciaInstalacao).toLowerCase().includes('kwp')) potenciaInstalacao = String(potenciaInstalacao).replace('.', ',') + ' kWp';
-      if(geracaoInstalacao !== '--' && !String(geracaoInstalacao).toLowerCase().includes('kwh')) geracaoInstalacao = String(geracaoInstalacao).replace('.', ',') + ' kWh';
-
-      html += '<div class="bms-item' + (estadoOnlineDispositivos[b.code] ? ' online-active' : '') + '" id="card-lista-' + b.code + '" data-search="' + String(nomeInstalacao + ' ' + enderecoInstalacao + ' ' + b.code).replace(/"/g,'&quot;') + '" onclick="abrirDash(\''+b.code+'\')">';
-      html += '<div class="install-thumb"></div>';
-      html += '<h3>'+nomeInstalacao+'</h3>';
-      html += '<div class="install-address">'+enderecoInstalacao+'</div>';
-      html += '<div class="install-metrics"><span class="metric-solar">'+potenciaInstalacao+'</span><span class="metric-energy">'+geracaoInstalacao+'</span></div>';
-      html += '<span class="status-dot ' + (estadoOnlineDispositivos[b.code] ? 'on' : 'off') + '" id="dot-lista-' + b.code + '">' + (estadoOnlineDispositivos[b.code] ? 'Normal' : 'Off-line') + '</span>';
+      html += '<div class="bms-item' + (estadoOnlineDispositivos[b.code] ? ' online-active' : '') + '" id="card-lista-' + b.code + '" onclick="abrirDash(\''+b.code+'\')">';
+      html += '<h3>'+b.nome+'</h3>';
+      html += '<p>'+b.code+'</p>';
+      html += '<span class="status-dot ' + (estadoOnlineDispositivos[b.code] ? 'on' : 'off') + '" id="dot-lista-' + b.code + '">' + (estadoOnlineDispositivos[b.code] ? 'Online' : 'Offline') + '</span>';
       html += '<div class="ultimo-online-dispositivo" id="last-lista-' + b.code + '" data-updated-at="' + (b.updated_at || '') + '">' + formatarUltimoOnlineSmartBms(b.updated_at) + '</div>';
-      html += '<button class="btn-item-del" onclick="event.stopPropagation();removerBms(\''+b.code+'\',\''+nomeInstalacao+'\')">Excluir Dispositivo</button>';
+      html += '<button class="btn-item-del" onclick="event.stopPropagation();removerBms(\''+b.code+'\',\''+b.nome+'\')">Excluir Dispositivo</button>';
       html += '</div>';
     }
     el.innerHTML = html;
-    atualizarResumoInstalacoesSmartBms(lista);
-    filtrarInstalacoesSmartBms();
 
     for(var j=0;j<lista.length;j++){
       if(isDispositivoDemoCliente(lista[j].code)){
@@ -3186,6 +3190,40 @@ function sairSemConfirmacao(){
     if (isStandalone()) {
       localStorage.setItem(DISPENSADO_KEY, '1');
     }
+  });
+})();
+</script>
+
+
+<script>
+function filtrarSmartInstalacoes(){
+  var termo = (document.getElementById('smartBuscaInstalacao')?.value || '').toLowerCase().trim();
+  var itens = document.querySelectorAll('#bms-list .bms-item');
+  itens.forEach(function(item){
+    var txt = (item.textContent || '').toLowerCase();
+    item.style.display = (!termo || txt.indexOf(termo) >= 0) ? 'grid' : 'none';
+  });
+  atualizarSmartStats();
+}
+function atualizarSmartStats(){
+  var itens = Array.prototype.slice.call(document.querySelectorAll('#bms-list .bms-item'));
+  var total = itens.length;
+  var online = itens.filter(function(i){ return i.querySelector('.status-dot.on'); }).length;
+  var offline = itens.filter(function(i){ return i.querySelector('.status-dot.off'); }).length;
+  var falha = 0;
+  var a=document.getElementById('statTudo'), b=document.getElementById('statNormal'), c=document.getElementById('statFalha'), d=document.getElementById('statOffline');
+  if(a) a.textContent = total;
+  if(b) b.textContent = online;
+  if(c) c.textContent = falha;
+  if(d) d.textContent = offline;
+}
+(function(){
+  var obs = new MutationObserver(function(){ atualizarSmartStats(); filtrarSmartInstalacoes(); });
+  window.addEventListener('load', function(){
+    var lista = document.getElementById('bms-list');
+    if(lista) obs.observe(lista,{childList:true,subtree:true,attributes:true,attributeFilter:['class']});
+    setTimeout(atualizarSmartStats,500);
+    setInterval(atualizarSmartStats,3000);
   });
 })();
 </script>
