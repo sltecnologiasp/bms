@@ -40,6 +40,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <title>SMART BMS</title>
+<!-- ajuste: botoes-config-sair-removidos-da-tela-inicial -->
 
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://bms.app.br/">
@@ -1373,6 +1374,97 @@ body.app-logado .bottom-nav-smart{display:grid;}
   color:#9ca3af !important;
 }
 
+
+/* SMART BMS - CORREÇÕES SOLICITADAS: 6 blocos no padrão dos dispositivos */
+.home-dashboard-card{
+  background:var(--card-bg) !important;
+  border:1px solid var(--card-border) !important;
+  border-radius:20px !important;
+  padding:12px !important;
+  width:100% !important;
+  box-shadow:var(--neon-glow) !important;
+  display:flex !important;
+  flex-direction:column !important;
+  gap:10px !important;
+  overflow:visible !important;
+}
+.home-dashboard-card .home-action-card{
+  background:transparent !important;
+  border:0 !important;
+  box-shadow:none !important;
+  overflow:visible !important;
+}
+.home-dashboard-card .home-action-row{
+  display:grid !important;
+  grid-template-columns:repeat(2, minmax(0, 1fr)) !important;
+  gap:8px !important;
+  min-height:0 !important;
+}
+.home-dashboard-card .home-action-divider{display:none !important;}
+.home-dashboard-card .home-action-btn,
+.home-dashboard-card .status-filter-item{
+  background:var(--card-bg) !important;
+  border:1px solid var(--card-border) !important;
+  border-radius:16px !important;
+  box-shadow:var(--neon-glow) !important;
+}
+.home-dashboard-card .home-action-btn{
+  min-height:78px !important;
+  padding:10px 8px !important;
+  color:var(--text-main) !important;
+  font-size:13px !important;
+  font-weight:800 !important;
+  line-height:1.15 !important;
+  text-align:center !important;
+  flex-direction:column !important;
+  gap:6px !important;
+}
+.home-dashboard-card .home-action-btn span{max-width:none !important;}
+.home-dashboard-card .home-action-btn svg{
+  width:28px !important;
+  height:28px !important;
+  stroke:var(--text-muted) !important;
+  fill:none !important;
+  stroke-width:2.2 !important;
+}
+.home-dashboard-card .status-filter-grid{
+  display:grid !important;
+  grid-template-columns:repeat(4, minmax(0, 1fr)) !important;
+  gap:8px !important;
+}
+.home-dashboard-card .status-filter-item{
+  min-height:70px !important;
+  cursor:pointer !important;
+}
+.home-dashboard-card .status-filter-item.active{
+  border-color:var(--cyan) !important;
+  background:var(--card-bg) !important;
+}
+.home-dashboard-card .status-filter-num{
+  font-size:20px !important;
+  font-weight:900 !important;
+  line-height:1 !important;
+}
+.home-dashboard-card .status-filter-label{
+  margin-top:6px !important;
+}
+body.modo-dispositivos .home-dashboard-card{display:none !important;}
+.perfil-sair-btn{
+  border-color:var(--red) !important;
+  color:var(--red) !important;
+  background:rgba(255,68,68,0.05) !important;
+  box-shadow:none !important;
+}
+@media(max-width:420px){
+  .home-dashboard-card{padding:10px !important;gap:8px !important;}
+  .home-dashboard-card .home-action-row{gap:7px !important;}
+  .home-dashboard-card .home-action-btn{min-height:72px !important;font-size:12px !important;}
+  .home-dashboard-card .home-action-btn svg{width:26px !important;height:26px !important;}
+  .home-dashboard-card .status-filter-grid{gap:6px !important;}
+  .home-dashboard-card .status-filter-item{min-height:64px !important;}
+  .home-dashboard-card .status-filter-num{font-size:19px !important;}
+}
+
 </style>
 </head>
 <body>
@@ -1583,10 +1675,6 @@ body.app-logado .bottom-nav-smart{display:grid;}
     </div>
   </div>
   
-  <div class="card" style="width:100%; display:flex; flex-direction:column; gap:12px; padding:16px; box-sizing:border-box;">
-    <button class="btn-card-action" onclick="mostrarPaginaConta()">CONFIGURAÇÕES DA CONTA</button>
-    <button class="btn-card-action" onclick="sair()">SAIR</button>
-  </div>
 </div>
 
 <div id="configuracoesPage" class="hidden">
@@ -1606,6 +1694,7 @@ body.app-logado .bottom-nav-smart{display:grid;}
   </div>
 
   <button class="btn-sec" style="max-width:440px; width:100%" onclick="voltarParaLista()">Voltar</button>
+  <button class="btn-danger perfil-sair-btn" style="max-width:440px; width:100%; margin-top:10px" onclick="sair()">SAIR</button>
   <div class="footer-link">
     <a href="https://wa.me/5515991355393" target="_blank">SL TECNOLOGIA</a>
     <span>© Todos os direitos reservados</span>
@@ -2814,6 +2903,7 @@ function atualizarRodapeSmart(ativo){
 
 function navegarRodapeSmart(destino){
   if(destino === 'perfil'){
+    document.body.classList.remove('modo-dispositivos');
     mostrarPaginaConta();
     atualizarRodapeSmart('perfil');
     return;
@@ -2824,10 +2914,12 @@ function navegarRodapeSmart(destino){
     return;
   }
   mostrarLista();
-  atualizarRodapeSmart(destino === 'dispositivos' ? 'dispositivos' : 'home');
   if(destino === 'dispositivos'){
-    var cortina = document.getElementById('cortina-dispositivos');
-    if(cortina) cortina.scrollIntoView({behavior:'smooth', block:'start'});
+    document.body.classList.add('modo-dispositivos');
+    atualizarRodapeSmart('dispositivos');
+  } else {
+    document.body.classList.remove('modo-dispositivos');
+    atualizarRodapeSmart('home');
   }
 }
 
@@ -2857,6 +2949,7 @@ function mostrarLista(){
   esconderTudo();
   document.getElementById('lista').classList.remove('hidden');
   document.body.classList.add('app-logado');
+  document.body.classList.remove('modo-dispositivos');
   atualizarRodapeSmart('home');
   document.getElementById('user-nome').textContent = USER ? USER.nome : 'Usuário';
   
