@@ -1075,133 +1075,146 @@ button:active{transform:scale(0.98)}
 }
 
 
-/* SMART BMS - Painel de ações e filtros da lista */
-.lista-controle-card{
-  display:flex;
-  flex-direction:column;
-  gap:10px;
+
+/* ======================================================
+   SMART BMS - HOME NOVA, FILTROS E RODAPÉ FIXO
+   ====================================================== */
+#lista{padding-bottom:118px!important;}
+.home-action-card{
+  background:var(--card-bg);
+  border:1px solid var(--card-border);
+  border-radius:20px;
+  width:100%;
+  box-shadow:var(--neon-glow);
+  overflow:hidden;
 }
-.lista-acoes-grid,
-.status-filtros-grid{
+.home-action-row{
   display:grid;
+  grid-template-columns:1fr 1px 1fr;
+  align-items:center;
+  min-height:88px;
+}
+.home-action-divider{height:48px;background:var(--input-border);opacity:.8;}
+.home-action-btn{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:12px;
+  padding:18px 10px;
+  cursor:pointer;
+  color:var(--text-main);
+  font-size:clamp(15px,4vw,20px);
+  font-weight:700;
+  text-align:left;
+  user-select:none;
+}
+.home-action-btn svg{width:34px;height:34px;stroke:currentColor;fill:none;stroke-width:2.3;stroke-linecap:round;stroke-linejoin:round;flex:0 0 auto;}
+.home-panel-cortina{
+  max-height:0;
+  overflow:hidden;
+  opacity:0;
+  transition:max-height .35s ease,opacity .25s ease;
+  border-top:1px solid transparent;
+}
+.home-panel-cortina.aberta{
+  max-height:650px;
+  opacity:1;
+  border-top:1px solid var(--card-border);
+}
+.home-panel-inner{padding:14px;}
+.status-filter-card{
+  background:transparent;
+  border:none;
+  box-shadow:none;
+  padding:0;
+  width:100%;
+}
+.status-filter-grid{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
   gap:8px;
   width:100%;
 }
-.lista-acoes-grid{
-  grid-template-columns:repeat(2, 1fr);
-}
-.status-filtros-grid{
-  grid-template-columns:repeat(4, 1fr);
-}
-.mini-action-card,
-.status-filtro-card{
-  margin-top:0!important;
-  min-height:72px;
-  padding:10px 6px;
-  border-radius:14px;
-  border:1px solid var(--card-border);
-  background:var(--cell-bg);
-  color:var(--text-main);
-  box-shadow:none;
+.status-filter-item{
+  min-height:88px;
+  background:var(--card-bg);
+  border:1px solid rgba(15,23,42,.06);
+  border-radius:18px;
+  box-shadow:0 4px 16px rgba(15,23,42,.05);
   display:flex;
   flex-direction:column;
   align-items:center;
   justify-content:center;
-  text-align:center;
-  gap:4px;
-  font-size:12px;
-  font-weight:900;
-  letter-spacing:.2px;
+  cursor:pointer;
+  transition:all .2s ease;
 }
-.mini-action-card.ativo,
-.status-filtro-card.ativo{
-  border-color:var(--cyan);
-  box-shadow:var(--neon-glow);
-  color:var(--cyan);
-}
-.status-filtro-card span{
-  font-size:11px;
-  text-transform:uppercase;
-  color:var(--text-muted);
-}
-.status-filtro-card strong{
-  font-size:22px;
-  line-height:1;
-  color:var(--text-main);
-}
-.status-filtro-card.ativo strong{
-  color:var(--cyan);
-}
-.lista-cortina-form{
-  border:1px solid var(--card-border);
-  border-radius:16px;
-  background:var(--cell-bg);
-}
-.lista-cortina-form.aberta{
-  padding:14px;
-  margin-top:2px;
-  margin-bottom:2px;
-}
-.convite-dispositivos-lista{
+.status-filter-item.active{border:1.8px solid #3b82f6;background:rgba(59,130,246,.08);}
+.status-filter-num{font-size:clamp(22px,6vw,30px);font-weight:900;line-height:1;color:#111111;}
+.status-filter-label{font-size:clamp(13px,3.7vw,17px);font-weight:500;margin-top:8px;color:#666666;line-height:1;}
+.status-filter-num.online{color:#24b66d;}
+.status-filter-num.falha{color:#ff3045;}
+.status-filter-num.offline{color:#8e8e8e;}
+.convite-device-list{
   display:flex;
   flex-direction:column;
   gap:8px;
-  width:100%;
-  margin-top:6px;
+  margin-top:8px;
+  max-height:220px;
+  overflow:auto;
 }
 .convite-device-option{
   display:flex;
   align-items:center;
   gap:10px;
   padding:10px 12px;
-  border:1px solid var(--card-border);
+  border:1px solid var(--input-border);
   border-radius:12px;
-  background:var(--card-bg);
   color:var(--text-main);
-  font-size:13px;
+  background:var(--input-bg);
   font-weight:700;
 }
-.convite-device-option input{
-  width:auto;
-  padding:0;
-  transform:scale(1.15);
+.convite-device-option input{width:auto;padding:0;}
+.bottom-nav-smart{
+  position:fixed;
+  left:0;
+  right:0;
+  bottom:0;
+  z-index:900;
+  background:var(--card-bg);
+  border-top:1px solid var(--card-border);
+  box-shadow:0 -8px 28px rgba(0,0,0,.10);
+  backdrop-filter:blur(10px);
+  -webkit-backdrop-filter:blur(10px);
+  display:none;
+  grid-template-columns:repeat(4,1fr);
+  padding:8px 4px 10px;
 }
-.convite-device-option span{
+body.app-logado .bottom-nav-smart{display:grid;}
+.bottom-nav-item{
   display:flex;
   flex-direction:column;
-  line-height:1.25;
-}
-.convite-device-option small{
-  color:var(--text-muted);
-  font-family:monospace;
+  align-items:center;
+  justify-content:center;
+  gap:4px;
+  color:#8e8e8e;
+  font-size:11px;
   font-weight:600;
+  cursor:pointer;
+  min-height:54px;
 }
-.convite-vazio{
-  text-align:center;
-  color:var(--text-muted);
-  font-size:13px;
-  padding:10px;
-}
+.bottom-nav-item svg{width:26px;height:26px;fill:currentColor;stroke:currentColor;}
+.bottom-nav-item.active{color:#1877ff;}
+[data-theme="dark"] .status-filter-num{color:var(--text-main);}
+[data-theme="dark"] .status-filter-label{color:#9ca3af;}
+[data-theme="dark"] .status-filter-item{background:var(--card-bg);border-color:var(--card-border);}
 @media(max-width:420px){
-  .lista-acoes-grid{
-    grid-template-columns:repeat(2, minmax(0,1fr));
-  }
-  .status-filtros-grid{
-    grid-template-columns:repeat(4, minmax(0,1fr));
-    gap:5px;
-  }
-  .mini-action-card,
-  .status-filtro-card{
-    min-height:64px;
-    font-size:11px;
-    padding:8px 4px;
-  }
-  .status-filtro-card span{
-    font-size:9px;
-  }
-  .status-filtro-card strong{
-    font-size:18px;
-  }
+  .home-action-row{min-height:78px;}
+  .home-action-btn{gap:8px;font-size:14px;line-height:1.18;padding:14px 8px;}
+  .home-action-btn svg{width:29px;height:29px;}
+  .status-filter-grid{gap:6px;}
+  .status-filter-item{min-height:76px;border-radius:16px;}
+  .status-filter-label{font-size:12px;margin-top:7px;}
+  .bottom-nav-item{font-size:10.5px;}
 }
 
 </style>
@@ -1216,6 +1229,25 @@ button:active{transform:scale(0.98)}
   <div class="pwa-install-actions">
     <button type="button" onclick="instalarSmartBmsPwa()">INSTALAR</button>
     <button type="button" class="pwa-install-close" onclick="dispensarSmartBmsPwa()">×</button>
+  </div>
+</div>
+
+<div id="bottomNavSmart" class="bottom-nav-smart">
+  <div id="nav-home" class="bottom-nav-item active" onclick="navegarRodapeSmart('home')">
+    <svg viewBox="0 0 24 24"><path d="M3 11l9-8 9 8v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>
+    <span>Página inicial</span>
+  </div>
+  <div id="nav-dispositivos" class="bottom-nav-item" onclick="navegarRodapeSmart('dispositivos')">
+    <svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="6" rx="2"/><rect x="4" y="14" width="16" height="6" rx="2"/><circle cx="17" cy="7" r="1" fill="white" stroke="none"/><circle cx="17" cy="17" r="1" fill="white" stroke="none"/></svg>
+    <span>Dispositivos</span>
+  </div>
+  <div id="nav-servicos" class="bottom-nav-item" onclick="navegarRodapeSmart('servicos')">
+    <svg viewBox="0 0 24 24"><rect x="4" y="4" width="7" height="7" rx="2"/><rect x="13" y="4" width="7" height="7" rx="2"/><rect x="4" y="13" width="7" height="7" rx="2"/><rect x="13" y="13" width="7" height="7" rx="2"/></svg>
+    <span>Serviços</span>
+  </div>
+  <div id="nav-perfil" class="bottom-nav-item" onclick="navegarRodapeSmart('perfil')">
+    <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.6-5 5-7 8-7s6.4 2 8 7"/></svg>
+    <span>Perfil</span>
   </div>
 </div>
 
@@ -1311,50 +1343,69 @@ button:active{transform:scale(0.98)}
 <div id="lista" class="hidden">
   <div class="title" style="font-size:clamp(28px,6vw,34px);margin-bottom:4px">SMART BMS</div>
   <div class="user-info">Olá, <span id="user-nome">--</span></div>
-  
-  <div class="card lista-controle-card">
-    <div class="lista-acoes-grid">
-      <button type="button" id="btn-cortina-add" class="mini-action-card" onclick="toggleCortinaAdicionarDispositivo()">Adicionar dispositivo</button>
-      <button type="button" id="btn-cortina-convite" class="mini-action-card" onclick="toggleCortinaConvidarUsuario()">Convidar usuário</button>
-    </div>
 
-    <div id="cortina-adicionar-dispositivo" class="cortina-wrapper lista-cortina-form">
-      <div class="label">Adicionar dispositivo</div>
-      <div class="qr-input-row">
-        <input id="bms-code" placeholder="Digite ou escaneie código" maxlength="14">
-        <button class="btn-qr-scan" onclick="abrirScannerCamera()" title="Escanear QR Code">
-          <svg viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M3 7V5a2 2 0 012-2h2m10 0h2a2 2 0 012 2v2m0 10v2a2 2 0 01-2 2h-2M7 21H5a2 2 0 01-2-2v-2M12 7v10m-3-5h6" />
-          </svg>
-        </button>
+  <div class="home-action-card">
+    <div class="home-action-row">
+      <div class="home-action-btn" onclick="togglePainelLista('add')">
+        <svg viewBox="0 0 64 64"><path d="M10 31L32 11l22 20"/><path d="M17 29v25h30V29"/><path d="M27 54V39h10v15"/><path d="M39 16h8v12"/><path d="M36 31l-8 11h7l-3 11 11-15h-7l0-7z"/><path d="M51 45v12M45 51h12"/></svg>
+        <span>Adicionar dispositivo</span>
       </div>
-      <input id="bms-nome" placeholder="Nome Ex: Casa" style="margin-top:12px">
-      <button onclick="addBms()">ADICIONAR DISPOSITIVO</button>
-    </div>
-
-    <div id="cortina-convidar-usuario" class="cortina-wrapper lista-cortina-form">
-      <div class="label">Convidar usuário</div>
-      <input id="convite-email" type="email" placeholder="E-mail do convidado">
-      <div class="label" style="margin-top:12px">Dispositivos liberados</div>
-      <div id="convite-dispositivos-lista" class="convite-dispositivos-lista">
-        <div class="convite-vazio">Nenhum dispositivo carregado</div>
+      <div class="home-action-divider"></div>
+      <div class="home-action-btn" onclick="togglePainelLista('convite')">
+        <svg viewBox="0 0 64 64"><circle cx="28" cy="20" r="10"/><path d="M10 52c3-12 12-18 18-18s15 6 18 18"/><path d="M50 35v16M42 43h16"/></svg>
+        <span>Convidar usuário</span>
       </div>
-      <button onclick="enviarConviteUsuario()">ENVIAR CONVITE</button>
     </div>
 
-    <div class="status-filtros-grid">
-      <button type="button" id="filtro-tudo" class="status-filtro-card ativo" onclick="filtrarDispositivos('tudo')">
-        <span>Tudo</span><strong id="countTudo">0</strong>
-      </button>
-      <button type="button" id="filtro-online" class="status-filtro-card" onclick="filtrarDispositivos('online')">
-        <span>Online</span><strong id="countOnline">0</strong>
-      </button>
-      <button type="button" id="filtro-falha" class="status-filtro-card" onclick="filtrarDispositivos('falha')">
-        <span>Falha</span><strong id="countFalha">0</strong>
-      </button>
-      <button type="button" id="filtro-offline" class="status-filtro-card" onclick="filtrarDispositivos('offline')">
-        <span>Offline</span><strong id="countOffline">0</strong>
-      </button>
+    <div id="painel-add-dispositivo" class="home-panel-cortina">
+      <div class="home-panel-inner">
+        <div class="label">Adicionar dispositivo</div>
+        <div class="qr-input-row">
+          <input id="bms-code" placeholder="Digite ou escaneie código" maxlength="14">
+          <button class="btn-qr-scan" onclick="abrirScannerCamera()" title="Escanear QR Code">
+            <svg viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M3 7V5a2 2 0 012-2h2m10 0h2a2 2 0 012 2v2m0 10v2a2 2 0 01-2 2h-2M7 21H5a2 2 0 01-2-2v-2M12 7v10m-3-5h6" />
+            </svg>
+          </button>
+        </div>
+        <input id="bms-nome" placeholder="Nome Ex: Casa" style="margin-top:12px">
+        <button onclick="addBms()">ADICIONAR DISPOSITIVO</button>
+        <button id="btn-toggle-cortina" class="hidden" onclick="toggleCortinaDispositivos()">MOSTRAR DISPOSITIVOS</button>
+      </div>
+    </div>
+
+    <div id="painel-convidar-usuario" class="home-panel-cortina">
+      <div class="home-panel-inner">
+        <div class="label">Convidar usuário</div>
+        <input id="convite-email" type="email" placeholder="E-mail do convidado">
+        <div class="label" style="margin-top:14px">Dispositivos liberados</div>
+        <div id="convite-dispositivos" class="convite-device-list">
+          <p style="text-align:center;color:var(--text-muted);font-size:13px;padding:10px">Carregando dispositivos...</p>
+        </div>
+        <button onclick="enviarConviteUsuario()">ENVIAR CONVITE</button>
+        <div id="erro-convite" class="erro hidden"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="status-filter-card">
+    <div class="status-filter-grid">
+      <div id="filter-tudo" class="status-filter-item active" onclick="filtrarBmsLista('tudo')">
+        <div id="count-tudo" class="status-filter-num">0</div>
+        <div class="status-filter-label">Tudo</div>
+      </div>
+      <div id="filter-online" class="status-filter-item" onclick="filtrarBmsLista('online')">
+        <div id="count-online" class="status-filter-num online">0</div>
+        <div class="status-filter-label">Online</div>
+      </div>
+      <div id="filter-falha" class="status-filter-item" onclick="filtrarBmsLista('falha')">
+        <div id="count-falha" class="status-filter-num falha">0</div>
+        <div class="status-filter-label">Falha</div>
+      </div>
+      <div id="filter-offline" class="status-filter-item" onclick="filtrarBmsLista('offline')">
+        <div id="count-offline" class="status-filter-num offline">0</div>
+        <div class="status-filter-label">Offline</div>
+      </div>
     </div>
   </div>
   
@@ -1369,8 +1420,6 @@ button:active{transform:scale(0.98)}
     <button class="btn-card-action" onclick="mostrarPaginaConta()">CONFIGURAÇÕES DA CONTA</button>
     <button class="btn-card-action" onclick="sair()">SAIR</button>
   </div>
-
-  
 </div>
 
 <div id="configuracoesPage" class="hidden">
@@ -1581,7 +1630,6 @@ var TIMEOUT_ERRO_CADASTRO = null;
 
 var CADASTRO_ATIVO = false;
 var USAR_CONTROLE_CORTINA = false;
-var FILTRO_LISTA_DISPOSITIVOS = 'tudo';
 
 var SCANNER_CAMERA_OBJ = null;
 var MQTT_CLIENT = null;
@@ -1600,6 +1648,8 @@ var CACHE_MQTT_MS = 30000;
  
 var estadoOnlineDispositivos = {};
 var ultimoSnapshotDispositivos = {};
+var filtroListaBmsAtual = "tudo";
+var listaBmsCacheAtual = [];
 
 
 // CONFIGURAÇÃO DO TIMEOUT EM MILISSEGUNDOS (15 SEGUNDOS DE TOLERÂNCIA CONTRA OSCILAÇÕES)
@@ -1657,7 +1707,9 @@ function marcarDemoOnlineNaLista(code){
   }
 
   atualizarUltimoOnlineCardSmartBms(code, true, new Date().toISOString());
+  atualizarResumoDispositivos();
 }
+
 
 
 
@@ -1710,18 +1762,15 @@ function agendarOfflineDispositivo(code){
 
     if(card && dot){
       card.className = "bms-item";
-      card.setAttribute('data-status', 'offline');
       dot.className = "status-dot off";
       dot.textContent = "Offline";
       atualizarUltimoOnlineCardSmartBms(code, false);
     }
 
-    atualizarResumoDispositivos();
-    if(FILTRO_LISTA_DISPOSITIVOS !== 'tudo' && FILTRO_LISTA_DISPOSITIVOS !== 'offline') renderizarListaDispositivosAtual();
-
     if(CODIGO === code && !document.getElementById('dash').classList.contains('hidden')){
       configurarInterfaceEstadoOffline();
     }
+    atualizarResumoDispositivos();
   }, TEMPO_TIMEOUT_CONEXAO);
 }
 
@@ -1733,14 +1782,13 @@ function marcarCardListaOnline(code){
 
   if(card && dot){
     card.className = "bms-item online-active";
-    card.setAttribute('data-status', 'online');
     dot.className = "status-dot on";
     dot.textContent = "Online";
     atualizarUltimoOnlineCardSmartBms(code, true, new Date().toISOString());
   }
   atualizarResumoDispositivos();
-  if(FILTRO_LISTA_DISPOSITIVOS !== 'tudo' && FILTRO_LISTA_DISPOSITIVOS !== 'online') renderizarListaDispositivosAtual();
 }
+
 
 function marcarDashboardBmsOnline(){
   gerenciarLayoutStatus(document.getElementById('cardBms'), document.getElementById('txtBms'), true, "Online", "Offline");
@@ -2007,6 +2055,7 @@ function alternarThemeDireto() {
 }
 
 function esconderTudo(){
+  document.body.classList.remove('app-logado');
   document.getElementById('login').classList.add('hidden');
   document.getElementById('cadastro').classList.add('hidden');
   document.getElementById('redefinir').classList.add('hidden');
@@ -2113,6 +2162,8 @@ function mostrarPaginaConta() {
   clearInterval(INT);
   esconderTudo();
   document.getElementById('configuracoesPage').classList.remove('hidden');
+  document.body.classList.add('app-logado');
+  atualizarRodapeSmart('perfil');
   atualizarBotaoTema();
 }
 
@@ -2446,196 +2497,171 @@ function restaurarBotaoCadastroOriginal() {
 }
 
 
-function toggleCortinaAdicionarDispositivo(){
-  var cortina = document.getElementById('cortina-adicionar-dispositivo');
-  var convite = document.getElementById('cortina-convidar-usuario');
-  var btnAdd = document.getElementById('btn-cortina-add');
-  var btnConvite = document.getElementById('btn-cortina-convite');
-  if(!cortina) return;
-
-  var vaiAbrir = !cortina.classList.contains('aberta');
-  cortina.classList.toggle('aberta', vaiAbrir);
-  if(btnAdd) btnAdd.classList.toggle('ativo', vaiAbrir);
-
-  if(vaiAbrir && convite){
-    convite.classList.remove('aberta');
-    if(btnConvite) btnConvite.classList.remove('ativo');
-  }
-}
-
-function toggleCortinaConvidarUsuario(){
-  var cortina = document.getElementById('cortina-convidar-usuario');
-  var add = document.getElementById('cortina-adicionar-dispositivo');
-  var btnConvite = document.getElementById('btn-cortina-convite');
-  var btnAdd = document.getElementById('btn-cortina-add');
-  if(!cortina) return;
-
-  var vaiAbrir = !cortina.classList.contains('aberta');
-  cortina.classList.toggle('aberta', vaiAbrir);
-  if(btnConvite) btnConvite.classList.toggle('ativo', vaiAbrir);
-
-  if(vaiAbrir && add){
+function togglePainelLista(tipo){
+  var add = document.getElementById('painel-add-dispositivo');
+  var conv = document.getElementById('painel-convidar-usuario');
+  if(!add || !conv) return;
+  if(tipo === 'add'){
+    var abrir = !add.classList.contains('aberta');
+    conv.classList.remove('aberta');
+    add.classList.toggle('aberta', abrir);
+  } else {
+    var abrirConv = !conv.classList.contains('aberta');
     add.classList.remove('aberta');
-    if(btnAdd) btnAdd.classList.remove('ativo');
+    conv.classList.toggle('aberta', abrirConv);
+    if(abrirConv) montarSeletorConviteDispositivos();
   }
-
-  if(vaiAbrir) atualizarSeletorConviteDispositivos();
 }
 
-function obterStatusDispositivoLista(code, item){
-  item = item || ultimoSnapshotDispositivos[code] || {};
-  var textoStatus = String(item.status || item.estado || item.situacao || '').toLowerCase();
-  var temFalha = !!(item.falha || item.erro || item.error || textoStatus.indexOf('falha') >= 0 || textoStatus.indexOf('erro') >= 0 || textoStatus.indexOf('fault') >= 0);
-  if(temFalha) return 'falha';
-  if(isDispositivoDemoCliente(code) || mqttRecenteDispositivo(code) || !!estadoOnlineDispositivos[code]) return 'online';
+function obterStatusVisualBms(b){
+  if(!b) return 'offline';
+  var code = b.code || '';
+  var st = String(b.status || b.estado || '').toLowerCase();
+  if(st.indexOf('falha') >= 0 || st.indexOf('erro') >= 0 || b.falha === true || b.alarm === true) return 'falha';
+  if(estadoOnlineDispositivos[code]) return 'online';
   return 'offline';
 }
 
+function filtrarBmsLista(filtro){
+  filtroListaBmsAtual = filtro || 'tudo';
+  ['tudo','online','falha','offline'].forEach(function(k){
+    var el = document.getElementById('filter-' + k);
+    if(el) el.classList.toggle('active', k === filtroListaBmsAtual);
+  });
+  renderizarListaBmsCache();
+}
+
 function atualizarResumoDispositivos(){
-  var total = listaPlacasRegistradas.length;
-  var online = 0;
-  var falha = 0;
-  var offline = 0;
-
-  for(var i=0;i<listaPlacasRegistradas.length;i++){
-    var code = listaPlacasRegistradas[i];
-    var status = obterStatusDispositivoLista(code);
-    if(status === 'online') online++;
-    else if(status === 'falha') falha++;
+  var total = listaBmsCacheAtual.length;
+  var online = 0, falha = 0, offline = 0;
+  listaBmsCacheAtual.forEach(function(b){
+    var st = obterStatusVisualBms(b);
+    if(st === 'falha') falha++;
+    else if(st === 'online') online++;
     else offline++;
-  }
-
-  var elTudo = document.getElementById('countTudo');
-  var elOnline = document.getElementById('countOnline');
-  var elFalha = document.getElementById('countFalha');
-  var elOffline = document.getElementById('countOffline');
-  if(elTudo) elTudo.textContent = total;
-  if(elOnline) elOnline.textContent = online;
-  if(elFalha) elFalha.textContent = falha;
-  if(elOffline) elOffline.textContent = offline;
+  });
+  var ids = {tudo:total, online:online, falha:falha, offline:offline};
+  Object.keys(ids).forEach(function(k){
+    var el = document.getElementById('count-' + k);
+    if(el) el.textContent = ids[k];
+  });
 }
 
-function atualizarBotoesFiltroDispositivos(){
-  var filtros = ['tudo','online','falha','offline'];
-  for(var i=0;i<filtros.length;i++){
-    var el = document.getElementById('filtro-' + filtros[i]);
-    if(el) el.classList.toggle('ativo', FILTRO_LISTA_DISPOSITIVOS === filtros[i]);
-  }
-}
-
-function filtrarDispositivos(filtro){
-  FILTRO_LISTA_DISPOSITIVOS = filtro || 'tudo';
-  atualizarBotoesFiltroDispositivos();
-  renderizarListaDispositivosAtual();
-}
-
-function atualizarSeletorConviteDispositivos(){
-  var el = document.getElementById('convite-dispositivos-lista');
-  if(!el) return;
-
-  if(!listaPlacasRegistradas.length){
-    el.innerHTML = '<div class="convite-vazio">Nenhum dispositivo disponível</div>';
+function montarSeletorConviteDispositivos(){
+  var box = document.getElementById('convite-dispositivos');
+  if(!box) return;
+  if(!listaBmsCacheAtual.length){
+    box.innerHTML = '<p style="text-align:center;color:var(--text-muted);font-size:13px;padding:10px">Nenhum dispositivo cadastrado</p>';
     return;
   }
-
   var html = '';
-  for(var i=0;i<listaPlacasRegistradas.length;i++){
-    var code = listaPlacasRegistradas[i];
-    var item = ultimoSnapshotDispositivos[code] || { code: code, nome: code };
+  listaBmsCacheAtual.forEach(function(b){
     html += '<label class="convite-device-option">';
-    html += '<input type="checkbox" class="convite-device-check" value="' + code + '">';
-    html += '<span>' + (item.nome || code) + '<small>' + code + '</small></span>';
+    html += '<input type="checkbox" class="convite-device-check" value="' + String(b.code || '').replace(/"/g,'&quot;') + '">';
+    html += '<span>' + String(b.nome || b.code || 'Dispositivo') + ' <small style="color:var(--text-muted);font-weight:600">' + String(b.code || '') + '</small></span>';
     html += '</label>';
-  }
-  el.innerHTML = html;
+  });
+  box.innerHTML = html;
 }
 
 function enviarConviteUsuario(){
   var emailEl = document.getElementById('convite-email');
+  var erro = document.getElementById('erro-convite');
   var email = emailEl ? emailEl.value.trim() : '';
-  var checks = document.querySelectorAll('.convite-device-check:checked');
-  var dispositivos = [];
-
-  for(var i=0;i<checks.length;i++) dispositivos.push(checks[i].value);
-
-  if(!email) return alert('Digite o e-mail do convidado.');
-  if(!/^\S+@\S+\.\S+$/.test(email)) return alert('Digite um e-mail válido.');
-  if(!dispositivos.length) return alert('Selecione pelo menos um dispositivo.');
-
+  var checks = Array.prototype.slice.call(document.querySelectorAll('.convite-device-check:checked'));
+  var devices = checks.map(function(c){ return c.value; });
+  if(erro){ erro.classList.add('hidden'); erro.textContent = ''; }
+  if(!email || email.indexOf('@') < 0){
+    if(erro){ erro.textContent = 'Informe um e-mail válido.'; erro.classList.remove('hidden'); }
+    return;
+  }
+  if(!devices.length){
+    if(erro){ erro.textContent = 'Selecione pelo menos um dispositivo.'; erro.classList.remove('hidden'); }
+    return;
+  }
   fetch(API + '?action=invite_user', {
     method:'POST',
     headers:{'Content-Type':'application/json','Authorization':'Bearer '+TOKEN},
-    body:JSON.stringify({ email: email, devices: dispositivos })
+    body:JSON.stringify({email:email, devices:devices})
   })
-  .then(function(r){ return r.json(); })
-  .then(function(d){
-    if(d && d.ok){
+  .then(function(r){ return r ? r.json() : null; })
+  .then(function(resp){
+    if(resp && resp.ok){
+      if(erro){ erro.textContent = 'Convite enviado com sucesso.'; erro.classList.remove('hidden'); }
       if(emailEl) emailEl.value = '';
-      var selecionados = document.querySelectorAll('.convite-device-check:checked');
-      for(var j=0;j<selecionados.length;j++) selecionados[j].checked = false;
-      alert('Convite enviado com sucesso.');
-      toggleCortinaConvidarUsuario();
+      checks.forEach(function(c){ c.checked = false; });
     } else {
-      alert('Erro ao enviar convite: ' + ((d && d.error) ? d.error : 'recurso ainda não disponível no servidor'));
+      if(erro){ erro.textContent = (resp && resp.error) ? resp.error : 'Convite preparado. Configure a rota invite_user no servidor para enviar o e-mail.'; erro.classList.remove('hidden'); }
     }
   })
-  .catch(function(err){
-    alert('Erro de conexão ao enviar convite: ' + err.message);
+  .catch(function(){
+    if(erro){ erro.textContent = 'Convite preparado. Falta conectar esta função ao backend de envio de e-mail.'; erro.classList.remove('hidden'); }
   });
 }
 
-function renderizarListaDispositivosAtual(){
+function renderizarListaBmsCache(){
+  atualizarResumoDispositivos();
+  montarSeletorConviteDispositivos();
   var el = document.getElementById('bms-list');
   if(!el) return;
-
-  atualizarResumoDispositivos();
-
-  if(!listaPlacasRegistradas.length){
-    el.innerHTML = '<p style="text-align:center;color:var(--text-muted);padding:20px;font-size:14px">Nenhuma BMS monitorada</p>';
-    atualizarSeletorConviteDispositivos();
+  var lista = listaBmsCacheAtual.filter(function(b){
+    var st = obterStatusVisualBms(b);
+    return filtroListaBmsAtual === 'tudo' || st === filtroListaBmsAtual;
+  });
+  if(!lista.length){
+    el.innerHTML = '<p style="text-align:center;color:var(--text-muted);padding:20px;font-size:14px">Nenhum dispositivo neste filtro</p>';
     return;
   }
-
   var html = '';
-  for(var i=0;i<listaPlacasRegistradas.length;i++){
-    var code = listaPlacasRegistradas[i];
-    var b = ultimoSnapshotDispositivos[code] || { code: code, nome: code };
-    var status = obterStatusDispositivoLista(code, b);
-
-    if(FILTRO_LISTA_DISPOSITIVOS !== 'tudo' && status !== FILTRO_LISTA_DISPOSITIVOS) continue;
-
-    var online = status === 'online';
-    var statusTexto = status === 'falha' ? 'Falha' : (online ? 'Online' : 'Offline');
-    var statusClasse = online ? 'on' : 'off';
-    var cardClasse = 'bms-item' + (online ? ' online-active' : '');
-
-    html += '<div class="' + cardClasse + '" id="card-lista-' + code + '" data-status="' + status + '" onclick="abrirDash(\''+code+'\')">';
-    html += '<h3>'+ (b.nome || code) +'</h3>';
-    html += '<p>'+code+'</p>';
-    html += '<span class="status-dot ' + statusClasse + '" id="dot-lista-' + code + '">' + statusTexto + '</span>';
-    html += '<div class="ultimo-online-dispositivo" id="last-lista-' + code + '" data-updated-at="' + (b.updated_at || '') + '">' + formatarUltimoOnlineSmartBms(b.updated_at) + '</div>';
-    html += '<button class="btn-item-del" onclick="event.stopPropagation();removerBms(\''+code+'\',\''+(b.nome || code).replace(/'/g, "\\'")+'\')">Excluir Dispositivo</button>';
+  for(var i=0;i<lista.length;i++){
+    var b = lista[i];
+    var st = obterStatusVisualBms(b);
+    var online = st === 'online';
+    var falha = st === 'falha';
+    var dotClass = falha ? 'off' : (online ? 'on' : 'off');
+    var dotText = falha ? 'Falha' : (online ? 'Online' : 'Offline');
+    html += '<div class="bms-item' + (online ? ' online-active' : '') + '" id="card-lista-' + b.code + '" data-status="' + st + '" onclick="abrirDash(\''+b.code+'\')">';
+    html += '<h3>'+b.nome+'</h3>';
+    html += '<p>'+b.code+'</p>';
+    html += '<span class="status-dot ' + dotClass + '" id="dot-lista-' + b.code + '">' + dotText + '</span>';
+    html += '<div class="ultimo-online-dispositivo" id="last-lista-' + b.code + '" data-updated-at="' + (b.updated_at || '') + '">' + formatarUltimoOnlineSmartBms(b.updated_at) + '</div>';
+    html += '<button class="btn-item-del" onclick="event.stopPropagation();removerBms(\''+b.code+'\',\''+String(b.nome || '').replace(/'/g,"\\'")+'\')">Excluir Dispositivo</button>';
     html += '</div>';
   }
-
-  if(!html){
-    var nomeFiltro = FILTRO_LISTA_DISPOSITIVOS.charAt(0).toUpperCase() + FILTRO_LISTA_DISPOSITIVOS.slice(1);
-    html = '<p style="text-align:center;color:var(--text-muted);padding:20px;font-size:14px">Nenhum dispositivo em ' + nomeFiltro + '</p>';
-  }
-
   el.innerHTML = html;
-
-  for(var j=0;j<listaPlacasRegistradas.length;j++){
-    var c = listaPlacasRegistradas[j];
-    if(isDispositivoDemoCliente(c)){
-      marcarDemoOnlineNaLista(c);
+  for(var j=0;j<lista.length;j++){
+    if(isDispositivoDemoCliente(lista[j].code)){
+      marcarDemoOnlineNaLista(lista[j].code);
     } else {
-      var snap = ultimoSnapshotDispositivos[c] || {};
-      atualizarUltimoOnlineCardSmartBms(c, !!estadoOnlineDispositivos[c], snap.updated_at || '');
+      atualizarUltimoOnlineCardSmartBms(lista[j].code, !!estadoOnlineDispositivos[lista[j].code], lista[j].updated_at || '');
     }
   }
+}
 
-  atualizarSeletorConviteDispositivos();
+function atualizarRodapeSmart(ativo){
+  ['home','dispositivos','servicos','perfil'].forEach(function(k){
+    var el = document.getElementById('nav-' + k);
+    if(el) el.classList.toggle('active', k === ativo);
+  });
+}
+
+function navegarRodapeSmart(destino){
+  if(destino === 'perfil'){
+    mostrarPaginaConta();
+    atualizarRodapeSmart('perfil');
+    return;
+  }
+  if(destino === 'servicos'){
+    alert('Serviços será configurado em uma próxima etapa.');
+    atualizarRodapeSmart('servicos');
+    return;
+  }
+  mostrarLista();
+  atualizarRodapeSmart(destino === 'dispositivos' ? 'dispositivos' : 'home');
+  if(destino === 'dispositivos'){
+    var cortina = document.getElementById('cortina-dispositivos');
+    if(cortina) cortina.scrollIntoView({behavior:'smooth', block:'start'});
+  }
 }
 
 function toggleCortinaDispositivos() {
@@ -2663,12 +2689,16 @@ function mostrarLista(){
   localStorage.removeItem('bms_codigo_ativo');
   esconderTudo();
   document.getElementById('lista').classList.remove('hidden');
+  document.body.classList.add('app-logado');
+  atualizarRodapeSmart('home');
   document.getElementById('user-nome').textContent = USER ? USER.nome : 'Usuário';
   
   var cortina = document.getElementById('cortina-dispositivos');
+  var btn = document.getElementById('btn-toggle-cortina');
+  
   if(cortina) cortina.classList.add('aberta');
+  if(btn) btn.classList.add('hidden');
   USAR_CONTROLE_CORTINA = false;
-  atualizarBotoesFiltroDispositivos();
 
   carregarListaUmaVez();
   garantirMqttGlobal();
@@ -2682,8 +2712,14 @@ function carregarListaUmaVez() {
   })
   .then(function(lista){
     if(!lista) return;
-
+    listaBmsCacheAtual = lista;
     listaPlacasRegistradas = lista.map(function(item) { return item.code; });
+
+    var cortina = document.getElementById('cortina-dispositivos');
+    var btn = document.getElementById('btn-toggle-cortina');
+    USAR_CONTROLE_CORTINA = false;
+    if(cortina) cortina.classList.add('aberta');
+    if(btn) btn.classList.add('hidden');
 
     for(var i=0;i<lista.length;i++){
       if(lista[i] && lista[i].code){
@@ -2692,11 +2728,7 @@ function carregarListaUmaVez() {
       }
     }
 
-    var cortina = document.getElementById('cortina-dispositivos');
-    if(cortina) cortina.classList.add('aberta');
-
-    atualizarBotoesFiltroDispositivos();
-    renderizarListaDispositivosAtual();
+    renderizarListaBmsCache();
     garantirMqttGlobal();
   });
 }
@@ -2724,6 +2756,8 @@ function iniciarDemoClienteSeparado(code){
 
   esconderTudo();
   document.getElementById('dash').classList.remove('hidden');
+  document.body.classList.add('app-logado');
+  atualizarRodapeSmart('dispositivos');
   document.getElementById('bms-titulo').textContent = code;
 
   forcarStatusDemoOnline();
@@ -2779,6 +2813,8 @@ function abrirDash(code){
 
   esconderTudo();
   document.getElementById('dash').classList.remove('hidden');
+  document.body.classList.add('app-logado');
+  atualizarRodapeSmart('dispositivos');
   document.getElementById('bms-titulo').textContent = code;
 
   garantirMqttGlobal();
@@ -2844,6 +2880,7 @@ function processarERenderizarDadosMqtt(d) {
     if(!mqttRecenteDispositivo(CODIGO)){
       configurarInterfaceEstadoOffline();
     }
+    atualizarResumoDispositivos();
   }, TEMPO_TIMEOUT_CONEXAO);
 
   marcarDashboardBmsOnline();
@@ -2885,11 +2922,9 @@ function addBms(){
       document.getElementById('bms-nome').value = '';
 
       var cortina = document.getElementById('cortina-dispositivos');
-      var addCortina = document.getElementById('cortina-adicionar-dispositivo');
-      var btnAdd = document.getElementById('btn-cortina-add');
+      var btn = document.getElementById('btn-toggle-cortina');
       if(cortina) cortina.classList.add('aberta');
-      if(addCortina) addCortina.classList.remove('aberta');
-      if(btnAdd) btnAdd.classList.remove('ativo');
+      if(btn) btn.textContent = 'OCULTAR DISPOSITIVOS';
 
       carregarListaUmaVez(); 
     } else { alert('Erro: ' + d.error); }
