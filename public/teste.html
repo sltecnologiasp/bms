@@ -1217,6 +1217,110 @@ body.app-logado .bottom-nav-smart{display:grid;}
   .bottom-nav-item{font-size:10.5px;}
 }
 
+
+/* SMART BMS - AJUSTE VISUAL FINAL DO TOPO E FILTROS */
+.home-dashboard-card{
+  background:var(--card-bg) !important;
+  border:1px solid var(--card-border) !important;
+  border-radius:22px !important;
+  padding:12px !important;
+  width:100% !important;
+  box-shadow:var(--neon-glow) !important;
+  display:flex !important;
+  flex-direction:column !important;
+  gap:12px !important;
+  overflow:hidden !important;
+}
+.home-dashboard-card .home-action-card{
+  background:transparent !important;
+  border:0 !important;
+  border-radius:16px !important;
+  box-shadow:none !important;
+  overflow:hidden !important;
+}
+.home-dashboard-card .home-action-row{
+  min-height:64px !important;
+  background:transparent !important;
+}
+.home-dashboard-card .home-action-divider{
+  height:36px !important;
+  width:1px !important;
+  background:var(--input-border) !important;
+  opacity:.75 !important;
+}
+.home-dashboard-card .home-action-btn{
+  min-height:64px !important;
+  padding:10px 8px !important;
+  gap:8px !important;
+  font-size:clamp(12px,3.25vw,15px) !important;
+  line-height:1.15 !important;
+  font-weight:800 !important;
+  color:var(--text-main) !important;
+}
+.home-dashboard-card .home-action-btn span{
+  max-width:110px !important;
+}
+.home-dashboard-card .home-action-btn svg{
+  width:26px !important;
+  height:26px !important;
+  stroke-width:2.4 !important;
+  flex:0 0 26px !important;
+}
+.home-dashboard-card .status-filter-card{
+  background:transparent !important;
+  border:0 !important;
+  box-shadow:none !important;
+  padding:0 !important;
+  margin:0 !important;
+}
+.home-dashboard-card .status-filter-grid{
+  gap:8px !important;
+}
+.home-dashboard-card .status-filter-item{
+  min-height:68px !important;
+  border-radius:16px !important;
+  background:#ffffff !important;
+  border:1px solid rgba(15,23,42,.06) !important;
+  box-shadow:0 3px 12px rgba(15,23,42,.045) !important;
+}
+.home-dashboard-card .status-filter-item.active{
+  border:1.7px solid #3b82f6 !important;
+  background:#edf4ff !important;
+}
+.home-dashboard-card .status-filter-num{
+  font-size:clamp(18px,4.8vw,24px) !important;
+  font-weight:900 !important;
+  line-height:1 !important;
+  color:#111827 !important;
+}
+.home-dashboard-card .status-filter-num.online{color:#24b66d !important;}
+.home-dashboard-card .status-filter-num.falha{color:#ff3045 !important;}
+.home-dashboard-card .status-filter-num.offline{color:#8e8e8e !important;}
+.home-dashboard-card .status-filter-label{
+  font-size:clamp(10.5px,3vw,13px) !important;
+  font-weight:500 !important;
+  margin-top:7px !important;
+  color:#666666 !important;
+  line-height:1 !important;
+}
+#cortina-dispositivos{margin-top:10px !important;}
+[data-theme="dark"] .home-dashboard-card .status-filter-item{background:rgba(255,255,255,.04) !important;border-color:var(--card-border) !important;}
+[data-theme="dark"] .home-dashboard-card .status-filter-item.active{background:rgba(59,130,246,.16) !important;}
+[data-theme="dark"] .home-dashboard-card .status-filter-num{color:#ffffff !important;}
+[data-theme="dark"] .home-dashboard-card .status-filter-label{color:#9ca3af !important;}
+@media(max-width:420px){
+  .home-dashboard-card{padding:10px !important;gap:10px !important;border-radius:20px !important;}
+  .home-dashboard-card .home-action-row{min-height:58px !important;}
+  .home-dashboard-card .home-action-btn{min-height:58px !important;font-size:12px !important;gap:7px !important;padding:8px 5px !important;}
+  .home-dashboard-card .home-action-btn span{max-width:88px !important;}
+  .home-dashboard-card .home-action-btn svg{width:23px !important;height:23px !important;flex-basis:23px !important;}
+  .home-dashboard-card .home-action-divider{height:32px !important;}
+  .home-dashboard-card .status-filter-grid{gap:6px !important;}
+  .home-dashboard-card .status-filter-item{min-height:62px !important;border-radius:15px !important;}
+  .home-dashboard-card .status-filter-num{font-size:22px !important;}
+  .home-dashboard-card .status-filter-label{font-size:11px !important;margin-top:6px !important;}
+}
+
 </style>
 </head>
 <body>
@@ -1344,15 +1448,16 @@ body.app-logado .bottom-nav-smart{display:grid;}
   <div class="title" style="font-size:clamp(28px,6vw,34px);margin-bottom:4px">SMART BMS</div>
   <div class="user-info">Olá, <span id="user-nome">--</span></div>
 
-  <div class="home-action-card">
-    <div class="home-action-row">
+  <div class="home-dashboard-card">
+    <div class="home-action-card">
+      <div class="home-action-row">
       <div class="home-action-btn" onclick="togglePainelLista('add')">
-        <svg viewBox="0 0 64 64"><path d="M10 31L32 11l22 20"/><path d="M17 29v25h30V29"/><path d="M27 54V39h10v15"/><path d="M39 16h8v12"/><path d="M36 31l-8 11h7l-3 11 11-15h-7l0-7z"/><path d="M51 45v12M45 51h12"/></svg>
+        <svg viewBox="0 0 64 64"><path d="M11 31L32 12l21 19"/><path d="M18 29v23h28V29"/><path d="M27 52V39h10v13"/><path d="M38 17h8v10"/><path d="M35 31l-8 12h7l-3 10 11-15h-7z"/><path d="M51 43v12M45 49h12"/></svg>
         <span>Adicionar dispositivo</span>
       </div>
       <div class="home-action-divider"></div>
       <div class="home-action-btn" onclick="togglePainelLista('convite')">
-        <svg viewBox="0 0 64 64"><circle cx="28" cy="20" r="10"/><path d="M10 52c3-12 12-18 18-18s15 6 18 18"/><path d="M50 35v16M42 43h16"/></svg>
+        <svg viewBox="0 0 64 64"><circle cx="27" cy="19" r="9"/><path d="M11 52c3-12 12-18 16-18s13 6 16 18"/><path d="M50 36v16M42 44h16"/></svg>
         <span>Convidar usuário</span>
       </div>
     </div>
@@ -1385,10 +1490,10 @@ body.app-logado .bottom-nav-smart{display:grid;}
         <button onclick="enviarConviteUsuario()">ENVIAR CONVITE</button>
         <div id="erro-convite" class="erro hidden"></div>
       </div>
+      </div>
     </div>
-  </div>
 
-  <div class="status-filter-card">
+    <div class="status-filter-card">
     <div class="status-filter-grid">
       <div id="filter-tudo" class="status-filter-item active" onclick="filtrarBmsLista('tudo')">
         <div id="count-tudo" class="status-filter-num">0</div>
@@ -1406,6 +1511,7 @@ body.app-logado .bottom-nav-smart{display:grid;}
         <div id="count-offline" class="status-filter-num offline">0</div>
         <div class="status-filter-label">Offline</div>
       </div>
+    </div>
     </div>
   </div>
   
