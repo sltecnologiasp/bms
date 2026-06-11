@@ -3936,6 +3936,54 @@ body.app-logado:not(:has(#lista:not(.hidden)))::after{
   }
 }
 
+
+/* ======================================================
+   SMART BMS - CORREÇÃO TOPO VISÍVEL
+   Remove o fade superior que apagava SMART BMS e os filtros
+   ====================================================== */
+
+/* Desliga completamente o fade de cima */
+body.app-logado::before{
+  content:none !important;
+  display:none !important;
+}
+
+/* Mantém o topo sempre acima de qualquer camada */
+#lista .lista-fixed-top{
+  z-index:999 !important;
+  opacity:1 !important;
+  background:var(--bg) !important;
+  backdrop-filter:none !important;
+  -webkit-backdrop-filter:none !important;
+}
+
+/* Card superior totalmente visível e sólido */
+#lista .home-dashboard-card,
+#lista .home-dashboard-card .home-action-btn,
+#lista .home-dashboard-card .status-filter-item{
+  opacity:1 !important;
+  background:var(--smart-solid-card-bg, #ffffff) !important;
+  backdrop-filter:none !important;
+  -webkit-backdrop-filter:none !important;
+}
+
+[data-theme="dark"] #lista .home-dashboard-card,
+[data-theme="dark"] #lista .home-dashboard-card .home-action-btn,
+[data-theme="dark"] #lista .home-dashboard-card .status-filter-item{
+  background:var(--smart-solid-card-bg, #0d1423) !important;
+}
+
+/* Mantém apenas a ocultação inferior perto do rodapé */
+body.app-logado::after{
+  z-index:940 !important;
+  pointer-events:none !important;
+}
+
+/* Rodapé acima do fade inferior */
+.bottom-nav-smart{
+  z-index:999 !important;
+}
+
 </style>
 </head>
 <body>
