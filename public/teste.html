@@ -3984,6 +3984,142 @@ body.app-logado::after{
   z-index:999 !important;
 }
 
+
+/* ======================================================
+   SMART BMS - DISPOSITIVOS NÃO PASSAM ATRÁS DO TOPO/RODAPÉ
+   Mantém os blocos iguais e cria uma área real de rolagem
+   apenas para os dispositivos, calculada por JS.
+   ====================================================== */
+
+:root{
+  --smart-list-top: 340px;
+  --smart-list-bottom: 104px;
+}
+
+/* remove fades/máscaras anteriores */
+body.app-logado::before,
+body.app-logado::after,
+#lista::before,
+#cortina-dispositivos::before{
+  content:none !important;
+  display:none !important;
+}
+
+/* a home ocupa a tela inteira sem deixar conteúdo atravessar os fixos */
+#lista{
+  height:100vh !important;
+  min-height:100vh !important;
+  overflow:hidden !important;
+  padding-top:0 !important;
+  padding-bottom:0 !important;
+}
+
+/* topo preservado, acima de tudo */
+#lista .lista-fixed-top{
+  z-index:980 !important;
+  opacity:1 !important;
+  background:var(--bg) !important;
+  backdrop-filter:none !important;
+  -webkit-backdrop-filter:none !important;
+}
+
+/* rodapé preservado, acima de tudo */
+.bottom-nav-smart{
+  z-index:980 !important;
+  opacity:1 !important;
+  backdrop-filter:none !important;
+  -webkit-backdrop-filter:none !important;
+}
+
+/* a lista dos dispositivos agora rola somente no espaço visível */
+#cortina-dispositivos{
+  position:fixed !important;
+  top:var(--smart-list-top) !important;
+  bottom:var(--smart-list-bottom) !important;
+  left:50% !important;
+  transform:translateX(-50%) !important;
+  width:calc(100% - 24px) !important;
+  max-width:1076px !important;
+  overflow-y:auto !important;
+  overflow-x:hidden !important;
+  margin:0 !important;
+  padding:0 0 14px 0 !important;
+  z-index:10 !important;
+  background:transparent !important;
+  opacity:1 !important;
+  -webkit-overflow-scrolling:touch !important;
+  max-height:none !important;
+  scrollbar-width:none !important;
+  -ms-overflow-style:none !important;
+}
+
+#cortina-dispositivos::-webkit-scrollbar{
+  width:0 !important;
+  height:0 !important;
+  display:none !important;
+}
+
+#cortina-dispositivos.aberta{
+  max-height:none !important;
+  opacity:1 !important;
+}
+
+#bms-list{
+  width:100% !important;
+  margin:0 !important;
+  padding:0 !important;
+  display:flex !important;
+  flex-direction:column !important;
+  gap:12px !important;
+  background:transparent !important;
+}
+
+/* segurança: nenhum card recebe preenchimento azul */
+#bms-list .bms-item,
+#bms-list > .card,
+.bms-item{
+  background:var(--smart-solid-card-bg, #ffffff) !important;
+  background-color:var(--smart-solid-card-bg, #ffffff) !important;
+  opacity:1 !important;
+  backdrop-filter:none !important;
+  -webkit-backdrop-filter:none !important;
+}
+
+[data-theme="dark"] #bms-list .bms-item,
+[data-theme="dark"] #bms-list > .card,
+[data-theme="dark"] .bms-item{
+  background:var(--smart-solid-card-bg, #0d1423) !important;
+  background-color:var(--smart-solid-card-bg, #0d1423) !important;
+}
+
+/* quando abrir a aba Dispositivos antiga ou outra página, volta ao fluxo normal */
+body.modo-dispositivos #lista{
+  height:auto !important;
+  overflow:visible !important;
+  padding-top:44px !important;
+  padding-bottom:118px !important;
+}
+
+body.modo-dispositivos #cortina-dispositivos{
+  position:relative !important;
+  top:auto !important;
+  bottom:auto !important;
+  left:auto !important;
+  transform:none !important;
+  width:100% !important;
+  max-width:100% !important;
+  overflow:visible !important;
+  padding:0 !important;
+}
+
+/* mobile */
+@media(max-width:420px){
+  #cortina-dispositivos{
+    width:calc(100% - 20px) !important;
+    padding-bottom:12px !important;
+  }
+}
+
 </style>
 </head>
 <body>
@@ -6734,6 +6870,56 @@ function sairSemConfirmacao(){
     var card = cardRealDispositivo(ev.target);
     if (!card) return;
     tocarCard(card);
+  }, true);
+})();
+</script>
+
+
+<script>
+/* SMART BMS - calcula o espaço visível da lista entre topo e rodapé */
+(function(){
+  function ajustarAreaDispositivosSmart(){
+    try{
+      var listaPage = document.getElementById('lista');
+      var topo = document.querySelector('#lista .lista-fixed-top');
+      var rodape = document.getElementById('bottomNavSmart');
+      var cortina = document.getElementById('cortina-dispositivos');
+
+      if (!listaPage || !topo || !cortina) return;
+      if (listaPage.classList.contains('hidden')) return;
+      if (document.body.classList.contains('modo-dispositivos')) return;
+
+      var topRect = topo.getBoundingClientRect();
+      var bottomTop = window.innerHeight;
+
+      if (rodape && getComputedStyle(rodape).display !== 'none') {
+        bottomTop = rodape.getBoundingClientRect().top;
+      }
+
+      var topLimit = Math.ceil(topRect.bottom + 12);
+      var bottomLimit = Math.max(88, Math.ceil(window.innerHeight - bottomTop + 12));
+
+      document.documentElement.style.setProperty('--smart-list-top', topLimit + 'px');
+      document.documentElement.style.setProperty('--smart-list-bottom', bottomLimit + 'px');
+    } catch(e){}
+  }
+
+  window.ajustarAreaDispositivosSmart = ajustarAreaDispositivosSmart;
+
+  window.addEventListener('resize', ajustarAreaDispositivosSmart);
+  window.addEventListener('orientationchange', function(){
+    setTimeout(ajustarAreaDispositivosSmart, 250);
+  });
+
+  document.addEventListener('DOMContentLoaded', function(){
+    ajustarAreaDispositivosSmart();
+    setTimeout(ajustarAreaDispositivosSmart, 300);
+    setTimeout(ajustarAreaDispositivosSmart, 900);
+    setInterval(ajustarAreaDispositivosSmart, 1500);
+  });
+
+  document.addEventListener('click', function(){
+    setTimeout(ajustarAreaDispositivosSmart, 120);
   }, true);
 })();
 </script>
