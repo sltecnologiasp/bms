@@ -3724,6 +3724,220 @@ body::-webkit-scrollbar,
   }
 }
 
+
+/* ======================================================
+   SMART BMS - CORREÇÃO DO AZUL NOS DISPOSITIVOS
+   Remove preenchimento/overlay azul e limita efeito ao card real
+   ====================================================== */
+
+/* Cards da lista sempre sólidos, sem fundo azulado */
+#bms-list,
+#cortina-dispositivos{
+  background:transparent !important;
+}
+
+#bms-list .bms-item,
+#bms-list > .card,
+.bms-item{
+  background:var(--smart-solid-card-bg, #ffffff) !important;
+  background-color:var(--smart-solid-card-bg, #ffffff) !important;
+  opacity:1 !important;
+  backdrop-filter:none !important;
+  -webkit-backdrop-filter:none !important;
+  overflow:hidden !important;
+  -webkit-tap-highlight-color:transparent !important;
+  outline:none !important;
+}
+
+/* Modo escuro também sólido */
+[data-theme="dark"] #bms-list .bms-item,
+[data-theme="dark"] #bms-list > .card,
+[data-theme="dark"] .bms-item{
+  background:var(--smart-solid-card-bg, #0d1423) !important;
+  background-color:var(--smart-solid-card-bg, #0d1423) !important;
+}
+
+/* Remove qualquer preenchimento azul do estado temporário */
+.bms-item.smart-device-touched,
+#bms-list > .card.smart-device-touched{
+  background:var(--smart-solid-card-bg, #ffffff) !important;
+  background-color:var(--smart-solid-card-bg, #ffffff) !important;
+  border-color:var(--smart-active-border, var(--cyan)) !important;
+  border-width:1.8px !important;
+  box-shadow:var(--neon-glow) !important;
+}
+
+[data-theme="dark"] .bms-item.smart-device-touched,
+[data-theme="dark"] #bms-list > .card.smart-device-touched{
+  background:var(--smart-solid-card-bg, #0d1423) !important;
+  background-color:var(--smart-solid-card-bg, #0d1423) !important;
+}
+
+/* O toque só cresce o card individual, sem sombra azul grande */
+.bms-item:active,
+#bms-list > .card:active{
+  transform:scale(1.018) !important;
+  background:var(--smart-solid-card-bg, #ffffff) !important;
+  box-shadow:var(--neon-glow) !important;
+}
+
+[data-theme="dark"] .bms-item:active,
+[data-theme="dark"] #bms-list > .card:active{
+  background:var(--smart-solid-card-bg, #0d1423) !important;
+}
+
+/* Evita que cards internos/containers recebam o efeito */
+#bms-list .card:not(.bms-item){
+  background:var(--smart-solid-card-bg, #ffffff) !important;
+}
+
+[data-theme="dark"] #bms-list .card:not(.bms-item){
+  background:var(--smart-solid-card-bg, #0d1423) !important;
+}
+
+/* Rodapé 100% sólido */
+.bottom-nav-smart{
+  background:var(--smart-solid-card-bg, #ffffff) !important;
+  opacity:1 !important;
+  backdrop-filter:none !important;
+  -webkit-backdrop-filter:none !important;
+}
+
+[data-theme="dark"] .bottom-nav-smart{
+  background:var(--smart-solid-card-bg, #0d1423) !important;
+}
+
+
+/* ======================================================
+   SMART BMS - LISTA NÃO PASSA POR TRÁS DO TOPO NEM RODAPÉ
+   A área dos dispositivos vira uma área própria de rolagem
+   ====================================================== */
+
+:root{
+  --smart-home-top-limit: 352px;
+  --smart-home-bottom-limit: 104px;
+}
+
+/* A tela inicial não deixa o conteúdo passar atrás dos blocos fixos */
+#lista{
+  height:100vh !important;
+  min-height:100vh !important;
+  overflow:hidden !important;
+  padding-top:0 !important;
+  padding-bottom:0 !important;
+}
+
+/* Topo continua fixo e acima da lista */
+#lista .lista-fixed-top{
+  position:fixed !important;
+  z-index:950 !important;
+}
+
+/* A lista agora rola dentro desse espaço, entre topo e rodapé */
+#cortina-dispositivos{
+  position:fixed !important;
+  top:var(--smart-home-top-limit) !important;
+  bottom:var(--smart-home-bottom-limit) !important;
+  left:50% !important;
+  transform:translateX(-50%) !important;
+  width:calc(100% - 24px) !important;
+  max-width:1076px !important;
+  overflow-y:auto !important;
+  overflow-x:hidden !important;
+  margin-top:0 !important;
+  padding:0 0 14px 0 !important;
+  z-index:20 !important;
+  background:transparent !important;
+  opacity:1 !important;
+  -webkit-overflow-scrolling:touch !important;
+}
+
+/* Remove qualquer comportamento de cortina que esconda a lista */
+#cortina-dispositivos.aberta,
+#cortina-dispositivos{
+  max-height:none !important;
+}
+
+/* Lista interna normal */
+#bms-list{
+  position:relative !important;
+  z-index:1 !important;
+  display:flex !important;
+  flex-direction:column !important;
+  gap:12px !important;
+  width:100% !important;
+  padding:0 !important;
+  margin:0 !important;
+  background:transparent !important;
+}
+
+/* Dispositivos não atravessam topo/rodapé porque ficam presos no container */
+#bms-list .bms-item,
+#bms-list > .card,
+.bms-item{
+  position:relative !important;
+  z-index:1 !important;
+}
+
+/* O rodapé fica acima e sólido */
+.bottom-nav-smart{
+  z-index:900 !important;
+  background:var(--smart-solid-card-bg, #ffffff) !important;
+  opacity:1 !important;
+  backdrop-filter:none !important;
+  -webkit-backdrop-filter:none !important;
+}
+
+/* No modo escuro também sólido */
+[data-theme="dark"] .bottom-nav-smart{
+  background:var(--smart-solid-card-bg, #0d1423) !important;
+}
+
+/* Esconde barra visual da área de rolagem */
+#cortina-dispositivos{
+  scrollbar-width:none !important;
+  -ms-overflow-style:none !important;
+}
+
+#cortina-dispositivos::-webkit-scrollbar{
+  width:0 !important;
+  height:0 !important;
+  display:none !important;
+}
+
+/* Quando entrar no modo antigo de dispositivos, cancela esse recorte da home */
+body.modo-dispositivos #cortina-dispositivos{
+  position:relative !important;
+  top:auto !important;
+  bottom:auto !important;
+  left:auto !important;
+  transform:none !important;
+  width:100% !important;
+  max-width:100% !important;
+  overflow:visible !important;
+}
+
+/* Ajuste para telas menores */
+@media(max-width:420px){
+  :root{
+    --smart-home-top-limit: 334px;
+    --smart-home-bottom-limit: 98px;
+  }
+
+  #cortina-dispositivos{
+    width:calc(100% - 20px) !important;
+    padding-bottom:12px !important;
+  }
+}
+
+/* Ajuste para celulares muito baixos */
+@media(max-height:720px){
+  :root{
+    --smart-home-top-limit: 322px;
+    --smart-home-bottom-limit: 94px;
+  }
+}
+
 </style>
 </head>
 <body>
@@ -6433,6 +6647,48 @@ function sairSemConfirmacao(){
       }
     }, 2500);
   });
+})();
+</script>
+
+
+<script>
+/* SMART BMS - correção: efeito somente no card de dispositivo real */
+(function(){
+  var timers = new WeakMap();
+
+  function cardRealDispositivo(target){
+    if (!target || !target.closest) return null;
+
+    var card = target.closest('#bms-list .bms-item, #bms-list > .card, .gerenciar-bms-item');
+    if (!card) return null;
+
+    /* evita aplicar em containers grandes ou cards que não sejam itens */
+    if (card.id === 'cortina-dispositivos' || card.id === 'bms-list') return null;
+
+    return card;
+  }
+
+  function tocarCard(card){
+    if (!card) return;
+
+    card.classList.add('smart-device-touched');
+
+    var old = timers.get(card);
+    if (old) clearTimeout(old);
+
+    var t = setTimeout(function(){
+      card.classList.remove('smart-device-touched');
+      timers.delete(card);
+    }, 3000);
+
+    timers.set(card, t);
+  }
+
+  document.addEventListener('click', function(ev){
+    var card = cardRealDispositivo(ev.target);
+    if (!card) return;
+    tocarCard(card);
+  }, true);
 })();
 </script>
 
