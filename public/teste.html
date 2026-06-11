@@ -2554,6 +2554,144 @@ body::-webkit-scrollbar,
   }
 }
 
+
+/* ======================================================
+   SMART BMS - PERFIL EM CARD ÚNICO + BOTÕES CINZA COM EFEITO
+   ====================================================== */
+
+#configuracoesPage{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:12px;
+  padding-bottom:118px !important;
+}
+
+.perfil-config-card{
+  width:100% !important;
+  max-width:440px !important;
+  background:var(--smart-solid-card-bg, var(--card-bg)) !important;
+  border:1px solid var(--card-border) !important;
+  border-radius:22px !important;
+  box-shadow:var(--neon-glow) !important;
+  padding:16px !important;
+  display:flex !important;
+  flex-direction:column !important;
+  gap:10px !important;
+  opacity:1 !important;
+  backdrop-filter:none !important;
+  -webkit-backdrop-filter:none !important;
+}
+
+.perfil-section-title{
+  margin-bottom:4px !important;
+}
+
+.perfil-action-btn{
+  width:100% !important;
+  min-height:56px !important;
+  margin-top:0 !important;
+  padding:14px 12px !important;
+  border-radius:16px !important;
+  background:var(--smart-solid-card-bg, var(--card-bg)) !important;
+  border:1px solid var(--card-border) !important;
+  color:var(--text-muted) !important;
+  box-shadow:var(--neon-glow) !important;
+  font-weight:800 !important;
+  font-size:13px !important;
+  letter-spacing:.2px !important;
+  opacity:1 !important;
+  outline:none !important;
+  -webkit-tap-highlight-color:transparent !important;
+  transition:
+    transform .16s ease,
+    border-color .16s ease,
+    box-shadow .16s ease,
+    color .16s ease !important;
+  will-change:transform !important;
+}
+
+.perfil-action-btn:active{
+  transform:scale(1.045) !important;
+  border-color:var(--smart-active-border, var(--cyan)) !important;
+  border-width:1.8px !important;
+  color:var(--text-muted) !important;
+  background:var(--smart-solid-card-bg, var(--card-bg)) !important;
+  box-shadow:var(--neon-glow) !important;
+}
+
+.perfil-action-btn:focus,
+.perfil-action-btn:focus-visible{
+  outline:none !important;
+  background:var(--smart-solid-card-bg, var(--card-bg)) !important;
+}
+
+.perfil-danger-group{
+  display:flex !important;
+  flex-direction:column !important;
+  gap:10px !important;
+  margin-top:8px !important;
+}
+
+.perfil-danger-action{
+  color:var(--text-muted) !important;
+  background:var(--smart-solid-card-bg, var(--card-bg)) !important;
+  border-color:var(--card-border) !important;
+  box-shadow:var(--neon-glow) !important;
+}
+
+.perfil-danger-action:active{
+  border-color:var(--smart-active-border, var(--cyan)) !important;
+  border-width:1.8px !important;
+  color:var(--text-muted) !important;
+  background:var(--smart-solid-card-bg, var(--card-bg)) !important;
+}
+
+/* Remove qualquer botão Voltar antigo caso exista em versões anteriores */
+#configuracoesPage > button[onclick="voltarParaLista()"]{
+  display:none !important;
+}
+
+/* Garante que estilos antigos de danger/sec não sobrescrevam o novo padrão do perfil */
+#configuracoesPage .perfil-action-btn.btn-sec,
+#configuracoesPage .perfil-action-btn.btn-danger,
+#configuracoesPage .perfil-sair-btn{
+  background:var(--smart-solid-card-bg, var(--card-bg)) !important;
+  border-color:var(--card-border) !important;
+  color:var(--text-muted) !important;
+  box-shadow:var(--neon-glow) !important;
+}
+
+#configuracoesPage .perfil-sair-btn:active,
+#configuracoesPage .perfil-sair-btn:focus,
+#configuracoesPage .perfil-danger-action:active,
+#configuracoesPage .perfil-danger-action:focus{
+  border-color:var(--smart-active-border, var(--cyan)) !important;
+  color:var(--text-muted) !important;
+}
+
+/* Sem transparência na tela de perfil */
+#configuracoesPage,
+#configuracoesPage .card,
+#configuracoesPage button{
+  opacity:1 !important;
+  backdrop-filter:none !important;
+  -webkit-backdrop-filter:none !important;
+}
+
+@media(max-width:420px){
+  .perfil-config-card{
+    border-radius:20px !important;
+    padding:14px !important;
+  }
+
+  .perfil-action-btn{
+    min-height:54px !important;
+    border-radius:15px !important;
+    font-size:12.5px !important;
+  }
+}
+
 </style>
 </head>
 <body>
@@ -2761,22 +2899,23 @@ body::-webkit-scrollbar,
 
 <div id="configuracoesPage" class="hidden">
   <div class="title" style="font-size:clamp(28px,6vw,34px);margin-bottom:4px">SMART BMS</div>
-  <div class="user-info">Configurações de Segurança</div>
+  <div class="user-info">Perfil e Configurações</div>
 
-  <div class="card" style="max-width:440px; width:100%">
-    <div class="label" style="margin-bottom:16px">Gerenciar Minha Conta</div>
-    <button class="btn-sec" style="margin-top:0" onclick="abrirModalSenha()">ALTERAR MINHA SENHA</button>
-    <button class="btn-sec" style="margin-top:12px; border-color:var(--green); color:var(--green);" onclick="window.open('https://wa.me/5515991355393', '_blank')">SUPORTE</button>
-    <button class="btn-danger" style="margin-top:12px" onclick="excluirMinhaConta()">EXCLUIR CONTA DEFINITIVAMENTE</button>
+  <div class="card perfil-config-card">
+    <div class="label perfil-section-title">Gerenciar minha conta</div>
+    <button class="perfil-action-btn" onclick="abrirModalSenha()">ALTERAR MINHA SENHA</button>
+
+    <button class="perfil-action-btn" onclick="window.open('https://wa.me/5515991355393', '_blank')">SUPORTE</button>
+
+    <div class="label perfil-section-title" style="margin-top:16px">Visual do aplicativo</div>
+    <button id="theme-toggle-btn" class="perfil-action-btn" onclick="alternarThemeDireto()"></button>
+
+    <div class="perfil-danger-group">
+      <button class="perfil-action-btn perfil-danger-action" onclick="excluirMinhaConta()">EXCLUIR CONTA DEFINITIVAMENTE</button>
+      <button class="perfil-action-btn perfil-danger-action perfil-sair-btn" onclick="sair()">SAIR</button>
+    </div>
   </div>
 
-  <div class="card" style="max-width:440px; width:100%">
-    <div class="label" style="margin-bottom:12px">Visual do Aplicativo</div>
-    <button id="theme-toggle-btn" class="btn-sec" style="margin-top:0" onclick="alternarThemeDireto()"></button>
-  </div>
-
-  <button class="btn-sec" style="max-width:440px; width:100%" onclick="voltarParaLista()">Voltar</button>
-  <button class="btn-danger perfil-sair-btn" style="max-width:440px; width:100%; margin-top:10px" onclick="sair()">SAIR</button>
   <div class="footer-link">
     <a href="https://wa.me/5515991355393" target="_blank">SL TECNOLOGIA</a>
     <span>© Todos os direitos reservados</span>
