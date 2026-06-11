@@ -1799,24 +1799,19 @@ body.modo-dispositivos #lista .lista-fixed-top{
 }
 
 
-/* SMART BMS - DISPOSITIVOS DIRETO NA TELA, SEM CARD PAI */
+
+/* SMART BMS - LISTA DE DISPOSITIVOS SEM CARD EXTERNO */
 #cortina-dispositivos{
-  margin-top:0 !important;
   background:transparent !important;
   border:0 !important;
   box-shadow:none !important;
   padding:0 !important;
 }
-#cortina-dispositivos.cortina-wrapper.aberta{
-  max-height:none !important;
-  overflow:visible !important;
-}
 #cortina-dispositivos > .card{
   display:contents !important;
 }
-#bms-list.bms-list{
+#bms-list{
   margin-top:0 !important;
-  width:100% !important;
 }
 
 </style>
@@ -2243,8 +2238,8 @@ var estadoOnlineDispositivos = {};
 var cacheMqttDispositivos = {};
 var timeoutOfflineDispositivos = {};
 var dashboardAberturaMs = 0;
-var GRACE_MQTT_INICIAL_MS = 10000;
-var CACHE_MQTT_MS = 30000;
+var GRACE_MQTT_INICIAL_MS = 25000;
+var CACHE_MQTT_MS = 120000;
  
 var estadoOnlineDispositivos = {};
 var ultimoSnapshotDispositivos = {};
@@ -2253,7 +2248,7 @@ var listaBmsCacheAtual = [];
 
 
 // CONFIGURAÇÃO DO TIMEOUT EM MILISSEGUNDOS (15 SEGUNDOS DE TOLERÂNCIA CONTRA OSCILAÇÕES)
-var TEMPO_TIMEOUT_CONEXAO = 15000;
+var TEMPO_TIMEOUT_CONEXAO = 60000;
 
 try{USER = JSON.parse(localStorage.getItem('bms_user')||'null');}catch(e){}
 
@@ -2315,8 +2310,14 @@ function marcarDemoOnlineNaLista(code){
 
 function mqttRecenteDispositivo(code){
   if(!code) return false;
+  code = String(code).trim().toUpperCase();
   var t = ultimoPacoteDispositivosMs[code] || 0;
-  return !!(t && (Date.now() - t) < TEMPO_TIMEOUT_CONEXAO);
+  if(t && (Date.now() - t) < TEMPO_TIMEOUT_CONEXAO) return true;
+
+  var cache = cacheMqttDispositivos[code];
+  if(cache && cache.ts && (Date.now() - cache.ts) < CACHE_MQTT_MS) return true;
+
+  return false;
 }
 
 function cacheMqttRecente(code){
@@ -2324,17 +2325,50 @@ function cacheMqttRecente(code){
   return (Date.now() - cacheMqttDispositivos[code].ts) < CACHE_MQTT_MS;
 }
 
+function chaveCacheMqttLocal(code){
+  return 'bms_mqtt_cache_' + String(code || '').trim().toUpperCase();
+}
+
 function obterPayloadCacheMqtt(code){
-  if(!cacheMqttRecente(code)) return null;
-  return cacheMqttDispositivos[code].payload || null;
+  if(!code) return null;
+
+  if(cacheMqttRecente(code)){
+    return cacheMqttDispositivos[code].payload || null;
+  }
+
+  try{
+    var salvo = JSON.parse(localStorage.getItem(chaveCacheMqttLocal(code)) || 'null');
+    if(salvo && salvo.ts && (Date.now() - salvo.ts) < CACHE_MQTT_MS){
+      cacheMqttDispositivos[code] = salvo;
+      ultimoPacoteDispositivosMs[code] = salvo.ts;
+      estadoOnlineDispositivos[code] = true;
+      return salvo.payload || null;
+    }
+  }catch(e){}
+
+  return null;
 }
 
 function salvarPayloadCacheMqtt(code, payload){
   if(!code || !payload) return;
-  cacheMqttDispositivos[code] = {
+  code = String(code).trim().toUpperCase();
+  var pacote = {
     ts: Date.now(),
     payload: payload
   };
+  cacheMqttDispositivos[code] = pacote;
+  try{
+    localStorage.setItem(chaveCacheMqttLocal(code), JSON.stringify(pacote));
+  }catch(e){}
+}
+
+function restaurarEstadoMqttLocal(code){
+  var payload = obterPayloadCacheMqtt(code);
+  if(payload){
+    estadoOnlineDispositivos[code] = true;
+    return true;
+  }
+  return false;
 }
 
 function limparTimeoutOfflineDispositivo(code){
@@ -2462,6 +2496,7 @@ function processarMensagemMqttGlobal(message){
     var codeMsg = partesTopico[1];
 
     if(!codeMsg) return;
+    codeMsg = String(codeMsg).trim().toUpperCase();
 
     var d = {};
     try{
@@ -2509,7 +2544,10 @@ function garantirMqttGlobal(){
     MQTT_CLIENT.onConnectionLost = function(responseObject){
       MQTT_GLOBAL_CONECTADO = false;
       MQTT_GLOBAL_CONECTANDO = false;
-      console.log("[MQTT GLOBAL] Conexão perdida.");
+      console.log("[MQTT GLOBAL] Conexão perdida. Tentando reconectar sem limpar os estados visuais.");
+      setTimeout(function(){
+        if(TOKEN) garantirMqttGlobal();
+      }, 3000);
     };
 
     MQTT_CLIENT.onMessageArrived = processarMensagemMqttGlobal;
@@ -2524,6 +2562,9 @@ function garantirMqttGlobal(){
         MQTT_GLOBAL_CONECTANDO = false;
         console.log("[MQTT GLOBAL] Conectado. Alimentando todas as páginas.");
         MQTT_CLIENT.subscribe("sl_bms/+/telemetria");
+        if(listaBmsCacheAtual && listaBmsCacheAtual.length){
+          renderizarListaBmsCache();
+        }
       },
       onFailure: function(err){
         MQTT_GLOBAL_CONECTADO = false;
@@ -3208,15 +3249,17 @@ function renderizarListaBmsCache(){
     var st = obterStatusVisualBms(b);
     return filtroListaBmsAtual === 'tudo' || st === filtroListaBmsAtual;
   });
-  var ordemStatusBms = { online: 0, falha: 1, offline: 2 };
-  lista.sort(function(a, b){
+
+  lista.sort(function(a,b){
+    var peso = {online:0, falha:1, offline:2};
     var sa = obterStatusVisualBms(a);
     var sb = obterStatusVisualBms(b);
-    var oa = ordemStatusBms.hasOwnProperty(sa) ? ordemStatusBms[sa] : 3;
-    var ob = ordemStatusBms.hasOwnProperty(sb) ? ordemStatusBms[sb] : 3;
-    if(oa !== ob) return oa - ob;
-    return String(a.nome || a.code || '').localeCompare(String(b.nome || b.code || ''), 'pt-BR', {sensitivity:'base'});
+    var pa = peso[sa] !== undefined ? peso[sa] : 3;
+    var pb = peso[sb] !== undefined ? peso[sb] : 3;
+    if(pa !== pb) return pa - pb;
+    return String(a.nome || a.code || '').localeCompare(String(b.nome || b.code || ''));
   });
+
   if(!lista.length){
     el.innerHTML = '<p style="text-align:center;color:var(--text-muted);padding:20px;font-size:14px">Nenhum dispositivo neste filtro</p>';
     return;
@@ -3336,7 +3379,10 @@ function carregarListaUmaVez() {
 
     for(var i=0;i<lista.length;i++){
       if(lista[i] && lista[i].code){
-        estadoOnlineDispositivos[lista[i].code] = isDispositivoDemoCliente(lista[i].code) ? true : (mqttRecenteDispositivo(lista[i].code) || !!estadoOnlineDispositivos[lista[i].code]);
+        var codeLista = String(lista[i].code).trim().toUpperCase();
+        lista[i].code = codeLista;
+        estadoOnlineDispositivos[codeLista] = isDispositivoDemoCliente(codeLista) ? true : (mqttRecenteDispositivo(codeLista) || restaurarEstadoMqttLocal(codeLista) || !!estadoOnlineDispositivos[codeLista]);
+        if(estadoOnlineDispositivos[codeLista]) agendarOfflineDispositivo(codeLista);
         ultimoSnapshotDispositivos[lista[i].code] = lista[i];
       }
     }
