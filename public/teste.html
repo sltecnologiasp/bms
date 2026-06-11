@@ -1799,76 +1799,33 @@ body.modo-dispositivos #lista .lista-fixed-top{
 }
 
 
-
-/* SMART BMS - LISTA DE DISPOSITIVOS SEM CARD EXTERNO */
-#cortina-dispositivos{
-  background:transparent !important;
-  border:0 !important;
-  box-shadow:none !important;
-  padding:0 !important;
-}
-#cortina-dispositivos > .card{
-  display:contents !important;
-}
-#bms-list{
-  margin-top:0 !important;
-}
-
-
-
 /* ======================================================
-   SMART BMS - HOME FIXA DEFINITIVA
-   Mantem cores originais e deixa o topo do print fixo.
+   SMART BMS - AJUSTE FINAL: TOPO STICKY NATURAL
+   Mantém layout/cores, remove card grande dos dispositivos
+   e evita sobreposição do topo fixo.
    ====================================================== */
-html,
-body{
-  scrollbar-width:none !important;
-  -ms-overflow-style:none !important;
-}
-html::-webkit-scrollbar,
-body::-webkit-scrollbar{
-  width:0 !important;
-  height:0 !important;
-  display:none !important;
-}
-#lista,
-#cortina-dispositivos,
-.bms-list,
-.convite-device-list{
-  scrollbar-width:none !important;
-  -ms-overflow-style:none !important;
-}
-#lista::-webkit-scrollbar,
-#cortina-dispositivos::-webkit-scrollbar,
-.bms-list::-webkit-scrollbar,
-.convite-device-list::-webkit-scrollbar{
-  width:0 !important;
-  height:0 !important;
-  display:none !important;
-}
-
 #lista{
-  padding-top:292px !important;
+  padding-top:44px !important;
   padding-bottom:118px !important;
 }
 
 #lista .lista-fixed-top{
-  position:fixed !important;
+  position:sticky !important;
   top:0 !important;
-  left:50% !important;
+  left:auto !important;
   right:auto !important;
-  transform:translateX(-50%) !important;
+  transform:none !important;
   z-index:950 !important;
   width:100% !important;
   max-width:1100px !important;
   background:var(--bg) !important;
-  padding:38px 12px 10px 12px !important;
-  box-shadow:0 10px 24px rgba(15,23,42,.06) !important;
+  padding:8px 0 10px 0 !important;
+  box-shadow:0 8px 22px rgba(15,23,42,.07) !important;
 }
 
 #lista .lista-fixed-top .title{
   font-size:clamp(28px,6vw,34px) !important;
-  line-height:1.08 !important;
+  line-height:1.05 !important;
   margin-bottom:4px !important;
 }
 
@@ -1877,121 +1834,23 @@ body::-webkit-scrollbar{
   margin-bottom:12px !important;
 }
 
-.home-dashboard-card{
-  background:var(--card-bg) !important;
-  border:1px solid var(--card-border) !important;
-  border-radius:20px !important;
-  padding:10px !important;
-  width:100% !important;
-  box-shadow:var(--neon-glow) !important;
-  display:flex !important;
-  flex-direction:column !important;
-  gap:8px !important;
-  overflow:visible !important;
-}
-
-.home-dashboard-card .home-action-card,
-.home-dashboard-card .status-filter-card{
-  background:transparent !important;
-  border:0 !important;
-  box-shadow:none !important;
-  padding:0 !important;
-  margin:0 !important;
-  overflow:visible !important;
-}
-
-.home-dashboard-card .home-action-row{
-  display:grid !important;
-  grid-template-columns:repeat(2,minmax(0,1fr)) !important;
-  gap:8px !important;
-  min-height:0 !important;
-}
-
-.home-dashboard-card .home-action-divider{
-  display:none !important;
-}
-
-.home-dashboard-card .home-action-btn{
-  min-height:72px !important;
-  padding:10px 8px !important;
-  border-radius:16px !important;
-  background:var(--card-bg) !important;
-  border:1px solid var(--card-border) !important;
-  box-shadow:var(--neon-glow) !important;
-  display:flex !important;
-  flex-direction:column !important;
-  align-items:center !important;
-  justify-content:center !important;
-  gap:6px !important;
-  text-align:center !important;
-}
-
-.home-dashboard-card .home-action-btn svg{
-  width:26px !important;
-  height:26px !important;
-  flex:0 0 26px !important;
-  color:var(--text-muted) !important;
-  fill:currentColor !important;
-  stroke:currentColor !important;
-}
-
-.home-dashboard-card .home-action-btn svg circle[stroke="none"]{
-  fill:var(--card-bg) !important;
-  stroke:none !important;
-}
-
-.home-dashboard-card .home-action-btn span{
-  max-width:none !important;
-  color:var(--text-muted) !important;
-  font-size:12px !important;
-  font-weight:700 !important;
-  line-height:1.15 !important;
-}
-
-.home-dashboard-card .status-filter-grid{
-  display:grid !important;
-  grid-template-columns:repeat(4,minmax(0,1fr)) !important;
-  gap:6px !important;
-  width:100% !important;
-}
-
-.home-dashboard-card .status-filter-item{
-  min-height:64px !important;
-  border-radius:15px !important;
-  background:var(--card-bg) !important;
-  border:1px solid var(--card-border) !important;
-  box-shadow:var(--neon-glow) !important;
-  display:flex !important;
-  flex-direction:column !important;
-  align-items:center !important;
-  justify-content:center !important;
-}
-
-.home-dashboard-card .status-filter-item.active{
-  border-color:var(--cyan) !important;
-  background:var(--card-bg) !important;
-}
-
-.home-dashboard-card .status-filter-num{
-  font-size:19px !important;
-  font-weight:900 !important;
-  line-height:1 !important;
-}
-
-.home-dashboard-card .status-filter-label{
-  margin-top:6px !important;
-  font-size:11px !important;
-  font-weight:600 !important;
-  color:var(--text-muted) !important;
-  line-height:1 !important;
-}
-
 #cortina-dispositivos{
-  margin-top:0 !important;
+  margin-top:12px !important;
+  overflow:visible !important;
+}
+
+#cortina-dispositivos.aberta{
+  max-height:none !important;
+  opacity:1 !important;
 }
 
 #cortina-dispositivos > .card{
   display:none !important;
+}
+
+#bms-list.bms-list{
+  margin-top:0 !important;
+  padding:0 !important;
 }
 
 body.modo-dispositivos #lista{
@@ -2004,57 +1863,24 @@ body.modo-dispositivos #lista .lista-fixed-top{
 
 @media(max-width:420px){
   #lista{
-    padding-top:286px !important;
+    padding-top:38px !important;
   }
 
   #lista .lista-fixed-top{
-    padding:36px 10px 8px 10px !important;
+    padding:6px 0 8px 0 !important;
   }
 
   #lista .lista-fixed-top .title{
-    font-size:30px !important;
+    font-size:28px !important;
   }
 
   #lista .lista-fixed-top .user-info{
-    font-size:13px !important;
+    font-size:12.5px !important;
     margin-bottom:10px !important;
   }
 
-  .home-dashboard-card{
-    padding:9px !important;
-    gap:7px !important;
-  }
-
-  .home-dashboard-card .home-action-row{
-    gap:7px !important;
-  }
-
-  .home-dashboard-card .home-action-btn{
-    min-height:68px !important;
-    padding:8px 6px !important;
-  }
-
-  .home-dashboard-card .home-action-btn svg{
-    width:24px !important;
-    height:24px !important;
-    flex-basis:24px !important;
-  }
-
-  .home-dashboard-card .home-action-btn span{
-    font-size:11px !important;
-  }
-
-  .home-dashboard-card .status-filter-item{
-    min-height:60px !important;
-  }
-
-  .home-dashboard-card .status-filter-num{
-    font-size:18px !important;
-  }
-
-  .home-dashboard-card .status-filter-label{
-    font-size:10px !important;
-    margin-top:5px !important;
+  #cortina-dispositivos{
+    margin-top:10px !important;
   }
 }
 
@@ -2482,8 +2308,8 @@ var estadoOnlineDispositivos = {};
 var cacheMqttDispositivos = {};
 var timeoutOfflineDispositivos = {};
 var dashboardAberturaMs = 0;
-var GRACE_MQTT_INICIAL_MS = 25000;
-var CACHE_MQTT_MS = 120000;
+var GRACE_MQTT_INICIAL_MS = 10000;
+var CACHE_MQTT_MS = 30000;
  
 var estadoOnlineDispositivos = {};
 var ultimoSnapshotDispositivos = {};
@@ -2492,7 +2318,7 @@ var listaBmsCacheAtual = [];
 
 
 // CONFIGURAÇÃO DO TIMEOUT EM MILISSEGUNDOS (15 SEGUNDOS DE TOLERÂNCIA CONTRA OSCILAÇÕES)
-var TEMPO_TIMEOUT_CONEXAO = 60000;
+var TEMPO_TIMEOUT_CONEXAO = 15000;
 
 try{USER = JSON.parse(localStorage.getItem('bms_user')||'null');}catch(e){}
 
@@ -2554,14 +2380,8 @@ function marcarDemoOnlineNaLista(code){
 
 function mqttRecenteDispositivo(code){
   if(!code) return false;
-  code = String(code).trim().toUpperCase();
   var t = ultimoPacoteDispositivosMs[code] || 0;
-  if(t && (Date.now() - t) < TEMPO_TIMEOUT_CONEXAO) return true;
-
-  var cache = cacheMqttDispositivos[code];
-  if(cache && cache.ts && (Date.now() - cache.ts) < CACHE_MQTT_MS) return true;
-
-  return false;
+  return !!(t && (Date.now() - t) < TEMPO_TIMEOUT_CONEXAO);
 }
 
 function cacheMqttRecente(code){
@@ -2569,50 +2389,17 @@ function cacheMqttRecente(code){
   return (Date.now() - cacheMqttDispositivos[code].ts) < CACHE_MQTT_MS;
 }
 
-function chaveCacheMqttLocal(code){
-  return 'bms_mqtt_cache_' + String(code || '').trim().toUpperCase();
-}
-
 function obterPayloadCacheMqtt(code){
-  if(!code) return null;
-
-  if(cacheMqttRecente(code)){
-    return cacheMqttDispositivos[code].payload || null;
-  }
-
-  try{
-    var salvo = JSON.parse(localStorage.getItem(chaveCacheMqttLocal(code)) || 'null');
-    if(salvo && salvo.ts && (Date.now() - salvo.ts) < CACHE_MQTT_MS){
-      cacheMqttDispositivos[code] = salvo;
-      ultimoPacoteDispositivosMs[code] = salvo.ts;
-      estadoOnlineDispositivos[code] = true;
-      return salvo.payload || null;
-    }
-  }catch(e){}
-
-  return null;
+  if(!cacheMqttRecente(code)) return null;
+  return cacheMqttDispositivos[code].payload || null;
 }
 
 function salvarPayloadCacheMqtt(code, payload){
   if(!code || !payload) return;
-  code = String(code).trim().toUpperCase();
-  var pacote = {
+  cacheMqttDispositivos[code] = {
     ts: Date.now(),
     payload: payload
   };
-  cacheMqttDispositivos[code] = pacote;
-  try{
-    localStorage.setItem(chaveCacheMqttLocal(code), JSON.stringify(pacote));
-  }catch(e){}
-}
-
-function restaurarEstadoMqttLocal(code){
-  var payload = obterPayloadCacheMqtt(code);
-  if(payload){
-    estadoOnlineDispositivos[code] = true;
-    return true;
-  }
-  return false;
 }
 
 function limparTimeoutOfflineDispositivo(code){
@@ -2740,7 +2527,6 @@ function processarMensagemMqttGlobal(message){
     var codeMsg = partesTopico[1];
 
     if(!codeMsg) return;
-    codeMsg = String(codeMsg).trim().toUpperCase();
 
     var d = {};
     try{
@@ -2788,10 +2574,7 @@ function garantirMqttGlobal(){
     MQTT_CLIENT.onConnectionLost = function(responseObject){
       MQTT_GLOBAL_CONECTADO = false;
       MQTT_GLOBAL_CONECTANDO = false;
-      console.log("[MQTT GLOBAL] Conexão perdida. Tentando reconectar sem limpar os estados visuais.");
-      setTimeout(function(){
-        if(TOKEN) garantirMqttGlobal();
-      }, 3000);
+      console.log("[MQTT GLOBAL] Conexão perdida.");
     };
 
     MQTT_CLIENT.onMessageArrived = processarMensagemMqttGlobal;
@@ -2806,9 +2589,6 @@ function garantirMqttGlobal(){
         MQTT_GLOBAL_CONECTANDO = false;
         console.log("[MQTT GLOBAL] Conectado. Alimentando todas as páginas.");
         MQTT_CLIENT.subscribe("sl_bms/+/telemetria");
-        if(listaBmsCacheAtual && listaBmsCacheAtual.length){
-          renderizarListaBmsCache();
-        }
       },
       onFailure: function(err){
         MQTT_GLOBAL_CONECTADO = false;
@@ -3493,17 +3273,15 @@ function renderizarListaBmsCache(){
     var st = obterStatusVisualBms(b);
     return filtroListaBmsAtual === 'tudo' || st === filtroListaBmsAtual;
   });
-
   lista.sort(function(a,b){
-    var peso = {online:0, falha:1, offline:2};
+    var peso = { online: 0, falha: 1, offline: 2 };
     var sa = obterStatusVisualBms(a);
     var sb = obterStatusVisualBms(b);
-    var pa = peso[sa] !== undefined ? peso[sa] : 3;
-    var pb = peso[sb] !== undefined ? peso[sb] : 3;
+    var pa = peso.hasOwnProperty(sa) ? peso[sa] : 3;
+    var pb = peso.hasOwnProperty(sb) ? peso[sb] : 3;
     if(pa !== pb) return pa - pb;
-    return String(a.nome || a.code || '').localeCompare(String(b.nome || b.code || ''));
+    return String(a.nome || a.code || '').localeCompare(String(b.nome || b.code || ''), 'pt-BR');
   });
-
   if(!lista.length){
     el.innerHTML = '<p style="text-align:center;color:var(--text-muted);padding:20px;font-size:14px">Nenhum dispositivo neste filtro</p>';
     return;
@@ -3623,10 +3401,7 @@ function carregarListaUmaVez() {
 
     for(var i=0;i<lista.length;i++){
       if(lista[i] && lista[i].code){
-        var codeLista = String(lista[i].code).trim().toUpperCase();
-        lista[i].code = codeLista;
-        estadoOnlineDispositivos[codeLista] = isDispositivoDemoCliente(codeLista) ? true : (mqttRecenteDispositivo(codeLista) || restaurarEstadoMqttLocal(codeLista) || !!estadoOnlineDispositivos[codeLista]);
-        if(estadoOnlineDispositivos[codeLista]) agendarOfflineDispositivo(codeLista);
+        estadoOnlineDispositivos[lista[i].code] = isDispositivoDemoCliente(lista[i].code) ? true : (mqttRecenteDispositivo(lista[i].code) || !!estadoOnlineDispositivos[lista[i].code]);
         ultimoSnapshotDispositivos[lista[i].code] = lista[i];
       }
     }
@@ -3981,27 +3756,6 @@ function sairSemConfirmacao(){
       localStorage.setItem(DISPENSADO_KEY, '1');
     }
   });
-})();
-</script>
-
-
-<script>
-/* SMART BMS - Ajusta automaticamente o espaço abaixo do topo fixo da home. */
-(function(){
-  function ajustarEspacoTopoListaSmartBms(){
-    var lista = document.getElementById('lista');
-    var topo = document.querySelector('#lista .lista-fixed-top');
-    if(!lista || !topo) return;
-    if(document.body && document.body.classList.contains('modo-dispositivos')) return;
-    var h = Math.ceil(topo.getBoundingClientRect().height || 0);
-    if(h > 0){
-      lista.style.setProperty('padding-top', (h + 12) + 'px', 'important');
-    }
-  }
-  window.addEventListener('load', ajustarEspacoTopoListaSmartBms);
-  window.addEventListener('resize', ajustarEspacoTopoListaSmartBms);
-  document.addEventListener('DOMContentLoaded', ajustarEspacoTopoListaSmartBms);
-  setInterval(ajustarEspacoTopoListaSmartBms, 1200);
 })();
 </script>
 
