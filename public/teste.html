@@ -2482,6 +2482,78 @@ body::-webkit-scrollbar,
   }
 }
 
+
+/* ======================================================
+   SMART BMS - CARD GRANDE SÓLIDO NO TOPO + CONJUNTO MAIS BAIXO
+   ====================================================== */
+
+/* Desce o conjunto fixo inteiro */
+#lista{
+  padding-top:292px !important;
+}
+
+#lista .lista-fixed-top{
+  top:28px !important;
+  background:var(--bg) !important;
+  opacity:1 !important;
+  backdrop-filter:none !important;
+  -webkit-backdrop-filter:none !important;
+  box-shadow:none !important;
+}
+
+/* Card grande atrás dos seis botões, no padrão do app */
+.home-dashboard-card{
+  background:var(--smart-solid-card-bg, var(--card-bg)) !important;
+  border:1px solid var(--card-border) !important;
+  border-radius:22px !important;
+  padding:12px !important;
+  box-shadow:var(--neon-glow) !important;
+  opacity:1 !important;
+  backdrop-filter:none !important;
+  -webkit-backdrop-filter:none !important;
+  overflow:visible !important;
+  gap:10px !important;
+}
+
+/* Mantém somente os blocos internos sem card extra duplicado */
+.home-dashboard-card .home-action-card,
+.home-dashboard-card .status-filter-card{
+  background:transparent !important;
+  border:0 !important;
+  box-shadow:none !important;
+  padding:0 !important;
+  margin:0 !important;
+  opacity:1 !important;
+  backdrop-filter:none !important;
+  -webkit-backdrop-filter:none !important;
+}
+
+/* Garante que os 6 botões continuem sólidos e com o efeito atual */
+.home-dashboard-card .home-action-btn,
+.home-dashboard-card .status-filter-item{
+  background:var(--smart-solid-card-bg, var(--card-bg)) !important;
+  opacity:1 !important;
+  backdrop-filter:none !important;
+  -webkit-backdrop-filter:none !important;
+}
+
+/* Ajuste mobile */
+@media(max-width:420px){
+  #lista{
+    padding-top:282px !important;
+  }
+
+  #lista .lista-fixed-top{
+    top:24px !important;
+  }
+
+  .home-dashboard-card{
+    border-radius:20px !important;
+    padding:10px !important;
+    gap:8px !important;
+  }
+}
+
 </style>
 </head>
 <body>
