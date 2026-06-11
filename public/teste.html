@@ -1498,40 +1498,172 @@ body.modo-dispositivos #lista .lista-fixed-top{
 
 
 
-/* SMART BMS - TOPO FIXO CORRIGIDO DA TELA INICIAL
-   Mantém título, saudação, ações e filtros fixos no topo.
-   A lista de dispositivos rola abaixo, sem ficar escondida. */
+/* SMART BMS - CORREÇÃO REAL: TOPO FIXO E ÍCONES DO RODAPÉ NOS BLOCOS */
 #lista{
-  padding-top:255px !important;
+  padding-top:300px !important;
+  padding-bottom:118px !important;
+}
+#lista .lista-fixed-top{
+  position:fixed !important;
+  top:0 !important;
+  left:50% !important;
+  transform:translateX(-50%) !important;
+  z-index:950 !important;
+  width:100% !important;
+  max-width:1100px !important;
+  background:var(--bg) !important;
+  padding:44px 12px 10px 12px !important;
+  box-shadow:0 10px 24px rgba(15,23,42,.06) !important;
+}
+#lista .lista-fixed-top .title{
+  margin-bottom:4px !important;
+}
+#lista .lista-fixed-top .user-info{
+  margin-bottom:12px !important;
+}
+.home-dashboard-card .home-action-btn svg{
+  width:26px !important;
+  height:26px !important;
+  color:var(--text-muted) !important;
+  fill:currentColor !important;
+  stroke:currentColor !important;
+}
+.home-dashboard-card .home-action-btn svg circle[stroke="none"]{
+  fill:var(--card-bg) !important;
+  stroke:none !important;
+}
+body.modo-dispositivos #lista{
+  padding-top:44px !important;
+}
+body.modo-dispositivos #lista .lista-fixed-top{
+  display:none !important;
+}
+@media(max-width:420px){
+  #lista{
+    padding-top:292px !important;
+  }
+  #lista .lista-fixed-top{
+    padding:38px 10px 8px 10px !important;
+  }
+  .home-dashboard-card .home-action-btn svg{
+    width:24px !important;
+    height:24px !important;
+  }
+}
+
+
+
+/* ======================================================
+   SMART BMS - CORREÇÃO FINAL HOME FIXA LIMPA
+   Topo fixo sem card grande amontoado + scroll sem barra
+   ====================================================== */
+html,
+body{
+  scrollbar-width:none !important;
+  -ms-overflow-style:none !important;
+}
+html::-webkit-scrollbar,
+body::-webkit-scrollbar{
+  width:0 !important;
+  height:0 !important;
+  display:none !important;
+}
+#lista,
+#cortina-dispositivos,
+.bms-list,
+.convite-device-list{
+  scrollbar-width:none !important;
+  -ms-overflow-style:none !important;
+}
+#lista::-webkit-scrollbar,
+#cortina-dispositivos::-webkit-scrollbar,
+.bms-list::-webkit-scrollbar,
+.convite-device-list::-webkit-scrollbar{
+  width:0 !important;
+  height:0 !important;
+  display:none !important;
+}
+
+#lista{
+  padding-top:248px !important;
   padding-bottom:118px !important;
 }
 
 #lista .lista-fixed-top{
   position:fixed !important;
   top:0 !important;
-  left:0 !important;
-  right:0 !important;
+  left:50% !important;
+  right:auto !important;
+  transform:translateX(-50%) !important;
   z-index:950 !important;
   width:100% !important;
   max-width:1100px !important;
-  margin:0 auto !important;
-  transform:none !important;
   background:var(--bg) !important;
-  padding:14px 12px 10px 12px !important;
-  box-shadow:0 8px 20px rgba(15,23,42,.08) !important;
+  padding:12px 12px 10px 12px !important;
+  box-shadow:0 8px 22px rgba(15,23,42,.07) !important;
 }
 
 #lista .lista-fixed-top .title{
-  margin-bottom:4px !important;
+  font-size:clamp(26px,5.5vw,32px) !important;
+  line-height:1.05 !important;
+  margin-bottom:2px !important;
 }
 
 #lista .lista-fixed-top .user-info{
+  font-size:13px !important;
   margin-bottom:10px !important;
 }
 
+.home-dashboard-card{
+  background:transparent !important;
+  border:0 !important;
+  border-radius:0 !important;
+  padding:0 !important;
+  box-shadow:none !important;
+  gap:10px !important;
+  overflow:visible !important;
+}
+
+.home-dashboard-card .home-action-card,
+.home-dashboard-card .status-filter-card{
+  background:transparent !important;
+  border:0 !important;
+  box-shadow:none !important;
+  padding:0 !important;
+  margin:0 !important;
+  overflow:visible !important;
+}
+
+.home-dashboard-card .home-action-row{
+  display:grid !important;
+  grid-template-columns:repeat(2,minmax(0,1fr)) !important;
+  gap:10px !important;
+  min-height:0 !important;
+}
+
+.home-dashboard-card .home-action-divider{
+  display:none !important;
+}
+
+.home-dashboard-card .home-action-btn{
+  min-height:74px !important;
+  padding:10px 8px !important;
+  border-radius:18px !important;
+  background:var(--card-bg) !important;
+  border:1px solid var(--card-border) !important;
+  box-shadow:var(--neon-glow) !important;
+  display:flex !important;
+  flex-direction:column !important;
+  align-items:center !important;
+  justify-content:center !important;
+  gap:6px !important;
+  text-align:center !important;
+}
+
 .home-dashboard-card .home-action-btn svg{
-  width:26px !important;
-  height:26px !important;
+  width:25px !important;
+  height:25px !important;
+  flex:0 0 25px !important;
   color:var(--text-muted) !important;
   fill:currentColor !important;
   stroke:currentColor !important;
@@ -1540,6 +1672,61 @@ body.modo-dispositivos #lista .lista-fixed-top{
 .home-dashboard-card .home-action-btn svg circle[stroke="none"]{
   fill:var(--card-bg) !important;
   stroke:none !important;
+}
+
+.home-dashboard-card .home-action-btn span{
+  max-width:none !important;
+  color:var(--text-muted) !important;
+  font-size:12px !important;
+  font-weight:700 !important;
+  line-height:1.15 !important;
+}
+
+.home-dashboard-card .status-filter-grid{
+  display:grid !important;
+  grid-template-columns:repeat(4,minmax(0,1fr)) !important;
+  gap:8px !important;
+  width:100% !important;
+}
+
+.home-dashboard-card .status-filter-item{
+  min-height:62px !important;
+  border-radius:16px !important;
+  background:var(--card-bg) !important;
+  border:1px solid var(--card-border) !important;
+  box-shadow:var(--neon-glow) !important;
+  display:flex !important;
+  flex-direction:column !important;
+  align-items:center !important;
+  justify-content:center !important;
+}
+
+.home-dashboard-card .status-filter-item.active{
+  border-color:var(--cyan) !important;
+  background:var(--card-bg) !important;
+}
+
+.home-dashboard-card .status-filter-num{
+  font-size:18px !important;
+  font-weight:900 !important;
+  line-height:1 !important;
+}
+
+.home-dashboard-card .status-filter-label{
+  margin-top:5px !important;
+  font-size:10.5px !important;
+  font-weight:600 !important;
+  color:var(--text-muted) !important;
+  line-height:1 !important;
+}
+
+#cortina-dispositivos{
+  margin-top:0 !important;
+}
+
+#cortina-dispositivos > .card{
+  border-radius:18px !important;
+  padding:14px !important;
 }
 
 body.modo-dispositivos #lista{
@@ -1552,16 +1739,62 @@ body.modo-dispositivos #lista .lista-fixed-top{
 
 @media(max-width:420px){
   #lista{
-    padding-top:245px !important;
+    padding-top:238px !important;
   }
 
   #lista .lista-fixed-top{
     padding:10px 10px 8px 10px !important;
   }
 
+  #lista .lista-fixed-top .title{
+    font-size:28px !important;
+  }
+
+  #lista .lista-fixed-top .user-info{
+    font-size:12.5px !important;
+    margin-bottom:8px !important;
+  }
+
+  .home-dashboard-card{
+    gap:8px !important;
+  }
+
+  .home-dashboard-card .home-action-row{
+    gap:8px !important;
+  }
+
+  .home-dashboard-card .home-action-btn{
+    min-height:68px !important;
+    border-radius:16px !important;
+    padding:8px 6px !important;
+  }
+
   .home-dashboard-card .home-action-btn svg{
-    width:24px !important;
-    height:24px !important;
+    width:23px !important;
+    height:23px !important;
+    flex-basis:23px !important;
+  }
+
+  .home-dashboard-card .home-action-btn span{
+    font-size:11px !important;
+  }
+
+  .home-dashboard-card .status-filter-grid{
+    gap:6px !important;
+  }
+
+  .home-dashboard-card .status-filter-item{
+    min-height:58px !important;
+    border-radius:15px !important;
+  }
+
+  .home-dashboard-card .status-filter-num{
+    font-size:17px !important;
+  }
+
+  .home-dashboard-card .status-filter-label{
+    font-size:10px !important;
+    margin-top:5px !important;
   }
 }
 
