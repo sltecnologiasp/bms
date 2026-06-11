@@ -1814,6 +1814,250 @@ body.modo-dispositivos #lista .lista-fixed-top{
   margin-top:0 !important;
 }
 
+
+
+/* ======================================================
+   SMART BMS - HOME FIXA DEFINITIVA
+   Mantem cores originais e deixa o topo do print fixo.
+   ====================================================== */
+html,
+body{
+  scrollbar-width:none !important;
+  -ms-overflow-style:none !important;
+}
+html::-webkit-scrollbar,
+body::-webkit-scrollbar{
+  width:0 !important;
+  height:0 !important;
+  display:none !important;
+}
+#lista,
+#cortina-dispositivos,
+.bms-list,
+.convite-device-list{
+  scrollbar-width:none !important;
+  -ms-overflow-style:none !important;
+}
+#lista::-webkit-scrollbar,
+#cortina-dispositivos::-webkit-scrollbar,
+.bms-list::-webkit-scrollbar,
+.convite-device-list::-webkit-scrollbar{
+  width:0 !important;
+  height:0 !important;
+  display:none !important;
+}
+
+#lista{
+  padding-top:292px !important;
+  padding-bottom:118px !important;
+}
+
+#lista .lista-fixed-top{
+  position:fixed !important;
+  top:0 !important;
+  left:50% !important;
+  right:auto !important;
+  transform:translateX(-50%) !important;
+  z-index:950 !important;
+  width:100% !important;
+  max-width:1100px !important;
+  background:var(--bg) !important;
+  padding:38px 12px 10px 12px !important;
+  box-shadow:0 10px 24px rgba(15,23,42,.06) !important;
+}
+
+#lista .lista-fixed-top .title{
+  font-size:clamp(28px,6vw,34px) !important;
+  line-height:1.08 !important;
+  margin-bottom:4px !important;
+}
+
+#lista .lista-fixed-top .user-info{
+  font-size:14px !important;
+  margin-bottom:12px !important;
+}
+
+.home-dashboard-card{
+  background:var(--card-bg) !important;
+  border:1px solid var(--card-border) !important;
+  border-radius:20px !important;
+  padding:10px !important;
+  width:100% !important;
+  box-shadow:var(--neon-glow) !important;
+  display:flex !important;
+  flex-direction:column !important;
+  gap:8px !important;
+  overflow:visible !important;
+}
+
+.home-dashboard-card .home-action-card,
+.home-dashboard-card .status-filter-card{
+  background:transparent !important;
+  border:0 !important;
+  box-shadow:none !important;
+  padding:0 !important;
+  margin:0 !important;
+  overflow:visible !important;
+}
+
+.home-dashboard-card .home-action-row{
+  display:grid !important;
+  grid-template-columns:repeat(2,minmax(0,1fr)) !important;
+  gap:8px !important;
+  min-height:0 !important;
+}
+
+.home-dashboard-card .home-action-divider{
+  display:none !important;
+}
+
+.home-dashboard-card .home-action-btn{
+  min-height:72px !important;
+  padding:10px 8px !important;
+  border-radius:16px !important;
+  background:var(--card-bg) !important;
+  border:1px solid var(--card-border) !important;
+  box-shadow:var(--neon-glow) !important;
+  display:flex !important;
+  flex-direction:column !important;
+  align-items:center !important;
+  justify-content:center !important;
+  gap:6px !important;
+  text-align:center !important;
+}
+
+.home-dashboard-card .home-action-btn svg{
+  width:26px !important;
+  height:26px !important;
+  flex:0 0 26px !important;
+  color:var(--text-muted) !important;
+  fill:currentColor !important;
+  stroke:currentColor !important;
+}
+
+.home-dashboard-card .home-action-btn svg circle[stroke="none"]{
+  fill:var(--card-bg) !important;
+  stroke:none !important;
+}
+
+.home-dashboard-card .home-action-btn span{
+  max-width:none !important;
+  color:var(--text-muted) !important;
+  font-size:12px !important;
+  font-weight:700 !important;
+  line-height:1.15 !important;
+}
+
+.home-dashboard-card .status-filter-grid{
+  display:grid !important;
+  grid-template-columns:repeat(4,minmax(0,1fr)) !important;
+  gap:6px !important;
+  width:100% !important;
+}
+
+.home-dashboard-card .status-filter-item{
+  min-height:64px !important;
+  border-radius:15px !important;
+  background:var(--card-bg) !important;
+  border:1px solid var(--card-border) !important;
+  box-shadow:var(--neon-glow) !important;
+  display:flex !important;
+  flex-direction:column !important;
+  align-items:center !important;
+  justify-content:center !important;
+}
+
+.home-dashboard-card .status-filter-item.active{
+  border-color:var(--cyan) !important;
+  background:var(--card-bg) !important;
+}
+
+.home-dashboard-card .status-filter-num{
+  font-size:19px !important;
+  font-weight:900 !important;
+  line-height:1 !important;
+}
+
+.home-dashboard-card .status-filter-label{
+  margin-top:6px !important;
+  font-size:11px !important;
+  font-weight:600 !important;
+  color:var(--text-muted) !important;
+  line-height:1 !important;
+}
+
+#cortina-dispositivos{
+  margin-top:0 !important;
+}
+
+#cortina-dispositivos > .card{
+  display:none !important;
+}
+
+body.modo-dispositivos #lista{
+  padding-top:44px !important;
+}
+
+body.modo-dispositivos #lista .lista-fixed-top{
+  display:none !important;
+}
+
+@media(max-width:420px){
+  #lista{
+    padding-top:286px !important;
+  }
+
+  #lista .lista-fixed-top{
+    padding:36px 10px 8px 10px !important;
+  }
+
+  #lista .lista-fixed-top .title{
+    font-size:30px !important;
+  }
+
+  #lista .lista-fixed-top .user-info{
+    font-size:13px !important;
+    margin-bottom:10px !important;
+  }
+
+  .home-dashboard-card{
+    padding:9px !important;
+    gap:7px !important;
+  }
+
+  .home-dashboard-card .home-action-row{
+    gap:7px !important;
+  }
+
+  .home-dashboard-card .home-action-btn{
+    min-height:68px !important;
+    padding:8px 6px !important;
+  }
+
+  .home-dashboard-card .home-action-btn svg{
+    width:24px !important;
+    height:24px !important;
+    flex-basis:24px !important;
+  }
+
+  .home-dashboard-card .home-action-btn span{
+    font-size:11px !important;
+  }
+
+  .home-dashboard-card .status-filter-item{
+    min-height:60px !important;
+  }
+
+  .home-dashboard-card .status-filter-num{
+    font-size:18px !important;
+  }
+
+  .home-dashboard-card .status-filter-label{
+    font-size:10px !important;
+    margin-top:5px !important;
+  }
+}
+
 </style>
 </head>
 <body>
@@ -3737,6 +3981,27 @@ function sairSemConfirmacao(){
       localStorage.setItem(DISPENSADO_KEY, '1');
     }
   });
+})();
+</script>
+
+
+<script>
+/* SMART BMS - Ajusta automaticamente o espaço abaixo do topo fixo da home. */
+(function(){
+  function ajustarEspacoTopoListaSmartBms(){
+    var lista = document.getElementById('lista');
+    var topo = document.querySelector('#lista .lista-fixed-top');
+    if(!lista || !topo) return;
+    if(document.body && document.body.classList.contains('modo-dispositivos')) return;
+    var h = Math.ceil(topo.getBoundingClientRect().height || 0);
+    if(h > 0){
+      lista.style.setProperty('padding-top', (h + 12) + 'px', 'important');
+    }
+  }
+  window.addEventListener('load', ajustarEspacoTopoListaSmartBms);
+  window.addEventListener('resize', ajustarEspacoTopoListaSmartBms);
+  document.addEventListener('DOMContentLoaded', ajustarEspacoTopoListaSmartBms);
+  setInterval(ajustarEspacoTopoListaSmartBms, 1200);
 })();
 </script>
 
