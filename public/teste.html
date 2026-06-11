@@ -2864,6 +2864,141 @@ body::-webkit-scrollbar,
   }
 }
 
+
+/* ======================================================
+   SMART BMS - GERENCIAR DISPOSITIVOS
+   ====================================================== */
+
+#gerenciarDispositivosPage{
+  position:relative;
+  z-index:1;
+  width:100%;
+  max-width:1100px;
+  margin:0 auto;
+  min-height:100vh;
+  padding:44px 12px 122px 12px !important;
+  display:block;
+}
+
+.gerenciar-dispositivos-card{
+  width:100% !important;
+  max-width:560px !important;
+  margin:0 auto !important;
+  background:var(--smart-solid-card-bg, var(--card-bg)) !important;
+  border:1px solid var(--card-border) !important;
+  border-radius:22px !important;
+  box-shadow:var(--neon-glow) !important;
+  padding:16px !important;
+  opacity:1 !important;
+  backdrop-filter:none !important;
+  -webkit-backdrop-filter:none !important;
+}
+
+.gerenciar-bms-list{
+  display:flex !important;
+  flex-direction:column !important;
+  gap:12px !important;
+  width:100% !important;
+}
+
+.gerenciar-bms-item{
+  background:var(--smart-solid-card-bg, var(--card-bg)) !important;
+  border:1px solid var(--card-border) !important;
+  border-radius:18px !important;
+  box-shadow:var(--neon-glow) !important;
+  padding:16px 14px !important;
+  display:flex !important;
+  flex-direction:column !important;
+  align-items:center !important;
+  text-align:center !important;
+  gap:8px !important;
+  opacity:1 !important;
+  -webkit-tap-highlight-color:transparent !important;
+}
+
+.gerenciar-bms-item.online-active{
+  animation:neonSuave 2s infinite ease-in-out !important;
+  border-width:1.5px !important;
+}
+
+.gerenciar-bms-item h3{
+  color:var(--text-main) !important;
+  font-size:18px !important;
+  font-weight:800 !important;
+  width:100% !important;
+}
+
+.gerenciar-bms-item p{
+  color:var(--text-muted) !important;
+  font-size:13px !important;
+  font-family:monospace !important;
+  width:100% !important;
+}
+
+.gerenciar-actions{
+  display:grid !important;
+  grid-template-columns:1fr 1fr !important;
+  gap:8px !important;
+  width:100% !important;
+  margin-top:6px !important;
+}
+
+.gerenciar-btn{
+  min-height:46px !important;
+  margin-top:0 !important;
+  padding:10px 8px !important;
+  border-radius:15px !important;
+  background:var(--smart-solid-card-bg, var(--card-bg)) !important;
+  border:1px solid var(--card-border) !important;
+  color:var(--text-muted) !important;
+  box-shadow:var(--neon-glow) !important;
+  font-weight:800 !important;
+  font-size:12px !important;
+  outline:none !important;
+  -webkit-tap-highlight-color:transparent !important;
+  transition:transform .16s ease,border-color .16s ease,box-shadow .16s ease !important;
+}
+
+.gerenciar-btn:active{
+  transform:scale(1.045) !important;
+  border-color:var(--smart-active-border, var(--cyan)) !important;
+  border-width:1.8px !important;
+}
+
+.gerenciar-btn-danger:active{
+  border-color:var(--red) !important;
+}
+
+.gerenciar-empty{
+  text-align:center !important;
+  color:var(--text-muted) !important;
+  padding:20px !important;
+  font-size:14px !important;
+}
+
+#gerenciarDispositivosPage,
+#gerenciarDispositivosPage .card,
+#gerenciarDispositivosPage button{
+  opacity:1 !important;
+  backdrop-filter:none !important;
+  -webkit-backdrop-filter:none !important;
+}
+
+@media(max-width:420px){
+  #gerenciarDispositivosPage{
+    padding-top:38px !important;
+  }
+
+  .gerenciar-dispositivos-card{
+    border-radius:20px !important;
+    padding:14px !important;
+  }
+
+  .gerenciar-bms-item{
+    border-radius:16px !important;
+  }
+}
+
 </style>
 </head>
 <body>
@@ -3067,6 +3202,17 @@ body::-webkit-scrollbar,
     </div>
   </div>
   
+</div>
+
+
+<div id="gerenciarDispositivosPage" class="hidden">
+  <div class="title" style="font-size:clamp(28px,6vw,34px);margin-bottom:4px">SMART BMS</div>
+  <div class="user-info">Gerenciar Dispositivos</div>
+
+  <div class="card gerenciar-dispositivos-card">
+    <div class="label" style="margin-bottom:12px">Gerenciar Dispositivos</div>
+    <div id="gerenciar-bms-list" class="gerenciar-bms-list"></div>
+  </div>
 </div>
 
 <div id="configuracoesPage" class="hidden">
@@ -5001,6 +5147,198 @@ function sairSemConfirmacao(){
     setInterval(function(){
       esconderBotoesExcluirHomeSmart();
       ordenarDispositivosHomeSmart();
+    }, 2500);
+  });
+})();
+</script>
+
+
+<script>
+/* SMART BMS - Tela Gerenciar Dispositivos */
+(function(){
+  function statusGerenciarSmart(b){
+    try{
+      if (typeof window.obterStatusVisualBms === 'function') return window.obterStatusVisualBms(b);
+    } catch(e){}
+    var code = b && b.code;
+    if (code && window.estadoOnlineDispositivos && window.estadoOnlineDispositivos[code]) return 'online';
+    return 'offline';
+  }
+
+  function prioridadeGerenciarSmart(b){
+    var st = statusGerenciarSmart(b);
+    if (st === 'online') return 0;
+    if (st === 'falha') return 1;
+    return 2;
+  }
+
+  function listaOrdenadaGerenciarSmart(){
+    var lista = Array.isArray(window.listaBmsCacheAtual) ? window.listaBmsCacheAtual.slice() : [];
+    lista.sort(function(a,b){
+      var pa = prioridadeGerenciarSmart(a);
+      var pb = prioridadeGerenciarSmart(b);
+      if (pa !== pb) return pa - pb;
+      return String(a.nome || a.code || '').localeCompare(String(b.nome || b.code || ''), 'pt-BR');
+    });
+    return lista;
+  }
+
+  function escapeSmart(v){
+    return String(v == null ? '' : v)
+      .replace(/&/g,'&amp;')
+      .replace(/</g,'&lt;')
+      .replace(/>/g,'&gt;')
+      .replace(/"/g,'&quot;')
+      .replace(/'/g,'&#39;');
+  }
+
+  function renderizarGerenciarDispositivosSmart(){
+    try{
+      var el = document.getElementById('gerenciar-bms-list');
+      if (!el) return;
+
+      var lista = listaOrdenadaGerenciarSmart();
+      if (!lista.length) {
+        el.innerHTML = '<div class="gerenciar-empty">Nenhum dispositivo cadastrado</div>';
+        return;
+      }
+
+      var html = '';
+      lista.forEach(function(b){
+        var st = statusGerenciarSmart(b);
+        var online = st === 'online';
+        var falha = st === 'falha';
+        var dotClass = falha ? 'off' : (online ? 'on' : 'off');
+        var dotText = falha ? 'Falha' : (online ? 'Online' : 'Offline');
+        var nome = escapeSmart(b.nome || b.code || '--');
+        var code = escapeSmart(b.code || '');
+
+        html += '<div class="gerenciar-bms-item' + (online ? ' online-active' : '') + '" data-status="' + st + '" data-code="' + code + '">';
+        html += '<h3>' + nome + '</h3>';
+        html += '<p>' + code + '</p>';
+        html += '<span class="status-dot ' + dotClass + '">' + dotText + '</span>';
+        html += '<div class="gerenciar-actions">';
+        html += '<button class="gerenciar-btn" onclick="event.stopPropagation(); mudarNomeDispositivoSmart(\\'' + String(b.code || '').replace(/'/g,"\\\\'") + '\\', \\'' + String(b.nome || '').replace(/'/g,"\\\\'") + '\\')">MUDAR NOME</button>';
+        html += '<button class="gerenciar-btn gerenciar-btn-danger" onclick="event.stopPropagation(); removerBms(\\'' + String(b.code || '').replace(/'/g,"\\\\'") + '\\', \\'' + String(b.nome || '').replace(/'/g,"\\\\'") + '\\')">EXCLUIR</button>';
+        html += '</div>';
+        html += '</div>';
+      });
+
+      el.innerHTML = html;
+    } catch(e){}
+  }
+
+  function abrirGerenciarDispositivosSmart(){
+    try{
+      if (typeof window.clearInterval === 'function' && window.INT) clearInterval(window.INT);
+      if (typeof window.esconderTudo === 'function') {
+        window.esconderTudo();
+      } else {
+        ['login','cadastro','redefinir','lista','dash','configuracoesPage','gerenciarDispositivosPage'].forEach(function(id){
+          var el = document.getElementById(id);
+          if (el) el.classList.add('hidden');
+        });
+      }
+
+      document.body.classList.add('app-logado');
+      document.body.classList.remove('modo-dispositivos');
+
+      var page = document.getElementById('gerenciarDispositivosPage');
+      if (page) page.classList.remove('hidden');
+
+      if (typeof window.atualizarRodapeSmart === 'function') window.atualizarRodapeSmart('dispositivos');
+
+      if (typeof window.carregarListaUmaVez === 'function') {
+        window.carregarListaUmaVez();
+      }
+
+      renderizarGerenciarDispositivosSmart();
+      window.scrollTo({top:0, behavior:'smooth'});
+    } catch(e){}
+  }
+
+  window.renderizarGerenciarDispositivosSmart = renderizarGerenciarDispositivosSmart;
+  window.abrirGerenciarDispositivosSmart = abrirGerenciarDispositivosSmart;
+
+  window.mudarNomeDispositivoSmart = function(code, nomeAtual){
+    var novoNome = prompt('Novo nome do dispositivo:', nomeAtual || code);
+    if (!novoNome) return;
+    novoNome = novoNome.trim();
+    if (!novoNome) return;
+
+    var atualizarLocal = function(){
+      if (Array.isArray(window.listaBmsCacheAtual)) {
+        window.listaBmsCacheAtual.forEach(function(item){
+          if (item && item.code === code) item.nome = novoNome;
+        });
+      }
+      if (typeof window.renderizarListaBmsCache === 'function') window.renderizarListaBmsCache();
+      renderizarGerenciarDispositivosSmart();
+    };
+
+    try{
+      fetch(API + '?action=update_bms_name', {
+        method:'POST',
+        headers:{'Content-Type':'application/json','Authorization':'Bearer '+TOKEN},
+        body:JSON.stringify({code:code,nome:novoNome})
+      })
+      .then(function(r){ return r ? r.json() : {}; })
+      .then(function(d){
+        if (d && d.error) {
+          alert('Erro ao mudar nome: ' + d.error);
+          return;
+        }
+        atualizarLocal();
+      })
+      .catch(function(){
+        atualizarLocal();
+      });
+    } catch(e){
+      atualizarLocal();
+    }
+  };
+
+  var navegarOriginal = window.navegarRodapeSmart;
+  if (typeof navegarOriginal === 'function' && !window.__smartGerenciarDispositivosPatch) {
+    window.__smartGerenciarDispositivosPatch = true;
+    window.navegarRodapeSmart = function(destino){
+      if (destino === 'dispositivos') {
+        abrirGerenciarDispositivosSmart();
+        return;
+      }
+      return navegarOriginal.apply(this, arguments);
+    };
+  }
+
+  var renderOriginal = window.renderizarListaBmsCache;
+  if (typeof renderOriginal === 'function' && !window.__smartRenderListaGerenciarPatch) {
+    window.__smartRenderListaGerenciarPatch = true;
+    window.renderizarListaBmsCache = function(){
+      var retorno = renderOriginal.apply(this, arguments);
+      try{
+        if (typeof window.ordenarDispositivosHomeSmart === 'function') window.ordenarDispositivosHomeSmart();
+        if (typeof window.esconderBotoesExcluirHomeSmart === 'function') window.esconderBotoesExcluirHomeSmart();
+        renderizarGerenciarDispositivosSmart();
+      } catch(e){}
+      return retorno;
+    };
+  }
+
+  var removerOriginal = window.removerBms;
+  if (typeof removerOriginal === 'function' && !window.__smartRemoverRenderPatch) {
+    window.__smartRemoverRenderPatch = true;
+    window.removerBms = function(){
+      var retorno = removerOriginal.apply(this, arguments);
+      setTimeout(renderizarGerenciarDispositivosSmart, 500);
+      setTimeout(renderizarGerenciarDispositivosSmart, 1500);
+      return retorno;
+    };
+  }
+
+  document.addEventListener('DOMContentLoaded', function(){
+    setInterval(function(){
+      var page = document.getElementById('gerenciarDispositivosPage');
+      if (page && !page.classList.contains('hidden')) renderizarGerenciarDispositivosSmart();
     }, 2500);
   });
 })();
