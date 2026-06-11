@@ -1884,6 +1884,91 @@ body.modo-dispositivos #lista .lista-fixed-top{
   }
 }
 
+
+
+/* ======================================================
+   SMART BMS - AJUSTE DO CARD GRANDE DO TOPO
+   Mantém MQTT global e sticky natural; apenas arredonda
+   o card pai para o mesmo padrão visual dos demais cards.
+   ====================================================== */
+#lista .lista-fixed-top{
+  background:transparent !important;
+  box-shadow:none !important;
+  border:0 !important;
+}
+
+.home-dashboard-card{
+  background:var(--card-bg) !important;
+  border:1px solid var(--card-border) !important;
+  border-radius:20px !important;
+  padding:12px !important;
+  box-shadow:var(--neon-glow) !important;
+  display:flex !important;
+  flex-direction:column !important;
+  gap:10px !important;
+  overflow:visible !important;
+}
+
+.home-dashboard-card .home-action-card,
+.home-dashboard-card .status-filter-card{
+  background:transparent !important;
+  border:0 !important;
+  box-shadow:none !important;
+  padding:0 !important;
+  margin:0 !important;
+  overflow:visible !important;
+}
+
+.home-dashboard-card .home-action-row{
+  display:grid !important;
+  grid-template-columns:repeat(2,minmax(0,1fr)) !important;
+  gap:8px !important;
+  min-height:0 !important;
+}
+
+.home-dashboard-card .status-filter-grid{
+  display:grid !important;
+  grid-template-columns:repeat(4,minmax(0,1fr)) !important;
+  gap:8px !important;
+}
+
+.home-dashboard-card .home-action-btn,
+.home-dashboard-card .status-filter-item{
+  background:var(--card-bg) !important;
+  border:1px solid var(--card-border) !important;
+  border-radius:16px !important;
+  box-shadow:var(--neon-glow) !important;
+}
+
+.home-dashboard-card .home-action-btn{
+  min-height:72px !important;
+}
+
+.home-dashboard-card .status-filter-item{
+  min-height:60px !important;
+}
+
+@media(max-width:420px){
+  .home-dashboard-card{
+    border-radius:20px !important;
+    padding:10px !important;
+    gap:8px !important;
+  }
+
+  .home-dashboard-card .home-action-row,
+  .home-dashboard-card .status-filter-grid{
+    gap:6px !important;
+  }
+
+  .home-dashboard-card .home-action-btn{
+    min-height:66px !important;
+  }
+
+  .home-dashboard-card .status-filter-item{
+    min-height:56px !important;
+  }
+}
+
 </style>
 </head>
 <body>
