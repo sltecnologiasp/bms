@@ -2000,6 +2000,98 @@ body::-webkit-scrollbar,
   }
 }
 
+
+/* ======================================================
+   SMART BMS - RODAPÉ MODERNO COM EFEITO DE CÁPSULA
+   ====================================================== */
+
+.bottom-nav-smart{
+  left:10px !important;
+  right:10px !important;
+  bottom:10px !important;
+  width:auto !important;
+  border:1px solid var(--card-border) !important;
+  border-radius:24px !important;
+  padding:8px 8px !important;
+  background:var(--card-bg) !important;
+  box-shadow:0 -4px 24px rgba(15,23,42,.10), var(--neon-glow) !important;
+  backdrop-filter:none !important;
+  -webkit-backdrop-filter:none !important;
+  overflow:hidden !important;
+}
+
+.bottom-nav-item{
+  position:relative !important;
+  min-height:58px !important;
+  border-radius:18px !important;
+  padding:7px 4px !important;
+  color:var(--smart-home-icon-text, var(--text-muted)) !important;
+  transition:
+    transform .18s ease,
+    border-color .18s ease,
+    box-shadow .18s ease,
+    background .18s ease !important;
+}
+
+.bottom-nav-item svg{
+  width:24px !important;
+  height:24px !important;
+  transition:transform .18s ease !important;
+}
+
+.bottom-nav-item span{
+  font-size:10.5px !important;
+  line-height:1.05 !important;
+}
+
+.bottom-nav-item.active{
+  border:1.8px solid var(--smart-home-active-border, var(--cyan)) !important;
+  background:rgba(0,180,216,.06) !important;
+  box-shadow:0 0 12px rgba(0,180,216,.14) !important;
+  transform:translateY(-1px) !important;
+}
+
+.bottom-nav-item.active svg{
+  transform:scale(1.08) !important;
+}
+
+.bottom-nav-item:active{
+  transform:scale(.96) !important;
+}
+
+.bottom-nav-item.active::before{
+  display:none !important;
+}
+
+[data-theme="dark"] .bottom-nav-item.active{
+  background:rgba(0,255,255,.08) !important;
+  box-shadow:0 0 14px rgba(0,255,255,.18) !important;
+}
+
+@media(max-width:420px){
+  .bottom-nav-smart{
+    left:8px !important;
+    right:8px !important;
+    bottom:8px !important;
+    border-radius:22px !important;
+    padding:7px 6px !important;
+  }
+
+  .bottom-nav-item{
+    min-height:56px !important;
+    border-radius:16px !important;
+  }
+
+  .bottom-nav-item svg{
+    width:23px !important;
+    height:23px !important;
+  }
+
+  .bottom-nav-item span{
+    font-size:10px !important;
+  }
+}
+
 </style>
 </head>
 <body>
