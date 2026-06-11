@@ -3809,104 +3809,18 @@ body::-webkit-scrollbar,
 
 
 /* ======================================================
-   SMART BMS - LISTA NÃO PASSA POR TRÁS DO TOPO NEM RODAPÉ
-   A área dos dispositivos vira uma área própria de rolagem
+   SMART BMS - OCULTAÇÃO SUAVE SEM ALTERAR OS BLOCOS
+   Mantém topo/rodapé iguais e faz os dispositivos sumirem
+   visualmente ao chegar nas áreas fixas.
    ====================================================== */
 
-:root{
-  --smart-home-top-limit: 352px;
-  --smart-home-bottom-limit: 104px;
-}
-
-/* A tela inicial não deixa o conteúdo passar atrás dos blocos fixos */
 #lista{
-  height:100vh !important;
+  height:auto !important;
   min-height:100vh !important;
-  overflow:hidden !important;
-  padding-top:0 !important;
-  padding-bottom:0 !important;
+  overflow:visible !important;
 }
 
-/* Topo continua fixo e acima da lista */
-#lista .lista-fixed-top{
-  position:fixed !important;
-  z-index:950 !important;
-}
-
-/* A lista agora rola dentro desse espaço, entre topo e rodapé */
 #cortina-dispositivos{
-  position:fixed !important;
-  top:var(--smart-home-top-limit) !important;
-  bottom:var(--smart-home-bottom-limit) !important;
-  left:50% !important;
-  transform:translateX(-50%) !important;
-  width:calc(100% - 24px) !important;
-  max-width:1076px !important;
-  overflow-y:auto !important;
-  overflow-x:hidden !important;
-  margin-top:0 !important;
-  padding:0 0 14px 0 !important;
-  z-index:20 !important;
-  background:transparent !important;
-  opacity:1 !important;
-  -webkit-overflow-scrolling:touch !important;
-}
-
-/* Remove qualquer comportamento de cortina que esconda a lista */
-#cortina-dispositivos.aberta,
-#cortina-dispositivos{
-  max-height:none !important;
-}
-
-/* Lista interna normal */
-#bms-list{
-  position:relative !important;
-  z-index:1 !important;
-  display:flex !important;
-  flex-direction:column !important;
-  gap:12px !important;
-  width:100% !important;
-  padding:0 !important;
-  margin:0 !important;
-  background:transparent !important;
-}
-
-/* Dispositivos não atravessam topo/rodapé porque ficam presos no container */
-#bms-list .bms-item,
-#bms-list > .card,
-.bms-item{
-  position:relative !important;
-  z-index:1 !important;
-}
-
-/* O rodapé fica acima e sólido */
-.bottom-nav-smart{
-  z-index:900 !important;
-  background:var(--smart-solid-card-bg, #ffffff) !important;
-  opacity:1 !important;
-  backdrop-filter:none !important;
-  -webkit-backdrop-filter:none !important;
-}
-
-/* No modo escuro também sólido */
-[data-theme="dark"] .bottom-nav-smart{
-  background:var(--smart-solid-card-bg, #0d1423) !important;
-}
-
-/* Esconde barra visual da área de rolagem */
-#cortina-dispositivos{
-  scrollbar-width:none !important;
-  -ms-overflow-style:none !important;
-}
-
-#cortina-dispositivos::-webkit-scrollbar{
-  width:0 !important;
-  height:0 !important;
-  display:none !important;
-}
-
-/* Quando entrar no modo antigo de dispositivos, cancela esse recorte da home */
-body.modo-dispositivos #cortina-dispositivos{
   position:relative !important;
   top:auto !important;
   bottom:auto !important;
@@ -3915,26 +3829,110 @@ body.modo-dispositivos #cortina-dispositivos{
   width:100% !important;
   max-width:100% !important;
   overflow:visible !important;
+  padding:0 !important;
+  z-index:1 !important;
 }
 
-/* Ajuste para telas menores */
+#lista::before{
+  content:none !important;
+  display:none !important;
+}
+
+#lista .lista-fixed-top{
+  z-index:960 !important;
+  opacity:1 !important;
+  backdrop-filter:none !important;
+  -webkit-backdrop-filter:none !important;
+}
+
+.bottom-nav-smart{
+  z-index:960 !important;
+  opacity:1 !important;
+  backdrop-filter:none !important;
+  -webkit-backdrop-filter:none !important;
+}
+
+/* Fade visual: sem máscara quadrada, apenas uma transição de ocultação */
+body.app-logado::before,
+body.app-logado::after{
+  content:'' !important;
+  position:fixed !important;
+  left:0 !important;
+  right:0 !important;
+  pointer-events:none !important;
+  z-index:940 !important;
+}
+
+/* Fade abaixo do topo */
+body.app-logado::before{
+  top:0 !important;
+  height:355px !important;
+  background:linear-gradient(
+    to bottom,
+    var(--bg) 0%,
+    var(--bg) 74%,
+    rgba(244,246,249,0) 100%
+  ) !important;
+}
+
+/* Fade acima do rodapé */
+body.app-logado::after{
+  bottom:0 !important;
+  height:122px !important;
+  background:linear-gradient(
+    to top,
+    var(--bg) 0%,
+    var(--bg) 58%,
+    rgba(244,246,249,0) 100%
+  ) !important;
+}
+
+[data-theme="dark"] body.app-logado::before{
+  background:linear-gradient(
+    to bottom,
+    var(--bg) 0%,
+    var(--bg) 74%,
+    rgba(5,7,13,0) 100%
+  ) !important;
+}
+
+[data-theme="dark"] body.app-logado::after{
+  background:linear-gradient(
+    to top,
+    var(--bg) 0%,
+    var(--bg) 58%,
+    rgba(5,7,13,0) 100%
+  ) !important;
+}
+
+/* Não aplica fade fora da home */
+body.app-logado:not(:has(#lista:not(.hidden)))::before,
+body.app-logado:not(:has(#lista:not(.hidden)))::after{
+  display:none !important;
+}
+
 @media(max-width:420px){
-  :root{
-    --smart-home-top-limit: 334px;
-    --smart-home-bottom-limit: 98px;
+  body.app-logado::before{
+    height:340px !important;
+    background:linear-gradient(
+      to bottom,
+      var(--bg) 0%,
+      var(--bg) 72%,
+      rgba(244,246,249,0) 100%
+    ) !important;
   }
 
-  #cortina-dispositivos{
-    width:calc(100% - 20px) !important;
-    padding-bottom:12px !important;
+  body.app-logado::after{
+    height:116px !important;
   }
-}
 
-/* Ajuste para celulares muito baixos */
-@media(max-height:720px){
-  :root{
-    --smart-home-top-limit: 322px;
-    --smart-home-bottom-limit: 94px;
+  [data-theme="dark"] body.app-logado::before{
+    background:linear-gradient(
+      to bottom,
+      var(--bg) 0%,
+      var(--bg) 72%,
+      rgba(5,7,13,0) 100%
+    ) !important;
   }
 }
 
