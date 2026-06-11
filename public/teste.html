@@ -1800,185 +1800,20 @@ body.modo-dispositivos #lista .lista-fixed-top{
 
 
 /* ======================================================
-   SMART BMS - AJUSTE FINAL: TOPO STICKY NATURAL
-   Mantém layout/cores, remove card grande dos dispositivos
-   e evita sobreposição do topo fixo.
+   SMART BMS - PADRÃO FINAL DE CORES HOME + RODAPÉ
+   - Itens do rodapé na mesma cor do botão Adicionar dispositivo
+   - Botões clicados/ativos com contorno igual ao botão Tudo
+   - Topo travado sólido, sem transparência
    ====================================================== */
+
+:root{
+  --smart-home-active-border: var(--cyan);
+  --smart-home-icon-text: var(--text-muted);
+}
+
+/* Topo da home travado e sólido */
 #lista{
-  padding-top:44px !important;
-  padding-bottom:118px !important;
-}
-
-#lista .lista-fixed-top{
-  position:sticky !important;
-  top:0 !important;
-  left:auto !important;
-  right:auto !important;
-  transform:none !important;
-  z-index:950 !important;
-  width:100% !important;
-  max-width:1100px !important;
-  background:var(--bg) !important;
-  padding:8px 0 10px 0 !important;
-  box-shadow:0 8px 22px rgba(15,23,42,.07) !important;
-}
-
-#lista .lista-fixed-top .title{
-  font-size:clamp(28px,6vw,34px) !important;
-  line-height:1.05 !important;
-  margin-bottom:4px !important;
-}
-
-#lista .lista-fixed-top .user-info{
-  font-size:14px !important;
-  margin-bottom:12px !important;
-}
-
-#cortina-dispositivos{
-  margin-top:12px !important;
-  overflow:visible !important;
-}
-
-#cortina-dispositivos.aberta{
-  max-height:none !important;
-  opacity:1 !important;
-}
-
-#cortina-dispositivos > .card{
-  display:none !important;
-}
-
-#bms-list.bms-list{
-  margin-top:0 !important;
-  padding:0 !important;
-}
-
-body.modo-dispositivos #lista{
-  padding-top:44px !important;
-}
-
-body.modo-dispositivos #lista .lista-fixed-top{
-  display:none !important;
-}
-
-@media(max-width:420px){
-  #lista{
-    padding-top:38px !important;
-  }
-
-  #lista .lista-fixed-top{
-    padding:6px 0 8px 0 !important;
-  }
-
-  #lista .lista-fixed-top .title{
-    font-size:28px !important;
-  }
-
-  #lista .lista-fixed-top .user-info{
-    font-size:12.5px !important;
-    margin-bottom:10px !important;
-  }
-
-  #cortina-dispositivos{
-    margin-top:10px !important;
-  }
-}
-
-
-
-/* ======================================================
-   SMART BMS - AJUSTE DO CARD GRANDE DO TOPO
-   Mantém MQTT global e sticky natural; apenas arredonda
-   o card pai para o mesmo padrão visual dos demais cards.
-   ====================================================== */
-#lista .lista-fixed-top{
-  background:transparent !important;
-  box-shadow:none !important;
-  border:0 !important;
-}
-
-.home-dashboard-card{
-  background:var(--card-bg) !important;
-  border:1px solid var(--card-border) !important;
-  border-radius:20px !important;
-  padding:12px !important;
-  box-shadow:var(--neon-glow) !important;
-  display:flex !important;
-  flex-direction:column !important;
-  gap:10px !important;
-  overflow:visible !important;
-}
-
-.home-dashboard-card .home-action-card,
-.home-dashboard-card .status-filter-card{
-  background:transparent !important;
-  border:0 !important;
-  box-shadow:none !important;
-  padding:0 !important;
-  margin:0 !important;
-  overflow:visible !important;
-}
-
-.home-dashboard-card .home-action-row{
-  display:grid !important;
-  grid-template-columns:repeat(2,minmax(0,1fr)) !important;
-  gap:8px !important;
-  min-height:0 !important;
-}
-
-.home-dashboard-card .status-filter-grid{
-  display:grid !important;
-  grid-template-columns:repeat(4,minmax(0,1fr)) !important;
-  gap:8px !important;
-}
-
-.home-dashboard-card .home-action-btn,
-.home-dashboard-card .status-filter-item{
-  background:var(--card-bg) !important;
-  border:1px solid var(--card-border) !important;
-  border-radius:16px !important;
-  box-shadow:var(--neon-glow) !important;
-}
-
-.home-dashboard-card .home-action-btn{
-  min-height:72px !important;
-}
-
-.home-dashboard-card .status-filter-item{
-  min-height:60px !important;
-}
-
-@media(max-width:420px){
-  .home-dashboard-card{
-    border-radius:20px !important;
-    padding:10px !important;
-    gap:8px !important;
-  }
-
-  .home-dashboard-card .home-action-row,
-  .home-dashboard-card .status-filter-grid{
-    gap:6px !important;
-  }
-
-  .home-dashboard-card .home-action-btn{
-    min-height:66px !important;
-  }
-
-  .home-dashboard-card .status-filter-item{
-    min-height:56px !important;
-  }
-}
-
-
-
-/* ======================================================
-   SMART BMS - FINAL: TOPO TRAVADO SÓLIDO + RODAPÉ PADRÃO
-   - Topo fixo sem transparência
-   - Dispositivos rolam por baixo sem aparecer atrás
-   - Rodapé usa a mesma cor de contorno do filtro ativo
-   ====================================================== */
-#lista{
-  padding-top:258px !important;
+  padding-top:248px !important;
   padding-bottom:118px !important;
 }
 
@@ -1986,51 +1821,30 @@ body.modo-dispositivos #lista .lista-fixed-top{
   position:fixed !important;
   top:0 !important;
   left:50% !important;
-  right:auto !important;
   transform:translateX(-50%) !important;
   z-index:950 !important;
   width:100% !important;
   max-width:1100px !important;
   background:var(--bg) !important;
   opacity:1 !important;
-  padding:12px 12px 12px 12px !important;
-  box-shadow:0 8px 22px rgba(15,23,42,.07) !important;
-  border:0 !important;
   backdrop-filter:none !important;
   -webkit-backdrop-filter:none !important;
+  padding:12px 12px 10px 12px !important;
+  box-shadow:0 8px 22px rgba(15,23,42,.07) !important;
 }
 
-#lista .lista-fixed-top::before{
-  content:'' !important;
-  position:absolute !important;
-  inset:0 !important;
-  z-index:-1 !important;
-  background:var(--bg) !important;
-  opacity:1 !important;
-  pointer-events:none !important;
-}
-
-#lista .lista-fixed-top .title{
-  font-size:clamp(28px,6vw,34px) !important;
-  line-height:1.05 !important;
-  margin-bottom:4px !important;
-}
-
-#lista .lista-fixed-top .user-info{
-  font-size:14px !important;
-  margin-bottom:12px !important;
-}
-
+/* Card pai do topo no mesmo padrão, sem aparência quadrada/translúcida */
 .home-dashboard-card{
   background:var(--card-bg) !important;
   border:1px solid var(--card-border) !important;
   border-radius:20px !important;
-  padding:12px !important;
+  padding:10px !important;
   box-shadow:var(--neon-glow) !important;
-  display:flex !important;
-  flex-direction:column !important;
   gap:10px !important;
   overflow:visible !important;
+  opacity:1 !important;
+  backdrop-filter:none !important;
+  -webkit-backdrop-filter:none !important;
 }
 
 .home-dashboard-card .home-action-card,
@@ -2043,97 +1857,146 @@ body.modo-dispositivos #lista .lista-fixed-top{
   overflow:visible !important;
 }
 
+/* Botões da tela inicial: cor dos ícones/textos igual ao Adicionar dispositivo */
 .home-dashboard-card .home-action-btn,
 .home-dashboard-card .status-filter-item{
   background:var(--card-bg) !important;
   border:1px solid var(--card-border) !important;
   border-radius:16px !important;
   box-shadow:var(--neon-glow) !important;
-}
-
-.home-dashboard-card .status-filter-item.active{
-  border-color:var(--cyan) !important;
-  background:var(--card-bg) !important;
-}
-
-#cortina-dispositivos{
-  margin-top:12px !important;
-  overflow:visible !important;
-}
-
-#cortina-dispositivos.aberta{
-  max-height:none !important;
+  color:var(--smart-home-icon-text) !important;
   opacity:1 !important;
+  transition:border-color .18s ease, box-shadow .18s ease, transform .12s ease !important;
 }
 
-#bms-list.bms-list{
-  margin-top:0 !important;
-  padding:0 !important;
+.home-dashboard-card .home-action-btn svg,
+.home-dashboard-card .home-action-btn span,
+.home-dashboard-card .status-filter-label{
+  color:var(--smart-home-icon-text) !important;
+  fill:currentColor !important;
+  stroke:currentColor !important;
 }
 
+.home-dashboard-card .home-action-btn svg circle[stroke="none"]{
+  fill:var(--card-bg) !important;
+  stroke:none !important;
+}
+
+/* Todos os botões ativos/clicados seguem o contorno azul/ciano do botão Tudo */
+.home-dashboard-card .home-action-btn.active,
+.home-dashboard-card .home-action-btn.smart-home-selected,
+.home-dashboard-card .home-action-btn:focus,
+.home-dashboard-card .home-action-btn:active,
+.home-dashboard-card .status-filter-item.active,
+.home-dashboard-card .status-filter-item:focus,
+.home-dashboard-card .status-filter-item:active{
+  border-color:var(--smart-home-active-border) !important;
+  border-width:1.8px !important;
+  box-shadow:var(--neon-glow) !important;
+  outline:none !important;
+}
+
+/* Mantém as cores funcionais dos números dos filtros */
+.home-dashboard-card .status-filter-num.online{color:var(--green) !important;}
+.home-dashboard-card .status-filter-num.falha{color:var(--red) !important;}
+.home-dashboard-card .status-filter-num.offline{color:var(--text-muted) !important;}
+
+/* Rodapé: ícones e textos com a mesma cor dos botões superiores */
 .bottom-nav-smart{
   background:var(--card-bg) !important;
   border-top:1px solid var(--card-border) !important;
-  box-shadow:0 -8px 28px rgba(0,0,0,.10) !important;
+  opacity:1 !important;
   backdrop-filter:none !important;
   -webkit-backdrop-filter:none !important;
 }
 
 .bottom-nav-item,
-.bottom-nav-item.active{
-  color:var(--cyan) !important;
-}
-
-.bottom-nav-item svg,
-.bottom-nav-item.active svg{
-  color:var(--cyan) !important;
+.bottom-nav-item span,
+.bottom-nav-item svg{
+  color:var(--smart-home-icon-text) !important;
   fill:currentColor !important;
   stroke:currentColor !important;
 }
 
-.bottom-nav-item span,
-.bottom-nav-item.active span{
-  color:var(--cyan) !important;
+.bottom-nav-item.active,
+.bottom-nav-item.active span,
+.bottom-nav-item.active svg,
+.bottom-nav-item:active,
+.bottom-nav-item:active span,
+.bottom-nav-item:active svg{
+  color:var(--smart-home-icon-text) !important;
+  fill:currentColor !important;
+  stroke:currentColor !important;
 }
 
+/* Indicador visual do item ativo no rodapé com o contorno azul/ciano */
 .bottom-nav-item.active{
-  font-weight:800 !important;
+  position:relative !important;
 }
 
-body.modo-dispositivos #lista{
-  padding-top:44px !important;
+.bottom-nav-item.active::before{
+  content:'' !important;
+  position:absolute !important;
+  top:2px !important;
+  width:34px !important;
+  height:3px !important;
+  border-radius:999px !important;
+  background:var(--smart-home-active-border) !important;
 }
 
-body.modo-dispositivos #lista .lista-fixed-top{
+/* Esconde barra lateral sem bloquear rolagem */
+html,
+body,
+#lista,
+#cortina-dispositivos,
+.bms-list,
+.convite-device-list{
+  scrollbar-width:none !important;
+  -ms-overflow-style:none !important;
+}
+
+html::-webkit-scrollbar,
+body::-webkit-scrollbar,
+#lista::-webkit-scrollbar,
+#cortina-dispositivos::-webkit-scrollbar,
+.bms-list::-webkit-scrollbar,
+.convite-device-list::-webkit-scrollbar{
+  width:0 !important;
+  height:0 !important;
   display:none !important;
+}
+
+/* Remove card grande de Meus Dispositivos, deixando apenas os dispositivos */
+#cortina-dispositivos > .card{
+  background:transparent !important;
+  border:0 !important;
+  box-shadow:none !important;
+  padding:0 !important;
+  border-radius:0 !important;
+  min-height:0 !important;
+}
+
+#cortina-dispositivos > .card > .label{
+  display:none !important;
+}
+
+#cortina-dispositivos{
+  margin-top:0 !important;
 }
 
 @media(max-width:420px){
   #lista{
-    padding-top:248px !important;
+    padding-top:238px !important;
   }
 
   #lista .lista-fixed-top{
-    padding:10px 10px 10px 10px !important;
-  }
-
-  #lista .lista-fixed-top .title{
-    font-size:28px !important;
-  }
-
-  #lista .lista-fixed-top .user-info{
-    font-size:12.5px !important;
-    margin-bottom:10px !important;
+    padding:10px 10px 8px 10px !important;
   }
 
   .home-dashboard-card{
-    border-radius:20px !important;
-    padding:10px !important;
+    border-radius:18px !important;
+    padding:9px !important;
     gap:8px !important;
-  }
-
-  #cortina-dispositivos{
-    margin-top:10px !important;
   }
 }
 
@@ -2334,7 +2197,10 @@ body.modo-dispositivos #lista .lista-fixed-top{
   </div>
 
   <div id="cortina-dispositivos" class="cortina-wrapper aberta">
-    <div id="bms-list" class="bms-list"></div>
+    <div class="card">
+      <div class="label" style="margin-bottom:12px">Meus Dispositivos</div>
+      <div id="bms-list" class="bms-list"></div>
+    </div>
   </div>
   
 </div>
@@ -3526,15 +3392,6 @@ function renderizarListaBmsCache(){
     var st = obterStatusVisualBms(b);
     return filtroListaBmsAtual === 'tudo' || st === filtroListaBmsAtual;
   });
-  lista.sort(function(a,b){
-    var peso = { online: 0, falha: 1, offline: 2 };
-    var sa = obterStatusVisualBms(a);
-    var sb = obterStatusVisualBms(b);
-    var pa = peso.hasOwnProperty(sa) ? peso[sa] : 3;
-    var pb = peso.hasOwnProperty(sb) ? peso[sb] : 3;
-    if(pa !== pb) return pa - pb;
-    return String(a.nome || a.code || '').localeCompare(String(b.nome || b.code || ''), 'pt-BR');
-  });
   if(!lista.length){
     el.innerHTML = '<p style="text-align:center;color:var(--text-muted);padding:20px;font-size:14px">Nenhum dispositivo neste filtro</p>';
     return;
@@ -4009,6 +3866,82 @@ function sairSemConfirmacao(){
       localStorage.setItem(DISPENSADO_KEY, '1');
     }
   });
+})();
+</script>
+
+
+<script>
+/* SMART BMS - Estado visual padrão dos botões da tela inicial */
+(function(){
+  function marcarBotaoHome(tipo){
+    try{
+      document.querySelectorAll('.home-dashboard-card .home-action-btn').forEach(function(btn){
+        btn.classList.remove('smart-home-selected');
+      });
+
+      var alvo = null;
+      if (tipo === 'add') {
+        alvo = document.querySelector('.home-action-btn[onclick*="togglePainelLista"][onclick*="add"]');
+      } else if (tipo === 'convite') {
+        alvo = document.querySelector('.home-action-btn[onclick*="togglePainelLista"][onclick*="convite"]');
+      }
+
+      if (alvo) alvo.classList.add('smart-home-selected');
+    } catch(e){}
+  }
+
+  window.marcarBotaoHomeSmart = marcarBotaoHome;
+
+  var antigoTogglePainelLista = window.togglePainelLista;
+  if (typeof antigoTogglePainelLista === 'function') {
+    window.togglePainelLista = function(tipo){
+      marcarBotaoHome(tipo);
+      return antigoTogglePainelLista.apply(this, arguments);
+    };
+  }
+
+  document.addEventListener('click', function(ev){
+    var btn = ev.target && ev.target.closest ? ev.target.closest('.home-dashboard-card .home-action-btn') : null;
+    if (!btn) return;
+
+    document.querySelectorAll('.home-dashboard-card .home-action-btn').forEach(function(item){
+      item.classList.remove('smart-home-selected');
+    });
+
+    btn.classList.add('smart-home-selected');
+  }, true);
+})();
+</script>
+
+
+<script>
+/* SMART BMS - Ordenação visual: Online primeiro, depois Falha, depois Offline */
+(function(){
+  function prioridadeDispositivo(el){
+    try{
+      var texto = (el.innerText || '').toLowerCase();
+      if (el.classList.contains('online-active') || texto.indexOf('online') !== -1) return 0;
+      if (texto.indexOf('falha') !== -1 || texto.indexOf('erro') !== -1) return 1;
+      return 2;
+    } catch(e){
+      return 2;
+    }
+  }
+
+  function ordenarDispositivosSmart(){
+    try{
+      var lista = document.getElementById('bms-list');
+      if (!lista) return;
+      Array.from(lista.children)
+        .filter(function(el){ return el.classList && (el.classList.contains('bms-item') || el.classList.contains('card')); })
+        .sort(function(a,b){ return prioridadeDispositivo(a) - prioridadeDispositivo(b); })
+        .forEach(function(el){ lista.appendChild(el); });
+    } catch(e){}
+  }
+
+  window.ordenarDispositivosSmart = ordenarDispositivosSmart;
+  setInterval(ordenarDispositivosSmart, 2500);
+  document.addEventListener('DOMContentLoaded', ordenarDispositivosSmart);
 })();
 </script>
 
