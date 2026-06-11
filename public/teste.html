@@ -2195,6 +2195,293 @@ body::-webkit-scrollbar,
   box-shadow:0 0 10px rgba(0,255,255,.12) !important;
 }
 
+
+/* ======================================================
+   SMART BMS - AJUSTE FINAL: SEM TRANSLUCIDEZ + EFEITO BOTÕES
+   ====================================================== */
+
+:root{
+  --smart-solid-top-bg: var(--bg);
+  --smart-solid-card-bg: #ffffff;
+  --smart-active-border: var(--cyan);
+  --smart-nav-color: var(--text-muted);
+}
+
+[data-theme="dark"]{
+  --smart-solid-card-bg: #0d1423;
+}
+
+/* Nada translúcido no corpo/base */
+body,
+#lista,
+#lista .lista-fixed-top{
+  opacity:1 !important;
+  backdrop-filter:none !important;
+  -webkit-backdrop-filter:none !important;
+}
+
+/* Topo fixo mais baixo e 100% sólido */
+#lista{
+  padding-top:270px !important;
+  padding-bottom:122px !important;
+}
+
+#lista .lista-fixed-top{
+  position:fixed !important;
+  top:14px !important;
+  left:50% !important;
+  right:auto !important;
+  transform:translateX(-50%) !important;
+  z-index:950 !important;
+  width:100% !important;
+  max-width:1100px !important;
+  background:var(--smart-solid-top-bg) !important;
+  opacity:1 !important;
+  padding:10px 12px 10px 12px !important;
+  box-shadow:none !important;
+  border:0 !important;
+}
+
+/* Remove a caixa/sombra branca quadrada do card pai superior */
+.home-dashboard-card{
+  background:transparent !important;
+  border:0 !important;
+  box-shadow:none !important;
+  border-radius:0 !important;
+  padding:0 !important;
+  gap:10px !important;
+  overflow:visible !important;
+  opacity:1 !important;
+  backdrop-filter:none !important;
+  -webkit-backdrop-filter:none !important;
+}
+
+.home-dashboard-card .home-action-card,
+.home-dashboard-card .status-filter-card{
+  background:transparent !important;
+  border:0 !important;
+  box-shadow:none !important;
+  padding:0 !important;
+  margin:0 !important;
+  overflow:visible !important;
+  opacity:1 !important;
+  backdrop-filter:none !important;
+  -webkit-backdrop-filter:none !important;
+}
+
+/* Botões/cards da home totalmente sólidos */
+.home-dashboard-card .home-action-btn,
+.home-dashboard-card .status-filter-item{
+  background:var(--smart-solid-card-bg) !important;
+  border:1px solid var(--card-border) !important;
+  border-radius:18px !important;
+  box-shadow:var(--neon-glow) !important;
+  opacity:1 !important;
+  color:var(--smart-nav-color) !important;
+  -webkit-tap-highlight-color:transparent !important;
+  outline:none !important;
+  transition:
+    transform .16s ease,
+    border-color .16s ease,
+    box-shadow .16s ease !important;
+  will-change:transform !important;
+}
+
+/* Cores dos ícones/textos iguais ao padrão do rodapé */
+.home-dashboard-card .home-action-btn svg,
+.home-dashboard-card .home-action-btn span,
+.home-dashboard-card .status-filter-label{
+  color:var(--smart-nav-color) !important;
+  fill:currentColor !important;
+  stroke:currentColor !important;
+}
+
+.home-dashboard-card .home-action-btn svg circle[stroke="none"]{
+  fill:var(--smart-solid-card-bg) !important;
+  stroke:none !important;
+}
+
+/* Efeito igual ao rodapé: cresce ao clicar */
+.home-dashboard-card .home-action-btn:active,
+.home-dashboard-card .status-filter-item:active,
+.bottom-nav-item:active{
+  transform:scale(1.045) !important;
+}
+
+/* Selecionado/ativo com contorno azul/ciano, sem fundo quadrado */
+.home-dashboard-card .home-action-btn.smart-home-selected,
+.home-dashboard-card .home-action-btn.active,
+.home-dashboard-card .home-action-btn:focus,
+.home-dashboard-card .status-filter-item.active,
+.home-dashboard-card .status-filter-item:focus{
+  border-color:var(--smart-active-border) !important;
+  border-width:1.8px !important;
+  background:var(--smart-solid-card-bg) !important;
+  outline:none !important;
+  box-shadow:var(--neon-glow) !important;
+}
+
+/* Mantém cores funcionais dos números */
+.home-dashboard-card .status-filter-num.online{
+  color:var(--green) !important;
+}
+.home-dashboard-card .status-filter-num.falha{
+  color:var(--red) !important;
+}
+.home-dashboard-card .status-filter-num.offline{
+  color:var(--text-muted) !important;
+}
+
+/* Rodapé totalmente sólido, sem transparência */
+.bottom-nav-smart{
+  left:10px !important;
+  right:10px !important;
+  bottom:10px !important;
+  width:auto !important;
+  background:var(--smart-solid-card-bg) !important;
+  border:1px solid var(--card-border) !important;
+  border-radius:24px !important;
+  padding:8px 8px !important;
+  opacity:1 !important;
+  backdrop-filter:none !important;
+  -webkit-backdrop-filter:none !important;
+  box-shadow:0 -4px 24px rgba(15,23,42,.10), var(--neon-glow) !important;
+  overflow:hidden !important;
+  isolation:isolate !important;
+}
+
+.bottom-nav-item{
+  position:relative !important;
+  min-height:58px !important;
+  border-radius:18px !important;
+  padding:7px 4px !important;
+  background:transparent !important;
+  color:var(--smart-nav-color) !important;
+  -webkit-tap-highlight-color:transparent !important;
+  outline:none !important;
+  transition:
+    transform .16s ease,
+    border-color .16s ease,
+    box-shadow .16s ease !important;
+  will-change:transform !important;
+}
+
+.bottom-nav-item svg,
+.bottom-nav-item span{
+  color:var(--smart-nav-color) !important;
+  fill:currentColor !important;
+  stroke:currentColor !important;
+  background:transparent !important;
+}
+
+.bottom-nav-item svg{
+  transition:transform .16s ease !important;
+}
+
+.bottom-nav-item.active{
+  background:transparent !important;
+  border:1.8px solid var(--smart-active-border) !important;
+  box-shadow:0 0 10px rgba(0,180,216,.10) !important;
+}
+
+.bottom-nav-item.active svg{
+  transform:scale(1.08) !important;
+}
+
+.bottom-nav-item:focus,
+.bottom-nav-item:focus-visible,
+.bottom-nav-item:active{
+  outline:none !important;
+  background:transparent !important;
+}
+
+.bottom-nav-item.active::before,
+.bottom-nav-item::after{
+  content:none !important;
+  display:none !important;
+}
+
+/* Remove qualquer fundo azul quadrado no toque */
+button,
+.home-action-btn,
+.status-filter-item,
+.bottom-nav-item,
+button *,
+.home-action-btn *,
+.status-filter-item *,
+.bottom-nav-item *{
+  -webkit-tap-highlight-color:transparent !important;
+  outline:none !important;
+  user-select:none !important;
+}
+
+/* Dispositivos sem card grande externo */
+#cortina-dispositivos > .card{
+  background:transparent !important;
+  border:0 !important;
+  box-shadow:none !important;
+  padding:0 !important;
+  border-radius:0 !important;
+  min-height:0 !important;
+}
+#cortina-dispositivos > .card > .label{
+  display:none !important;
+}
+
+/* Scroll sem barra lateral */
+html,
+body,
+#lista,
+#cortina-dispositivos,
+.bms-list,
+.convite-device-list{
+  scrollbar-width:none !important;
+  -ms-overflow-style:none !important;
+}
+html::-webkit-scrollbar,
+body::-webkit-scrollbar,
+#lista::-webkit-scrollbar,
+#cortina-dispositivos::-webkit-scrollbar,
+.bms-list::-webkit-scrollbar,
+.convite-device-list::-webkit-scrollbar{
+  width:0 !important;
+  height:0 !important;
+  display:none !important;
+}
+
+@media(max-width:420px){
+  #lista{
+    padding-top:260px !important;
+  }
+
+  #lista .lista-fixed-top{
+    top:12px !important;
+    padding:8px 10px 8px 10px !important;
+  }
+
+  .home-dashboard-card{
+    gap:8px !important;
+  }
+
+  .home-dashboard-card .home-action-btn,
+  .home-dashboard-card .status-filter-item{
+    border-radius:16px !important;
+  }
+
+  .bottom-nav-smart{
+    left:8px !important;
+    right:8px !important;
+    bottom:8px !important;
+    border-radius:22px !important;
+    padding:7px 6px !important;
+  }
+
+  .bottom-nav-item{
+    min-height:56px !important;
+    border-radius:16px !important;
+  }
+}
+
 </style>
 </head>
 <body>
@@ -4137,6 +4424,49 @@ function sairSemConfirmacao(){
   window.ordenarDispositivosSmart = ordenarDispositivosSmart;
   setInterval(ordenarDispositivosSmart, 2500);
   document.addEventListener('DOMContentLoaded', ordenarDispositivosSmart);
+})();
+</script>
+
+
+<script>
+/* SMART BMS - Efeito visual consistente nos botões da home */
+(function(){
+  function limparSelecionadosHome(){
+    document.querySelectorAll('.home-dashboard-card .home-action-btn').forEach(function(btn){
+      btn.classList.remove('smart-home-selected');
+    });
+  }
+
+  function marcarBotaoHomeSmart(tipo){
+    try{
+      limparSelecionadosHome();
+      var alvo = null;
+      if (tipo === 'add') {
+        alvo = document.querySelector('.home-action-btn[onclick*="add"]');
+      } else if (tipo === 'convite') {
+        alvo = document.querySelector('.home-action-btn[onclick*="convite"]');
+      }
+      if (alvo) alvo.classList.add('smart-home-selected');
+    } catch(e){}
+  }
+
+  window.marcarBotaoHomeSmart = marcarBotaoHomeSmart;
+
+  var toggleOriginal = window.togglePainelLista;
+  if (typeof toggleOriginal === 'function' && !window.__smartToggleHomePatchFinal) {
+    window.__smartToggleHomePatchFinal = true;
+    window.togglePainelLista = function(tipo){
+      marcarBotaoHomeSmart(tipo);
+      return toggleOriginal.apply(this, arguments);
+    };
+  }
+
+  document.addEventListener('click', function(ev){
+    var btn = ev.target && ev.target.closest ? ev.target.closest('.home-dashboard-card .home-action-btn') : null;
+    if (!btn) return;
+    limparSelecionadosHome();
+    btn.classList.add('smart-home-selected');
+  }, true);
 })();
 </script>
 
