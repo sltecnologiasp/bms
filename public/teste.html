@@ -3005,6 +3005,98 @@ body::-webkit-scrollbar,
   }
 }
 
+
+/* ======================================================
+   SMART BMS - AJUSTE SEGURO DISPOSITIVOS + ESPAÇAMENTO TOPO
+   Base: arquivo enviado pelo usuário
+   ====================================================== */
+
+/* Espaçamento: deixa o SMART BMS mais afastado do card superior */
+#lista .lista-fixed-top .title{
+  margin-bottom:22px !important;
+}
+
+/* Mantém o topo sólido */
+#lista .lista-fixed-top{
+  background:var(--bg) !important;
+  opacity:1 !important;
+  backdrop-filter:none !important;
+  -webkit-backdrop-filter:none !important;
+}
+
+/* Remove destaque azul quadrado do Android/WebView */
+.bms-item,
+.bms-item *,
+.gerenciar-bms-item,
+.gerenciar-bms-item *,
+#bms-list .card,
+#bms-list .card *{
+  -webkit-tap-highlight-color:transparent !important;
+  outline:none !important;
+  user-select:none !important;
+}
+
+/* Efeito igual ao rodapé nos dispositivos */
+.bms-item,
+.gerenciar-bms-item,
+#bms-list .card{
+  transition:
+    transform .16s ease,
+    border-color .24s ease,
+    box-shadow .24s ease !important;
+  will-change:transform !important;
+}
+
+/* Toque: cresce de leve, sem sombra azul quadrada */
+.bms-item:active,
+.gerenciar-bms-item:active,
+#bms-list .card:active{
+  transform:scale(1.025) !important;
+  outline:none !important;
+  box-shadow:var(--neon-glow) !important;
+}
+
+/* Contorno temporário aplicado via JS */
+.bms-item.smart-device-touched,
+.gerenciar-bms-item.smart-device-touched,
+#bms-list .card.smart-device-touched{
+  border-color:var(--cyan) !important;
+  border-width:1.8px !important;
+  box-shadow:var(--neon-glow) !important;
+}
+
+/* Evita qualquer sombra azul extra em foco */
+.bms-item:focus,
+.bms-item:focus-visible,
+.gerenciar-bms-item:focus,
+.gerenciar-bms-item:focus-visible,
+#bms-list .card:focus,
+#bms-list .card:focus-visible{
+  outline:none !important;
+  box-shadow:var(--neon-glow) !important;
+}
+
+/* Preserva o efeito online existente */
+.bms-item.online-active,
+.gerenciar-bms-item.online-active{
+  animation:neonSuave 2s infinite ease-in-out !important;
+}
+
+/* Esconde botão excluir na tela inicial */
+#bms-list .btn-item-del,
+#bms-list button[onclick*="removerBms"],
+#bms-list button[onclick*="remove"],
+#bms-list button[onclick*="excluir"],
+#bms-list button[onclick*="del"]{
+  display:none !important;
+}
+
+/* Online sempre visualmente no topo quando a ordenação JS rodar */
+#bms-list{
+  display:flex !important;
+  flex-direction:column !important;
+}
+
 </style>
 </head>
 <body>
@@ -5353,6 +5445,94 @@ function sairSemConfirmacao(){
       if (page && !page.classList.contains('hidden')) window.renderizarGerenciarDispositivosSmart();
     }, 2500);
   });
+})();
+</script>
+
+
+<script>
+/* SMART BMS - Efeito seguro nos cards dos dispositivos */
+(function(){
+  var timersSmartDevice = new WeakMap();
+
+  function prioridadeSmartDevice(el){
+    try{
+      var texto = (el.innerText || '').toLowerCase();
+      var st = (el.getAttribute('data-status') || '').toLowerCase();
+
+      if (el.classList.contains('online-active') || st === 'online' || texto.indexOf('online') !== -1) return 0;
+      if (st === 'falha' || texto.indexOf('falha') !== -1 || texto.indexOf('erro') !== -1 || texto.indexOf('alerta') !== -1) return 1;
+      return 2;
+    }catch(e){
+      return 2;
+    }
+  }
+
+  function ordenarCardsDispositivosSmart(){
+    try{
+      var listas = [
+        document.getElementById('bms-list'),
+        document.getElementById('gerenciar-bms-list')
+      ].filter(Boolean);
+
+      listas.forEach(function(lista){
+        var itens = Array.from(lista.children).filter(function(el){
+          return el && el.classList && (
+            el.classList.contains('bms-item') ||
+            el.classList.contains('gerenciar-bms-item') ||
+            el.classList.contains('card')
+          );
+        });
+
+        if (itens.length < 2) return;
+
+        var ordenados = itens.slice().sort(function(a,b){
+          var pa = prioridadeSmartDevice(a);
+          var pb = prioridadeSmartDevice(b);
+          if (pa !== pb) return pa - pb;
+          return (a.innerText || '').localeCompare((b.innerText || ''), 'pt-BR');
+        });
+
+        var mudou = ordenados.some(function(el, i){ return lista.children[i] !== el; });
+        if (!mudou) return;
+
+        ordenados.forEach(function(el){ lista.appendChild(el); });
+      });
+    }catch(e){}
+  }
+
+  function aplicarEfeitoTemporario(card){
+    if (!card) return;
+
+    card.classList.add('smart-device-touched');
+
+    var anterior = timersSmartDevice.get(card);
+    if (anterior) clearTimeout(anterior);
+
+    var timer = setTimeout(function(){
+      card.classList.remove('smart-device-touched');
+      timersSmartDevice.delete(card);
+    }, 3000);
+
+    timersSmartDevice.set(card, timer);
+  }
+
+  document.addEventListener('click', function(ev){
+    var card = ev.target && ev.target.closest
+      ? ev.target.closest('.bms-item, .gerenciar-bms-item, #bms-list .card')
+      : null;
+
+    if (!card) return;
+
+    aplicarEfeitoTemporario(card);
+    setTimeout(ordenarCardsDispositivosSmart, 60);
+  }, true);
+
+  document.addEventListener('DOMContentLoaded', function(){
+    ordenarCardsDispositivosSmart();
+    setInterval(ordenarCardsDispositivosSmart, 2500);
+  });
+
+  window.ordenarCardsDispositivosSmart = ordenarCardsDispositivosSmart;
 })();
 </script>
 
