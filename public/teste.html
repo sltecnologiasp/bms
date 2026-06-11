@@ -2694,16 +2694,9 @@ body::-webkit-scrollbar,
 
 
 /* ======================================================
-   SMART BMS - HOME ORGANIZADA FINAL
-   - SMART BMS fora do card
-   - Saudação dentro do card
-   - Topo mais baixo e sólido
-   - Online sempre no topo
-   - Sem excluir dispositivo na home
-   - Botão Página Inicial restaura a home
+   SMART BMS - HOME CONFERIDA SEM LOOP
    ====================================================== */
 
-/* Topo mais baixo e espaço da lista ajustado */
 #lista{
   padding-top:318px !important;
   padding-bottom:122px !important;
@@ -2723,7 +2716,6 @@ body::-webkit-scrollbar,
   margin-bottom:12px !important;
 }
 
-/* Saudação agora dentro do card grande */
 .home-card-user-info{
   font-size:16px !important;
   font-weight:700 !important;
@@ -2737,7 +2729,6 @@ body::-webkit-scrollbar,
   color:var(--text-main) !important;
 }
 
-/* Card grande sólido atrás da saudação e dos botões */
 .home-dashboard-card{
   background:var(--smart-solid-card-bg, var(--card-bg)) !important;
   border:1px solid var(--card-border) !important;
@@ -2763,7 +2754,6 @@ body::-webkit-scrollbar,
   -webkit-backdrop-filter:none !important;
 }
 
-/* Botões da home com efeito igual ao rodapé */
 .home-dashboard-card .home-action-btn,
 .home-dashboard-card .status-filter-item{
   background:var(--smart-solid-card-bg, var(--card-bg)) !important;
@@ -2774,14 +2764,13 @@ body::-webkit-scrollbar,
   color:var(--smart-nav-color, var(--text-muted)) !important;
   -webkit-tap-highlight-color:transparent !important;
   outline:none !important;
-  transition:
-    transform .16s ease,
-    border-color .16s ease,
-    box-shadow .16s ease !important;
+  transition:transform .16s ease,border-color .16s ease,box-shadow .16s ease !important;
 }
 
 .home-dashboard-card .home-action-btn:active,
-.home-dashboard-card .status-filter-item:active{
+.home-dashboard-card .status-filter-item:active,
+.bottom-nav-item:active,
+.perfil-action-btn:active{
   transform:scale(1.045) !important;
 }
 
@@ -2793,12 +2782,7 @@ body::-webkit-scrollbar,
   background:var(--smart-solid-card-bg, var(--card-bg)) !important;
 }
 
-/* Esconde excluir/remover dispositivo apenas na tela inicial */
-#lista .bms-item .btn-item-del,
-#lista .bms-item button[onclick*="del"],
-#lista .bms-item button[onclick*="excluir"],
-#lista .bms-item button[onclick*="remove"],
-#lista .bms-item button[onclick*="remover"],
+/* Oculta excluir/remover somente na tela inicial */
 #bms-list .btn-item-del,
 #bms-list button[onclick*="del"],
 #bms-list button[onclick*="excluir"],
@@ -2807,7 +2791,7 @@ body::-webkit-scrollbar,
   display:none !important;
 }
 
-/* Dispositivos diretamente na tela, sem card externo grande */
+/* Dispositivos sem card grande externo */
 #cortina-dispositivos > .card{
   background:transparent !important;
   border:0 !important;
@@ -2825,13 +2809,16 @@ body::-webkit-scrollbar,
 #lista,
 #lista .lista-fixed-top,
 .home-dashboard-card,
-.bottom-nav-smart{
+.bottom-nav-smart,
+#configuracoesPage,
+#configuracoesPage .card,
+#configuracoesPage button{
   opacity:1 !important;
   backdrop-filter:none !important;
   -webkit-backdrop-filter:none !important;
 }
 
-/* Barra lateral escondida sem travar rolagem */
+/* Scroll sem barra lateral */
 html,
 body,
 #lista,
@@ -4868,20 +4855,26 @@ function sairSemConfirmacao(){
 
 
 <script>
-/* SMART BMS - Home sempre organizada ao clicar em Página Inicial */
+/* SMART BMS - Home organizada sem loop de MutationObserver */
 (function(){
-  function prioridadeCardDispositivo(el){
-    try{
-      var texto = (el.innerText || '').toLowerCase();
-      if (el.classList.contains('online-active') || texto.indexOf('online') !== -1) return 0;
-      if (texto.indexOf('falha') !== -1 || texto.indexOf('erro') !== -1 || texto.indexOf('alerta') !== -1) return 1;
-      return 2;
-    } catch(e){
-      return 2;
-    }
+  var ordenandoSmart = false;
+  var ultimoSnapshotSmart = '';
+
+  function prioridadeCardSmart(el){
+    var texto = (el.innerText || '').toLowerCase();
+    if (el.classList.contains('online-active') || texto.indexOf('online') !== -1) return 0;
+    if (texto.indexOf('falha') !== -1 || texto.indexOf('erro') !== -1 || texto.indexOf('alerta') !== -1) return 1;
+    return 2;
+  }
+
+  function assinaturaListaSmart(itens){
+    return itens.map(function(el){
+      return (prioridadeCardSmart(el) + ':' + (el.innerText || '').trim());
+    }).join('|');
   }
 
   function ordenarDispositivosHomeSmart(){
+    if (ordenandoSmart) return;
     try{
       var lista = document.getElementById('bms-list');
       if (!lista) return;
@@ -4893,17 +4886,29 @@ function sairSemConfirmacao(){
         );
       });
 
-      itens.sort(function(a,b){
-        var pa = prioridadeCardDispositivo(a);
-        var pb = prioridadeCardDispositivo(b);
+      if (itens.length < 2) return;
+
+      var antes = assinaturaListaSmart(itens);
+
+      var ordenados = itens.slice().sort(function(a,b){
+        var pa = prioridadeCardSmart(a);
+        var pb = prioridadeCardSmart(b);
         if (pa !== pb) return pa - pb;
         return (a.innerText || '').localeCompare((b.innerText || ''), 'pt-BR');
       });
 
-      itens.forEach(function(el){
-        lista.appendChild(el);
+      var depois = assinaturaListaSmart(ordenados);
+      if (antes === depois && antes === ultimoSnapshotSmart) return;
+
+      ordenandoSmart = true;
+      ordenados.forEach(function(el, i){
+        if (lista.children[i] !== el) lista.appendChild(el);
       });
-    } catch(e){}
+      ultimoSnapshotSmart = depois;
+      ordenandoSmart = false;
+    } catch(e){
+      ordenandoSmart = false;
+    }
   }
 
   function esconderBotoesExcluirHomeSmart(){
@@ -4928,46 +4933,28 @@ function sairSemConfirmacao(){
   }
 
   function fecharPaineisHomeSmart(){
-    try{
-      var add = document.getElementById('painel-add-dispositivo');
-      var convite = document.getElementById('painel-convidar-usuario');
-      if (add) add.classList.remove('aberta');
-      if (convite) convite.classList.remove('aberta');
+    var add = document.getElementById('painel-add-dispositivo');
+    var convite = document.getElementById('painel-convidar-usuario');
+    if (add) add.classList.remove('aberta');
+    if (convite) convite.classList.remove('aberta');
 
-      document.querySelectorAll('.home-dashboard-card .home-action-btn').forEach(function(btn){
-        btn.classList.remove('smart-home-selected');
-        btn.classList.remove('active');
-      });
-    } catch(e){}
+    document.querySelectorAll('.home-dashboard-card .home-action-btn').forEach(function(btn){
+      btn.classList.remove('smart-home-selected');
+      btn.classList.remove('active');
+    });
   }
 
   function ativarFiltroTudoSmart(){
-    try{
-      if (typeof window.filtrarBmsLista === 'function') {
-        window.filtrarBmsLista('tudo');
-      }
+    if (typeof window.filtrarBmsLista === 'function') {
+      window.filtrarBmsLista('tudo');
+    }
 
-      document.querySelectorAll('.status-filter-item').forEach(function(el){
-        el.classList.remove('active');
-      });
+    document.querySelectorAll('.status-filter-item').forEach(function(el){
+      el.classList.remove('active');
+    });
 
-      var tudo = document.getElementById('filter-tudo');
-      if (tudo) tudo.classList.add('active');
-    } catch(e){}
-  }
-
-  function atualizarContadoresSeExistirSmart(){
-    try{
-      if (typeof window.atualizarContadoresLista === 'function') {
-        window.atualizarContadoresLista();
-      }
-      if (typeof window.atualizarFiltrosLista === 'function') {
-        window.atualizarFiltrosLista();
-      }
-      if (typeof window.atualizarStatusFiltros === 'function') {
-        window.atualizarStatusFiltros();
-      }
-    } catch(e){}
+    var tudo = document.getElementById('filter-tudo');
+    if (tudo) tudo.classList.add('active');
   }
 
   function restaurarHomeSmart(){
@@ -4976,17 +4963,14 @@ function sairSemConfirmacao(){
 
       fecharPaineisHomeSmart();
       ativarFiltroTudoSmart();
-      ordenarDispositivosHomeSmart();
       esconderBotoesExcluirHomeSmart();
-      atualizarContadoresSeExistirSmart();
+      ordenarDispositivosHomeSmart();
 
       var cortina = document.getElementById('cortina-dispositivos');
       if (cortina) cortina.classList.add('aberta');
 
       var lista = document.getElementById('lista');
-      if (lista) {
-        lista.scrollTop = 0;
-      }
+      if (lista) lista.scrollTop = 0;
       window.scrollTo({top:0, behavior:'smooth'});
     } catch(e){}
   }
@@ -4996,13 +4980,12 @@ function sairSemConfirmacao(){
   window.esconderBotoesExcluirHomeSmart = esconderBotoesExcluirHomeSmart;
 
   var navegarOriginal = window.navegarRodapeSmart;
-  if (typeof navegarOriginal === 'function' && !window.__smartHomeF5Patch) {
-    window.__smartHomeF5Patch = true;
+  if (typeof navegarOriginal === 'function' && !window.__smartHomeF5PatchSeguro) {
+    window.__smartHomeF5PatchSeguro = true;
     window.navegarRodapeSmart = function(destino){
       var retorno = navegarOriginal.apply(this, arguments);
-      if (destino === 'home' || destino === 'inicio' || destino === 'pagina-inicial') {
-        setTimeout(restaurarHomeSmart, 60);
-        setTimeout(restaurarHomeSmart, 350);
+      if (destino === 'home') {
+        setTimeout(restaurarHomeSmart, 80);
       }
       return retorno;
     };
@@ -5010,28 +4993,15 @@ function sairSemConfirmacao(){
 
   document.addEventListener('click', function(ev){
     var homeNav = ev.target && ev.target.closest ? ev.target.closest('#nav-home') : null;
-    if (homeNav) {
-      setTimeout(restaurarHomeSmart, 80);
-      setTimeout(restaurarHomeSmart, 350);
-    }
+    if (homeNav) setTimeout(restaurarHomeSmart, 100);
   }, true);
 
-  var observer = new MutationObserver(function(){
-    ordenarDispositivosHomeSmart();
-    esconderBotoesExcluirHomeSmart();
-  });
-
   document.addEventListener('DOMContentLoaded', function(){
-    try{
-      var lista = document.getElementById('bms-list');
-      if (lista) observer.observe(lista, {childList:true, subtree:true, characterData:true});
-    } catch(e){}
-
     restaurarHomeSmart();
     setInterval(function(){
-      ordenarDispositivosHomeSmart();
       esconderBotoesExcluirHomeSmart();
-    }, 2000);
+      ordenarDispositivosHomeSmart();
+    }, 2500);
   });
 })();
 </script>
