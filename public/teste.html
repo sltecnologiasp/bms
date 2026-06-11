@@ -1969,6 +1969,174 @@ body.modo-dispositivos #lista .lista-fixed-top{
   }
 }
 
+
+
+/* ======================================================
+   SMART BMS - FINAL: TOPO TRAVADO SÓLIDO + RODAPÉ PADRÃO
+   - Topo fixo sem transparência
+   - Dispositivos rolam por baixo sem aparecer atrás
+   - Rodapé usa a mesma cor de contorno do filtro ativo
+   ====================================================== */
+#lista{
+  padding-top:258px !important;
+  padding-bottom:118px !important;
+}
+
+#lista .lista-fixed-top{
+  position:fixed !important;
+  top:0 !important;
+  left:50% !important;
+  right:auto !important;
+  transform:translateX(-50%) !important;
+  z-index:950 !important;
+  width:100% !important;
+  max-width:1100px !important;
+  background:var(--bg) !important;
+  opacity:1 !important;
+  padding:12px 12px 12px 12px !important;
+  box-shadow:0 8px 22px rgba(15,23,42,.07) !important;
+  border:0 !important;
+  backdrop-filter:none !important;
+  -webkit-backdrop-filter:none !important;
+}
+
+#lista .lista-fixed-top::before{
+  content:'' !important;
+  position:absolute !important;
+  inset:0 !important;
+  z-index:-1 !important;
+  background:var(--bg) !important;
+  opacity:1 !important;
+  pointer-events:none !important;
+}
+
+#lista .lista-fixed-top .title{
+  font-size:clamp(28px,6vw,34px) !important;
+  line-height:1.05 !important;
+  margin-bottom:4px !important;
+}
+
+#lista .lista-fixed-top .user-info{
+  font-size:14px !important;
+  margin-bottom:12px !important;
+}
+
+.home-dashboard-card{
+  background:var(--card-bg) !important;
+  border:1px solid var(--card-border) !important;
+  border-radius:20px !important;
+  padding:12px !important;
+  box-shadow:var(--neon-glow) !important;
+  display:flex !important;
+  flex-direction:column !important;
+  gap:10px !important;
+  overflow:visible !important;
+}
+
+.home-dashboard-card .home-action-card,
+.home-dashboard-card .status-filter-card{
+  background:transparent !important;
+  border:0 !important;
+  box-shadow:none !important;
+  padding:0 !important;
+  margin:0 !important;
+  overflow:visible !important;
+}
+
+.home-dashboard-card .home-action-btn,
+.home-dashboard-card .status-filter-item{
+  background:var(--card-bg) !important;
+  border:1px solid var(--card-border) !important;
+  border-radius:16px !important;
+  box-shadow:var(--neon-glow) !important;
+}
+
+.home-dashboard-card .status-filter-item.active{
+  border-color:var(--cyan) !important;
+  background:var(--card-bg) !important;
+}
+
+#cortina-dispositivos{
+  margin-top:12px !important;
+  overflow:visible !important;
+}
+
+#cortina-dispositivos.aberta{
+  max-height:none !important;
+  opacity:1 !important;
+}
+
+#bms-list.bms-list{
+  margin-top:0 !important;
+  padding:0 !important;
+}
+
+.bottom-nav-smart{
+  background:var(--card-bg) !important;
+  border-top:1px solid var(--card-border) !important;
+  box-shadow:0 -8px 28px rgba(0,0,0,.10) !important;
+  backdrop-filter:none !important;
+  -webkit-backdrop-filter:none !important;
+}
+
+.bottom-nav-item,
+.bottom-nav-item.active{
+  color:var(--cyan) !important;
+}
+
+.bottom-nav-item svg,
+.bottom-nav-item.active svg{
+  color:var(--cyan) !important;
+  fill:currentColor !important;
+  stroke:currentColor !important;
+}
+
+.bottom-nav-item span,
+.bottom-nav-item.active span{
+  color:var(--cyan) !important;
+}
+
+.bottom-nav-item.active{
+  font-weight:800 !important;
+}
+
+body.modo-dispositivos #lista{
+  padding-top:44px !important;
+}
+
+body.modo-dispositivos #lista .lista-fixed-top{
+  display:none !important;
+}
+
+@media(max-width:420px){
+  #lista{
+    padding-top:248px !important;
+  }
+
+  #lista .lista-fixed-top{
+    padding:10px 10px 10px 10px !important;
+  }
+
+  #lista .lista-fixed-top .title{
+    font-size:28px !important;
+  }
+
+  #lista .lista-fixed-top .user-info{
+    font-size:12.5px !important;
+    margin-bottom:10px !important;
+  }
+
+  .home-dashboard-card{
+    border-radius:20px !important;
+    padding:10px !important;
+    gap:8px !important;
+  }
+
+  #cortina-dispositivos{
+    margin-top:10px !important;
+  }
+}
+
 </style>
 </head>
 <body>
