@@ -1798,6 +1798,27 @@ body.modo-dispositivos #lista .lista-fixed-top{
   }
 }
 
+
+/* SMART BMS - DISPOSITIVOS DIRETO NA TELA, SEM CARD PAI */
+#cortina-dispositivos{
+  margin-top:0 !important;
+  background:transparent !important;
+  border:0 !important;
+  box-shadow:none !important;
+  padding:0 !important;
+}
+#cortina-dispositivos.cortina-wrapper.aberta{
+  max-height:none !important;
+  overflow:visible !important;
+}
+#cortina-dispositivos > .card{
+  display:contents !important;
+}
+#bms-list.bms-list{
+  margin-top:0 !important;
+  width:100% !important;
+}
+
 </style>
 </head>
 <body>
@@ -1995,10 +2016,7 @@ body.modo-dispositivos #lista .lista-fixed-top{
   </div>
 
   <div id="cortina-dispositivos" class="cortina-wrapper aberta">
-    <div class="card">
-      <div class="label" style="margin-bottom:12px">Meus Dispositivos</div>
-      <div id="bms-list" class="bms-list"></div>
-    </div>
+    <div id="bms-list" class="bms-list"></div>
   </div>
   
 </div>
@@ -3189,6 +3207,15 @@ function renderizarListaBmsCache(){
   var lista = listaBmsCacheAtual.filter(function(b){
     var st = obterStatusVisualBms(b);
     return filtroListaBmsAtual === 'tudo' || st === filtroListaBmsAtual;
+  });
+  var ordemStatusBms = { online: 0, falha: 1, offline: 2 };
+  lista.sort(function(a, b){
+    var sa = obterStatusVisualBms(a);
+    var sb = obterStatusVisualBms(b);
+    var oa = ordemStatusBms.hasOwnProperty(sa) ? ordemStatusBms[sa] : 3;
+    var ob = ordemStatusBms.hasOwnProperty(sb) ? ordemStatusBms[sb] : 3;
+    if(oa !== ob) return oa - ob;
+    return String(a.nome || a.code || '').localeCompare(String(b.nome || b.code || ''), 'pt-BR', {sensitivity:'base'});
   });
   if(!lista.length){
     el.innerHTML = '<p style="text-align:center;color:var(--text-muted);padding:20px;font-size:14px">Nenhum dispositivo neste filtro</p>';
