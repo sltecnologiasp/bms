@@ -478,6 +478,173 @@ export async function onRequest({ request, env }) {
       return json({ ok: true });
     }
 
+
+    // =========================================================================
+    // ROTA ALEXA - CUSTOM SKILL SMART BMS
+    // Endpoint configurado na Alexa:
+    // https://bms.app.br/api/bms?action=alexa
+    // =========================================================================
+    if (action === 'alexa' && request.method === 'POST') {
+      let body = {};
+      try {
+        body = await request.json();
+      } catch (err) {
+        body = {};
+      }
+
+      function alexaResponse(texto, shouldEndSession = true) {
+        return new Response(JSON.stringify({
+          version: '1.0',
+          response: {
+            outputSpeech: {
+              type: 'PlainText',
+              text: texto
+            },
+            shouldEndSession
+          }
+        }), {
+          headers: {
+            ...cors,
+            'Content-Type': 'application/json'
+          }
+        });
+      }
+
+      function formatarNumero(valor, casas = 1) {
+        const n = Number(valor);
+        if (!Number.isFinite(n)) return '0';
+        return n.toFixed(casas).replace('.', ',');
+      }
+
+      function boolTexto(valor) {
+        return valor === 1 || valor === true || valor === '1' || valor === 'true';
+      }
+
+      const requestType = body?.request?.type || 'LaunchRequest';
+      const intentName = body?.request?.intent?.name || '';
+
+      // BMS padrão para a primeira versão da Skill.
+      // Depois podemos trocar isso por Account Linking para identificar o usuário automaticamente.
+      const code = 'SL83914D9B4DC';
+
+      const data = await env.DB.prepare(`
+        SELECT *, datetime(updated_at) || 'Z' as updated_at
+        FROM bms
+        WHERE code = ?
+      `).bind(code).first();
+
+      if (!data) {
+        return alexaResponse('Não encontrei dados recentes do Smart BMS.');
+      }
+
+      const now = Date.now();
+      const updatedAt = data.updated_at ? new Date(data.updated_at).getTime() : 0;
+      const online = updatedAt && (now - updatedAt < 15000);
+
+      let cells = [];
+      try {
+        cells = JSON.parse(data.cells || '[]');
+      } catch (err) {
+        cells = [];
+      }
+
+      const soc = Math.round(numeroSeguro(data.soc, 0));
+      const voltage = numeroSeguro(data.voltage, 0);
+      const current = numeroSeguro(data.current, 0);
+      const temp = numeroSeguro(data.temp, 0);
+      const invPotencia = numeroSeguro(data.inv_potencia, 0);
+      const invGeracaoDia = numeroSeguro(data.inv_geracao_dia, 0);
+      const inversorConectado = data.inversor_conectado !== undefined ? boolTexto(data.inversor_conectado) : true;
+      const bateriaConectada = data.bateria_conectada !== undefined ? boolTexto(data.bateria_conectada) : true;
+
+      const validCells = cells.map(Number).filter(v => Number.isFinite(v) && v > 0);
+      const minCell = validCells.length ? Math.min(...validCells) : 0;
+      const maxCell = validCells.length ? Math.max(...validCells) : 0;
+      const diffCell = validCells.length ? (maxCell - minCell) : 0;
+
+      let resposta = '';
+
+      if (requestType === 'LaunchRequest') {
+        resposta =
+          `Bem-vindo ao Smart BMS. ` +
+          `A bateria está com ${soc} por cento de carga. ` +
+          `A tensão é ${formatarNumero(voltage, 2)} volts, ` +
+          `a temperatura é ${formatarNumero(temp, 1)} graus Celsius, ` +
+          `e o inversor ${inversorConectado ? 'está conectado' : 'está desconectado'}.`;
+        return alexaResponse(resposta);
+      }
+
+      if (requestType === 'SessionEndedRequest') {
+        return alexaResponse('Até logo.');
+      }
+
+      switch (intentName) {
+        case 'ResumoIntent':
+          resposta =
+            `Resumo do Smart BMS. ` +
+            `A bateria está com ${soc} por cento. ` +
+            `A tensão é ${formatarNumero(voltage, 2)} volts. ` +
+            `A corrente é ${formatarNumero(current, 1)} amperes. ` +
+            `A temperatura é ${formatarNumero(temp, 1)} graus Celsius. ` +
+            `A potência do inversor é ${Math.round(invPotencia)} watts.`;
+          break;
+
+        case 'BatterySocIntent':
+          resposta = `A bateria está com ${soc} por cento de carga.`;
+          break;
+
+        case 'BatteryVoltageIntent':
+          resposta = `A tensão atual da bateria é de ${formatarNumero(voltage, 2)} volts.`;
+          break;
+
+        case 'BatteryCurrentIntent':
+          resposta = `A corrente atual da bateria é de ${formatarNumero(current, 1)} amperes.`;
+          break;
+
+        case 'BatteryTemperatureIntent':
+          resposta = `A temperatura atual da bateria é de ${formatarNumero(temp, 1)} graus Celsius.`;
+          break;
+
+        case 'InverterPowerIntent':
+          resposta = `A potência atual do inversor é de ${Math.round(invPotencia)} watts.`;
+          break;
+
+        case 'GenerationTodayIntent':
+          resposta = `A geração acumulada do dia é de ${formatarNumero(invGeracaoDia, 1)} quilowatts hora.`;
+          break;
+
+        case 'SystemStatusIntent':
+          resposta =
+            `${online ? 'O Smart BMS está online' : 'O Smart BMS está offline'}. ` +
+            `O inversor ${inversorConectado ? 'está conectado' : 'está desconectado'} ` +
+            `e a bateria ${bateriaConectada ? 'está conectada' : 'está desconectada'}.`;
+          break;
+
+        case 'AMAZON.HelpIntent':
+          resposta =
+            'Você pode perguntar: qual a carga da bateria, qual a tensão, qual a corrente, qual a temperatura, qual a potência do inversor ou qual a geração do dia.';
+          return alexaResponse(resposta, false);
+
+        case 'AMAZON.CancelIntent':
+        case 'AMAZON.StopIntent':
+          return alexaResponse('Até logo.');
+
+        default:
+          resposta =
+            `Não entendi o pedido. Você pode perguntar, por exemplo: qual a carga da bateria ou qual a temperatura.`;
+      }
+
+      return alexaResponse(resposta);
+    }
+
+    if (action === 'alexa' && request.method === 'GET') {
+      return json({
+        ok: true,
+        message: 'Endpoint Alexa SMART BMS ativo. Use POST pela Alexa Skill.'
+      });
+    }
+
+
     // =========================================================================
     // BARREIRA DE SEGURANÇA GLOBAL COM ASSINATURA DIGITAL E EXPIRAÇÃO DE SESSÃO
     // =========================================================================
