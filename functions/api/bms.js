@@ -480,170 +480,522 @@ export async function onRequest({ request, env }) {
 
 
     // =========================================================================
-    // ROTA ALEXA - CUSTOM SKILL SMART BMS
-    // Endpoint configurado na Alexa:
-    // https://bms.app.br/api/bms?action=alexa
+    // ALEXA - ACCOUNT LINKING OAUTH2 + ENDPOINT DA SKILL
+    // Rotas públicas:
+    //   ?action=oauth_authorize
+    //   ?action=oauth_token
+    //   ?action=alexa
     // =========================================================================
-    if (action === 'alexa' && request.method === 'POST') {
-      let body = {};
-      try {
-        body = await request.json();
-      } catch (err) {
-        body = {};
-      }
 
-      function alexaResponse(texto, shouldEndSession = true) {
-        return new Response(JSON.stringify({
-          version: '1.0',
-          response: {
-            outputSpeech: {
-              type: 'PlainText',
-              text: texto
-            },
-            shouldEndSession
+    function htmlEscape(valor) {
+      return String(valor ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    function base64Url(bytes) {
+      let bin = '';
+      for (const b of bytes) bin += String.fromCharCode(b);
+      return btoa(bin).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/g, '');
+    }
+
+    function tokenAleatorio(prefixo = 'tok') {
+      const bytes = new Uint8Array(32);
+      crypto.getRandomValues(bytes);
+      return `${prefixo}_${base64Url(bytes)}`;
+    }
+
+    function formatarNumeroPt(valor, casas = 1) {
+      const n = Number(valor);
+      if (!Number.isFinite(n)) return 'zero';
+      return n.toFixed(casas).replace('.', ',');
+    }
+
+    async function hashSenhaAlexa(senha) {
+      const hash = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(String(senha || '')));
+      return Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2, '0')).join('');
+    }
+
+    async function garantirTabelasAlexa() {
+      await env.DB.prepare(`
+        CREATE TABLE IF NOT EXISTS alexa_auth_codes (
+          code TEXT PRIMARY KEY,
+          user_id INTEGER NOT NULL,
+          created_at TEXT DEFAULT CURRENT_TIMESTAMP
+        )
+      `).run();
+
+      await env.DB.prepare(`
+        CREATE TABLE IF NOT EXISTS alexa_tokens (
+          access_token TEXT PRIMARY KEY,
+          user_id INTEGER NOT NULL,
+          created_at TEXT DEFAULT CURRENT_TIMESTAMP
+        )
+      `).run();
+
+      await env.DB.prepare(`
+        CREATE TABLE IF NOT EXISTS alexa_refresh_tokens (
+          refresh_token TEXT PRIMARY KEY,
+          user_id INTEGER NOT NULL,
+          created_at TEXT DEFAULT CURRENT_TIMESTAMP
+        )
+      `).run();
+    }
+
+    function getAlexaClientCredentials(request) {
+      const ALEXA_CLIENT_ID = env.ALEXA_CLIENT_ID || 'smart_bms_alexa';
+      const ALEXA_CLIENT_SECRET = env.ALEXA_CLIENT_SECRET || 'smart_bms_2026';
+
+      let clientId = '';
+      let clientSecret = '';
+
+      const authHeader = request.headers.get('Authorization') || '';
+      if (authHeader.startsWith('Basic ')) {
+        try {
+          const decoded = atob(authHeader.slice(6));
+          const sep = decoded.indexOf(':');
+          if (sep >= 0) {
+            clientId = decodeURIComponent(decoded.slice(0, sep));
+            clientSecret = decodeURIComponent(decoded.slice(sep + 1));
           }
-        }), {
-          headers: {
-            ...cors,
-            'Content-Type': 'application/json'
-          }
-        });
+        } catch (err) {}
       }
 
-      function formatarNumero(valor, casas = 1) {
-        const n = Number(valor);
-        if (!Number.isFinite(n)) return '0';
-        return n.toFixed(casas).replace('.', ',');
+      return {
+        receivedClientId: clientId,
+        receivedClientSecret: clientSecret,
+        expectedClientId: ALEXA_CLIENT_ID,
+        expectedClientSecret: ALEXA_CLIENT_SECRET,
+        ok: clientId === ALEXA_CLIENT_ID && clientSecret === ALEXA_CLIENT_SECRET
+      };
+    }
+
+    function respostaAlexa(texto, shouldEndSession = true, card = null) {
+      const response = {
+        version: '1.0',
+        response: {
+          outputSpeech: {
+            type: 'PlainText',
+            text: texto
+          },
+          shouldEndSession
+        }
+      };
+
+      if (card) response.response.card = card;
+      return json(response);
+    }
+
+    function respostaAlexaLinkAccount() {
+      return respostaAlexa(
+        'Para usar o Smart BMS, vincule sua conta no aplicativo Alexa.',
+        true,
+        {
+          type: 'LinkAccount'
+        }
+      );
+    }
+
+    async function obterUsuarioAlexa(body) {
+      const accessToken =
+        body?.context?.System?.user?.accessToken ||
+        body?.session?.user?.accessToken ||
+        body?.request?.intent?.slots?.accessToken?.value ||
+        '';
+
+      if (!accessToken) return null;
+
+      const tokenRow = await env.DB.prepare(`
+        SELECT user_id
+        FROM alexa_tokens
+        WHERE access_token = ?
+        LIMIT 1
+      `).bind(accessToken).first();
+
+      return tokenRow?.user_id ? Number(tokenRow.user_id) : null;
+    }
+
+    async function obterBmsDoUsuarioAlexa(userId, nomeSolicitado = '') {
+      const nome = String(nomeSolicitado || '').trim().toLowerCase();
+
+      const { results } = await env.DB.prepare(`
+        SELECT
+          ub.bms_code AS code,
+          ub.bms_nome AS nome,
+          b.soc, b.voltage, b.current, b.temp, b.cells,
+          b.inversor_conectado, b.bateria_conectada,
+          b.inv_potencia, b.inv_tensao_ac, b.inv_frequencia, b.inv_geracao_dia,
+          datetime(b.updated_at) || 'Z' AS updated_at
+        FROM user_bms ub
+        LEFT JOIN bms b ON b.code = ub.bms_code
+        WHERE ub.user_id = ?
+        ORDER BY ub.id ASC
+      `).bind(userId).all();
+
+      const lista = results || [];
+      if (!lista.length) return null;
+
+      if (nome) {
+        const encontrado = lista.find(item =>
+          String(item.nome || '').toLowerCase().includes(nome) ||
+          String(item.code || '').toLowerCase().includes(nome)
+        );
+        if (encontrado) return encontrado;
       }
 
-      function boolTexto(valor) {
-        return valor === 1 || valor === true || valor === '1' || valor === 'true';
-      }
+      return lista[0];
+    }
 
-      const requestType = body?.request?.type || 'LaunchRequest';
-      const intentName = body?.request?.intent?.name || '';
-
-      // BMS padrão para a primeira versão da Skill.
-      // Depois podemos trocar isso por Account Linking para identificar o usuário automaticamente.
-      const code = 'SL83914D9B4DC';
-
-      const data = await env.DB.prepare(`
-        SELECT *, datetime(updated_at) || 'Z' as updated_at
-        FROM bms
-        WHERE code = ?
-      `).bind(code).first();
-
-      if (!data) {
-        return alexaResponse('Não encontrei dados recentes do Smart BMS.');
-      }
-
-      const now = Date.now();
-      const updatedAt = data.updated_at ? new Date(data.updated_at).getTime() : 0;
-      const online = updatedAt && (now - updatedAt < 15000);
+    function normalizarDadosBmsAlexa(data) {
+      if (!data) return null;
 
       let cells = [];
       try {
-        cells = JSON.parse(data.cells || '[]');
+        cells = Array.isArray(data.cells) ? data.cells : JSON.parse(data.cells || '[]');
       } catch (err) {
         cells = [];
       }
 
-      const soc = Math.round(numeroSeguro(data.soc, 0));
-      const voltage = numeroSeguro(data.voltage, 0);
-      const current = numeroSeguro(data.current, 0);
-      const temp = numeroSeguro(data.temp, 0);
-      const invPotencia = numeroSeguro(data.inv_potencia, 0);
-      const invGeracaoDia = numeroSeguro(data.inv_geracao_dia, 0);
-      const inversorConectado = data.inversor_conectado !== undefined ? boolTexto(data.inversor_conectado) : true;
-      const bateriaConectada = data.bateria_conectada !== undefined ? boolTexto(data.bateria_conectada) : true;
+      const now = Date.now();
+      const updated = data.updated_at ? new Date(data.updated_at).getTime() : 0;
+      const online = data.updated_at ? (now - updated < 15000) : false;
 
-      const validCells = cells.map(Number).filter(v => Number.isFinite(v) && v > 0);
-      const minCell = validCells.length ? Math.min(...validCells) : 0;
-      const maxCell = validCells.length ? Math.max(...validCells) : 0;
-      const diffCell = validCells.length ? (maxCell - minCell) : 0;
+      const valoresCelulas = cells.map(v => Number(v)).filter(v => Number.isFinite(v) && v > 0);
+      const minCell = valoresCelulas.length ? Math.min(...valoresCelulas) : 0;
+      const maxCell = valoresCelulas.length ? Math.max(...valoresCelulas) : 0;
+      const diffCell = valoresCelulas.length ? (maxCell - minCell) : 0;
 
-      let resposta = '';
+      return {
+        ...data,
+        cells,
+        online,
+        soc: numeroSeguro(data.soc, 0),
+        voltage: numeroSeguro(data.voltage, 0),
+        current: numeroSeguro(data.current, 0),
+        temp: numeroSeguro(data.temp, 0),
+        inv_potencia: numeroSeguro(data.inv_potencia, 0),
+        inv_geracao_dia: numeroSeguro(data.inv_geracao_dia, 0),
+        inversor_conectado: data.inversor_conectado !== undefined ? Number(data.inversor_conectado) === 1 : true,
+        bateria_conectada: data.bateria_conectada !== undefined ? Number(data.bateria_conectada) === 1 : true,
+        minCell,
+        maxCell,
+        diffCell
+      };
+    }
 
-      if (requestType === 'LaunchRequest') {
-        resposta =
-          `Bem-vindo ao Smart BMS. ` +
-          `A bateria está com ${soc} por cento de carga. ` +
-          `A tensão é ${formatarNumero(voltage, 2)} volts, ` +
-          `a temperatura é ${formatarNumero(temp, 1)} graus Celsius, ` +
-          `e o inversor ${inversorConectado ? 'está conectado' : 'está desconectado'}.`;
-        return alexaResponse(resposta);
+    // Tela de login aberta pela Amazon durante o Account Linking.
+    if ((action === 'oauth_authorize' || action === 'oauth') && request.method === 'GET') {
+      const clientId = url.searchParams.get('client_id') || '';
+      const redirectUri = url.searchParams.get('redirect_uri') || '';
+      const state = url.searchParams.get('state') || '';
+      const scope = url.searchParams.get('scope') || '';
+      const responseType = url.searchParams.get('response_type') || 'code';
+
+      const expectedClientId = env.ALEXA_CLIENT_ID || 'smart_bms_alexa';
+      if (clientId !== expectedClientId || responseType !== 'code' || !redirectUri) {
+        return new Response('Solicitação OAuth inválida.', { status: 400 });
       }
 
-      if (requestType === 'SessionEndedRequest') {
-        return alexaResponse('Até logo.');
+      return new Response(`
+        <!doctype html>
+        <html lang="pt-BR">
+        <head>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1">
+          <title>Vincular SMART BMS</title>
+          <style>
+            *{box-sizing:border-box}
+            body{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;background:#f4f6f9;font-family:Inter,Arial,sans-serif;color:#0f172a;padding:18px}
+            .card{width:100%;max-width:430px;background:#fff;border:1px solid rgba(0,180,216,.18);border-radius:22px;padding:24px;box-shadow:0 12px 40px rgba(0,119,182,.12)}
+            h1{margin:0 0 8px;text-align:center;font-size:28px;font-weight:900;background:linear-gradient(90deg,#0077b6,#00b4d8);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+            p{margin:0 0 22px;text-align:center;color:#64748b;font-size:14px;line-height:1.5}
+            label{display:block;font-size:11px;text-transform:uppercase;letter-spacing:1px;color:#64748b;font-weight:800;text-align:center;margin:14px 0 6px}
+            input{width:100%;padding:15px;border-radius:14px;border:1px solid #cbd5e1;text-align:center;font-size:16px;font-weight:700;outline:none}
+            input:focus{border-color:#00b4d8;box-shadow:0 0 0 3px rgba(0,180,216,.12)}
+            button{width:100%;padding:15px;border:0;border-radius:14px;background:linear-gradient(90deg,#0077b6,#00b4d8);color:#fff;font-size:16px;font-weight:900;margin-top:18px}
+            .note{font-size:12px;margin-top:14px;color:#64748b}
+          </style>
+        </head>
+        <body>
+          <form class="card" method="POST" action="${htmlEscape(url.pathname)}?action=oauth_authorize">
+            <h1>SMART BMS</h1>
+            <p>Entre com sua conta SMART BMS para vincular à Alexa.</p>
+            <input type="hidden" name="client_id" value="${htmlEscape(clientId)}">
+            <input type="hidden" name="redirect_uri" value="${htmlEscape(redirectUri)}">
+            <input type="hidden" name="state" value="${htmlEscape(state)}">
+            <input type="hidden" name="scope" value="${htmlEscape(scope)}">
+            <label>E-mail</label>
+            <input name="email" type="email" autocomplete="email" required>
+            <label>Senha</label>
+            <input name="senha" type="password" autocomplete="current-password" required>
+            <button type="submit">Vincular com Alexa</button>
+            <p class="note">A Alexa poderá consultar os dados das BMS vinculadas à sua conta.</p>
+          </form>
+        </body>
+        </html>
+      `, { headers: { 'Content-Type': 'text/html; charset=utf-8' } });
+    }
+
+    // Processa login do usuário e devolve authorization_code para a Amazon.
+    if ((action === 'oauth_authorize' || action === 'oauth') && request.method === 'POST') {
+      await garantirTabelasAlexa();
+
+      const form = await request.formData();
+      const clientId = String(form.get('client_id') || '');
+      const redirectUri = String(form.get('redirect_uri') || '');
+      const state = String(form.get('state') || '');
+      const email = String(form.get('email') || '').trim().toLowerCase();
+      const senha = String(form.get('senha') || '');
+
+      const expectedClientId = env.ALEXA_CLIENT_ID || 'smart_bms_alexa';
+      if (clientId !== expectedClientId || !redirectUri) {
+        return new Response('Solicitação OAuth inválida.', { status: 400 });
       }
 
-      switch (intentName) {
+      const user = await env.DB.prepare(`
+        SELECT id, nome, email, senha_hash, email_verificado
+        FROM users
+        WHERE email = ?
+        LIMIT 1
+      `).bind(email).first();
+
+      const senhaHash = await hashSenhaAlexa(senha);
+
+      if (!user || user.senha_hash !== senhaHash) {
+        return new Response(`
+          <html lang="pt-BR"><body style="font-family:sans-serif;text-align:center;padding:40px">
+          <h2>Login inválido</h2>
+          <p>E-mail ou senha incorretos.</p>
+          <button onclick="history.back()">Voltar</button>
+          </body></html>
+        `, { status: 401, headers: { 'Content-Type': 'text/html; charset=utf-8' } });
+      }
+
+      if (Number(user.email_verificado || 0) !== 1) {
+        return new Response(`
+          <html lang="pt-BR"><body style="font-family:sans-serif;text-align:center;padding:40px">
+          <h2>Conta não ativada</h2>
+          <p>Confirme seu e-mail antes de vincular a Alexa.</p>
+          <button onclick="history.back()">Voltar</button>
+          </body></html>
+        `, { status: 403, headers: { 'Content-Type': 'text/html; charset=utf-8' } });
+      }
+
+      const code = tokenAleatorio('code');
+
+      await env.DB.prepare(`
+        INSERT INTO alexa_auth_codes (code, user_id, created_at)
+        VALUES (?, ?, datetime('now'))
+      `).bind(code, user.id).run();
+
+      const redirect = new URL(redirectUri);
+      redirect.searchParams.set('code', code);
+      if (state) redirect.searchParams.set('state', state);
+
+      return Response.redirect(redirect.toString(), 302);
+    }
+
+    // Amazon troca authorization_code por access_token.
+    if (action === 'oauth_token' && request.method === 'POST') {
+      await garantirTabelasAlexa();
+
+      const creds = getAlexaClientCredentials(request);
+      if (!creds.ok) {
+        return json({ error: 'invalid_client' }, 401);
+      }
+
+      const contentType = request.headers.get('Content-Type') || '';
+      let params = {};
+      if (contentType.includes('application/json')) {
+        params = await request.json();
+      } else {
+        const formText = await request.text();
+        params = Object.fromEntries(new URLSearchParams(formText));
+      }
+
+      const grantType = params.grant_type;
+
+      if (grantType === 'authorization_code') {
+        const code = String(params.code || '');
+        const row = await env.DB.prepare(`
+          SELECT code, user_id, created_at
+          FROM alexa_auth_codes
+          WHERE code = ?
+          LIMIT 1
+        `).bind(code).first();
+
+        if (!row) return json({ error: 'invalid_grant' }, 400);
+
+        const created = new Date(row.created_at + 'Z').getTime();
+        if (Date.now() - created > 5 * 60 * 1000) {
+          await env.DB.prepare('DELETE FROM alexa_auth_codes WHERE code = ?').bind(code).run();
+          return json({ error: 'expired_grant' }, 400);
+        }
+
+        const accessToken = tokenAleatorio('atk');
+        const refreshToken = tokenAleatorio('rtk');
+
+        await env.DB.prepare(`
+          INSERT INTO alexa_tokens (access_token, user_id, created_at)
+          VALUES (?, ?, datetime('now'))
+        `).bind(accessToken, row.user_id).run();
+
+        await env.DB.prepare(`
+          INSERT INTO alexa_refresh_tokens (refresh_token, user_id, created_at)
+          VALUES (?, ?, datetime('now'))
+        `).bind(refreshToken, row.user_id).run();
+
+        await env.DB.prepare('DELETE FROM alexa_auth_codes WHERE code = ?').bind(code).run();
+
+        return json({
+          access_token: accessToken,
+          refresh_token: refreshToken,
+          token_type: 'Bearer',
+          expires_in: 3600
+        });
+      }
+
+      if (grantType === 'refresh_token') {
+        const refreshToken = String(params.refresh_token || '');
+        const row = await env.DB.prepare(`
+          SELECT user_id
+          FROM alexa_refresh_tokens
+          WHERE refresh_token = ?
+          LIMIT 1
+        `).bind(refreshToken).first();
+
+        if (!row) return json({ error: 'invalid_grant' }, 400);
+
+        const accessToken = tokenAleatorio('atk');
+
+        await env.DB.prepare(`
+          INSERT INTO alexa_tokens (access_token, user_id, created_at)
+          VALUES (?, ?, datetime('now'))
+        `).bind(accessToken, row.user_id).run();
+
+        return json({
+          access_token: accessToken,
+          token_type: 'Bearer',
+          expires_in: 3600
+        });
+      }
+
+      return json({ error: 'unsupported_grant_type' }, 400);
+    }
+
+    // Endpoint chamado pela Custom Skill da Alexa.
+    if (action === 'alexa' && request.method === 'POST') {
+      await garantirTabelasAlexa();
+
+      const body = await request.json();
+
+      if (body.request?.type === 'LaunchRequest') {
+        const userIdAlexa = await obterUsuarioAlexa(body);
+        if (!userIdAlexa) return respostaAlexaLinkAccount();
+
+        const raw = await obterBmsDoUsuarioAlexa(userIdAlexa);
+        const data = normalizarDadosBmsAlexa(raw);
+
+        if (!data) {
+          return respostaAlexa('Sua conta ainda não possui nenhuma BMS vinculada.');
+        }
+
+        return respostaAlexa(
+          `Bem-vindo ao Smart BMS. A bateria ${data.nome || ''} está com ${Math.round(data.soc)} por cento, tensão de ${formatarNumeroPt(data.voltage, 2)} volts e temperatura de ${formatarNumeroPt(data.temp, 1)} graus.`
+        );
+      }
+
+      if (body.request?.type === 'SessionEndedRequest') {
+        return json({ version: '1.0', response: { shouldEndSession: true } });
+      }
+
+      const userIdAlexa = await obterUsuarioAlexa(body);
+      if (!userIdAlexa) return respostaAlexaLinkAccount();
+
+      const intent = body.request?.intent?.name || '';
+      const slots = body.request?.intent?.slots || {};
+      const nomeBms =
+        slots.BatteryName?.value ||
+        slots.BmsName?.value ||
+        slots.Dispositivo?.value ||
+        '';
+
+      const raw = await obterBmsDoUsuarioAlexa(userIdAlexa, nomeBms);
+      const data = normalizarDadosBmsAlexa(raw);
+
+      if (!data) {
+        return respostaAlexa('Não encontrei nenhuma BMS vinculada à sua conta Smart BMS.');
+      }
+
+      let texto = '';
+
+      switch (intent) {
         case 'ResumoIntent':
-          resposta =
-            `Resumo do Smart BMS. ` +
-            `A bateria está com ${soc} por cento. ` +
-            `A tensão é ${formatarNumero(voltage, 2)} volts. ` +
-            `A corrente é ${formatarNumero(current, 1)} amperes. ` +
-            `A temperatura é ${formatarNumero(temp, 1)} graus Celsius. ` +
-            `A potência do inversor é ${Math.round(invPotencia)} watts.`;
+          texto =
+            `Resumo da ${data.nome || 'bateria'}. ` +
+            `Carga em ${Math.round(data.soc)} por cento. ` +
+            `Tensão de ${formatarNumeroPt(data.voltage, 2)} volts. ` +
+            `Corrente de ${formatarNumeroPt(data.current, 1)} amperes. ` +
+            `Temperatura de ${formatarNumeroPt(data.temp, 1)} graus. ` +
+            `Potência do inversor de ${Math.round(data.inv_potencia)} watts.`;
           break;
 
         case 'BatterySocIntent':
-          resposta = `A bateria está com ${soc} por cento de carga.`;
+          texto = `A bateria ${data.nome || ''} está com ${Math.round(data.soc)} por cento de carga.`;
           break;
 
         case 'BatteryVoltageIntent':
-          resposta = `A tensão atual da bateria é de ${formatarNumero(voltage, 2)} volts.`;
+          texto = `A tensão da bateria ${data.nome || ''} é de ${formatarNumeroPt(data.voltage, 2)} volts.`;
           break;
 
         case 'BatteryCurrentIntent':
-          resposta = `A corrente atual da bateria é de ${formatarNumero(current, 1)} amperes.`;
+          texto = `A corrente da bateria ${data.nome || ''} é de ${formatarNumeroPt(data.current, 1)} amperes.`;
           break;
 
         case 'BatteryTemperatureIntent':
-          resposta = `A temperatura atual da bateria é de ${formatarNumero(temp, 1)} graus Celsius.`;
+          texto = `A temperatura da bateria ${data.nome || ''} é de ${formatarNumeroPt(data.temp, 1)} graus Celsius.`;
           break;
 
         case 'InverterPowerIntent':
-          resposta = `A potência atual do inversor é de ${Math.round(invPotencia)} watts.`;
+          texto = `A potência atual do inversor é de ${Math.round(data.inv_potencia)} watts.`;
           break;
 
         case 'GenerationTodayIntent':
-          resposta = `A geração acumulada do dia é de ${formatarNumero(invGeracaoDia, 1)} quilowatts hora.`;
+          texto = `A geração acumulada hoje é de ${formatarNumeroPt(data.inv_geracao_dia, 1)} quilowatts hora.`;
           break;
 
         case 'SystemStatusIntent':
-          resposta =
-            `${online ? 'O Smart BMS está online' : 'O Smart BMS está offline'}. ` +
-            `O inversor ${inversorConectado ? 'está conectado' : 'está desconectado'} ` +
-            `e a bateria ${bateriaConectada ? 'está conectada' : 'está desconectada'}.`;
+          texto =
+            `O Smart BMS está ${data.online ? 'online' : 'offline'}. ` +
+            `O inversor está ${data.inversor_conectado ? 'conectado' : 'desconectado'} e ` +
+            `a bateria está ${data.bateria_conectada ? 'conectada' : 'desconectada'}.`;
+          break;
+
+        case 'CellDifferenceIntent':
+          texto =
+            `A menor célula está em ${formatarNumeroPt(data.minCell, 2)} volts, ` +
+            `a maior em ${formatarNumeroPt(data.maxCell, 2)} volts, ` +
+            `com diferença de ${formatarNumeroPt(data.diffCell, 2)} volts.`;
           break;
 
         case 'AMAZON.HelpIntent':
-          resposta =
-            'Você pode perguntar: qual a carga da bateria, qual a tensão, qual a corrente, qual a temperatura, qual a potência do inversor ou qual a geração do dia.';
-          return alexaResponse(resposta, false);
+          texto = 'Você pode perguntar: qual a carga da bateria, qual a tensão, qual a temperatura ou qual a potência do inversor.';
+          break;
 
-        case 'AMAZON.CancelIntent':
         case 'AMAZON.StopIntent':
-          return alexaResponse('Até logo.');
+        case 'AMAZON.CancelIntent':
+          texto = 'Até mais.';
+          break;
 
         default:
-          resposta =
-            `Não entendi o pedido. Você pode perguntar, por exemplo: qual a carga da bateria ou qual a temperatura.`;
+          texto = `A bateria ${data.nome || ''} está com ${Math.round(data.soc)} por cento de carga.`;
       }
 
-      return alexaResponse(resposta);
+      return respostaAlexa(texto);
     }
-
-    if (action === 'alexa' && request.method === 'GET') {
-      return json({
-        ok: true,
-        message: 'Endpoint Alexa SMART BMS ativo. Use POST pela Alexa Skill.'
-      });
-    }
-
 
     // =========================================================================
     // BARREIRA DE SEGURANÇA GLOBAL COM ASSINATURA DIGITAL E EXPIRAÇÃO DE SESSÃO
