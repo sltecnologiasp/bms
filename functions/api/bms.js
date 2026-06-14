@@ -890,7 +890,15 @@ export async function onRequest({ request, env }) {
     }
 
     // Endpoint chamado pela Custom Skill da Alexa.
-    if (action === 'alexa' && request.method === 'POST') {
+    
+    if (action === 'alexa' && request.method === 'GET') {
+      return json({
+        ok: true,
+        status: 'Alexa endpoint ativo'
+      });
+    }
+
+if (action === 'alexa' && request.method === 'POST') {
       await garantirTabelasAlexa();
 
       const body = await request.json();
