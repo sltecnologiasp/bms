@@ -545,7 +545,7 @@ export async function onRequest({ request, env }) {
       `).run();
     }
 
-    function getAlexaClientCredentials(request) {
+    function getAlexaClientCredentials(request, params = {}) {
       const ALEXA_CLIENT_ID = env.ALEXA_CLIENT_ID || 'smart_bms_alexa';
       const ALEXA_CLIENT_SECRET = env.ALEXA_CLIENT_SECRET || 'smart_bms_2026';
 
@@ -563,6 +563,9 @@ export async function onRequest({ request, env }) {
           }
         } catch (err) {}
       }
+
+      if (!clientId) clientId = String(params.client_id || '');
+      if (!clientSecret) clientSecret = String(params.client_secret || '');
 
       return {
         receivedClientId: clientId,
@@ -802,11 +805,6 @@ export async function onRequest({ request, env }) {
     if (action === 'oauth_token' && request.method === 'POST') {
       await garantirTabelasAlexa();
 
-      const creds = getAlexaClientCredentials(request);
-      if (!creds.ok) {
-        return json({ error: 'invalid_client' }, 401);
-      }
-
       const contentType = request.headers.get('Content-Type') || '';
       let params = {};
       if (contentType.includes('application/json')) {
@@ -814,6 +812,11 @@ export async function onRequest({ request, env }) {
       } else {
         const formText = await request.text();
         params = Object.fromEntries(new URLSearchParams(formText));
+      }
+
+      const creds = getAlexaClientCredentials(request, params);
+      if (!creds.ok) {
+        return json({ error: 'invalid_client' }, 401);
       }
 
       const grantType = params.grant_type;
